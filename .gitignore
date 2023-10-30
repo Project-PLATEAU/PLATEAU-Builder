@@ -1,0 +1,10 @@
+bin
+.classpath
+.project
+.settings
+build
+.gradle
+.idea
+.vscode
+nbproject
+target

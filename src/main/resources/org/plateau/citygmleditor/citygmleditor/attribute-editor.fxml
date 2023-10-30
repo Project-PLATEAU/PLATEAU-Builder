@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<TitledPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            animated="false" text="属性情報"
+            fx:id="titledPane"
+            fx:controller="org.plateau.citygmleditor.citygmleditor.AttributeEditorController"
+            prefHeight="600.0" prefWidth="600.0">
+    <TreeTableView fx:id="attributeTreeTable" editable="true" prefHeight="600.0" prefWidth="200.0" minHeight="400">
+        <columns>
+            <TreeTableColumn fx:id="keyColumn" editable="false" prefWidth="200.0" sortable="false" text="キー" />
+            <TreeTableColumn fx:id="valueColumn" prefWidth="75.0" text="値" />
+        </columns>
+    </TreeTableView>
+</TitledPane>
