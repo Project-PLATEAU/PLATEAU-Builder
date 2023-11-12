@@ -36,7 +36,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.awt.FileDialog;
+import java.awt.Frame;
+import java.awt.event.FocusEvent;
 
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -52,7 +60,10 @@ import org.citygml4j.model.citygml.ade.ADEException;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
 import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.exporters.GmlExporter;
+import org.plateau.citygmleditor.exporters.TextureExporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
+import org.plateau.citygmleditor.world.World;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -76,11 +87,29 @@ import javafx.util.Duration;
 import org.plateau.citygmleditor.importers.Importer3D;
 import org.plateau.citygmleditor.importers.gltf.GltfImporter;
 
+import org.plateau.citygmleditor.importers.Importer3D;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.FieldPosition;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.StyledEditorKit;
+
+import javafx.stage.DirectoryChooser;
 import javafx.geometry.BoundingBox;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.ButtonType;
+import java.nio.file.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import org.plateau.citygmleditor.world.*;
 
 /**
  * Controller class for main fxml file.
@@ -96,11 +125,13 @@ public class MainController implements Initializable {
     private int nodeCount = 0;
     private int meshCount = 0;
     private int triangleCount = 0;
-    private final ContentModel contentModel = CityGMLEditorApp.getContentModel();
+    private final SceneContent sceneContent = CityGMLEditorApp.getSceneContent();
     private File loadedPath;
     private String loadedURL;
     private String[] supportedFormatRegex;
     private SessionManager sessionManager = SessionManager.getSessionManager();
+    private String sourceRootDirPath;
+    private String[] importGmlPathComponents;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -110,7 +141,8 @@ public class MainController implements Initializable {
             // CREATE SETTINGS PANEL
             sidebar = FXMLLoader.load(MainController.class.getResource("sidebar.fxml"));
             // SETUP SPLIT PANE
-            splitPane.getItems().addAll(new SubSceneResizer(contentModel.subSceneProperty(), navigationPanel), sidebar);
+            splitPane.getItems().addAll(new SubSceneResizer(sceneContent.subSceneProperty(), navigationPanel),
+                    sidebar);
             splitPane.getDividers().get(0).setPosition(1);
 
         } catch (IOException e) {
@@ -123,12 +155,11 @@ public class MainController implements Initializable {
         for (int i = 0; i < supportedFormatRegex.length; i++) {
             supportedFormatRegex[i] = "." + supportedFormatRegex[i].replaceAll("\\.", "\\.");
         }
-        contentModel.getSubScene().setOnDragOver(event -> {
+        sceneContent.getSubScene().setOnDragOver(event -> {
             Dragboard db = event.getDragboard();
             if (db.hasFiles()) {
                 boolean hasSupportedFile = false;
-                fileLoop:
-                for (File file : db.getFiles()) {
+                fileLoop: for (File file : db.getFiles()) {
                     for (String format : supportedFormatRegex) {
                         if (file.getName().matches(format)) {
                             hasSupportedFile = true;
@@ -136,17 +167,17 @@ public class MainController implements Initializable {
                         }
                     }
                 }
-                if (hasSupportedFile) event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                if (hasSupportedFile)
+                    event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             }
             event.consume();
         });
-        contentModel.getSubScene().setOnDragDropped(event -> {
+        sceneContent.getSubScene().setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             boolean success = false;
             if (db.hasFiles()) {
                 File supportedFile = null;
-                fileLoop:
-                for (File file : db.getFiles()) {
+                fileLoop: for (File file : db.getFiles()) {
                     for (String format : supportedFormatRegex) {
                         if (file.getName().matches(format)) {
                             supportedFile = file;
@@ -188,7 +219,6 @@ public class MainController implements Initializable {
         }
     }
 
-
     private void loadGml(String fileUrl) {
         try {
             try {
@@ -204,10 +234,12 @@ public class MainController implements Initializable {
 
     private void doLoadGml(String fileUrl) {
         loadedURL = fileUrl;
+        importGmlPathComponents = fileUrl.split("\\\\");
+        sourceRootDirPath = new File(new File(new File(loadedURL).getParent()).getParent()).getParent();
         sessionManager.getProperties().setProperty(CityGMLEditorApp.FILE_URL_PROPERTY, fileUrl);
         try {
             var root = GmlImporter.loadGml(fileUrl);
-            contentModel.setContent(root);
+            sceneContent.setContent(root);
         } catch (Exception ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -216,7 +248,8 @@ public class MainController implements Initializable {
 
     public void open(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", Importer3D.getSupportedFormatExtensionFilters()));
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Supported files", Importer3D.getSupportedFormatExtensionFilters()));
         if (loadedPath != null) {
             chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
         }
@@ -255,7 +288,7 @@ public class MainController implements Initializable {
         try {
             Node root = Importer3D.load(
                     fileUrl, loadAsPolygonsCheckBox.isSelected());
-            contentModel.setContent(root);
+            sceneContent.setContent(root);
         } catch (IOException ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -266,12 +299,12 @@ public class MainController implements Initializable {
         nodeCount = 0;
         meshCount = 0;
         triangleCount = 0;
-        updateCount(contentModel.getRoot3D());
-        Node content = contentModel.getContent();
+        updateCount(World.getRoot3D());
+        Node content = sceneContent.getContent();
         final Bounds bounds = content == null ? new BoundingBox(0, 0, 0, 0) : content.getBoundsInLocal();
         status.setText(
                 String.format("Nodes [%d] :: Meshes [%d] :: Triangles [%d] :: " +
-                                "Bounds [w=%.2f,h=%.2f,d=%.2f]",
+                        "Bounds [w=%.2f,h=%.2f,d=%.2f]",
                         nodeCount, meshCount, triangleCount,
                         bounds.getWidth(), bounds.getHeight(), bounds.getDepth()));
     }
@@ -309,9 +342,8 @@ public class MainController implements Initializable {
                                     sidebar.setMinWidth(Region.USE_PREF_SIZE);
                                 }
                             },
-                            new KeyValue(divider.positionProperty(), divPos, Interpolator.EASE_BOTH)
-                    )
-            ).play();
+                            new KeyValue(divider.positionProperty(), divPos, Interpolator.EASE_BOTH)))
+                    .play();
         } else {
             settingsLastWidth = sidebar.getWidth();
             sidebar.setMinWidth(0);
@@ -320,30 +352,89 @@ public class MainController implements Initializable {
     }
 
     public void export(ActionEvent event) {
-        FileChooser chooser = new FileChooser();
-        if (loadedPath != null) {
-            chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
-        }
-        chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("CityGML", "*.gml")
-        );
-        chooser.setTitle("Export CityGML");
-        File newFile = chooser.showSaveDialog(openMenuBtn.getScene().getWindow());
-        if (newFile == null)
-            return;
 
-        var content = (Group) CityGMLEditorApp.getContentModel().getContent();
+        String[] destRootDirComponents = importGmlPathComponents[importGmlPathComponents.length - 4].split("_");// インポートしたcitygmlのルートフォルダネームを_で分解
+        String cityCode = destRootDirComponents[0];
+        String cityName = destRootDirComponents[1];
+        String developmentYear = destRootDirComponents[2];
+        String updateCount = Integer.toString(Integer.parseInt(destRootDirComponents[4]) + 1);
+        String options;
+        String rootDirName;// エクスポート先のルートフォルダの名前
+        String udxDirName = "udx";
+        String bldgDirName = "bldg";
+
+        // ダイアログで表示される初期のフォルダ名を指定
+        String defaultDirName = "";
+        if (destRootDirComponents[destRootDirComponents.length - 1].equals("op")) {
+            if (destRootDirComponents.length == 7) {
+                options = destRootDirComponents[5];
+                defaultDirName = cityCode + "_" + cityName + "_" + developmentYear + "_" + "citygml" + "_" +
+                        updateCount + "_" + options + "_" + "op";
+            } else {
+                defaultDirName = cityCode + "_" + cityName + "_" + developmentYear + "_" + "citygml" + "_" +
+                        updateCount + "_" + "op";
+            }
+        } else {
+            if (destRootDirComponents.length == 6) {
+                options = destRootDirComponents[5];
+                defaultDirName = cityCode + "_" + cityName + "_" + developmentYear + "_" + "citygml" + "_" +
+                        updateCount + "_" + options;
+            } else {
+                defaultDirName = cityCode + "_" + cityName + "_" + developmentYear + "_" + "citygml" + "_" +
+                        updateCount;
+            }
+        }
+        // テキスト入力ダイアログを表示し、ユーザーにフォルダ名を入力させる(仮のフォルダ名は表示)
+        TextInputDialog dialog = new TextInputDialog(defaultDirName);
+        dialog.setTitle("Input Root Folder Name");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Folder Name:");
+
+        Optional<String> result = dialog.showAndWait();
+        rootDirName = dialog.getResult();
+
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        if (loadedPath != null) {
+            directoryChooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());// 初期ディレクトリ指定
+        }
+        // 初期ディレクトリを設定（オプション）
+        // directoryChooser.setInitialDirectory(new File("/path/to/initial/directory"));
+        directoryChooser.setTitle("Export CityGML");
+        var selectedDirectory = directoryChooser.showDialog(null);
+
+        // インポート元からエクスポート先のフォルダへコピー
+        try {
+            folderCopy(Paths.get(sourceRootDirPath),
+                    Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/"));
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        var content = (Group) sceneContent.getContent();
         var cityModelNode = content.getChildren().get(0);
+
         if (cityModelNode == null)
             return;
 
-        var cityModel = (CityModel)cityModelNode;
-
+        var cityModel = (CityModel) cityModelNode;
         try {
-            GmlExporter.export(newFile.toString(), cityModel.getGmlObject(), cityModel.getSchemaHandler());
+            // CityGMLのエクスポート
+            GmlExporter.export(
+                    Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" +
+                            udxDirName + "/"
+                            + bldgDirName
+                            + "/" + importGmlPathComponents[importGmlPathComponents.length - 1])
+                            .toString(),
+                    cityModel.getGmlObject(),
+                    cityModel.getSchemaHandler());
+            // Appearanceのエクスポート
+            TextureExporter.export(
+                    selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" + udxDirName + "/" + bldgDirName,
+                    cityModel);
         } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
             throw new RuntimeException(e);
         }
+
     }
 
     public void openValidationWindow(ActionEvent event) throws IOException {
@@ -387,11 +478,25 @@ public class MainController implements Initializable {
         try {
             var root = GltfImporter.loadGltf(fileUrl);
             if (root != null) {
-                contentModel.setContent(root);
+                sceneContent.setContent(root);
             }
         } catch (Exception ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
         updateStatus();
     }
+    // フォルダコピーメソッド(udx以下は無視)
+    public void folderCopy(Path sourcePath, Path destinationPath) throws IOException {
+        String skipPattern = sourceRootDirPath.replace("\\", "\\\\") + "\\\\udx\\\\.*";
+        Files.walk(sourcePath).forEach(path -> {
+            if (!path.toString().matches(skipPattern)) {
+                try {
+                    Files.copy(path, destinationPath.resolve(sourcePath.relativize(path)));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
 }

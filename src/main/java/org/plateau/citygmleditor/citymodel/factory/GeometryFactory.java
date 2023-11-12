@@ -121,7 +121,7 @@ public class GeometryFactory extends CityGMLFactory {
 
                     // ノードの最小単位＝ポリゴン
                     var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
-                    var polygonMesh = new ArrayList<Polygon>(Arrays.asList(polygonObject));
+                    var polygonMesh = new ArrayList<Polygon>(List.of(polygonObject));
                     var meshView = new MeshView();
                     meshView.setMesh(createTriangleMesh(polygonMesh));
                     meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
@@ -147,7 +147,7 @@ public class GeometryFactory extends CityGMLFactory {
 
                         // ノードの最小単位＝ポリゴン
                         var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
-                        var polygonMesh = new ArrayList<Polygon>(Arrays.asList(polygonObject));
+                        var polygonMesh = new ArrayList<Polygon>(List.of(polygonObject));
                         var meshView = new MeshView();
                         meshView.setMesh(createTriangleMesh(polygonMesh));
                         meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
@@ -187,7 +187,7 @@ public class GeometryFactory extends CityGMLFactory {
 
                 // ノードの最小単位＝ポリゴン
                 var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
-                var polygonMesh = new ArrayList<Polygon>(Arrays.asList(polygonObject));
+                var polygonMesh = new ArrayList<Polygon>(List.of(polygonObject));
                 var meshView = new MeshView();
                 meshView.setMesh(createTriangleMesh(polygonMesh));
                 meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
