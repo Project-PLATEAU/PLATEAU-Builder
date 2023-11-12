@@ -75,6 +75,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <ColorPicker fx:id="backgroundColorPicker" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             <Label text="Smooth Texture Map" GridPane.columnIndex="0" GridPane.rowIndex="7" />
             <Region maxHeight="1.7976931348623157E308" prefHeight="-1.0" prefWidth="-1.0" GridPane.columnIndex="0" GridPane.rowIndex="8" />
+            <!-- Toggle button for mode selection-->
+            <Label text="Move Mode:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+            <ToggleButton fx:id="moveModeToggleButton" text="ON"  GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="mode-toggle-button" />
+            <Label text="Rotate Mode:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+            <ToggleButton fx:id="rotateModeToggleButton" text="ON" GridPane.columnIndex="1" GridPane.rowIndex="5" selected="true" styleClass="mode-toggle-button"/>
           </children>
           <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />

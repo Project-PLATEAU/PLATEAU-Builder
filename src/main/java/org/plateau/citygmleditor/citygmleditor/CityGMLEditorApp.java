@@ -47,18 +47,27 @@ import org.plateau.citygmleditor.world.World;
  */
 public class CityGMLEditorApp extends Application {
     public static final String FILE_URL_PROPERTY = "fileUrl";
-    private static ContentModel contentModel;
+    private static CameraController cameraController;
+    private static UIManager uiManager;
 
     private SessionManager sessionManager;
 
     private static FeatureSelection selection;
 
-    public static ContentModel getContentModel() {
-        return contentModel;
+    public static CameraController getCameraController() {
+        return cameraController;
     }
-    public static FeatureSelection getFeatureSellection() { return selection; }
 
-    @Override public void start(Stage stage) throws Exception {
+    public static UIManager getUIManager() {
+        return uiManager;
+    }
+
+    public static FeatureSelection getFeatureSellection() {
+        return selection;
+    }
+
+    @Override
+    public void start(Stage stage) throws Exception {
         sessionManager = SessionManager.createSessionManager("Jfx3dViewerApp");
         sessionManager.loadSession();
 
@@ -68,7 +77,10 @@ public class CityGMLEditorApp extends Application {
                     new File(args.get(0)).toURI().toURL().toString());
         }
 
-        contentModel = new ContentModel();
+        uiManager = new UIManager();
+        cameraController = new CameraController();
+        uiManager.setCametController(cameraController);
+        uiManager.Initialize();
 
         selection = new FeatureSelection();
 
@@ -76,7 +88,7 @@ public class CityGMLEditorApp extends Application {
 
         Scene scene = new Scene(
                 FXMLLoader.<Parent>load(CityGMLEditorApp.class.getResource("main.fxml")),
-                1024,600, true);
+                1024, 600, true);
 
         stage.setScene(scene);
         stage.show();

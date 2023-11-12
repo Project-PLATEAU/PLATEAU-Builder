@@ -58,13 +58,16 @@ import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.transform.Transform;
+import javafx.scene.control.ToggleButton;
 import javafx.util.StringConverter;
+import javafx.scene.control.ToggleGroup;
 
 /**
  * Controller class for settings panel
  */
 public class SettingsController implements Initializable {
-    private final ContentModel contentModel = CityGMLEditorApp.getContentModel();
+    private final CameraController cameraController = CityGMLEditorApp.getCameraController();
+    private final UIManager uiManager = CityGMLEditorApp.getUIManager();
 
     public Accordion settings;
     public ColorPicker ambientColorPicker;
@@ -103,8 +106,12 @@ public class SettingsController implements Initializable {
     public Slider farClipSlider;
     public Label nearClipLabel;
     public Label farClipLabel;
+    public ToggleButton rotateModeToggleButton; // Toggle button for rotation mode
+    public ToggleButton moveModeToggleButton; // Toggle button for move mode
+    private ToggleGroup modeToggleGroup; // Group of toggle buttons for mode selection
 
-    @Override public void initialize(URL location, ResourceBundle resources) {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
         // keep one pane open always
         settings.expandedPaneProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(
                 () -> {
@@ -112,86 +119,108 @@ public class SettingsController implements Initializable {
                         settings.setExpandedPane(settings.getPanes().get(0));
                 }));
         // wire up settings in OPTIONS
-        contentModel.msaaProperty().bind(msaaCheckBox.selectedProperty());
-        contentModel.showAxisProperty().bind(showAxisCheckBox.selectedProperty());
-        contentModel.yUpProperty().bind(yUpCheckBox.selectedProperty());
-        backgroundColorPicker.setValue((Color)contentModel.getSubScene().getFill());
-        contentModel.getSubScene().fillProperty().bind(backgroundColorPicker.valueProperty());
+        uiManager.msaaProperty().bind(msaaCheckBox.selectedProperty());
+        uiManager.showAxisProperty().bind(showAxisCheckBox.selectedProperty());
+        uiManager.yUpProperty().bind(yUpCheckBox.selectedProperty());
+
+        // Register state transition process for toggle buttons in rotation mode and
+        // selection mode
+        modeToggleGroup = new ToggleGroup();
+        moveModeToggleButton.setToggleGroup(modeToggleGroup);
+        rotateModeToggleButton.setToggleGroup(modeToggleGroup);
+        uiManager.moveModeProperty().bind(moveModeToggleButton.selectedProperty());
+        uiManager.rotateModeProperty().bind(rotateModeToggleButton.selectedProperty());
+
+        backgroundColorPicker.setValue((Color) uiManager.getSubScene().getFill());
+        uiManager.getSubScene().fillProperty().bind(backgroundColorPicker.valueProperty());
         // wire up settings in LIGHTS
-        ambientEnableCheckbox.setSelected(contentModel.getAmbientLightEnabled());
-        contentModel.ambientLightEnabledProperty().bind(ambientEnableCheckbox.selectedProperty());
-        ambientColorPicker.setValue(contentModel.getAmbientLight().getColor());
-        contentModel.getAmbientLight().colorProperty().bind(ambientColorPicker.valueProperty());
+        ambientEnableCheckbox.setSelected(uiManager.getAmbientLightEnabled());
+        uiManager.ambientLightEnabledProperty().bind(ambientEnableCheckbox.selectedProperty());
+        ambientColorPicker.setValue(uiManager.getAmbientLight().getColor());
+        uiManager.getAmbientLight().colorProperty().bind(ambientColorPicker.valueProperty());
 
         // LIGHT 1
-        light1EnabledCheckBox.setSelected(contentModel.getLight1Enabled());
-        contentModel.light1EnabledProperty().bind(light1EnabledCheckBox.selectedProperty());
-        light1ColorPicker.setValue(contentModel.getLight1().getColor());
-        contentModel.getLight1().colorProperty().bind(light1ColorPicker.valueProperty());
+        light1EnabledCheckBox.setSelected(uiManager.getLight1Enabled());
+        uiManager.light1EnabledProperty().bind(light1EnabledCheckBox.selectedProperty());
+        light1ColorPicker.setValue(uiManager.getLight1().getColor());
+        uiManager.getLight1().colorProperty().bind(light1ColorPicker.valueProperty());
         light1x.disableProperty().bind(light1followCameraCheckBox.selectedProperty());
         light1y.disableProperty().bind(light1followCameraCheckBox.selectedProperty());
         light1z.disableProperty().bind(light1followCameraCheckBox.selectedProperty());
         light1followCameraCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                contentModel.getLight1().translateXProperty().bind(new DoubleBinding() {
-                    { bind(contentModel.getCamera().boundsInParentProperty()); }
-                    @Override protected double computeValue() {
-                        return contentModel.getCamera().getBoundsInParent().getMinX();
+                uiManager.getLight1().translateXProperty().bind(new DoubleBinding() {
+                    {
+                        bind(cameraController.getCamera().boundsInParentProperty());
+                    }
+
+                    @Override
+                    protected double computeValue() {
+                        return cameraController.getCamera().getBoundsInParent().getMinX();
                     }
                 });
-                contentModel.getLight1().translateYProperty().bind(new DoubleBinding() {
-                    { bind(contentModel.getCamera().boundsInParentProperty()); }
-                    @Override protected double computeValue() {
-                        return contentModel.getCamera().getBoundsInParent().getMinY();
+                uiManager.getLight1().translateYProperty().bind(new DoubleBinding() {
+                    {
+                        bind(cameraController.getCamera().boundsInParentProperty());
+                    }
+
+                    @Override
+                    protected double computeValue() {
+                        return cameraController.getCamera().getBoundsInParent().getMinY();
                     }
                 });
-                contentModel.getLight1().translateZProperty().bind(new DoubleBinding() {
-                    { bind(contentModel.getCamera().boundsInParentProperty()); }
-                    @Override protected double computeValue() {
-                        return contentModel.getCamera().getBoundsInParent().getMinZ();
+                uiManager.getLight1().translateZProperty().bind(new DoubleBinding() {
+                    {
+                        bind(cameraController.getCamera().boundsInParentProperty());
+                    }
+
+                    @Override
+                    protected double computeValue() {
+                        return cameraController.getCamera().getBoundsInParent().getMinZ();
                     }
                 });
             } else {
-                contentModel.getLight1().translateXProperty().bind(light1x.valueProperty());
-                contentModel.getLight1().translateYProperty().bind(light1y.valueProperty());
-                contentModel.getLight1().translateZProperty().bind(light1z.valueProperty());
+                uiManager.getLight1().translateXProperty().bind(light1x.valueProperty());
+                uiManager.getLight1().translateYProperty().bind(light1y.valueProperty());
+                uiManager.getLight1().translateZProperty().bind(light1z.valueProperty());
             }
         });
         // LIGHT 2
-        light2EnabledCheckBox.setSelected(contentModel.getLight2Enabled());
-        contentModel.light2EnabledProperty().bind(light2EnabledCheckBox.selectedProperty());
-        light2ColorPicker.setValue(contentModel.getLight2().getColor());
-        contentModel.getLight2().colorProperty().bind(light2ColorPicker.valueProperty());
-        contentModel.getLight2().translateXProperty().bind(light2x.valueProperty());
-        contentModel.getLight2().translateYProperty().bind(light2y.valueProperty());
-        contentModel.getLight2().translateZProperty().bind(light2z.valueProperty());
+        light2EnabledCheckBox.setSelected(uiManager.getLight2Enabled());
+        uiManager.light2EnabledProperty().bind(light2EnabledCheckBox.selectedProperty());
+        light2ColorPicker.setValue(uiManager.getLight2().getColor());
+        uiManager.getLight2().colorProperty().bind(light2ColorPicker.valueProperty());
+        uiManager.getLight2().translateXProperty().bind(light2x.valueProperty());
+        uiManager.getLight2().translateYProperty().bind(light2y.valueProperty());
+        uiManager.getLight2().translateZProperty().bind(light2z.valueProperty());
         // LIGHT 3
-        light3EnabledCheckBox.setSelected(contentModel.getLight3Enabled());
-        contentModel.light3EnabledProperty().bind(light3EnabledCheckBox.selectedProperty());
-        light3ColorPicker.setValue(contentModel.getLight3().getColor());
-        contentModel.getLight3().colorProperty().bind(light3ColorPicker.valueProperty());
-        contentModel.getLight3().translateXProperty().bind(light3x.valueProperty());
-        contentModel.getLight3().translateYProperty().bind(light3y.valueProperty());
-        contentModel.getLight3().translateZProperty().bind(light3z.valueProperty());
+        light3EnabledCheckBox.setSelected(uiManager.getLight3Enabled());
+        uiManager.light3EnabledProperty().bind(light3EnabledCheckBox.selectedProperty());
+        light3ColorPicker.setValue(uiManager.getLight3().getColor());
+        uiManager.getLight3().colorProperty().bind(light3ColorPicker.valueProperty());
+        uiManager.getLight3().translateXProperty().bind(light3x.valueProperty());
+        uiManager.getLight3().translateYProperty().bind(light3y.valueProperty());
+        uiManager.getLight3().translateZProperty().bind(light3z.valueProperty());
         // wire up settings in CAMERA
-        fovSlider.setValue(contentModel.getCamera().getFieldOfView());
-        contentModel.getCamera().fieldOfViewProperty().bind(fovSlider.valueProperty());
-        nearClipSlider.setValue(Math.log10(contentModel.getCamera().getNearClip()));
-        farClipSlider.setValue(Math.log10(contentModel.getCamera().getFarClip()));
-        nearClipLabel.textProperty().bind(Bindings.format(nearClipLabel.getText(), contentModel.getCamera().nearClipProperty()));
-        farClipLabel.textProperty().bind(Bindings.format(farClipLabel.getText(), contentModel.getCamera().farClipProperty()));
-        contentModel.getCamera().nearClipProperty().bind(new Power10DoubleBinding(nearClipSlider.valueProperty()));
-        contentModel.getCamera().farClipProperty().bind(new Power10DoubleBinding(farClipSlider.valueProperty()));
+        fovSlider.setValue(cameraController.getCamera().getFieldOfView());
+        cameraController.getCamera().fieldOfViewProperty().bind(fovSlider.valueProperty());
+        nearClipSlider.setValue(Math.log10(cameraController.getCamera().getNearClip()));
+        farClipSlider.setValue(Math.log10(cameraController.getCamera().getFarClip()));
+        nearClipLabel.textProperty()
+                .bind(Bindings.format(nearClipLabel.getText(), cameraController.getCamera().nearClipProperty()));
+        farClipLabel.textProperty()
+                .bind(Bindings.format(farClipLabel.getText(), cameraController.getCamera().farClipProperty()));
+        cameraController.getCamera().nearClipProperty().bind(new Power10DoubleBinding(nearClipSlider.valueProperty()));
+        cameraController.getCamera().farClipProperty().bind(new Power10DoubleBinding(farClipSlider.valueProperty()));
 
         hierarachyTreeTable.rootProperty().bind(new ObjectBinding<TreeItem<Node>>() {
-
             {
-                bind(contentModel.contentProperty());
+                bind(uiManager.contentProperty());
             }
 
             @Override
             protected TreeItem<Node> computeValue() {
-                Node content3D = contentModel.getContent();
+                Node content3D = uiManager.getContent();
                 if (content3D != null) {
                     return new TreeItemImpl(content3D);
                 } else {
@@ -220,8 +249,12 @@ public class SettingsController implements Initializable {
         visibilityColumn.setCellValueFactory(p -> p.getValue().getValue().visibleProperty());
         visibilityColumn.setCellFactory(CheckBoxTreeTableCell.forTreeTableColumn(visibilityColumn));
         widthColumn.setCellValueFactory(p -> new ObjectBinding<Double>() {
-            {  bind(p.getValue().getValue().boundsInLocalProperty()); }
-            @Override protected Double computeValue() {
+            {
+                bind(p.getValue().getValue().boundsInLocalProperty());
+            }
+
+            @Override
+            protected Double computeValue() {
                 return p.getValue().getValue().getBoundsInLocal().getWidth();
             }
         });
@@ -233,21 +266,29 @@ public class SettingsController implements Initializable {
 
             @Override
             public Double fromString(String string) {
-                throw new UnsupportedOperationException("Not supported yet."); //Not needed so far
+                throw new UnsupportedOperationException("Not supported yet."); // Not needed so far
             }
         };
         widthColumn.setCellFactory(TextFieldTreeTableCell.<Node, Double>forTreeTableColumn(niceDoubleStringConverter));
         heightColumn.setCellFactory(TextFieldTreeTableCell.<Node, Double>forTreeTableColumn(niceDoubleStringConverter));
         depthColumn.setCellFactory(TextFieldTreeTableCell.<Node, Double>forTreeTableColumn(niceDoubleStringConverter));
         heightColumn.setCellValueFactory(p -> new ObjectBinding<Double>() {
-            {  bind(p.getValue().getValue().boundsInLocalProperty()); }
-            @Override protected Double computeValue() {
+            {
+                bind(p.getValue().getValue().boundsInLocalProperty());
+            }
+
+            @Override
+            protected Double computeValue() {
                 return p.getValue().getValue().getBoundsInLocal().getHeight();
             }
         });
         depthColumn.setCellValueFactory(p -> new ObjectBinding<Double>() {
-            {  bind(p.getValue().getValue().boundsInLocalProperty()); }
-            @Override protected Double computeValue() {
+            {
+                bind(p.getValue().getValue().boundsInLocalProperty());
+            }
+
+            @Override
+            protected Double computeValue() {
                 return p.getValue().getValue().getBoundsInLocal().getDepth();
             }
         });

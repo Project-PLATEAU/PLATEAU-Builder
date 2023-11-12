@@ -92,7 +92,8 @@ public class MainController implements Initializable {
     private int nodeCount = 0;
     private int meshCount = 0;
     private int triangleCount = 0;
-    private final ContentModel contentModel = CityGMLEditorApp.getContentModel();
+    private final CameraController cameraController = CityGMLEditorApp.getCameraController();
+    private final UIManager uiManager = CityGMLEditorApp.getUIManager();
     private File loadedPath;
     private String loadedURL;
     private String[] supportedFormatRegex;
@@ -106,7 +107,8 @@ public class MainController implements Initializable {
             // CREATE SETTINGS PANEL
             sidebar = FXMLLoader.load(MainController.class.getResource("sidebar.fxml"));
             // SETUP SPLIT PANE
-            splitPane.getItems().addAll(new SubSceneResizer(contentModel.subSceneProperty(), navigationPanel), sidebar);
+            splitPane.getItems().addAll(new SubSceneResizer(uiManager.subSceneProperty(), navigationPanel),
+                    sidebar);
             splitPane.getDividers().get(0).setPosition(1);
 
         } catch (IOException e) {
@@ -119,12 +121,11 @@ public class MainController implements Initializable {
         for (int i = 0; i < supportedFormatRegex.length; i++) {
             supportedFormatRegex[i] = "." + supportedFormatRegex[i].replaceAll("\\.", "\\.");
         }
-        contentModel.getSubScene().setOnDragOver(event -> {
+        uiManager.getSubScene().setOnDragOver(event -> {
             Dragboard db = event.getDragboard();
             if (db.hasFiles()) {
                 boolean hasSupportedFile = false;
-                fileLoop:
-                for (File file : db.getFiles()) {
+                fileLoop: for (File file : db.getFiles()) {
                     for (String format : supportedFormatRegex) {
                         if (file.getName().matches(format)) {
                             hasSupportedFile = true;
@@ -132,17 +133,17 @@ public class MainController implements Initializable {
                         }
                     }
                 }
-                if (hasSupportedFile) event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                if (hasSupportedFile)
+                    event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             }
             event.consume();
         });
-        contentModel.getSubScene().setOnDragDropped(event -> {
+        uiManager.getSubScene().setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             boolean success = false;
             if (db.hasFiles()) {
                 File supportedFile = null;
-                fileLoop:
-                for (File file : db.getFiles()) {
+                fileLoop: for (File file : db.getFiles()) {
                     for (String format : supportedFormatRegex) {
                         if (file.getName().matches(format)) {
                             supportedFile = file;
@@ -184,7 +185,6 @@ public class MainController implements Initializable {
         }
     }
 
-
     private void loadGml(String fileUrl) {
         try {
             try {
@@ -203,7 +203,7 @@ public class MainController implements Initializable {
         sessionManager.getProperties().setProperty(CityGMLEditorApp.FILE_URL_PROPERTY, fileUrl);
         try {
             var root = GmlImporter.loadGml(fileUrl);
-            contentModel.setContent(root);
+            uiManager.setContent(root);
         } catch (Exception ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -212,7 +212,8 @@ public class MainController implements Initializable {
 
     public void open(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", Importer3D.getSupportedFormatExtensionFilters()));
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Supported files", Importer3D.getSupportedFormatExtensionFilters()));
         if (loadedPath != null) {
             chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
         }
@@ -251,7 +252,7 @@ public class MainController implements Initializable {
         try {
             Node root = Importer3D.load(
                     fileUrl, loadAsPolygonsCheckBox.isSelected());
-            contentModel.setContent(root);
+            uiManager.setContent(root);
         } catch (IOException ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -262,12 +263,12 @@ public class MainController implements Initializable {
         nodeCount = 0;
         meshCount = 0;
         triangleCount = 0;
-        updateCount(contentModel.getRoot3D());
-        Node content = contentModel.getContent();
+        updateCount(uiManager.getRoot3D());
+        Node content = uiManager.getContent();
         final Bounds bounds = content == null ? new BoundingBox(0, 0, 0, 0) : content.getBoundsInLocal();
         status.setText(
                 String.format("Nodes [%d] :: Meshes [%d] :: Triangles [%d] :: " +
-                                "Bounds [w=%.2f,h=%.2f,d=%.2f]",
+                        "Bounds [w=%.2f,h=%.2f,d=%.2f]",
                         nodeCount, meshCount, triangleCount,
                         bounds.getWidth(), bounds.getHeight(), bounds.getDepth()));
     }
@@ -305,9 +306,8 @@ public class MainController implements Initializable {
                                     sidebar.setMinWidth(Region.USE_PREF_SIZE);
                                 }
                             },
-                            new KeyValue(divider.positionProperty(), divPos, Interpolator.EASE_BOTH)
-                    )
-            ).play();
+                            new KeyValue(divider.positionProperty(), divPos, Interpolator.EASE_BOTH)))
+                    .play();
         } else {
             settingsLastWidth = sidebar.getWidth();
             sidebar.setMinWidth(0);
@@ -321,17 +321,16 @@ public class MainController implements Initializable {
             chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
         }
         chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("CityGML", "*.gml")
-        );
+                new FileChooser.ExtensionFilter("CityGML", "*.gml"));
         chooser.setTitle("Export CityGML");
         File newFile = chooser.showSaveDialog(openMenuBtn.getScene().getWindow());
 
-        var content = (Group) CityGMLEditorApp.getContentModel().getContent();
+        var content = (Group) CityGMLEditorApp.getUIManager().getContent();
         var cityModelNode = content.getChildren().get(0);
         if (cityModelNode == null)
             return;
 
-        var cityModel = (CityModel)cityModelNode;
+        var cityModel = (CityModel) cityModelNode;
 
         try {
             GmlExporter.export(newFile.toString(), cityModel.getGmlObject(), cityModel.getSchemaHandler());
