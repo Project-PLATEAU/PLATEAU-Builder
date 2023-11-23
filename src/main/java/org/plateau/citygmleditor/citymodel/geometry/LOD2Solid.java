@@ -8,7 +8,7 @@ import org.plateau.citygmleditor.citymodel.SurfaceData;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class LOD2Solid extends Parent {
+public class LOD2Solid extends Parent implements ILODSolid {
     private AbstractSolid gmlObject;
     private ArrayList<BoundarySurface> boundaries;
 
@@ -47,5 +47,10 @@ public class LOD2Solid extends Parent {
 
     public void addMeshView(MeshView meshView) {
         getChildren().add(meshView);
+    }
+
+    @Override
+    public AbstractSolid getAbstractSolid() {
+        return gmlObject;
     }
 }
