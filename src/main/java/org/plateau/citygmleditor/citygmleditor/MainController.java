@@ -325,6 +325,8 @@ public class MainController implements Initializable {
         );
         chooser.setTitle("Export CityGML");
         File newFile = chooser.showSaveDialog(openMenuBtn.getScene().getWindow());
+        if (newFile == null)
+            return;
 
         var content = (Group) CityGMLEditorApp.getContentModel().getContent();
         var cityModelNode = content.getChildren().get(0);
