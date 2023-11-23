@@ -331,6 +331,8 @@ public class ContentModel {
                     cameraXform.ry.setAngle(cameraXform.ry.getAngle() + 2.0*ALT_MULTIPLIER);  // -
                 }
                 break;
+            default:
+                break;
         }
         //System.out.println(cameraXform.getTranslateX() + ", " + cameraXform.getTranslateY() + ", " + cameraXform.getTranslateZ());
 
