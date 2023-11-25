@@ -17,6 +17,8 @@ module CityGMLEditor {
     requires transitive java.xml.bind;
     requires transitive com.sun.xml.xsom;
     requires j3d.core.utils;
+	requires jgltf.model;
+    requires com.fasterxml.jackson.core;
 
     provides Importer with
             ObjOrPolyObjImporter;
