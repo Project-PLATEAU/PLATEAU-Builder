@@ -74,6 +74,7 @@ import javafx.scene.shape.TriangleMesh;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.plateau.citygmleditor.importers.Importer3D;
+import org.plateau.citygmleditor.importers.gltf.GltfImporter;
 
 import java.net.URISyntaxException;
 import java.util.logging.Level;
@@ -351,5 +352,46 @@ public class MainController implements Initializable {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("validation.fxml"));
         newWindow.setScene(new Scene(loader.load()));
         newWindow.showAndWait();
+    }
+
+    public void openGltf(ActionEvent actionEvent) {
+        FileChooser chooser = new FileChooser();
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", "*.gltf"));
+        if (loadedPath != null) {
+            chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
+        }
+        chooser.setTitle("Select file to load");
+        File newFile = chooser.showOpenDialog(openMenuBtn.getScene().getWindow());
+        if (newFile != null) {
+            loadGltf(newFile.toString());
+        }
+    }
+
+
+    private void loadGltf(String fileUrl) {
+        try {
+            try {
+                loadedPath = new File(new URL(fileUrl).toURI()).getAbsoluteFile();
+            } catch (IllegalArgumentException | MalformedURLException | URISyntaxException ignored) {
+                loadedPath = null;
+            }
+            doLoadGltf(fileUrl);
+        } catch (Exception ex) {
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void doLoadGltf(String fileUrl) {
+        loadedURL = fileUrl;
+        sessionManager.getProperties().setProperty(CityGMLEditorApp.FILE_URL_PROPERTY, fileUrl);
+        try {
+            var root = GltfImporter.loadGltf(fileUrl);
+            if (root != null) {
+                contentModel.setContent(root);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        updateStatus();
     }
 }
