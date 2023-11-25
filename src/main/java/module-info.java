@@ -19,6 +19,8 @@ module CityGMLEditor {
     requires j3d.core.utils;
 	requires jgltf.model;
     requires jgltf.model.builder;
+    requires jgltf.impl.v1;
+    requires jgltf.impl.v2;
     requires com.fasterxml.jackson.core;
 
     provides Importer with
