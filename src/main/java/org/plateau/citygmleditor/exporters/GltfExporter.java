@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import de.javagl.jgltf.model.io.GltfWriter;
-import de.javagl.jgltf.model.io.v2.GltfAssetV2;
-import de.javagl.jgltf.model.io.v2.GltfAssetsV2;
-import de.javagl.jgltf.model.v2.MaterialModelV2;
+import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
+
 import de.javagl.jgltf.impl.v2.GlTF;
 import de.javagl.jgltf.model.creation.GltfModelBuilder;
 import de.javagl.jgltf.model.creation.MaterialBuilder;
@@ -18,9 +17,10 @@ import de.javagl.jgltf.model.impl.DefaultMeshModel;
 import de.javagl.jgltf.model.impl.DefaultMeshPrimitiveModel;
 import de.javagl.jgltf.model.impl.DefaultNodeModel;
 import de.javagl.jgltf.model.impl.DefaultSceneModel;
-
-import org.plateau.citygmleditor.citymodel.CityModel;
-import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
+import de.javagl.jgltf.model.io.GltfWriter;
+import de.javagl.jgltf.model.io.v2.GltfAssetV2;
+import de.javagl.jgltf.model.io.v2.GltfAssetsV2;
+import de.javagl.jgltf.model.v2.MaterialModelV2;
 
 
 public class GltfExporter {
