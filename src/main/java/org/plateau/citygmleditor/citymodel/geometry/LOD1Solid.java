@@ -1,12 +1,11 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
-import javafx.scene.Parent;
-import javafx.scene.shape.MeshView;
+import java.util.ArrayList;
 
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.citygml4j.model.gml.geometry.primitives.Solid;
 
-import java.util.ArrayList;
+import javafx.scene.shape.MeshView;
 
 public class LOD1Solid extends MeshView implements ILODSolid {
     private Solid gmlObject;

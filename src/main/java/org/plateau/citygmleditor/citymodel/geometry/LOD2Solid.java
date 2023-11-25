@@ -1,12 +1,13 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
-import javafx.scene.Parent;
-import javafx.scene.shape.MeshView;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.plateau.citygmleditor.citymodel.SurfaceData;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import javafx.scene.Parent;
+import javafx.scene.shape.MeshView;
 
 public class LOD2Solid extends Parent implements ILODSolid {
     private AbstractSolid gmlObject;
