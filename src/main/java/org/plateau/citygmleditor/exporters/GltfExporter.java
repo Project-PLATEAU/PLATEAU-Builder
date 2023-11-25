@@ -22,29 +22,25 @@ import de.javagl.jgltf.model.io.v2.GltfAssetV2;
 import de.javagl.jgltf.model.io.v2.GltfAssetsV2;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
 
-
 public class GltfExporter {
     public static void export(String fileUrl, CityModel cityModel, ILODSolid lodSolid) {
         // TODO: CityModel→GltfModel
-        
+
         // Create a mesh primitive
         int indices[] = { 0, 1, 2 };
-        float positions[] =
-        {
-            0.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 0.0f,
-            0.5f, 1.0f, 0.0f
+        float positions[] = {
+                0.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+                0.5f, 1.0f, 0.0f
         };
-        
-        MeshPrimitiveBuilder meshPrimitiveBuilder = 
-            MeshPrimitiveBuilder.create(); 
+
+        MeshPrimitiveBuilder meshPrimitiveBuilder = MeshPrimitiveBuilder.create();
         meshPrimitiveBuilder.setIntIndicesAsShort(IntBuffer.wrap(indices));
         meshPrimitiveBuilder.addPositions3D(FloatBuffer.wrap(positions));
-        DefaultMeshPrimitiveModel meshPrimitiveModel = 
-            meshPrimitiveBuilder.build();
-        
+        DefaultMeshPrimitiveModel meshPrimitiveModel = meshPrimitiveBuilder.build();
+
         // Create a material, and assign it to the mesh primitive
-        MaterialBuilder materialBuilder =  MaterialBuilder.create();
+        MaterialBuilder materialBuilder = MaterialBuilder.create();
         materialBuilder.setBaseColorFactor(1.0f, 0.9f, 0.9f, 1.0f);
         materialBuilder.setDoubleSided(true);
         MaterialModelV2 materialModel = materialBuilder.build();
@@ -57,14 +53,14 @@ public class GltfExporter {
         // Create a node with the mesh
         DefaultNodeModel nodeModel = new DefaultNodeModel();
         nodeModel.addMeshModel(meshModel);
-        
+
         // Create a scene with the node
         DefaultSceneModel sceneModel = new DefaultSceneModel();
         sceneModel.addNode(nodeModel);
 
         // Pass the scene to the model builder. It will take care
         // of the other model elements that are contained in the scene.
-        // (I.e. the mesh primitive and its accessors, and the material 
+        // (I.e. the mesh primitive and its accessors, and the material
         // and its textures)
         GltfModelBuilder gltfModelBuilder = GltfModelBuilder.create();
         gltfModelBuilder.addSceneModel(sceneModel);
