@@ -300,7 +300,7 @@ public class SettingsController implements Initializable {
     public void Export(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("gLTF", "*.gltf")
+                new FileChooser.ExtensionFilter("gLTF", "*.gltf", "*.glb")
         );
         chooser.setTitle("Export gLTF");
         File newFile = chooser.showSaveDialog(hierarchyTreeTable.getScene().getWindow());
