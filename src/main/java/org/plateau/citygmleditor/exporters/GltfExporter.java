@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.exporters;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -8,7 +9,6 @@ import java.nio.IntBuffer;
 import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
 
-import de.javagl.jgltf.impl.v2.GlTF;
 import de.javagl.jgltf.model.creation.GltfModelBuilder;
 import de.javagl.jgltf.model.creation.MaterialBuilder;
 import de.javagl.jgltf.model.creation.MeshPrimitiveBuilder;
@@ -17,9 +17,7 @@ import de.javagl.jgltf.model.impl.DefaultMeshModel;
 import de.javagl.jgltf.model.impl.DefaultMeshPrimitiveModel;
 import de.javagl.jgltf.model.impl.DefaultNodeModel;
 import de.javagl.jgltf.model.impl.DefaultSceneModel;
-import de.javagl.jgltf.model.io.GltfWriter;
-import de.javagl.jgltf.model.io.v2.GltfAssetV2;
-import de.javagl.jgltf.model.io.v2.GltfAssetsV2;
+import de.javagl.jgltf.model.io.GltfModelWriter;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
 
 public class GltfExporter {
@@ -66,15 +64,26 @@ public class GltfExporter {
         gltfModelBuilder.addSceneModel(sceneModel);
         DefaultGltfModel gltfModel = gltfModelBuilder.build();
 
-        GltfAssetV2 asset = GltfAssetsV2.createEmbedded(gltfModel);
-        GlTF gltf = asset.getGltf();
+        
+        // Create a writer and write the glTF
+        GltfModelWriter writer = new GltfModelWriter();
 
-        try (FileOutputStream stream = new FileOutputStream(fileUrl)) {
-            GltfWriter writer = new GltfWriter();
-            writer.setIndenting(true);
-            writer.write(gltf, stream);
-        } catch (IOException e) {
-            e.printStackTrace();
+        File file = new File(fileUrl);
+        String fileName = file.getName();
+        String ext = fileName.substring(fileName.lastIndexOf(".") + 1);
+
+        if (ext.toLowerCase().equals("gltf")) {
+            try {
+                writer.write(gltfModel, fileUrl);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (ext.toLowerCase().equals("glb")) {
+            try (FileOutputStream stream = new FileOutputStream(fileUrl)) {
+                writer.writeBinary(gltfModel, stream);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
