@@ -50,6 +50,16 @@ public class LOD2Solid extends Parent implements ILODSolid {
         getChildren().add(meshView);
     }
 
+    public ArrayList<Polygon> getPolygons() {
+        var polygons = new ArrayList<Polygon>();
+
+        for (var boundary : boundaries) {
+            polygons.addAll(boundary.getPolygons());
+        }
+
+        return polygons;
+    }
+
     @Override
     public AbstractSolid getAbstractSolid() {
         return gmlObject;
