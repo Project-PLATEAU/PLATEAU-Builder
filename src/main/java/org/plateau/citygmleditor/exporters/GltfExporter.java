@@ -64,7 +64,6 @@ public class GltfExporter {
         gltfModelBuilder.addSceneModel(sceneModel);
         DefaultGltfModel gltfModel = gltfModelBuilder.build();
 
-        
         // Create a writer and write the glTF
         GltfModelWriter writer = new GltfModelWriter();
 
