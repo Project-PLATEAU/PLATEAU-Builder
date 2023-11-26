@@ -6,5 +6,6 @@ import javafx.scene.Parent;
 
 public interface ILODSolid {
     public AbstractSolid getAbstractSolid();
+
     public Parent getParent();
 }
