@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
 import org.plateau.citygmleditor.exporters.GltfExporter;
+import org.plateau.citygmleditor.exporters.ObjExporter;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -112,7 +113,8 @@ public class SettingsController implements Initializable {
     public Label nearClipLabel;
     public Label farClipLabel;
     public ContextMenu hierarchyContextMenu;
-    public MenuItem exportMenu;
+    public MenuItem exportGltfMenu;
+    public MenuItem exportObjMenu;
 
     @Override public void initialize(URL location, ResourceBundle resources) {
         // keep one pane open always
@@ -214,7 +216,8 @@ public class SettingsController implements Initializable {
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
                 if (selectedItem != null) {
                     var item = selectedItem.valueProperty().get();
-                    exportMenu.setDisable(!(item instanceof ILODSolid));
+                    exportGltfMenu.setDisable(!(item instanceof ILODSolid));
+                    exportObjMenu.setDisable(!(item instanceof ILODSolid));
                 }
             }
             if (t.getClickCount() == 2) {
@@ -297,7 +300,7 @@ public class SettingsController implements Initializable {
         sessionManager.bind(settings, "settingsPane");
     }
 
-    public void Export(ActionEvent actionEvent) {
+    public void ExportGltf(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("gLTF", "*.gltf", "*.glb")
@@ -321,6 +324,35 @@ public class SettingsController implements Initializable {
         CityModel cityModel = (CityModel)cityNode;
         try {
             GltfExporter.export(newFile.toString(), cityModel, solid);
+        } catch (Exception ex) {
+            Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void ExportObj(ActionEvent actionEvent) {
+        FileChooser chooser = new FileChooser();
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("OBJ", "*.obj")
+        );
+        chooser.setTitle("Export OBJ");
+        File newFile = chooser.showSaveDialog(hierarchyTreeTable.getScene().getWindow());
+        if (newFile == null)
+            return;
+
+        TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
+        if (selectedItem == null)
+            return;
+
+        var item = selectedItem.valueProperty().get();
+        if (!(item instanceof ILODSolid)) 
+            return;
+
+        ILODSolid solid = (ILODSolid)item;
+        var buildingNode = solid.getParent();
+        var cityNode = buildingNode.getParent();
+        CityModel cityModel = (CityModel)cityNode;
+        try {
+            ObjExporter.export(newFile.toString(), cityModel, solid);
         } catch (Exception ex) {
             Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
         }

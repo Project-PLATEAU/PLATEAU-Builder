@@ -202,7 +202,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          <contextMenu>
             <ContextMenu fx:id="hierarchyContextMenu">
               <items>
-                <MenuItem fx:id="exportMenu" onAction="#Export" mnemonicParsing="false" text="Export..." />
+                <MenuItem fx:id="exportGltfMenu" onAction="#ExportGltf" mnemonicParsing="false" text="Export gLTF..." />
+                <MenuItem fx:id="exportObjMenu" onAction="#ExportObj" mnemonicParsing="false" text="Export OBJ..." />
               </items>
             </ContextMenu>
          </contextMenu>
