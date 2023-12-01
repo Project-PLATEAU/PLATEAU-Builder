@@ -123,7 +123,6 @@ public class ObjExporter {
                     var materialFileName = materialFile.getName();
                     writer.write(String.format("map_Kd %s\r\n", materialFileName));
 
-                    file.getParent();
                     var copyPath = new File(file.getParent(), materialFileName);
                     Files.copy(Paths.get(materialFile.getAbsolutePath()), Paths.get(copyPath.getAbsolutePath()),
                             StandardCopyOption.REPLACE_EXISTING);
