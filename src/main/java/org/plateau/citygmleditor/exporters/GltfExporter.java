@@ -5,19 +5,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.Paths;
 
 import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2Solid;
 
 import de.javagl.jgltf.model.creation.GltfModelBuilder;
+import de.javagl.jgltf.model.creation.ImageModels;
 import de.javagl.jgltf.model.creation.MaterialBuilder;
 import de.javagl.jgltf.model.creation.MeshPrimitiveBuilder;
 import de.javagl.jgltf.model.impl.DefaultGltfModel;
+import de.javagl.jgltf.model.impl.DefaultImageModel;
 import de.javagl.jgltf.model.impl.DefaultMeshModel;
 import de.javagl.jgltf.model.impl.DefaultMeshPrimitiveModel;
 import de.javagl.jgltf.model.impl.DefaultNodeModel;
 import de.javagl.jgltf.model.impl.DefaultSceneModel;
+import de.javagl.jgltf.model.impl.DefaultTextureModel;
 import de.javagl.jgltf.model.io.GltfModelWriter;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
 import javafx.scene.paint.PhongMaterial;
@@ -28,14 +32,16 @@ public class GltfExporter {
         if (lodSolid instanceof LOD2Solid) {
             LOD2Solid lod2Solid = (LOD2Solid) lodSolid;
 
-            MaterialBuilder materialBuilder = MaterialBuilder.create();
-            materialBuilder.setBaseColorFactor(0.9f, 0.9f, 0.9f, 1.0f);
-            materialBuilder.setDoubleSided(true);
-            MaterialModelV2 materialModel = materialBuilder.build();
+            
 
             DefaultMeshModel meshModel = new DefaultMeshModel();
 
-            String materialUrl = null;
+            MaterialBuilder materialBuilder = MaterialBuilder.create();
+            materialBuilder.setBaseColorFactor(0.9f, 0.9f, 0.9f, 1.0f);
+            materialBuilder.setDoubleSided(true);
+            MaterialModelV2 defaultMaterialModel = materialBuilder.build();
+            MaterialModelV2 textureMaterialModel = null;
+
             var polygons = lod2Solid.getPolygons();
             for (var polygon : polygons) {
                 var polygonFaces = polygon.getFaces();
@@ -50,28 +56,48 @@ public class GltfExporter {
                 var subVertices = polygon.getAllVertices();
                 float positions[] = new float[subVertices.length];
                 for (int i = 0; i < subVertices.length; i += 3) {
-                    positions[i] = (float) subVertices[i];
+                    positions[i] = (float) subVertices[i + 1];
                     positions[i + 1] = (float) subVertices[i + 2];
-                    positions[i + 2] = (float) subVertices[i + 1];
+                    positions[i + 2] = (float) subVertices[i + 0];
+                }
+
+                var subUVs = polygon.getAllUVs();
+                var uvs = new float[subUVs.length];
+                for (int i = 0; i < subUVs.length; i += 2) {
+                    uvs[i] = (float) subUVs[i];
+                    uvs[i + 1] = 1 - (float) subUVs[i + 1];
                 }
 
                 MeshPrimitiveBuilder meshPrimitiveBuilder = MeshPrimitiveBuilder.create();
                 meshPrimitiveBuilder.setIntIndicesAsShort(IntBuffer.wrap(faces));
                 meshPrimitiveBuilder.addPositions3D(FloatBuffer.wrap(positions));
+                meshPrimitiveBuilder.addTexCoords02D(FloatBuffer.wrap(uvs));
+
                 DefaultMeshPrimitiveModel meshPrimitiveModel = meshPrimitiveBuilder.build();
+                MaterialModelV2 materialModel = null;
+
+                var surfaceData = polygon.getSurfaceData();
+                if (surfaceData != null) {
+                    var material = surfaceData.getMaterial();
+                    if (material instanceof PhongMaterial) {
+                        if (textureMaterialModel == null) {
+                            PhongMaterial phongMaterial = (PhongMaterial) material;
+                            var materialFile = new File(phongMaterial.getDiffuseMap().getUrl());
+                            var inputUri = Paths.get(materialFile.getAbsolutePath()).toUri().normalize().toString();
+                            DefaultImageModel imageModel = ImageModels.create(inputUri, materialFile.getName());
+                            var textureModel = new DefaultTextureModel();
+                            textureModel.setImageModel(imageModel);
+                            materialBuilder.setBaseColorTexture(textureModel, 0);
+                            textureMaterialModel = materialBuilder.build();
+                        }
+                        materialModel = textureMaterialModel;
+                    }
+                } else {
+                    materialModel = defaultMaterialModel;
+                }
+
                 meshPrimitiveModel.setMaterialModel(materialModel);
                 meshModel.addMeshPrimitiveModel(meshPrimitiveModel);
-
-                if (materialUrl == null) {
-                    var surfaceData = polygon.getSurfaceData();
-                    if (surfaceData != null) {
-                        var material = surfaceData.getMaterial();
-                        if (material instanceof PhongMaterial) {
-                            PhongMaterial phongMaterial = (PhongMaterial) material;
-                            materialUrl = phongMaterial.getDiffuseMap().getUrl();
-                        }
-                    }
-                }
             }
 
             // Create a node with the mesh
@@ -98,8 +124,14 @@ public class GltfExporter {
 
             if (ext.toLowerCase().equals("gltf")) {
                 try {
-                    // writer.write(gltfModel, fileUrl);
+                    //writer.write(gltfModel, fileUrl);
                     writer.writeEmbedded(gltfModel, file);
+                    // if (materialFile != null) {
+                    //     var materialFileName = materialFile.getName();
+                    //     var copyPath = new File(file.getParent(), materialFileName);
+                    //     Files.copy(Paths.get(materialFile.getAbsolutePath()), Paths.get(copyPath.getAbsolutePath()),
+                    //             StandardCopyOption.REPLACE_EXISTING);
+                    // }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
