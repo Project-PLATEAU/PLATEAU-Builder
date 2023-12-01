@@ -32,8 +32,6 @@ public class GltfExporter {
         if (lodSolid instanceof LOD2Solid) {
             LOD2Solid lod2Solid = (LOD2Solid) lodSolid;
 
-            
-
             DefaultMeshModel meshModel = new DefaultMeshModel();
 
             MaterialBuilder materialBuilder = MaterialBuilder.create();
@@ -126,12 +124,6 @@ public class GltfExporter {
                 try {
                     //writer.write(gltfModel, fileUrl);
                     writer.writeEmbedded(gltfModel, file);
-                    // if (materialFile != null) {
-                    //     var materialFileName = materialFile.getName();
-                    //     var copyPath = new File(file.getParent(), materialFileName);
-                    //     Files.copy(Paths.get(materialFile.getAbsolutePath()), Paths.get(copyPath.getAbsolutePath()),
-                    //             StandardCopyOption.REPLACE_EXISTING);
-                    // }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
