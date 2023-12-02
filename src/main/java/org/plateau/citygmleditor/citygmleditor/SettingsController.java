@@ -319,11 +319,8 @@ public class SettingsController implements Initializable {
             return;
 
         ILODSolid solid = (ILODSolid)item;
-        var buildingNode = solid.getParent();
-        var cityNode = buildingNode.getParent();
-        CityModel cityModel = (CityModel)cityNode;
         try {
-            GltfExporter.export(newFile.toString(), cityModel, solid);
+            GltfExporter.export(newFile.toString(), solid);
         } catch (Exception ex) {
             Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
         }
