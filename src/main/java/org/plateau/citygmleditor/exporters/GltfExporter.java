@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.plateau.citygmleditor.citymodel.CityModel;
-import org.plateau.citygmleditor.citymodel.geometry.BoundarySurface;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2Solid;
 
