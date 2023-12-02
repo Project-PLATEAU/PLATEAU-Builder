@@ -19,4 +19,8 @@ public class BoundarySurface {
     public void setPolygons(ArrayList<Polygon> polygons) {
         this.polygons = polygons;
     }
+
+    public String getId() {
+        return gmlObject.getId();
+    }
 }
