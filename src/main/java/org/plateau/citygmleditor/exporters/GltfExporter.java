@@ -75,47 +75,17 @@ public class GltfExporter {
     }
 
     private static DefaultSceneModel createSceneModel(LOD1Solid lod1Solid) {
+        DefaultSceneModel sceneModel = new DefaultSceneModel();
+        DefaultNodeModel nodeModel = new DefaultNodeModel();
         DefaultMeshModel meshModel = new DefaultMeshModel();
+        
         for (var polygon : lod1Solid.getPolygons()) {
-
-            var polygonFaces = polygon.getFaces();
-            var faces = new int[polygonFaces.length / 2];
-            for (var i = 0; i < faces.length; i += 3) {
-                faces[i] = polygonFaces[i * 2];
-                faces[i + 1] = polygonFaces[i * 2 + 2];
-                faces[i + 2] = polygonFaces[i * 2 + 4];
-            }
-
-            // 右手系Y-up
-            var subVertices = polygon.getAllVertices();
-            float positions[] = new float[subVertices.length];
-            for (int i = 0; i < subVertices.length; i += 3) {
-                positions[i] = (float) subVertices[i + 1];
-                positions[i + 1] = (float) subVertices[i + 2];
-                positions[i + 2] = (float) subVertices[i + 0];
-            }
-
-            var subUVs = polygon.getAllUVs();
-            var uvs = new float[subUVs.length];
-            for (int i = 0; i < subUVs.length; i += 2) {
-                uvs[i] = (float) subUVs[i];
-                uvs[i + 1] = 1 - (float) subUVs[i + 1];
-            }
-
-            MeshPrimitiveBuilder meshPrimitiveBuilder = MeshPrimitiveBuilder.create();
-            meshPrimitiveBuilder.setIntIndicesAsShort(IntBuffer.wrap(faces));
-            meshPrimitiveBuilder.addPositions3D(FloatBuffer.wrap(positions));
-            meshPrimitiveBuilder.addTexCoords02D(FloatBuffer.wrap(uvs));
-
-            DefaultMeshPrimitiveModel meshPrimitiveModel = meshPrimitiveBuilder.build();
+            DefaultMeshPrimitiveModel meshPrimitiveModel = createMeshPrimitive(polygon);
             meshPrimitiveModel.setMaterialModel(defaultMaterialModel);
             meshModel.addMeshPrimitiveModel(meshPrimitiveModel);
         }
 
-        DefaultNodeModel nodeModel = new DefaultNodeModel();
         nodeModel.addMeshModel(meshModel);
-
-        DefaultSceneModel sceneModel = new DefaultSceneModel();
         sceneModel.addNode(nodeModel);
 
         return sceneModel;
@@ -129,66 +99,74 @@ public class GltfExporter {
             DefaultNodeModel nodeModel = new DefaultNodeModel();
             nodeModel.setName(boundary.getId());
 
+            DefaultMeshModel meshModel = new DefaultMeshModel();
             for (var polygon : boundary.getPolygons()) {
-                DefaultMeshModel meshModel = new DefaultMeshModel();
-
-                var polygonFaces = polygon.getFaces();
-                var faces = new int[polygonFaces.length / 2];
-                for (var i = 0; i < faces.length; i += 3) {
-                    faces[i] = polygonFaces[i * 2];
-                    faces[i + 1] = polygonFaces[i * 2 + 2];
-                    faces[i + 2] = polygonFaces[i * 2 + 4];
-                }
-
-                // 右手系Y-up
-                var subVertices = polygon.getAllVertices();
-                float positions[] = new float[subVertices.length];
-                for (int i = 0; i < subVertices.length; i += 3) {
-                    positions[i] = (float) subVertices[i + 1];
-                    positions[i + 1] = (float) subVertices[i + 2];
-                    positions[i + 2] = (float) subVertices[i + 0];
-                }
-
-                var subUVs = polygon.getAllUVs();
-                var uvs = new float[subUVs.length];
-                for (int i = 0; i < subUVs.length; i += 2) {
-                    uvs[i] = (float) subUVs[i];
-                    uvs[i + 1] = 1 - (float) subUVs[i + 1];
-                }
-
-                MeshPrimitiveBuilder meshPrimitiveBuilder = MeshPrimitiveBuilder.create();
-                meshPrimitiveBuilder.setIntIndicesAsShort(IntBuffer.wrap(faces));
-                meshPrimitiveBuilder.addPositions3D(FloatBuffer.wrap(positions));
-                meshPrimitiveBuilder.addTexCoords02D(FloatBuffer.wrap(uvs));
-
-                DefaultMeshPrimitiveModel meshPrimitiveModel = meshPrimitiveBuilder.build();
-                MaterialModelV2 materialModel = null;
-
-                var surfaceData = polygon.getSurfaceData();
-                if (surfaceData != null) {
-                    var material = surfaceData.getMaterial();
-                    if (material instanceof PhongMaterial) {
-                        PhongMaterial phongMaterial = (PhongMaterial) material;
-                        var url = phongMaterial.getDiffuseMap().getUrl();
-                        if (materialMap.containsKey(url)) {
-                            materialModel = materialMap.get(url);
-                        } else {
-                            materialModel = createMaterial(phongMaterial);
-                            materialMap.put(url, materialModel);
-                        }
-                    }
-                } else {
-                    materialModel = defaultMaterialModel;
-                }
-
-                meshPrimitiveModel.setMaterialModel(materialModel);
+                DefaultMeshPrimitiveModel meshPrimitiveModel = createMeshPrimitive(polygon);
+                meshPrimitiveModel.setMaterialModel(createOrGetMaterialModel(materialMap, polygon));
                 meshModel.addMeshPrimitiveModel(meshPrimitiveModel);
-                nodeModel.addMeshModel(meshModel);
             }
+
+            nodeModel.addMeshModel(meshModel);
             sceneModel.addNode(nodeModel);
         }
 
         return sceneModel;
+    }
+    
+    private static DefaultMeshPrimitiveModel createMeshPrimitive(org.plateau.citygmleditor.citymodel.geometry.Polygon polygon) {
+        var polygonFaces = polygon.getFaces();
+        var faces = new int[polygonFaces.length / 2];
+        for (var i = 0; i < faces.length; i += 3) {
+            faces[i] = polygonFaces[i * 2];
+            faces[i + 1] = polygonFaces[i * 2 + 2];
+            faces[i + 2] = polygonFaces[i * 2 + 4];
+        }
+
+        // 右手系Y-up
+        var subVertices = polygon.getAllVertices();
+        float positions[] = new float[subVertices.length];
+        for (int i = 0; i < subVertices.length; i += 3) {
+            positions[i] = (float) subVertices[i + 1];
+            positions[i + 1] = (float) subVertices[i + 2];
+            positions[i + 2] = (float) subVertices[i + 0];
+        }
+
+        var subUVs = polygon.getAllUVs();
+        var uvs = new float[subUVs.length];
+        for (int i = 0; i < subUVs.length; i += 2) {
+            uvs[i] = (float) subUVs[i];
+            uvs[i + 1] = 1 - (float) subUVs[i + 1];
+        }
+
+        MeshPrimitiveBuilder meshPrimitiveBuilder = MeshPrimitiveBuilder.create();
+        meshPrimitiveBuilder.setIntIndicesAsShort(IntBuffer.wrap(faces));
+        meshPrimitiveBuilder.addPositions3D(FloatBuffer.wrap(positions));
+        meshPrimitiveBuilder.addTexCoords02D(FloatBuffer.wrap(uvs));
+
+        DefaultMeshPrimitiveModel meshPrimitiveModel = meshPrimitiveBuilder.build();
+        return meshPrimitiveModel;
+    }
+
+    private static MaterialModelV2 createOrGetMaterialModel(Map<String, MaterialModelV2> materialMap, org.plateau.citygmleditor.citymodel.geometry.Polygon polygon) {
+        MaterialModelV2 materialModel = null;
+        var surfaceData = polygon.getSurfaceData();
+        if (surfaceData != null) {
+            var material = surfaceData.getMaterial();
+            if (material instanceof PhongMaterial) {
+                PhongMaterial phongMaterial = (PhongMaterial) material;
+                var url = phongMaterial.getDiffuseMap().getUrl();
+                if (materialMap.containsKey(url)) {
+                    materialModel = materialMap.get(url);
+                } else {
+                    materialModel = createMaterial(phongMaterial);
+                    materialMap.put(url, materialModel);
+                }
+            }
+        } else {
+            materialModel = defaultMaterialModel;
+        }
+
+        return materialModel;
     }
 
     private static MaterialModelV2 createMaterial(PhongMaterial material) {
