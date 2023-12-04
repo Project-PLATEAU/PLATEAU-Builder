@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </SplitMenuButton>
     <Button mnemonicParsing="false" onAction="#openGml" text="Import GML..."/>
     <Button mnemonicParsing="false" onAction="#export" text="Export..."/>
+    <Button mnemonicParsing="false" onAction="#openValidationWindow" text="Validate"/>
     <!--HBox.hgrow="ALWAYS"-->
     <Pane maxWidth="1.7976931348623157E308" prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS"/>
 

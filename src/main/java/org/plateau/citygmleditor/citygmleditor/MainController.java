@@ -43,7 +43,10 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
@@ -338,5 +341,13 @@ public class MainController implements Initializable {
         } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void openValidationWindow(ActionEvent event) throws IOException {
+        Stage newWindow = new Stage();
+        newWindow.setTitle("品質検査");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("validation.fxml"));
+        newWindow.setScene(new Scene(loader.load()));
+        newWindow.showAndWait();
     }
 }
