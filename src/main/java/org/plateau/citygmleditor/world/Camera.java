@@ -29,7 +29,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.plateau.citygmleditor.citygmleditor;
+package org.plateau.citygmleditor.world;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -47,16 +47,17 @@ import javafx.scene.shape.Box;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.event.EventHandler;
 import javafx.util.Duration;
+
+import org.plateau.citygmleditor.citygmleditor.*;
 
 /**
  * Class responsible for camera operation.
  * Rotate, move, zoom in/out, etc.
  */
-public class CameraController {
+public class Camera {
     private final PerspectiveCamera camera = new PerspectiveCamera(true);
     private final Rotate cameraXRotate = new Rotate(-20, 0, 0, 0, Rotate.X_AXIS);
     private final Rotate cameraYRotate = new Rotate(-20, 0, 0, 0, Rotate.Y_AXIS);
@@ -67,8 +68,8 @@ public class CameraController {
     private final Xform cameraXform2 = new Xform();
     private final Xform cameraXform3 = new Xform();
     private final double cameraDistance = 200;
+
     private double dragStartX, dragStartY, dragStartRotateX, dragStartRotateY;
-    private final UIManager uiManager = CityGMLEditorApp.getUIManager();
     private Rotate yUpRotate = new Rotate(0, 0, 0, 0, Rotate.X_AXIS);
     private double mousePosX;
     private double mousePosY;
@@ -77,9 +78,12 @@ public class CameraController {
     private double mouseDeltaX;
     private double mouseDeltaY;
 
+    private Light light;
+    private SceneContent sceneContent;
+
     private final EventHandler<MouseEvent> mouseEventHandler = event -> {
         double yFlip = 1.0;
-        if (uiManager.getYUp()) {
+        if (getYUp()) {
             yFlip = 1.0;
         } else {
             yFlip = -1.0;
@@ -120,13 +124,13 @@ public class CameraController {
                 cameraXform2.t.setY(cameraXform2.t.getY() + yFlip * mouseDeltaY * modifierFactor * modifier * 0.3); // -
             } else if (alt && event.isPrimaryButtonDown()) {
                 // When rotate mode is selected
-                if (uiManager.getRotateMode() == true) {
+                if (getRotateMode() == true) {
                     cameraXform.rx
                             .setAngle(cameraXform.rx.getAngle() + flip * mouseDeltaY * modifierFactor * modifier * 2.0); // -
                     cameraXform.rz.setAngle(
                             cameraXform.rz.getAngle() + yFlip * mouseDeltaX * modifierFactor * modifier * 2.0); // -
                     // When move mode is selected
-                } else if (uiManager.getMoveMode() == true) {
+                } else if (getMoveMode() == true) {
                     cameraXform2.t.setX(cameraXform2.t.getX() + flip * mouseDeltaX * modifierFactor * modifier * 0.3); // -
                     cameraXform2.t.setY(cameraXform2.t.getY() + yFlip * mouseDeltaY * modifierFactor * modifier * 0.3); // -
                 }
@@ -232,33 +236,62 @@ public class CameraController {
         }
     };
 
-    public CameraController() {
-        // CAMERA
-        camera.setNearClip(1.0); // TODO: Workaround as per RT-31255
-        camera.setFarClip(10000.0); // TODO: Workaround as per RT-31255
+    private SimpleBooleanProperty yUp = new SimpleBooleanProperty(false) {
+        @Override
+        protected void invalidated() {
+            if (get()) {
+                setYUpRotate(180);
+            } else {
+                setYUpRotate(0);
+            }
+        }
+    };
+    private SimpleBooleanProperty rotateMode = new SimpleBooleanProperty(true) {
+        @Override
+        protected void invalidated() {
+        }
+    };
 
-        camera.getTransforms().addAll(
-                yUpRotate,
-                cameraPosition,
-                cameraLookXRotate,
-                cameraLookZRotate);
+    private SimpleBooleanProperty moveMode = new SimpleBooleanProperty(false) {
+        @Override
+        protected void invalidated() {
+        }
+    };
 
-        cameraXform.getChildren().add(cameraXform2);
-        cameraXform2.getChildren().add(cameraXform3);
-        cameraXform3.getChildren().add(camera);
-        cameraPosition.setZ(-cameraDistance);
+    public SimpleBooleanProperty yUpProperty() {
+        return yUp;
+    }
 
-        SessionManager sessionManager = SessionManager.getSessionManager();
-        sessionManager.bind(cameraLookXRotate.angleProperty(), "cameraLookXRotate");
-        sessionManager.bind(cameraLookZRotate.angleProperty(), "cameraLookZRotate");
-        sessionManager.bind(cameraPosition.xProperty(), "cameraPosition.x");
-        sessionManager.bind(cameraPosition.yProperty(), "cameraPosition.y");
-        sessionManager.bind(cameraPosition.zProperty(), "cameraPosition.z");
-        sessionManager.bind(cameraXRotate.angleProperty(), "cameraXRotate");
-        sessionManager.bind(cameraYRotate.angleProperty(), "cameraYRotate");
-        sessionManager.bind(camera.nearClipProperty(), "cameraNearClip");
-        sessionManager.bind(camera.farClipProperty(), "cameraFarClip");
+    public SimpleBooleanProperty moveModeProperty() {
+        return moveMode;
+    }
 
+    public SimpleBooleanProperty rotateModeProperty() {
+        return rotateMode;
+    }
+
+    public EventHandler<MouseEvent> getMouseEventHandler() {
+        return mouseEventHandler;
+    }
+
+    public EventHandler<KeyEvent> getKeyEventHandler() {
+        return keyEventHandler;
+    }
+
+    public EventHandler<ScrollEvent> getScrollEventHandler() {
+        return scrollEventHandler;
+    }
+
+    public EventHandler<ZoomEvent> getZoomEventHandler() {
+        return zoomEventHandler;
+    }
+
+    public Xform getCameraXform() {
+        return cameraXform;
+    }
+
+    public boolean getYUp() {
+        return yUp.get();
     }
 
     public PerspectiveCamera getCamera() {
@@ -285,27 +318,53 @@ public class CameraController {
         return cameraLookZRotate;
     }
 
+    public boolean getMoveMode() {
+        return moveMode.get();
+    }
+
+    public boolean getRotateMode() {
+        return rotateMode.get();
+    }
+
+    public void setSceneContent() {
+        this.sceneContent = CityGMLEditorApp.getSceneContent();
+    }
+
     public void setYUpRotate(int rate) {
         yUpRotate.setAngle(rate);
     }
 
-    public Xform getCameraXform() {
-        return cameraXform;
+    public void setYUp(boolean yUp) {
+        this.yUp.set(yUp);
     }
 
-    public EventHandler<MouseEvent> getMouseEventHandler() {
-        return mouseEventHandler;
-    }
+    public Camera() {
+        this.light = CityGMLEditorApp.getLight();
+        // CAMERA
+        camera.setNearClip(1.0); // TODO: Workaround as per RT-31255
+        camera.setFarClip(10000.0); // TODO: Workaround as per RT-31255
 
-    public EventHandler<KeyEvent> getKeyEventHandler() {
-        return keyEventHandler;
-    }
+        camera.getTransforms().addAll(
+                yUpRotate,
+                cameraPosition,
+                cameraLookXRotate,
+                cameraLookZRotate);
 
-    public EventHandler<ScrollEvent> getScrollEventHandler() {
-        return scrollEventHandler;
-    }
+        cameraXform.getChildren().add(cameraXform2);
+        cameraXform2.getChildren().add(cameraXform3);
+        cameraXform3.getChildren().add(camera);
+        cameraPosition.setZ(-cameraDistance);
 
-    public EventHandler<ZoomEvent> getZoomEventHandler() {
-        return zoomEventHandler;
+        SessionManager sessionManager = SessionManager.getSessionManager();
+        sessionManager.bind(cameraLookXRotate.angleProperty(), "cameraLookXRotate");
+        sessionManager.bind(cameraLookZRotate.angleProperty(), "cameraLookZRotate");
+        sessionManager.bind(cameraPosition.xProperty(), "cameraPosition.x");
+        sessionManager.bind(cameraPosition.yProperty(), "cameraPosition.y");
+        sessionManager.bind(cameraPosition.zProperty(), "cameraPosition.z");
+        sessionManager.bind(cameraXRotate.angleProperty(), "cameraXRotate");
+        sessionManager.bind(cameraYRotate.angleProperty(), "cameraYRotate");
+        sessionManager.bind(camera.nearClipProperty(), "cameraNearClip");
+        sessionManager.bind(camera.farClipProperty(), "cameraFarClip");
+
     }
 }
