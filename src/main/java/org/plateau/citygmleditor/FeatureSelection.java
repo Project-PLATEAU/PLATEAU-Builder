@@ -9,6 +9,8 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.DrawMode;
 import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.citymodel.Building;
+import org.plateau.citygmleditor.world.World;
+
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
@@ -38,7 +40,7 @@ public class FeatureSelection {
         outLine.setDrawMode(DrawMode.LINE);
         outLine.setDepthTest(DepthTest.DISABLE);
 
-        var node = (Group) CityGMLEditorApp.getUIManager().getRoot3D();
+        var node = (Group) World.getRoot3D();
         node.getChildren().add(outLine);
 
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {

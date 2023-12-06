@@ -35,6 +35,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ScrollBar;
+import org.plateau.citygmleditor.world.*;
 
 /**
  * Controller class for settings panel
@@ -43,16 +44,15 @@ public class NavigationController implements Initializable {
     // public FourWayNavControl eyeNav;
     public ScrollBar zoomBar;
     // public FourWayNavControl camNav;
-    private CameraController cameraController = CityGMLEditorApp.getCameraController();
-    private UIManager uiManager = CityGMLEditorApp.getUIManager();
+    private Camera camera = CityGMLEditorApp.getCamera();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         zoomBar.setMin(-100);
         zoomBar.setMax(0);
-        zoomBar.setValue(cameraController.getCameraPosition().getZ());
+        zoomBar.setValue(camera.getCameraPosition().getZ());
         zoomBar.setVisibleAmount(5);
-        cameraController.getCameraPosition().zProperty().bindBidirectional(zoomBar.valueProperty());
+        camera.getCameraPosition().zProperty().bindBidirectional(zoomBar.valueProperty());
         // eyeNav.setListener(new FourWayNavControl.FourWayListener() {
         // @Override public void navigateStep(Side direction, double amount) {
         // switch (direction) {

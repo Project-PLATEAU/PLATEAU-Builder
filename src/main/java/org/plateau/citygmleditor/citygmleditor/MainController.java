@@ -59,6 +59,8 @@ import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.exporters.TextureExporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
+import org.plateau.citygmleditor.world.World;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -102,6 +104,7 @@ import javafx.scene.control.ButtonType;
 import java.nio.file.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import org.plateau.citygmleditor.world.*;
 
 /**
  * Controller class for main fxml file.
@@ -117,8 +120,7 @@ public class MainController implements Initializable {
     private int nodeCount = 0;
     private int meshCount = 0;
     private int triangleCount = 0;
-    private final CameraController cameraController = CityGMLEditorApp.getCameraController();
-    private final UIManager uiManager = CityGMLEditorApp.getUIManager();
+    private final SceneContent sceneContent = CityGMLEditorApp.getSceneContent();
     private File loadedPath;
     private String loadedURL;
     private String[] supportedFormatRegex;
@@ -134,7 +136,7 @@ public class MainController implements Initializable {
             // CREATE SETTINGS PANEL
             sidebar = FXMLLoader.load(MainController.class.getResource("sidebar.fxml"));
             // SETUP SPLIT PANE
-            splitPane.getItems().addAll(new SubSceneResizer(uiManager.subSceneProperty(), navigationPanel),
+            splitPane.getItems().addAll(new SubSceneResizer(sceneContent.subSceneProperty(), navigationPanel),
                     sidebar);
             splitPane.getDividers().get(0).setPosition(1);
 
@@ -148,7 +150,7 @@ public class MainController implements Initializable {
         for (int i = 0; i < supportedFormatRegex.length; i++) {
             supportedFormatRegex[i] = "." + supportedFormatRegex[i].replaceAll("\\.", "\\.");
         }
-        uiManager.getSubScene().setOnDragOver(event -> {
+        sceneContent.getSubScene().setOnDragOver(event -> {
             Dragboard db = event.getDragboard();
             if (db.hasFiles()) {
                 boolean hasSupportedFile = false;
@@ -165,7 +167,7 @@ public class MainController implements Initializable {
             }
             event.consume();
         });
-        uiManager.getSubScene().setOnDragDropped(event -> {
+        sceneContent.getSubScene().setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             boolean success = false;
             if (db.hasFiles()) {
@@ -232,7 +234,7 @@ public class MainController implements Initializable {
         sessionManager.getProperties().setProperty(CityGMLEditorApp.FILE_URL_PROPERTY, fileUrl);
         try {
             var root = GmlImporter.loadGml(fileUrl);
-            uiManager.setContent(root);
+            sceneContent.setContent(root);
         } catch (Exception ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -281,7 +283,7 @@ public class MainController implements Initializable {
         try {
             Node root = Importer3D.load(
                     fileUrl, loadAsPolygonsCheckBox.isSelected());
-            uiManager.setContent(root);
+            sceneContent.setContent(root);
         } catch (IOException ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -292,8 +294,8 @@ public class MainController implements Initializable {
         nodeCount = 0;
         meshCount = 0;
         triangleCount = 0;
-        updateCount(uiManager.getRoot3D());
-        Node content = uiManager.getContent();
+        updateCount(World.getRoot3D());
+        Node content = sceneContent.getContent();
         final Bounds bounds = content == null ? new BoundingBox(0, 0, 0, 0) : content.getBoundsInLocal();
         status.setText(
                 String.format("Nodes [%d] :: Meshes [%d] :: Triangles [%d] :: " +
@@ -403,7 +405,7 @@ public class MainController implements Initializable {
             System.out.println(e);
         }
 
-        var content = (Group) CityGMLEditorApp.getUIManager().getContent();
+        var content = (Group) sceneContent.getContent();
         var cityModelNode = content.getChildren().get(0);
 
         if (cityModelNode == null)
