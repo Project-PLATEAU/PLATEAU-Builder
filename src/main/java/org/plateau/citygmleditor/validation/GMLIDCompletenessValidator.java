@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 public class GMLIDCompletenessValidator implements IValidator {
-    public List<ValidationResultMessage> validate(CityModel cityModel) {
+    public List<ValidationResultMessage> validate(CityModel cityModel, String pathFile) {
         Set<String> gmlIDs = new HashSet<>();
         List<ValidationResultMessage> messages = new ArrayList<>();
 

@@ -1,17 +1,19 @@
 package org.plateau.citygmleditor.utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Logger;
+
 
 
 public class XmlUtil {
@@ -28,17 +30,15 @@ public class XmlUtil {
    * @throws IOException
    * @throws SAXException
    */
-  public static List<Node> getAllNodeFromXmlFile(File file, String tagName)
-      throws ParserConfigurationException, IOException, SAXException {
+  public static NodeList getAllTagFromXmlFile(File file, String tagName) throws ParserConfigurationException, IOException, SAXException {
     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     try {
       dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       DocumentBuilder db = dbf.newDocumentBuilder();
       Document doc = db.parse(file);
       doc.getDocumentElement().normalize();
-      var resultList = new ArrayList<Node>();
-      recursiveFindNodeByTagName(doc, resultList, tagName);
-      return resultList;
+      return doc.getElementsByTagName(tagName);
+
     } catch (ParserConfigurationException | SAXException | IOException e) {
       logger.severe("Error while parsing xml file");
       throw e;
