@@ -28,8 +28,14 @@ public class GMLIDCompletenessValidator implements IValidator {
 
             var building = (Building)cityObject;
 
+            if (building.getId() == null || building.getId().isEmpty()) {
+                messages.add(new ValidationResultMessage(
+                        ValidationResultMessageType.Error,
+                        String.format("Exists GmlId null\n")));
+            }
+
             var id = building.getId();
-            if (gmlIDs.contains(id)) {
+            if (gmlIDs.contains(id) && id != "") {
                 messages.add(new ValidationResultMessage(
                     ValidationResultMessageType.Error,
                     String.format("%sは重複して使用されています。\n", id)));
