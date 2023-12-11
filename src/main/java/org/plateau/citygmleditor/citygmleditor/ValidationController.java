@@ -4,10 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import org.plateau.citygmleditor.validation.GMLIDCompletenessValidator;
-import org.plateau.citygmleditor.validation.IValidator;
-import org.plateau.citygmleditor.validation.ValidationResultMessage;
-import org.plateau.citygmleditor.validation.ValidationResultMessageType;
+import org.plateau.citygmleditor.validation.*;
 import org.plateau.citygmleditor.world.World;
 
 import javafx.event.ActionEvent;
@@ -58,6 +55,7 @@ public class ValidationController implements Initializable {
         List<IValidator> validators = new ArrayList<IValidator>() {
             {
                 add(new GMLIDCompletenessValidator());
+                add(new L05CompletenessValidator());
             }
         };
 
