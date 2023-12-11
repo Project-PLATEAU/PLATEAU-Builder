@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class L05CompletenessValidator implements IValidator{
     @Override
-    public List<ValidationResultMessage> validate(CityModel cityModel, String pathFile) {
+    public List<ValidationResultMessage> validate(CityModel cityModel) {
         List<ValidationResultMessage> messages = new ArrayList<>();
 
         if (Objects.isNull(cityModel)) {

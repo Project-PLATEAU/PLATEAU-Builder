@@ -4,6 +4,7 @@ import javafx.geometry.Point3D;
 import org.citygml4j.model.citygml.core.CityModel;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.XmlUtil;
+import org.plateau.citygmleditor.world.World;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -55,9 +56,9 @@ public class L07_Validate implements IValidator {
         }
     }
 
-    public List<ValidationResultMessage> validate(CityModel cityModel, String pathGmlFile) throws ParserConfigurationException, IOException, SAXException {
+    public List<ValidationResultMessage> validate(CityModel cityModel) throws ParserConfigurationException, IOException, SAXException {
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
-        File file = new File(pathGmlFile);
+        File file = new File(World.getActiveInstance().getCityModel().getGmlPath());
         NodeList buildings = XmlUtil.getAllTagFromXmlFile(file, TagName.BUILDING);
 
         for (int i = 0; i < buildings.getLength(); i++) {

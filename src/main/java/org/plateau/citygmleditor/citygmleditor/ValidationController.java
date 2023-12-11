@@ -41,7 +41,7 @@ public class ValidationController implements Initializable {
         resultTextContainer.getChildren().add(text);
     }
 
-    public void execute(ActionEvent event) throws IOException, ParserConfigurationException, SAXException {
+    public void execute(ActionEvent event) throws ParserConfigurationException, IOException, SAXException {
         var cityModelView = World.getActiveInstance().getCityModel();
         if (cityModelView == null || cityModelView.getGmlObject() == null) {
             showMessage(new ValidationResultMessage(
@@ -59,6 +59,7 @@ public class ValidationController implements Initializable {
             {
                 add(new GMLIDCompletenessValidator());
                 add(new L05CompletenessValidator());
+                add(new L06CompletenessValidator());
                 add(new L07_Validate());
             }
         };
@@ -66,9 +67,8 @@ public class ValidationController implements Initializable {
         var errorCount = 0;
         var warningCount = 0;
 
-        String pathGmlFile = cityModelView.getGmlPath();
         for (var validator : validators) {
-            var messages = validator.validate(cityModel, pathGmlFile);
+            var messages = validator.validate(cityModel);
 
             for (var message : messages) {
                 showMessage(message);
