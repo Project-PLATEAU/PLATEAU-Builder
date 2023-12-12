@@ -92,6 +92,15 @@ public class GeometryFactory extends CityGMLFactory {
         return solid;
     }
 
+    public LOD3Solid createLOD3Solid(AbstractBuilding gmlObject) {
+        if (gmlObject.getLod3Solid() == null)
+            return null;
+
+        var solid = new LOD3Solid(gmlObject.getLod3Solid().getObject());
+
+        return solid;
+    }
+
     public Polygon createPolygon(org.citygml4j.model.gml.geometry.primitives.Polygon gmlObject) {
         var polygon = new Polygon(gmlObject);
 

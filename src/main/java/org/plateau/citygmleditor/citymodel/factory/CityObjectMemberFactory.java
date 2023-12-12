@@ -30,6 +30,10 @@ public class CityObjectMemberFactory extends CityGMLFactory {
 //            if (num > 16)
 //                lod2Solid.setVisible(false);
         }
+        var lod3Solid = geometryFactory.createLOD3Solid(gmlObject);
+        if (lod3Solid != null) {
+            building.setLOD3Solid(lod3Solid);
+        }
 
         return building;
     }

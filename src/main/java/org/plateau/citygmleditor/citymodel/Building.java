@@ -8,12 +8,14 @@ import org.plateau.citygmleditor.citymodel.factory.CityGMLFactory;
 import org.citygml4j.model.gml.geometry.primitives.*;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1Solid;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2Solid;
+import org.plateau.citygmleditor.citymodel.geometry.LOD3Solid;
 
 public class Building extends Parent {
     private AbstractBuilding gmlObject;
 
     private LOD1Solid lod1Solid;
     private LOD2Solid lod2Solid;
+    private LOD3Solid lod3Solid;
 
     public Building(AbstractBuilding gmlObject) {
         this.gmlObject = gmlObject;
@@ -48,5 +50,20 @@ public class Building extends Parent {
 
     public LOD2Solid getLOD2Solid() {
         return this.lod2Solid;
+    }
+
+    public void setLOD3Solid(LOD3Solid solid) {
+        if (solid == null)
+            return;
+
+        if (this.lod3Solid == null) {
+            this.getChildren().remove(this.lod3Solid);
+        }
+        this.lod3Solid = solid;
+        this.getChildren().add(solid);
+    }
+
+    public LOD3Solid getLOD3Solid() {
+        return this.lod3Solid;
     }
 }
