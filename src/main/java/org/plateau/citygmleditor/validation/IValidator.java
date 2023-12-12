@@ -8,5 +8,5 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IValidator {
-    List<ValidationResultMessage> validate(CityModel cityModel, String pathGmlFile) throws IOException, SAXException, ParserConfigurationException;
+    List<ValidationResultMessage> validate(CityModel cityModel) throws ParserConfigurationException, IOException, SAXException;
 }
