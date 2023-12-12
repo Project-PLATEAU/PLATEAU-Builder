@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 
-public class L07_Validate implements IValidator {
+public class L07CompletenessValidator implements IValidator {
     public static Logger logger = Logger.getLogger(XmlUtil.class.getName());
 
     static class BuildingInvalid {
