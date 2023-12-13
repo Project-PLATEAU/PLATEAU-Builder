@@ -64,4 +64,30 @@ public class XmlUtil {
       }
     }
   }
+
+  public static Node findNearestParentByTagAndAttribute(Node node, String tagName, String attribute) {
+    Node parentNode = node.getParentNode();
+    if (parentNode == null) {
+      return null;
+    } else {
+      if (parentNode.getNodeName().equals(tagName) && parentNode.getAttributes().getNamedItem(attribute) != null) {
+        return parentNode;
+      } else {
+        return findNearestParentByTagAndAttribute(parentNode, tagName, attribute);
+      }
+    }
+  }
+
+  public static Node findNearestParentByAttribute(Node node, String attribute) {
+    Node parentNode = node.getParentNode();
+    if (parentNode == null) {
+      return null;
+    } else {
+      if (parentNode.getAttributes().getNamedItem(attribute) != null) {
+        return parentNode;
+      } else {
+        return findNearestParentByAttribute(parentNode, attribute);
+      }
+    }
+  }
 }
