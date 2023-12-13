@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.utils;
 
+import javafx.geometry.Point3D;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
