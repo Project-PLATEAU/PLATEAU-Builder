@@ -55,10 +55,11 @@ public class GeometryFactory extends CityGMLFactory {
 
         var solid = new LOD2Solid(gmlObject.getLod2Solid().getObject());
 
-        var polygons = new ArrayList<Polygon>();
         var boundaries = new ArrayList<BoundarySurface>();
 
         for (var boundedBySurface : gmlObject.getBoundedBySurface()) {
+            if (boundedBySurface.getBoundarySurface().getLod2MultiSurface() == null)
+                continue;
             var boundary = new BoundarySurface(boundedBySurface.getBoundarySurface());
             boundaries.add(boundary);
 
@@ -69,7 +70,6 @@ public class GeometryFactory extends CityGMLFactory {
                     continue;
 
                 var polygonObject = createPolygon(polygon);
-                polygons.add(polygonObject);
                 boundaryPolygons.add(polygonObject);
             }
 
@@ -97,6 +97,63 @@ public class GeometryFactory extends CityGMLFactory {
             return null;
 
         var solid = new LOD3Solid(gmlObject.getLod3Solid().getObject());
+
+        var boundaries = new ArrayList<BoundarySurface>();
+
+        // <bldg:boundedBy>
+        for (var boundedBySurface : gmlObject.getBoundedBySurface()) {
+            var boundarySurface = boundedBySurface.getBoundarySurface();
+
+            // <bldg:lod3MultiSurface>
+            if (boundarySurface.getLod3MultiSurface() != null) {
+                var boundary = new BoundarySurface(boundarySurface);
+                boundaries.add(boundary);
+
+                var boundaryPolygons = new ArrayList<Polygon>();
+                for (var surfaceMember : boundarySurface.getLod3MultiSurface().getMultiSurface().getSurfaceMember()) {
+                    var polygon = (org.citygml4j.model.gml.geometry.primitives.Polygon) surfaceMember.getSurface();
+                    if (polygon == null)
+                        continue;
+
+                    var polygonObject = createPolygon(polygon);
+                    boundaryPolygons.add(polygonObject);
+                }
+
+                boundary.setPolygons(boundaryPolygons);
+            }
+            // <bldg:opening>
+            if (boundarySurface.getOpening() != null) {
+                var boundary = new BoundarySurface(boundarySurface);
+                boundaries.add(boundary);
+
+                var boundaryPolygons = new ArrayList<Polygon>();
+                for (var opening : boundarySurface.getOpening()) {
+                    for (var surfaceMember : opening.getOpening().getLod3MultiSurface().getMultiSurface().getSurfaceMember()) {
+                        var polygon = (org.citygml4j.model.gml.geometry.primitives.Polygon) surfaceMember.getSurface();
+                        if (polygon == null)
+                            continue;
+
+                        var polygonObject = createPolygon(polygon);
+                        boundaryPolygons.add(polygonObject);
+                    }   
+                }
+
+                boundary.setPolygons(boundaryPolygons);
+            }
+        }
+        solid.setBoundaries(boundaries);
+
+        var polygonsMap = solid.getSurfaceDataPolygonsMap();
+        for (Map.Entry<SurfaceData, ArrayList<Polygon>> entry : polygonsMap.entrySet()) {
+            var meshView = new MeshView();
+            meshView.setMesh(createTriangleMesh(entry.getValue()));
+            if (entry.getKey() == null) {
+                meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
+            } else {
+                meshView.setMaterial(entry.getKey().getMaterial());
+            }
+            solid.addMeshView(meshView);
+        }
 
         return solid;
     }

@@ -21,7 +21,8 @@ public class CityObjectMemberFactory extends CityGMLFactory {
         building.setLOD1Solid(lod1Solid);
         var lod2Solid = geometryFactory.createLOD2Solid(gmlObject);
         if (lod2Solid != null) {
-            lod1Solid.setVisible(false);
+            if(lod1Solid != null)
+                lod1Solid.setVisible(false);
 
             building.setLOD2Solid(lod2Solid);
 
@@ -32,6 +33,10 @@ public class CityObjectMemberFactory extends CityGMLFactory {
         }
         var lod3Solid = geometryFactory.createLOD3Solid(gmlObject);
         if (lod3Solid != null) {
+            if(lod1Solid != null)
+                lod1Solid.setVisible(false);
+            if(lod2Solid != null)
+                lod2Solid.setVisible(false);
             building.setLOD3Solid(lod3Solid);
         }
 
