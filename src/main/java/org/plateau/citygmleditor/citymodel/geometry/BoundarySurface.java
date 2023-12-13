@@ -19,4 +19,12 @@ public class BoundarySurface {
     public void setPolygons(ArrayList<Polygon> polygons) {
         this.polygons = polygons;
     }
+
+    /**
+     * Get the id of the {@link AbstractBoundarySurface}
+     * @return the id
+     */
+    public String getId() {
+        return gmlObject.getId();
+    }
 }
