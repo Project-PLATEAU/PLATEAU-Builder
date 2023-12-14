@@ -6,8 +6,8 @@ import org.citygml4j.model.citygml.core.CityModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static org.plateau.citygmleditor.constant.TagName.srsNameURI;
 
 public class L05CompletenessValidator implements IValidator{
     @Override
@@ -15,8 +15,7 @@ public class L05CompletenessValidator implements IValidator{
         List<ValidationResultMessage> messages = new ArrayList<>();
 
         if (Objects.isNull(cityModel)) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                    "The model Null"));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "The model Null"));
             return messages;
         }
 
@@ -27,21 +26,7 @@ public class L05CompletenessValidator implements IValidator{
                 return messages;
             }
 
-            if (uri.contains("6697") || uri.contains("6668")) {
-                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                        "The spatial reference system specified by srsName is neither 6697 nor 6668"));
-                return messages;
-            }
-
-            /*
-            - Regex check standard Uri
-            - Start by "http://", "https://" or "ftp://"
-            - No 1 character is blank, "/", "$", ".", "?", or "#"
-             */
-            Pattern p = Pattern.compile("^(https?|ftp):\\/\\/[^\\s\\/$.?#].[^\\s]*$");
-            Matcher m = p.matcher(uri);
-
-            if (!m.matches()) {
+            if (uri.equals(srsNameURI)) {
                 messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "Url error!"));
             }
 
