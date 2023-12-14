@@ -3,7 +3,11 @@ package org.plateau.citygmleditor.validation;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import javafx.geometry.Point3D;
 import javafx.util.Pair;
@@ -28,15 +32,13 @@ public class L08CompletenessValidator implements IValidator {
 
     File file = new File(World.getActiveInstance().getCityModel().getGmlPath());
     NodeList lineStringNodes = XmlUtil.getAllTagFromXmlFile(file, TagName.LINESTRING);
+    Map<Node, Set<Node>> buildingWithErrorLineString = new HashMap<>();
 
     for (int i = 0; i < lineStringNodes.getLength(); i++) {
       Node lineStringNode = lineStringNodes.item(i);
-      Element lineStringElement = (Element) lineStringNode;
-      String[] posString = lineStringElement.getElementsByTagName(TagName.POSLIST).item(0).getTextContent().split(" ");
-      // Convert string to 3d points
-      List<Point3D> points = get3dPoints(posString);
-      // Convert 3d points to line segments
-      List<LineSegment3D> lineSegments = getLineSegments(points);
+      Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(lineStringNode, TagName.BUILDING, TagName.GML_ID);
+
+      List<LineSegment3D> lineSegments = getLineSegments(lineStringNode);
 
       // If there is only 1 line segment, there is no intersection
       if (lineSegments.size() >= 2) {
@@ -48,16 +50,32 @@ public class L08CompletenessValidator implements IValidator {
             // Check if 2 line segments are intersected
             // if j == k-1, 2 line segments are continuous
             if (isLineSegmentsIntersect(first.getStart(), first.getEnd(), second.getStart(), second.getEnd(), j == k-1)) {
-              messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "Line segments are intersected"));
-              // Return if there is an error
-              return messages;
+              // Update error list of building
+              Set<Node> errorList = buildingWithErrorLineString.getOrDefault(buildingNode, new HashSet<>());
+              errorList.add(lineStringNode);
+              buildingWithErrorLineString.put(buildingNode, errorList);
             }
           }
         }
       }
     }
 
+    buildingWithErrorLineString.forEach((buildingNode, lineStringNodesWithError) -> {
+      String gmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
+      var msg = String.format("Building which gml:id=\"%s\" has %s <gml:LineString> invalid", gmlId, lineStringNodesWithError.size());
+      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, msg));
+    });
+
     return messages;
+  }
+
+  private List<LineSegment3D> getLineSegments(Node lineStringNode) {
+    Element lineStringElement = (Element) lineStringNode;
+    String[] posString = lineStringElement.getElementsByTagName(TagName.POSLIST).item(0).getTextContent().split(" ");
+    // Convert string to 3d points
+    List<Point3D> points = get3dPoints(posString);
+    // Convert 3d points to line segments
+    return getLineSegments(points);
   }
 
   private List<LineSegment3D> getLineSegments(List<Point3D> points) {
