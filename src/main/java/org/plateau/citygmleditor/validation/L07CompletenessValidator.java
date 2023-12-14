@@ -3,6 +3,8 @@ package org.plateau.citygmleditor.validation;
 import javafx.geometry.Point3D;
 import org.citygml4j.model.citygml.core.CityModel;
 import org.plateau.citygmleditor.constant.TagName;
+import org.plateau.citygmleditor.utils.CollectionUtil;
+import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.world.World;
 import org.w3c.dom.Element;
@@ -14,12 +16,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
 
-public class L07_Validate implements IValidator {
+public class L07CompletenessValidator implements IValidator {
     public static Logger logger = Logger.getLogger(XmlUtil.class.getName());
 
     static class BuildingInvalid {
@@ -72,27 +73,24 @@ public class L07_Validate implements IValidator {
             NodeList tagLineStrings = building.getElementsByTagName(TagName.LINEARRING);
             List<String> lineStringIDvalids = this.getListTagIDInvalid(tagLineStrings);
 
-            if (collectionEmpty(linearRingIDInvalids) && collectionEmpty(lineStringIDvalids)) continue;
+            if (CollectionUtil.collectionEmpty(linearRingIDInvalids) && CollectionUtil.collectionEmpty(lineStringIDvalids))
+                continue;
             BuildingInvalid buildingInvalid = new BuildingInvalid();
             buildingInvalid.setID(buildingID);
-            if (!collectionEmpty(linearRingIDInvalids)) {
+            if (!CollectionUtil.collectionEmpty(linearRingIDInvalids)) {
                 buildingInvalid.setLinearRings(linearRingIDInvalids);
             }
-            if (!collectionEmpty(lineStringIDvalids)) {
+            if (!CollectionUtil.collectionEmpty(lineStringIDvalids)) {
                 buildingInvalid.setLineStrings(lineStringIDvalids);
             }
             buildingInvalids.add(buildingInvalid);
         }
 
         List<ValidationResultMessage> messages = new ArrayList<>();
-        if (collectionEmpty(buildingInvalids)) return messages;
+        if (CollectionUtil.collectionEmpty(buildingInvalids)) return messages;
         messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("%sは重複して使用されています。\n", buildingInvalids)));
 
         return messages;
-    }
-
-    public boolean collectionEmpty(Collection collection) {
-        return collection == null || collection.isEmpty();
     }
 
     private List<String> getListTagIDInvalid(NodeList tags) {
@@ -107,7 +105,7 @@ public class L07_Validate implements IValidator {
             // split posList into points
             List<Point3D> point3Ds = new ArrayList<>();
             try {
-                point3Ds = this.get3Dpoints(posString);
+                point3Ds = ThreeDUtil.createListPoint(posString);
             } catch (RuntimeException e) {
                 String attribute = tagElement.getAttribute(TagName.GML_ID);
                 tagInvalids.add(attribute);
@@ -121,26 +119,6 @@ public class L07_Validate implements IValidator {
         }
 
         return tagInvalids;
-    }
-
-    private List<Point3D> get3Dpoints(String[] posString) {
-        int length = posString.length;
-        if (length == 0 || length % 3 != 0) throw new RuntimeException("Invalid String");
-
-        List<Point3D> point3DS = new ArrayList<>();
-        for (int i = 0; i <= length - 3; ) {
-            try {
-                double x = Double.parseDouble(posString[i++]);
-                double y = Double.parseDouble(posString[i++]);
-                double z = Double.parseDouble(posString[i++]);
-                Point3D point = new Point3D(x, y, z);
-                point3DS.add(point);
-            } catch (NumberFormatException e) {
-                logger.severe("Error when parse from string to double");
-                throw new RuntimeException("Invalid String");
-            }
-        }
-        return point3DS;
     }
 
     private boolean isListPointValid(List<Point3D> points) {

@@ -60,8 +60,9 @@ public class ValidationController implements Initializable {
                 add(new GMLIDCompletenessValidator());
                 add(new L05CompletenessValidator());
                 add(new L06CompletenessValidator());
-                add(new L07_Validate());
+                add(new L07CompletenessValidator());
                 add(new L08CompletenessValidator());
+                add(new L11CompletenessValidator());
             }
         };
 
