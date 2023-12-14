@@ -1,6 +1,9 @@
 package org.plateau.citygmleditor.utils;
 
 import javafx.geometry.Point3D;
+import org.plateau.citygmleditor.geometry.GeoCoordinate;
+import org.plateau.citygmleditor.utils3d.geom.Vec3f;
+import org.plateau.citygmleditor.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +13,6 @@ public class ThreeDUtil {
     public static Logger logger = Logger.getLogger(ThreeDUtil.class.getName());
 
     public static List<Point3D> createListPoint(String[] posString) {
-
         int length = posString.length;
         if (length == 0 || length % 3 != 0) throw new RuntimeException("Invalid String");
 
@@ -28,5 +30,21 @@ public class ThreeDUtil {
             }
         }
         return point3DS;
+    }
+
+    public static Vec3f convertGeoToCalculateDistance(Point3D point) {
+        return World.getActiveInstance().getGeoReference()
+                .Project(new GeoCoordinate(point.getX(), point.getY(), point.getZ()));
+    }
+
+    public static double distance(Point3D input1, Point3D input2) {
+        Vec3f point1 = convertGeoToCalculateDistance(input1);
+        Vec3f point2 = convertGeoToCalculateDistance(input2);
+        point2.sub(point1);
+
+        double x = point2.x;
+        double y = point2.y;
+        double z = point2.z;
+        return Math.sqrt(x * x + y * y + z * z);
     }
 }
