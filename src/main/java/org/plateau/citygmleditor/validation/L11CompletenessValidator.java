@@ -172,6 +172,10 @@ public class L11CompletenessValidator implements IValidator {
         return true;
     }
 
+    /**
+     * The equation of the plane is 'Ax + By + Cz + D = 0'
+     * Get Coefficients of the equation (A,B,C,D)
+     */
     private double[] findPlaneEquation(Point3D point1, Point3D point2, Point3D point3) {
         Point3D vector12 = point2.subtract(point1);
         Point3D vector23 = point3.subtract(point2);
@@ -183,7 +187,6 @@ public class L11CompletenessValidator implements IValidator {
 
         Vec3f normalVector = new Vec3f((float) xNormalVector, (float) yNormalVector, (float) zNormalVector);
         normalVector.normalize();
-        // The equation of the plane is 'Ax + By + Cz + D = 0'
         // Coefficient A
         planeEquation[0] = normalVector.x;
         // Coefficient B
