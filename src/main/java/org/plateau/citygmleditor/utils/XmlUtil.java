@@ -1,6 +1,7 @@
 package org.plateau.citygmleditor.utils;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -11,6 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -89,5 +91,21 @@ public class XmlUtil {
         return findNearestParentByAttribute(parentNode, attribute);
       }
     }
+  }
+
+  public static List<Node> getTagsByRegex(String regex, Node tagInput) {
+    List<Node> result = new ArrayList<>();
+    Element element = (Element) tagInput;
+    NodeList allTags = element.getElementsByTagName("*");
+
+    for (int i = 0; i < allTags.getLength(); i++) {
+      Node tag = allTags.item(i);
+      String tagName = tag.getNodeName();
+      // Check if the name tag matches the regular expression
+      if (tagName.matches(regex)) {
+        result.add(tag);
+      }
+    }
+    return result;
   }
 }

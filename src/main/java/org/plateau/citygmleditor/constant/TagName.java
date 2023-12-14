@@ -8,4 +8,6 @@ public interface TagName {
     String POSLIST = "gml:posList";
 
     String GML_ID = "gml:id";
+
+    String POLYGON = "gml:Polygon";
 }
