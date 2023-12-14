@@ -60,9 +60,8 @@ public class XmlUtil {
         var childNode = childNodes.item(i);
         if (childNode.getNodeName().equals(tagName)) {
           resultList.add(childNode);
-        } else {
-          recursiveFindNodeByTagName(childNode, resultList, tagName);
         }
+        recursiveFindNodeByTagName(childNode, resultList, tagName);
       }
     }
   }
