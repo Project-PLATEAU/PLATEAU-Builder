@@ -107,4 +107,17 @@ public class XmlUtil {
     }
     return result;
   }
+  
+  public static void recursiveFindNodeByAttribute(Node node, List<Node> resultList, String attribute) {
+    if (node.hasChildNodes()) {
+      NodeList childNodes = node.getChildNodes();
+      for (int i = 0; i < childNodes.getLength(); i++) {
+        var childNode = childNodes.item(i);
+        if (childNode.getAttributes() != null && childNode.getAttributes().getNamedItem(attribute) != null) {
+          resultList.add(childNode);
+        }
+        recursiveFindNodeByAttribute(childNode, resultList, attribute);
+      }
+    }
+  }
 }
