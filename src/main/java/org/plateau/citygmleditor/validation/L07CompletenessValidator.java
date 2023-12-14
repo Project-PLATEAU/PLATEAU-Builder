@@ -17,12 +17,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 
 public class L07CompletenessValidator implements IValidator {
-    public static Logger logger = Logger.getLogger(XmlUtil.class.getName());
-
     static class BuildingInvalid {
         private String ID;
         private List<String> linearRings;
@@ -86,10 +83,9 @@ public class L07CompletenessValidator implements IValidator {
             buildingInvalids.add(buildingInvalid);
         }
 
+        if (CollectionUtil.collectionEmpty(buildingInvalids)) return null;
         List<ValidationResultMessage> messages = new ArrayList<>();
-        if (CollectionUtil.collectionEmpty(buildingInvalids)) return messages;
         messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("%sは重複して使用されています。\n", buildingInvalids)));
-
         return messages;
     }
 
@@ -129,7 +125,7 @@ public class L07CompletenessValidator implements IValidator {
         }
         // don't need to check the endpoint
         for (int i = 0; i < pointSize - 1; i++) {
-            if (points.get(i).distance(points.get(i + 1)) < 0.01) return false;
+            if (ThreeDUtil.distance(points.get(i), points.get(i + 1)) < 0.01) return false;
         }
         return true;
     }

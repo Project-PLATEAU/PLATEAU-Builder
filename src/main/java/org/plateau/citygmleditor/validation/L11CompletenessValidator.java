@@ -18,10 +18,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.logging.Logger;
 
 
 public class L11CompletenessValidator implements IValidator {
+    public static Logger logger = Logger.getLogger(L11CompletenessValidator.class.getName());
     private final String LOD1 = ".*[lLoOdD]1.*";
+    private final String L11 = "L11";
+    private final String L12 = "L12";
 
     static class LOD1Invalid {
         private String lod1ID;
@@ -87,12 +92,12 @@ public class L11CompletenessValidator implements IValidator {
             Element building = (Element) tagBuilding;
             String buildingID = building.getAttribute(TagName.GML_ID);
             List<Node> tagLOD1s = XmlUtil.getTagsByRegex(LOD1, tagBuilding);
-            List<LOD1Invalid> lod1Invalids1 = this.getInvalidLOD1(tagLOD1s);
+            List<LOD1Invalid> lod1Invalids = this.getInvalidLOD1(tagLOD1s, L11);
 
-            if (CollectionUtil.collectionEmpty(lod1Invalids1)) continue;
+            if (CollectionUtil.collectionEmpty(lod1Invalids)) continue;
             BuildingInvalid buildingInvalid = new BuildingInvalid();
             buildingInvalid.setBuildingID(buildingID);
-            buildingInvalid.setLod1Invalids(lod1Invalids1);
+            buildingInvalid.setLod1Invalids(lod1Invalids);
             buildingInvalids.add(buildingInvalid);
         }
 
@@ -102,12 +107,12 @@ public class L11CompletenessValidator implements IValidator {
         return messages;
     }
 
-    private List<LOD1Invalid> getInvalidLOD1(List<Node> tagLOD1s) {
+    public List<LOD1Invalid> getInvalidLOD1(List<Node> tagLOD1s, String standard) {
         List<LOD1Invalid> result = new ArrayList<>();
         for (Node nodeLOD1 : tagLOD1s) {
             Element lod1 = (Element) nodeLOD1;
             NodeList tagPolygons = lod1.getElementsByTagName(TagName.POLYGON);
-            List<String> polygonInvalids = this.getListPolygonInvalid(tagPolygons);
+            List<String> polygonInvalids = this.getListPolygonInvalid(tagPolygons, standard);
 
             if (CollectionUtil.collectionEmpty(polygonInvalids)) continue;
             LOD1Invalid lod1Invalid = new LOD1Invalid();
@@ -120,7 +125,7 @@ public class L11CompletenessValidator implements IValidator {
         return result;
     }
 
-    private List<String> getListPolygonInvalid(NodeList tagPolygons) {
+    private List<String> getListPolygonInvalid(NodeList tagPolygons, String standard) {
         List<String> polygonIdInvalids = new ArrayList<>();
 
         for (int i = 0; i < tagPolygons.getLength(); i++) {
@@ -128,7 +133,7 @@ public class L11CompletenessValidator implements IValidator {
             String attribute = polygon.getAttribute(TagName.GML_ID);
             NodeList tagPosList = polygon.getElementsByTagName(TagName.POSLIST);
 
-            if (!this.isPosListValid(tagPosList)) {
+            if (!this.isPosListValid(tagPosList, standard)) {
                 polygonIdInvalids.add(attribute);
             }
         }
@@ -136,7 +141,7 @@ public class L11CompletenessValidator implements IValidator {
         return polygonIdInvalids;
     }
 
-    private boolean isPosListValid(NodeList tagPoslists) {
+    private boolean isPosListValid(NodeList tagPoslists, String standard) {
         for (int i = 0; i < tagPoslists.getLength(); i++) {
             Node tagPosList = tagPoslists.item(i);
             Element posList = (Element) tagPosList;
@@ -146,7 +151,7 @@ public class L11CompletenessValidator implements IValidator {
             try {
                 // split posList into points
                 List<Point3D> point3Ds = ThreeDUtil.createListPoint(posString);
-                return this.arePointsInAPlane(point3Ds);
+                return this.arePointsInAPlane(point3Ds, standard);
             } catch (RuntimeException e) {
                 return false;
             }
@@ -156,20 +161,53 @@ public class L11CompletenessValidator implements IValidator {
     }
 
 
-    private boolean arePointsInAPlane(List<Point3D> points) {
+    private boolean arePointsInAPlane(List<Point3D> points, String standard) {
         if (points.size() <= 3) return true;
 
         // resolve plane equator by 3 points
         double[] planeEquation = this.findPlaneEquation(points.get(0), points.get(1), points.get(2));
+
+        if (planeEquation[0] == 0.0 && planeEquation[1] == 0.0 && planeEquation[2] == 0.0) {
+            logger.severe("Plane is not exist");
+            throw new RuntimeException("Invalid Coefficient");
+        }
+
         for (int i = 3; i < points.size(); i++) {
-            double x = points.get(i).getX();
-            double y = points.get(i).getY();
-            double z = points.get(i).getZ();
-            boolean isPointOnPlane = planeEquation[0] * x + planeEquation[1] * y + planeEquation[2] * z + planeEquation[3] == 0.0;
-            if (!isPointOnPlane) return false;
+            boolean isValidStandard;
+            if (Objects.equals(standard, L11)) {
+                isValidStandard = this.distanceFromPointToPlane(points.get(i), planeEquation) == 0.0;
+                return isValidStandard;
+            }
+            if (Objects.equals(standard, L12)) {
+                isValidStandard = this.distanceFromPointToPlane(points.get(i), planeEquation) <= 0.03;
+                return isValidStandard;
+            }
         }
 
         return true;
+    }
+
+    private double distanceFromPointToPlane(Point3D pointInput, double[] plane) {
+        Point3D pointProject = this.projectOntoPlane(plane, pointInput);
+        return ThreeDUtil.distance(pointInput, pointProject);
+    }
+
+    /**
+     * The equation of the line is {x = x0 + at, y = y0 + bt , z = z0 + ct} with a,b,c is coordinates of plane's normal_vector
+     * Find the projection of the point on the plane
+     *
+     * @param plane known
+     * @param point need to find project
+     */
+    private Point3D projectOntoPlane(double[] plane, Point3D point) {
+        // find t in the equation of line
+        double a = plane[0];
+        double b = plane[1];
+        double c = plane[2];
+        double d = plane[3];
+        double t = -(a * point.getX() + b * point.getY() + c * point.getZ() + d) / (a * a + b * b + c * c);
+
+        return new Point3D(a * t + point.getX(), b * t + point.getY(), c * t + point.getZ());
     }
 
     /**
