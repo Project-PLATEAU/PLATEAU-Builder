@@ -44,7 +44,7 @@ public class L09CompletenessValidator implements IValidator {
 
     buildingWithErrorLinearRing.forEach((buildingNode, linearRingNodesWithError) -> {
       String gmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
-      var msg = String.format("Building which gml:id=\"%s\" has %s <gml:LinearRing> invalid", gmlId, linearRingNodesWithError.size());
+      var msg = String.format("L09: Building which gml:id=\"%s\" has %s <gml:LinearRing> invalid", gmlId, linearRingNodesWithError.size());
       messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, msg));
     });
 

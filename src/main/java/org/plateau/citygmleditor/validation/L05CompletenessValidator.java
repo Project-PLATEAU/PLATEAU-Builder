@@ -22,17 +22,17 @@ public class L05CompletenessValidator implements IValidator{
         try {
             String uri = cityModel.getBoundedBy().getEnvelope().getSrsName();
             if (StringUtils.isBlank(uri)) {
-                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "Url is blank"));
+                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "L05: Url is blank"));
                 return messages;
             }
 
             if (uri.equals(srsNameURI)) {
-                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "Url error!"));
+                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "L05: Url error!"));
             }
 
             return messages;
         } catch (Exception e) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "gml:srsName field is not exists"));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "L05: gml:srsName field is not exists"));
             return messages;
         }
 

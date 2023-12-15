@@ -41,7 +41,7 @@ public class L08CompletenessValidator implements IValidator {
 
     buildingWithErrorLineString.forEach((buildingNode, lineStringNodesWithError) -> {
       String gmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
-      var msg = String.format("Building which gml:id=\"%s\" has %s <gml:LineString> invalid", gmlId, lineStringNodesWithError.size());
+      var msg = String.format("L08: Building which gml:id=\"%s\" has %s <gml:LineString> invalid", gmlId, lineStringNodesWithError.size());
       messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, msg));
     });
 
