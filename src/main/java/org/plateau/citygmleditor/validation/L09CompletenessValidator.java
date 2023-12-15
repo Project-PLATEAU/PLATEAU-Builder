@@ -108,9 +108,23 @@ public class L09CompletenessValidator implements IValidator {
 
   private List<Point3D> get3dPoints(Node linearRingNode) {
     Element linearRingElement = (Element) linearRingNode;
-    String[] posString = linearRingElement.getElementsByTagName(TagName.POSLIST).item(0).getTextContent().split(" ");
-    // Convert string to 3d points
-    return ThreeDUtil.createListPoint(posString);
+    // There are 2 cases: posList and pos of LinearRing
+    NodeList posListNodes = linearRingElement.getElementsByTagName(TagName.POSLIST);
+    NodeList posNodes = linearRingElement.getElementsByTagName(TagName.GML_POS);
+
+    if (posListNodes.getLength() > 0) {
+      String[] posString = posListNodes.item(0).getTextContent().split(" ");
+      ThreeDUtil.createListPoint(posString);
+    } else if (posNodes.getLength() > 0) {
+      List<Point3D> point3DS = new ArrayList<>();
+      for (int i = 0; i < posNodes.getLength(); i++) {
+        Node posNode = posNodes.item(i);
+        String[] posString = posNode.getTextContent().split(" ");
+        point3DS.addAll(ThreeDUtil.createListPoint(posString));
+      }
+      return point3DS;
+    }
+    return List.of();
   }
 
   private List<LineSegment3D> getLineSegments(Node linearRingNode) {

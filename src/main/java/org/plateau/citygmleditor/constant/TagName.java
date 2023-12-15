@@ -6,6 +6,7 @@ public interface TagName {
     String LINESTRING = "gml:LineString";
     String srsNameURI = "http://www.opengis.net/def/crs/EPSG/0/6697";
     String POSLIST = "gml:posList";
+    String GML_POS = "gml:pos";
 
     String GML_ID = "gml:id";
 
