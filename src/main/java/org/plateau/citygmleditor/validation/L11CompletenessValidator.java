@@ -101,7 +101,7 @@ public class L11CompletenessValidator implements IValidator {
             buildingInvalids.add(buildingInvalid);
         }
 
-        if (CollectionUtil.collectionEmpty(buildingInvalids)) return null;
+        if (CollectionUtil.collectionEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
         messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("%sは重複して使用されています。\n", buildingInvalids)));
         return messages;
