@@ -37,7 +37,7 @@ public class L06CompletenessValidator implements IValidator {
         DirectPosition upperCorner = cityModel.getBoundedBy().getEnvelope().getUpperCorner();
         if (Objects.isNull(lowerCorner) || Objects.isNull(upperCorner)) {
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                    "The upperCorner or lowerCorner is Null"));
+                    "L06: The upperCorner or lowerCorner is Null"));
             return messages;
         }
         Point3D lowerPoint = new Point3D(lowerCorner.getValue().get(0), lowerCorner.getValue().get(1), lowerCorner.getValue().get(2));
@@ -50,7 +50,7 @@ public class L06CompletenessValidator implements IValidator {
             List<Point3D> point3Ds = ThreeDUtil.createListPoint(values.toArray(new String[0]));
             if (values.size() % 3 != 0) {
                 messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                        "The coordinates in postList error!"));
+                        "L06: The coordinates in postList error!"));
             }
 
             Node nodeParentBuilding = XmlUtil.findNearestParentByAttribute(node, TagName.GML_ID);
@@ -63,7 +63,7 @@ public class L06CompletenessValidator implements IValidator {
                     if (errorMap.containsKey(id)) {
                         errorMap.replace(id, String.format("%s\n%s %s %s", errorMap.get(id), point3D.getX(), point3D.getY(), point3D.getZ()));
                     } else {
-                        errorMap.put(id, String.format("gml:id=\"%s\"のbuildingにエラー座標値：%s %s %s", id, point3D.getX(), point3D.getY(), point3D.getZ()));
+                        errorMap.put(id, String.format("L06: gml:id=\"%s\"のbuildingにエラー座標値：%s %s %s", id, point3D.getX(), point3D.getY(), point3D.getZ()));
                     }
                 }
             }

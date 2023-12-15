@@ -46,7 +46,7 @@ public class L12CompletenessValidator implements IValidator {
 
         if (CollectionUtil.collectionEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
-        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("%sは重複して使用されています。\n", buildingInvalids)));
+        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("L12: %sは重複して使用されています。\n", buildingInvalids)));
         return messages;
     }
 }
