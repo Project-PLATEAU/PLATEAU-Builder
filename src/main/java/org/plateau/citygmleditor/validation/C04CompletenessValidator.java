@@ -68,7 +68,7 @@ public class C04CompletenessValidator implements IValidator {
 
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
-        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("%sは重複して使用されています。\n","C04: " + buildingInvalids)));
+        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("%sは重複して使用されています。\n", "C04: " + buildingInvalids)));
         return messages;
     }
 
@@ -77,7 +77,7 @@ public class C04CompletenessValidator implements IValidator {
         NodeList tagUroBuildingIDs = building.getElementsByTagName(TagName.URO_BULDING_ID);
 
         length = tagUroBuildingIDs.getLength();
-        if (length == 0) return null;
+        if (length == 0) return List.of();
         List<String> conditions = new ArrayList<>();
         Node uroBuildingIDNode = tagUroBuildingIDs.item(0);
         String uroBuildingID = uroBuildingIDNode.getTextContent().trim();
