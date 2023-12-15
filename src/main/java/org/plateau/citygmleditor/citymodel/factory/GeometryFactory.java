@@ -136,15 +136,23 @@ public class GeometryFactory extends CityGMLFactory {
 
                         var polygonObject = createPolygon(polygon);
                         boundaryPolygons.add(polygonObject);
-                    }   
+                    }
                 }
 
                 boundary.setPolygons(boundaryPolygons);
             }
         }
+        
+        solid.setBoundaries(boundaries);
+
         // </bldg:outerBuildingInstallation>
+        var geometrys = new ArrayList<Geometry>();
         for (var OuterBuildingInstallation : gmlObject.getOuterBuildingInstallation()) {
             var buildingInstallation = OuterBuildingInstallation.getBuildingInstallation();
+            if (buildingInstallation.getLod3Geometry() == null)
+                continue;
+            var geometry = new Geometry(buildingInstallation.getLod3Geometry().getGeometry());
+            geometrys.add(geometry);
             var multiSurface = (MultiSurface) buildingInstallation.getLod3Geometry().getGeometry();
             var polygons = new ArrayList<Polygon>();
             for (var surfaceMember : multiSurface.getSurfaceMember()) {
@@ -153,14 +161,18 @@ public class GeometryFactory extends CityGMLFactory {
                     continue;
                 var polygonObject = createPolygon(polygon);
                 polygons.add(polygonObject);
-            }
-            var meshView = new MeshView();
-            meshView.setMesh(createTriangleMesh(polygons));
-            meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
-            solid.addMeshView(meshView);
-        }
 
-        solid.setBoundaries(boundaries);
+                // ノードの最小単位＝ポリゴン
+                var polygonMesh = new ArrayList<Polygon>(Arrays.asList(polygonObject));
+                var meshView = new MeshView();
+                meshView.setMesh(createTriangleMesh(polygonMesh));
+                meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
+                meshView.setId(surfaceMember.getGeometry().getId());
+                solid.addMeshView(buildingInstallation.getId(), meshView);
+            }
+            geometry.setPolygons(polygons);
+        }
+        solid.setOuterBuildingInstallations(geometrys);
 
         var polygonsMap = solid.getSurfaceDataPolygonsMap();
         for (Map.Entry<SurfaceData, ArrayList<Polygon>> entry : polygonsMap.entrySet()) {
