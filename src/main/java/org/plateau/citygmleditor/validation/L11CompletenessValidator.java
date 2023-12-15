@@ -84,7 +84,7 @@ public class L11CompletenessValidator implements IValidator {
     public List<ValidationResultMessage> validate(CityModel cityModel) throws ParserConfigurationException, IOException, SAXException {
         File gmlFile = new File(World.getActiveInstance().getCityModel().getGmlPath());
         // get buildings from gml file
-        NodeList buildings = XmlUtil.getAllTagFromXmlFile(gmlFile, TagName.BUILDING);
+        NodeList buildings = XmlUtil.getAllTagFromXmlFile(gmlFile, TagName.BLDG_BUILDING);
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
 
         for (int i = 0; i < buildings.getLength(); i++) {
@@ -94,14 +94,14 @@ public class L11CompletenessValidator implements IValidator {
             List<Node> tagLOD1s = XmlUtil.getTagsByRegex(LOD1, tagBuilding);
             List<LOD1Invalid> lod1Invalids = this.getInvalidLOD1(tagLOD1s, L11);
 
-            if (CollectionUtil.collectionEmpty(lod1Invalids)) continue;
+            if (CollectionUtil.isEmpty(lod1Invalids)) continue;
             BuildingInvalid buildingInvalid = new BuildingInvalid();
             buildingInvalid.setBuildingID(buildingID);
             buildingInvalid.setLod1Invalids(lod1Invalids);
             buildingInvalids.add(buildingInvalid);
         }
 
-        if (CollectionUtil.collectionEmpty(buildingInvalids)) return List.of();
+        if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
         messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("L11: %sは重複して使用されています。\n", buildingInvalids)));
         return messages;
@@ -111,10 +111,10 @@ public class L11CompletenessValidator implements IValidator {
         List<LOD1Invalid> result = new ArrayList<>();
         for (Node nodeLOD1 : tagLOD1s) {
             Element lod1 = (Element) nodeLOD1;
-            NodeList tagPolygons = lod1.getElementsByTagName(TagName.POLYGON);
+            NodeList tagPolygons = lod1.getElementsByTagName(TagName.GML_POLYGON);
             List<String> polygonInvalids = this.getListPolygonInvalid(tagPolygons, standard);
 
-            if (CollectionUtil.collectionEmpty(polygonInvalids)) continue;
+            if (CollectionUtil.isEmpty(polygonInvalids)) continue;
             LOD1Invalid lod1Invalid = new LOD1Invalid();
             String lod1ID = lod1.getAttribute(TagName.GML_ID);
             lod1Invalid.setLod1ID(lod1ID);
@@ -131,7 +131,7 @@ public class L11CompletenessValidator implements IValidator {
         for (int i = 0; i < tagPolygons.getLength(); i++) {
             Element polygon = (Element) tagPolygons.item(i);
             String attribute = polygon.getAttribute(TagName.GML_ID);
-            NodeList tagPosList = polygon.getElementsByTagName(TagName.POSLIST);
+            NodeList tagPosList = polygon.getElementsByTagName(TagName.GML_POSLIST);
 
             if (!this.isPosListValid(tagPosList, standard)) {
                 polygonIdInvalids.add(attribute);
