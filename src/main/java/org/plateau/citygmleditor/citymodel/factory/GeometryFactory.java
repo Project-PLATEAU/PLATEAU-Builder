@@ -118,8 +118,16 @@ public class GeometryFactory extends CityGMLFactory {
 
                     var polygonObject = createPolygon(polygon);
                     boundaryPolygons.add(polygonObject);
-                }
 
+                    // ノードの最小単位＝ポリゴン
+                    var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
+                    var polygonMesh = new ArrayList<Polygon>(Arrays.asList(polygonObject));
+                    var meshView = new MeshView();
+                    meshView.setMesh(createTriangleMesh(polygonMesh));
+                    meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
+                    meshView.setId(surfaceMember.getGeometry().getId());
+                    solid.addMeshView(boundarySurface.getId(), meshView);
+                }
                 boundary.setPolygons(boundaryPolygons);
             }
             // <bldg:opening>
@@ -136,9 +144,19 @@ public class GeometryFactory extends CityGMLFactory {
 
                         var polygonObject = createPolygon(polygon);
                         boundaryPolygons.add(polygonObject);
+
+                        // ノードの最小単位＝ポリゴン
+                        var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
+                        var polygonMesh = new ArrayList<Polygon>(Arrays.asList(polygonObject));
+                        var meshView = new MeshView();
+                        meshView.setMesh(createTriangleMesh(polygonMesh));
+                        meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
+                        meshView.setId(surfaceMember.getGeometry().getId());
+                        // TODO どの壁に属するのかわからなくなる？
+                        //solid.addMeshView(boundarySurface.getId(), meshView);
+                        solid.addMeshView(opening.getOpening().getId(), meshView);
                     }
                 }
-
                 boundary.setPolygons(boundaryPolygons);
             }
         }
@@ -163,28 +181,17 @@ public class GeometryFactory extends CityGMLFactory {
                 polygons.add(polygonObject);
 
                 // ノードの最小単位＝ポリゴン
+                var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
                 var polygonMesh = new ArrayList<Polygon>(Arrays.asList(polygonObject));
                 var meshView = new MeshView();
                 meshView.setMesh(createTriangleMesh(polygonMesh));
-                meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
+                meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
                 meshView.setId(surfaceMember.getGeometry().getId());
                 solid.addMeshView(buildingInstallation.getId(), meshView);
             }
             geometry.setPolygons(polygons);
         }
         solid.setOuterBuildingInstallations(geometrys);
-
-        var polygonsMap = solid.getSurfaceDataPolygonsMap();
-        for (Map.Entry<SurfaceData, ArrayList<Polygon>> entry : polygonsMap.entrySet()) {
-            var meshView = new MeshView();
-            meshView.setMesh(createTriangleMesh(entry.getValue()));
-            if (entry.getKey() == null) {
-                meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
-            } else {
-                meshView.setMaterial(entry.getKey().getMaterial());
-            }
-            solid.addMeshView(meshView);
-        }
 
         return solid;
     }
