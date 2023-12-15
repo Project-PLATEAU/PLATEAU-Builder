@@ -26,8 +26,8 @@ public class L05CompletenessValidator implements IValidator{
                 return messages;
             }
 
-            if (uri.equals(srsNameURI)) {
-                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "L05: Url error!"));
+            if (!uri.equals(srsNameURI)) {
+                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "L05: Url error!" + uri));
             }
 
             return messages;
