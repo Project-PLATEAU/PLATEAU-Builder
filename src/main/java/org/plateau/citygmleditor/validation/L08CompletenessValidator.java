@@ -32,7 +32,7 @@ public class L08CompletenessValidator implements IValidator {
     List<ValidationResultMessage> messages = new ArrayList<>();
 
     File file = new File(World.getActiveInstance().getCityModel().getGmlPath());
-    NodeList lineStringNodes = XmlUtil.getAllTagFromXmlFile(file, TagName.LINESTRING);
+    NodeList lineStringNodes = XmlUtil.getAllTagFromXmlFile(file, TagName.GML_LINESTRING);
     Map<Node, Set<Node>> buildingWithErrorLineString = new HashMap<>();
 
     for (int i = 0; i < lineStringNodes.getLength(); i++) {
@@ -49,7 +49,7 @@ public class L08CompletenessValidator implements IValidator {
   }
 
   private void checkPointsIntersect(Node lineStringNode, Map<Node, Set<Node>> buildingWithErrorLineString) {
-    Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(lineStringNode, TagName.BUILDING, TagName.GML_ID);
+    Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(lineStringNode, TagName.BLDG_BUILDING, TagName.GML_ID);
 
     List<LineSegment3D> lineSegments = getLineSegments(lineStringNode);
 
@@ -75,7 +75,7 @@ public class L08CompletenessValidator implements IValidator {
 
   private List<LineSegment3D> getLineSegments(Node lineStringNode) {
     Element lineStringElement = (Element) lineStringNode;
-    String[] posString = lineStringElement.getElementsByTagName(TagName.POSLIST).item(0).getTextContent().split(" ");
+    String[] posString = lineStringElement.getElementsByTagName(TagName.GML_POSLIST).item(0).getTextContent().split(" ");
     // Convert string to 3d points
     List<Point3D> points = ThreeDUtil.createListPoint(posString);;
     // Convert 3d points to line segments

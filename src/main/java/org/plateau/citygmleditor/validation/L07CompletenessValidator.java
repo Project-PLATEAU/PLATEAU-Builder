@@ -57,33 +57,33 @@ public class L07CompletenessValidator implements IValidator {
     public List<ValidationResultMessage> validate(CityModel cityModel) throws ParserConfigurationException, IOException, SAXException {
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
         File file = new File(World.getActiveInstance().getCityModel().getGmlPath());
-        NodeList buildings = XmlUtil.getAllTagFromXmlFile(file, TagName.BUILDING);
+        NodeList buildings = XmlUtil.getAllTagFromXmlFile(file, TagName.BLDG_BUILDING);
 
         for (int i = 0; i < buildings.getLength(); i++) {
             Element building = (Element) buildings.item(i);
             String buildingID = building.getAttribute(TagName.GML_ID);
 
             // get invalid linearRing tags
-            NodeList tagLinearRings = building.getElementsByTagName(TagName.LINEARRING);
+            NodeList tagLinearRings = building.getElementsByTagName(TagName.GML_LINEARRING);
             List<String> linearRingIDInvalids = this.getListTagIDInvalid(tagLinearRings);
             // get invalid lineString tags
-            NodeList tagLineStrings = building.getElementsByTagName(TagName.LINEARRING);
+            NodeList tagLineStrings = building.getElementsByTagName(TagName.GML_LINEARRING);
             List<String> lineStringIDvalids = this.getListTagIDInvalid(tagLineStrings);
 
-            if (CollectionUtil.collectionEmpty(linearRingIDInvalids) && CollectionUtil.collectionEmpty(lineStringIDvalids))
+            if (CollectionUtil.isEmpty(linearRingIDInvalids) && CollectionUtil.isEmpty(lineStringIDvalids))
                 continue;
             BuildingInvalid buildingInvalid = new BuildingInvalid();
             buildingInvalid.setID(buildingID);
-            if (!CollectionUtil.collectionEmpty(linearRingIDInvalids)) {
+            if (!CollectionUtil.isEmpty(linearRingIDInvalids)) {
                 buildingInvalid.setLinearRings(linearRingIDInvalids);
             }
-            if (!CollectionUtil.collectionEmpty(lineStringIDvalids)) {
+            if (!CollectionUtil.isEmpty(lineStringIDvalids)) {
                 buildingInvalid.setLineStrings(lineStringIDvalids);
             }
             buildingInvalids.add(buildingInvalid);
         }
 
-        if (CollectionUtil.collectionEmpty(buildingInvalids)) return List.of();
+        if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
         messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("L07: %sは重複して使用されています。\n", buildingInvalids)));
         return messages;

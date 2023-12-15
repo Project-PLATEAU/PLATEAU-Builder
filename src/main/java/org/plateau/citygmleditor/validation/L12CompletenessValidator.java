@@ -25,7 +25,7 @@ public class L12CompletenessValidator implements IValidator {
     public List<ValidationResultMessage> validate(CityModel cityModel) throws ParserConfigurationException, IOException, SAXException {
         File gmlFile = new File(World.getActiveInstance().getCityModel().getGmlPath());
         // get buildings from gml file
-        NodeList buildings = XmlUtil.getAllTagFromXmlFile(gmlFile, TagName.BUILDING);
+        NodeList buildings = XmlUtil.getAllTagFromXmlFile(gmlFile, TagName.BLDG_BUILDING);
         List<L11CompletenessValidator.BuildingInvalid> buildingInvalids = new ArrayList<>();
 
         for (int i = 0; i < buildings.getLength(); i++) {
@@ -37,14 +37,14 @@ public class L12CompletenessValidator implements IValidator {
             L11CompletenessValidator l11Validate = new L11CompletenessValidator();
             List<L11CompletenessValidator.LOD1Invalid> lod1Invalids = l11Validate.getInvalidLOD1(tagLOD1s, L12);
 
-            if (CollectionUtil.collectionEmpty(lod1Invalids)) continue;
+            if (CollectionUtil.isEmpty(lod1Invalids)) continue;
             L11CompletenessValidator.BuildingInvalid buildingInvalid = new L11CompletenessValidator.BuildingInvalid();
             buildingInvalid.setBuildingID(buildingID);
             buildingInvalid.setLod1Invalids(lod1Invalids);
             buildingInvalids.add(buildingInvalid);
         }
 
-        if (CollectionUtil.collectionEmpty(buildingInvalids)) return List.of();
+        if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
         messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("L12: %sは重複して使用されています。\n", buildingInvalids)));
         return messages;

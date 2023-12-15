@@ -16,8 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import static org.plateau.citygmleditor.utils.XmlUtil.logger;
-
 public class L06CompletenessValidator implements IValidator {
 
     @Override
@@ -31,7 +29,7 @@ public class L06CompletenessValidator implements IValidator {
         }
 
         File input = new File(World.getActiveInstance().getCityModel().getGmlPath());
-        NodeList nodes = XmlUtil.getAllTagFromXmlFile(input, TagName.POSLIST);
+        NodeList nodes = XmlUtil.getAllTagFromXmlFile(input, TagName.GML_POSLIST);
 
         DirectPosition lowerCorner = cityModel.getBoundedBy().getEnvelope().getLowerCorner();
         DirectPosition upperCorner = cityModel.getBoundedBy().getEnvelope().getUpperCorner();

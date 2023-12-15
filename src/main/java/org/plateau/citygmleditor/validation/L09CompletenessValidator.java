@@ -1,20 +1,8 @@
 package org.plateau.citygmleditor.validation;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
 import javafx.geometry.Point3D;
-import javafx.util.Pair;
-import javax.xml.parsers.ParserConfigurationException;
 import org.citygml4j.model.citygml.core.CityModel;
 import org.plateau.citygmleditor.constant.TagName;
-import org.plateau.citygmleditor.utils.SolveEquationUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.world.World;
@@ -22,6 +10,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Logger;
 
 
 public class L09CompletenessValidator implements IValidator {
@@ -33,7 +27,7 @@ public class L09CompletenessValidator implements IValidator {
     List<ValidationResultMessage> messages = new ArrayList<>();
 
     File file = new File(World.getActiveInstance().getCityModel().getGmlPath());
-    NodeList linearRingNodes = XmlUtil.getAllTagFromXmlFile(file, TagName.LINEARRING);
+    NodeList linearRingNodes = XmlUtil.getAllTagFromXmlFile(file, TagName.GML_LINEARRING);
     Map<Node, Set<Node>> buildingWithErrorLinearRing = new HashMap<>();
 
     for (int i = 0; i < linearRingNodes.getLength(); i++) {
@@ -52,7 +46,7 @@ public class L09CompletenessValidator implements IValidator {
   }
 
   private void checkPointsIntersect(Node linearRingNode, Map<Node, Set<Node>> buildingWithErrorLinearRing) {
-    Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(linearRingNode, TagName.BUILDING, TagName.GML_ID);
+    Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(linearRingNode, TagName.BLDG_BUILDING, TagName.GML_ID);
 
     List<LineSegment3D> lineSegments = getLineSegments(linearRingNode);
 
@@ -89,7 +83,7 @@ public class L09CompletenessValidator implements IValidator {
   }
 
   private void checkPointsNonDuplicatedAndClosed(Node linearRingNode, Map<Node, Set<Node>> buildingWithErrorLinearRing) {
-    Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(linearRingNode, TagName.BUILDING, TagName.GML_ID);
+    Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(linearRingNode, TagName.BLDG_BUILDING, TagName.GML_ID);
 
     List<Point3D> points = get3dPoints(linearRingNode);
 
@@ -109,7 +103,7 @@ public class L09CompletenessValidator implements IValidator {
   private List<Point3D> get3dPoints(Node linearRingNode) {
     Element linearRingElement = (Element) linearRingNode;
     // There are 2 cases: posList and pos of LinearRing
-    NodeList posListNodes = linearRingElement.getElementsByTagName(TagName.POSLIST);
+    NodeList posListNodes = linearRingElement.getElementsByTagName(TagName.GML_POSLIST);
     NodeList posNodes = linearRingElement.getElementsByTagName(TagName.GML_POS);
 
     if (posListNodes.getLength() > 0) {

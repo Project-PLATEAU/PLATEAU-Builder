@@ -64,6 +64,7 @@ public class ValidationController implements Initializable {
                 add(new L08CompletenessValidator());
                 add(new L11CompletenessValidator());
                 add(new L12CompletenessValidator());
+                add(new C04CompletenessValidator());
             }
         };
 
