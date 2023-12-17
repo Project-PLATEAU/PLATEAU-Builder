@@ -22,6 +22,9 @@ import javafx.event.EventHandler;
 import javafx.util.Duration;
 import org.plateau.citygmleditor.citygmleditor.*;
 
+/**
+ * Class responsible for AntiAliasing
+ */
 public class AntiAliasing {
     private SceneContent sceneContent;
 

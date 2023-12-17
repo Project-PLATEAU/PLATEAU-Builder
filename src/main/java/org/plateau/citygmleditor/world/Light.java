@@ -23,7 +23,7 @@ import javafx.util.Duration;
 import org.plateau.citygmleditor.citygmleditor.*;
 
 /**
- * Class responsible for managing the status and display of buttons on the UI
+ * Class responsible for Various Lighting Processes
  */
 public class Light {
     private AmbientLight ambientLight = new AmbientLight(Color.DARKGREY);

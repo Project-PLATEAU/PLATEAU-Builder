@@ -137,7 +137,6 @@ public class Camera {
             } else if (alt && event.isSecondaryButtonDown()) {
                 double z = cameraPosition.getZ();
                 double newZ = z - flip * (mouseDeltaX + mouseDeltaY) * modifierFactor * modifier;
-                System.out.println("newZ = " + newZ);
                 cameraPosition.setZ(newZ);
             }
         }

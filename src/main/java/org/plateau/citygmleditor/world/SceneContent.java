@@ -23,6 +23,9 @@ import javafx.scene.SubScene;
 
 import org.plateau.citygmleditor.citygmleditor.*;
 
+/**
+ * Class responsible for Management of Scenes and Contents within the View
+ */
 public class SceneContent {
     private final SimpleObjectProperty<SubScene> subScene = new SimpleObjectProperty<>();
     private ObjectProperty<Node> content = new SimpleObjectProperty<>();
