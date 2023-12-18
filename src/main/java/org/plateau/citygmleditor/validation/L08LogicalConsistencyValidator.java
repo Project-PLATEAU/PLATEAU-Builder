@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import javafx.geometry.Point3D;
-import javafx.util.Pair;
+
 import javax.xml.parsers.ParserConfigurationException;
 import org.citygml4j.model.citygml.core.CityModel;
 import org.plateau.citygmleditor.constant.TagName;
@@ -23,9 +23,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 
-public class L08CompletenessValidator implements IValidator {
+public class L08LogicalConsistencyValidator implements IValidator {
 
-  public static Logger logger = Logger.getLogger(L08CompletenessValidator.class.getName());
+  public static Logger logger = Logger.getLogger(L08LogicalConsistencyValidator.class.getName());
 
   public List<ValidationResultMessage> validate(CityModel cityModel)
       throws ParserConfigurationException, IOException, SAXException {

@@ -2,6 +2,7 @@ package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
 import org.citygml4j.model.citygml.core.CityModel;
+import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
@@ -16,48 +17,49 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 
 
-public class L11CompletenessValidator implements IValidator {
-    public static Logger logger = Logger.getLogger(L11CompletenessValidator.class.getName());
+public class L11LogicalConsistencyValidator implements IValidator {
+    public static Logger logger = Logger.getLogger(L11LogicalConsistencyValidator.class.getName());
     private final String LOD1 = ".*[lLoOdD]1.*";
     private final String L11 = "L11";
     private final String L12 = "L12";
 
-    static class LOD1Invalid {
-        private String lod1ID;
+    static class LODInvalid {
+        private String lodTag;
 
-        private List<String> polygonID;
+        private List<String> polygon;
 
-        public String getLod1ID() {
-            return lod1ID;
+        public String getLodTag() {
+            return lodTag;
         }
 
-        public void setLod1ID(String lod1ID) {
-            this.lod1ID = lod1ID;
+        public void setLodTag(String lodTag) {
+            this.lodTag = lodTag;
         }
 
-        public List<String> getPolygonID() {
-            return polygonID;
+        public List<String> getPolygon() {
+            return polygon;
         }
 
-        public void setPolygonID(List<String> polygonID) {
-            this.polygonID = polygonID;
+        public void setPolygon(List<String> polygon) {
+            this.polygon = polygon;
         }
 
         public String toString() {
-            return "LOD1 = " + lod1ID + " [Polygon = " + polygonID.size() + "]";
+            return "LOD = " + lodTag + " [Polygon = " + polygon + "]";
         }
     }
 
     static class BuildingInvalid {
         private String buildingID;
 
-        private List<LOD1Invalid> lod1Invalids;
+        private List<LODInvalid> lodInvalids;
 
         public String getBuildingID() {
             return buildingID;
@@ -67,16 +69,12 @@ public class L11CompletenessValidator implements IValidator {
             this.buildingID = buildingID;
         }
 
-        public List<LOD1Invalid> getLod1Invalids() {
-            return lod1Invalids;
-        }
-
-        public void setLod1Invalids(List<LOD1Invalid> lod1Invalids) {
-            this.lod1Invalids = lod1Invalids;
+        public void setLodInvalids(List<LODInvalid> lodInvalids) {
+            this.lodInvalids = lodInvalids;
         }
 
         public String toString() {
-            return "buildingID = " + buildingID + "\n" + " [LOD1Id = " + lod1Invalids + "]";
+            return "buildingID = " + buildingID + " \n" + lodInvalids + "]";
         }
     }
 
@@ -91,35 +89,38 @@ public class L11CompletenessValidator implements IValidator {
             Node tagBuilding = buildings.item(i);
             Element building = (Element) tagBuilding;
             String buildingID = building.getAttribute(TagName.GML_ID);
-            List<Node> tagLOD1s = XmlUtil.getTagsByRegex(LOD1, tagBuilding);
-            List<LOD1Invalid> lod1Invalids = this.getInvalidLOD1(tagLOD1s, L11);
+            List<Node> tagLODs = XmlUtil.getTagsByRegex(LOD1, tagBuilding);
+            List<LODInvalid> lodInvalids = this.getInvalidLOD(tagLODs, L11);
 
-            if (CollectionUtil.isEmpty(lod1Invalids)) continue;
+            if (CollectionUtil.isEmpty(lodInvalids)) continue;
             BuildingInvalid buildingInvalid = new BuildingInvalid();
             buildingInvalid.setBuildingID(buildingID);
-            buildingInvalid.setLod1Invalids(lod1Invalids);
+            buildingInvalid.setLodInvalids(lodInvalids);
             buildingInvalids.add(buildingInvalid);
         }
 
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
-        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("L11: %sは重複して使用されています。\n", buildingInvalids)));
+        for (BuildingInvalid invalid : buildingInvalids) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                    MessageFormat.format(MessageError.ERR_L11_001, invalid)));
+        }
         return messages;
     }
 
-    public List<LOD1Invalid> getInvalidLOD1(List<Node> tagLOD1s, String standard) {
-        List<LOD1Invalid> result = new ArrayList<>();
-        for (Node nodeLOD1 : tagLOD1s) {
-            Element lod1 = (Element) nodeLOD1;
-            NodeList tagPolygons = lod1.getElementsByTagName(TagName.GML_POLYGON);
+    public List<LODInvalid> getInvalidLOD(List<Node> tagLOD, String standard) {
+        List<LODInvalid> result = new ArrayList<>();
+        for (Node lodNode : tagLOD) {
+            Element lod = (Element) lodNode;
+            NodeList tagPolygons = lod.getElementsByTagName(TagName.GML_POLYGON);
             List<String> polygonInvalids = this.getListPolygonInvalid(tagPolygons, standard);
 
             if (CollectionUtil.isEmpty(polygonInvalids)) continue;
-            LOD1Invalid lod1Invalid = new LOD1Invalid();
-            String lod1ID = lod1.getAttribute(TagName.GML_ID);
-            lod1Invalid.setLod1ID(lod1ID);
-            lod1Invalid.setPolygonID(polygonInvalids);
-            result.add(lod1Invalid);
+            LODInvalid lodInvalid = new LODInvalid();
+            String content = lod.getTagName().trim();
+            lodInvalid.setLodTag(content);
+            lodInvalid.setPolygon(polygonInvalids);
+            result.add(lodInvalid);
         }
 
         return result;
@@ -130,11 +131,11 @@ public class L11CompletenessValidator implements IValidator {
 
         for (int i = 0; i < tagPolygons.getLength(); i++) {
             Element polygon = (Element) tagPolygons.item(i);
-            String attribute = polygon.getAttribute(TagName.GML_ID);
+            String content = polygon.getTextContent().trim();
             NodeList tagPosList = polygon.getElementsByTagName(TagName.GML_POSLIST);
 
             if (!this.isPosListValid(tagPosList, standard)) {
-                polygonIdInvalids.add(attribute);
+                polygonIdInvalids.add(content);
             }
         }
 
