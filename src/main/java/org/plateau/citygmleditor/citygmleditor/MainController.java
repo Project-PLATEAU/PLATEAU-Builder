@@ -51,10 +51,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
@@ -84,8 +81,6 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
-import org.plateau.citygmleditor.importers.Importer3D;
-import org.plateau.citygmleditor.importers.gltf.GltfImporter;
 
 import org.plateau.citygmleditor.importers.Importer3D;
 import java.io.File;
@@ -352,16 +347,6 @@ public class MainController implements Initializable {
     }
 
     public void export(ActionEvent event) {
-        FileChooser chooser = new FileChooser();
-        if (loadedPath != null) {
-            chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
-        }
-        chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("CityGML", "*.gml"));
-        chooser.setTitle("Export CityGML");
-        File newFile = chooser.showSaveDialog(openMenuBtn.getScene().getWindow());
-        if (newFile == null)
-            return;
 
         String[] destRootDirComponents = importGmlPathComponents[importGmlPathComponents.length - 4].split("_");// インポートしたcitygmlのルートフォルダネームを_で分解
         String cityCode = destRootDirComponents[0];
@@ -461,51 +446,4 @@ public class MainController implements Initializable {
         });
     }
 
-    public void openValidationWindow(ActionEvent event) throws IOException {
-        Stage newWindow = new Stage();
-        newWindow.setTitle("品質検査");
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("validation.fxml"));
-        newWindow.setScene(new Scene(loader.load()));
-        newWindow.showAndWait();
-    }
-
-    public void openGltf(ActionEvent actionEvent) {
-        FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", "*.gltf"));
-        if (loadedPath != null) {
-            chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
-        }
-        chooser.setTitle("Select file to load");
-        File newFile = chooser.showOpenDialog(openMenuBtn.getScene().getWindow());
-        if (newFile != null) {
-            loadGltf(newFile.toString());
-        }
-    }
-
-    private void loadGltf(String fileUrl) {
-        try {
-            try {
-                loadedPath = new File(new URL(fileUrl).toURI()).getAbsoluteFile();
-            } catch (IllegalArgumentException | MalformedURLException | URISyntaxException ignored) {
-                loadedPath = null;
-            }
-            doLoadGltf(fileUrl);
-        } catch (Exception ex) {
-            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private void doLoadGltf(String fileUrl) {
-        loadedURL = fileUrl;
-        sessionManager.getProperties().setProperty(CityGMLEditorApp.FILE_URL_PROPERTY, fileUrl);
-        try {
-            var root = GltfImporter.loadGltf(fileUrl);
-            if (root != null) {
-                contentModel.setContent(root);
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        updateStatus();
-    }
 }

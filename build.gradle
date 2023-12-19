@@ -1,6 +1,4 @@
 plugins {
-    id 'java'
-    id 'eclipse'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.13'  //requires JDK11+
     id 'org.beryx.jlink' version '2.25.0'
@@ -29,16 +27,8 @@ repositories {
 dependencies {
     implementation 'org.citygml4j:citygml4j:2.12.0'
     implementation 'org.citygml4j.ade:iur-ade-citygml4j:1.4.2'
-    
-    implementation 'java3d:j3d-core-utils:1.3.1'
 
-    implementation 'de.javagl:jgltf-model:2.0.3'
-    implementation 'de.javagl:jgltf-model-builder:2.0.3'
-    implementation 'de.javagl:jgltf-impl-v1:2.0.3'
-    implementation 'de.javagl:jgltf-impl-v2:2.0.3'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.0'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.16.0'
+    implementation 'java3d:j3d-core-utils:1.3.1'
 }
 
 compileJava {
@@ -59,31 +49,6 @@ jar {
             'Created-By': System.getProperty('java.runtime.version') + ' (' + System.getProperty('java.vendor') + ')',
             'Gradle-Version': 'Gradle ' + gradle.getGradleVersion(),
         )
-    }
-}
-
-eclipse {
-    classpath {
-        containers 'org.eclipse.buildship.core.gradleclasspathcontainer'
-        file {
-            whenMerged {
-                entries.findAll { it.properties.kind.equals('lib') && !it.properties.path.contains("junit") }.each {
-                    it.entryAttributes['module'] = 'true'
-                }
-                entries.findAll { it.properties.path.startsWith('org.eclipse.jdt.launching.JRE_CONTAINER') }.each {
-                    it.entryAttributes['module'] = 'true'
-                }
-                entries.find { it.path == 'src/main/java' }.output = 'bin/main'
-                entries.forEach { entry ->
-                    def entryIn = { it.find { file(entry.path).equals(it) } }
-                    if (entry.kind == 'lib') {
-                        entry.entryAttributes['test'] =
-                            entryIn(configurations.testRuntimeClasspath) &&
-                            !entryIn(configurations.runtimeClasspath)
-                    }
-                }
-            }
-        }
     }
 }
 

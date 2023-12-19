@@ -1,15 +1,14 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import javafx.scene.Parent;
+import javafx.scene.shape.MeshView;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.plateau.citygmleditor.citymodel.SurfaceData;
 
-import javafx.scene.Parent;
-import javafx.scene.shape.MeshView;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-public class LOD2Solid extends Parent implements ILODSolid {
+public class LOD2Solid extends Parent {
     private AbstractSolid gmlObject;
     private ArrayList<BoundarySurface> boundaries;
 
@@ -48,26 +47,5 @@ public class LOD2Solid extends Parent implements ILODSolid {
 
     public void addMeshView(MeshView meshView) {
         getChildren().add(meshView);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public ArrayList<Polygon> getPolygons() {
-        var polygons = new ArrayList<Polygon>();
-
-        for (var boundary : boundaries) {
-            polygons.addAll(boundary.getPolygons());
-        }
-
-        return polygons;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AbstractSolid getAbstractSolid() {
-        return gmlObject;
     }
 }
