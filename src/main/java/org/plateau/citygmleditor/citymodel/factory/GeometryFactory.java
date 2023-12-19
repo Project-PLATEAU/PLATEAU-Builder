@@ -15,7 +15,6 @@ import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.world.World;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -300,8 +299,9 @@ public class GeometryFactory extends CityGMLFactory {
         mesh.getTexCoords().addAll(uvs);
 
         var smooth = new int[faces.length / mesh.getFaceElementSize()];
-        Arrays.fill(smooth, 1);
-
+        for (int i = 0; i < smooth.length; ++i) {
+            smooth[i] = i;
+        }
         mesh.getFaceSmoothingGroups().addAll(smooth);
 
         return mesh;

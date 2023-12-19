@@ -42,6 +42,10 @@ module CityGMLEditor {
     opens org.plateau.citygmleditor.citymodel to javafx.fxml, javafx.graphics;
     exports org.plateau.citygmleditor.citymodel.geometry;
     opens org.plateau.citygmleditor.citymodel.geometry to javafx.fxml, javafx.graphics;
+    exports org.plateau.citygmleditor.utils3d.geom;
+    opens org.plateau.citygmleditor.utils3d.geom to javafx.fxml, javafx.graphics;
+    exports org.plateau.citygmleditor.utils3d.polygonmesh;
+    opens org.plateau.citygmleditor.utils3d.polygonmesh to javafx.fxml, javafx.graphics;
 
     uses Importer;
 }
