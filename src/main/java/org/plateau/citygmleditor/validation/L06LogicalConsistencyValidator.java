@@ -16,8 +16,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * 幾何オブジェクトインスタンスの座標値に含まれる、緯度、経度、標高が、その幾何オブジェクトインスタンスを含む都市モデル（core:CityModel）の空間範囲に含まれていることを検査します。
+ **/
 public class L06LogicalConsistencyValidator implements IValidator {
 
+    /**
+     * The function checks L06 validate
+     *
+     * @param cityModel the model of city contain: building, surfaceMember, polygon, ...
+     */
     @Override
     public List<ValidationResultMessage> validate(CityModel cityModel) throws ParserConfigurationException, IOException, SAXException {
         List<ValidationResultMessage> messages = new ArrayList<>();
@@ -28,6 +36,7 @@ public class L06LogicalConsistencyValidator implements IValidator {
             return messages;
         }
 
+        // Read all posList objects in gml file
         File input = new File(World.getActiveInstance().getCityModel().getGmlPath());
         NodeList nodes = XmlUtil.getAllTagFromXmlFile(input, TagName.GML_POSLIST);
 
@@ -54,6 +63,7 @@ public class L06LogicalConsistencyValidator implements IValidator {
             Node nodeParentBuilding = XmlUtil.findNearestParentByAttribute(node, TagName.GML_ID);
             String id = nodeParentBuilding.getAttributes().getNamedItem("gml:id").getTextContent();
 
+            // Check the point within spatial extent of the model city
             for (Point3D point3D : point3Ds) {
                 if (lowerPoint.getX() > point3D.getX() || point3D.getX() > upperPoint.getX()
                         || lowerPoint.getY() > point3D.getY() || point3D.getY() > upperPoint.getY()
