@@ -58,12 +58,12 @@ public class ValidationController implements Initializable {
         List<IValidator> validators = new ArrayList<>() {
             {
                 add(new GMLIDCompletenessValidator());
-                add(new L05CompletenessValidator());
-                add(new L06CompletenessValidator());
-                add(new L07CompletenessValidator());
-                add(new L08CompletenessValidator());
-                add(new L11CompletenessValidator());
-                add(new L12CompletenessValidator());
+                add(new L05LogicalConsistencyValidator());
+                add(new L06LogicalConsistencyValidator());
+                add(new L07LogicalConsistencyValidator());
+                add(new L08LogicalConsistencyValidator());
+                add(new L11LogicalConsistencyValidator());
+                add(new L12LogicalConsistencyValidator());
                 add(new C04CompletenessValidator());
             }
         };

@@ -1,6 +1,7 @@
 package org.plateau.citygmleditor.validation;
 
 import org.citygml4j.model.citygml.core.CityModel;
+import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
@@ -13,11 +14,12 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class L12CompletenessValidator implements IValidator {
-    private final String LOD1 = ".*[lLoOdD]1.*";
+public class L12LogicalConsistencyValidator implements IValidator {
+    private final String LOD2OR3 = ".*[lLoOdD][23].*";
 
     private final String L12 = "L12";
 
@@ -26,27 +28,30 @@ public class L12CompletenessValidator implements IValidator {
         File gmlFile = new File(World.getActiveInstance().getCityModel().getGmlPath());
         // get buildings from gml file
         NodeList buildings = XmlUtil.getAllTagFromXmlFile(gmlFile, TagName.BLDG_BUILDING);
-        List<L11CompletenessValidator.BuildingInvalid> buildingInvalids = new ArrayList<>();
+        List<L11LogicalConsistencyValidator.BuildingInvalid> buildingInvalids = new ArrayList<>();
 
         for (int i = 0; i < buildings.getLength(); i++) {
             Node tagBuilding = buildings.item(i);
             Element building = (Element) tagBuilding;
             String buildingID = building.getAttribute(TagName.GML_ID);
-            List<Node> tagLOD1s = XmlUtil.getTagsByRegex(LOD1, tagBuilding);
+            List<Node> tagLOD23s = XmlUtil.getTagsByRegex(LOD2OR3, tagBuilding);
 
-            L11CompletenessValidator l11Validate = new L11CompletenessValidator();
-            List<L11CompletenessValidator.LOD1Invalid> lod1Invalids = l11Validate.getInvalidLOD1(tagLOD1s, L12);
+            L11LogicalConsistencyValidator l11Validate = new L11LogicalConsistencyValidator();
+            List<L11LogicalConsistencyValidator.LODInvalid> lodInvalids = l11Validate.getInvalidLOD(tagLOD23s, L12);
 
-            if (CollectionUtil.isEmpty(lod1Invalids)) continue;
-            L11CompletenessValidator.BuildingInvalid buildingInvalid = new L11CompletenessValidator.BuildingInvalid();
+            if (CollectionUtil.isEmpty(lodInvalids)) continue;
+            L11LogicalConsistencyValidator.BuildingInvalid buildingInvalid = new L11LogicalConsistencyValidator.BuildingInvalid();
             buildingInvalid.setBuildingID(buildingID);
-            buildingInvalid.setLod1Invalids(lod1Invalids);
+            buildingInvalid.setLodInvalids(lodInvalids);
             buildingInvalids.add(buildingInvalid);
         }
 
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
-        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("L12: %sは重複して使用されています。\n", buildingInvalids)));
+        for (L11LogicalConsistencyValidator.BuildingInvalid invalid : buildingInvalids) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                    MessageFormat.format(MessageError.ERR_L12_001, invalid)));
+        }
         return messages;
     }
 }

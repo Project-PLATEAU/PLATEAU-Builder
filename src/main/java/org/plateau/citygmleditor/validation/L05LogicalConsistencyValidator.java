@@ -9,7 +9,7 @@ import java.util.Objects;
 
 import static org.plateau.citygmleditor.constant.TagName.srsNameURI;
 
-public class L05CompletenessValidator implements IValidator{
+public class L05LogicalConsistencyValidator implements IValidator{
     @Override
     public List<ValidationResultMessage> validate(CityModel cityModel) {
         List<ValidationResultMessage> messages = new ArrayList<>();

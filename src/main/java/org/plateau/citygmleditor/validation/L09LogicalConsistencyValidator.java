@@ -18,9 +18,9 @@ import java.util.*;
 import java.util.logging.Logger;
 
 
-public class L09CompletenessValidator implements IValidator {
+public class L09LogicalConsistencyValidator implements IValidator {
 
-  public static Logger logger = Logger.getLogger(L09CompletenessValidator.class.getName());
+  public static Logger logger = Logger.getLogger(L09LogicalConsistencyValidator.class.getName());
 
   public List<ValidationResultMessage> validate(CityModel cityModel)
       throws ParserConfigurationException, IOException, SAXException {

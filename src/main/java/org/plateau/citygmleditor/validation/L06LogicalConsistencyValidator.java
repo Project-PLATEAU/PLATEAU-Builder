@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public class L06CompletenessValidator implements IValidator {
+public class L06LogicalConsistencyValidator implements IValidator {
 
     @Override
     public List<ValidationResultMessage> validate(CityModel cityModel) throws ParserConfigurationException, IOException, SAXException {

@@ -2,6 +2,7 @@ package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
 import org.citygml4j.model.citygml.core.CityModel;
+import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
@@ -15,11 +16,12 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class L07CompletenessValidator implements IValidator {
+public class L07LogicalConsistencyValidator implements IValidator {
     static class BuildingInvalid {
         private String ID;
         private List<String> linearRings;
@@ -85,7 +87,10 @@ public class L07CompletenessValidator implements IValidator {
 
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
-        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("L07: %sは重複して使用されています。\n", buildingInvalids)));
+        for (BuildingInvalid invalid : buildingInvalids) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                    MessageFormat.format(MessageError.ERR_L07_001, invalid)));
+        }
         return messages;
     }
 
