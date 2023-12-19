@@ -31,37 +31,17 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<?import java.lang.*?>
-<?import java.net.*?>
-<?import java.util.*?>
+
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.paint.*?>
 <?scenebuilder-stylesheet viewer.css?>
+
 <!--suppress JavaFxUnresolvedStyleClassReference -->
 
-<Accordion fx:id="settings" minWidth="0.0" prefHeight="798.0" prefWidth="279.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.plateau.citygmleditor.citygmleditor.SettingsController">
-  <expandedPane>
-    <TitledPane fx:id="x5" animated="false" expanded="true" text="Hierarchy">
-      <content>
-        <TreeTableView fx:id="hierarachyTreeTable" editable="true" prefHeight="200.0" prefWidth="200.0">
-          <columns>
-            <TreeTableColumn fx:id="nodeColumn" editable="false" prefWidth="75.0" sortable="false" text="Node" />
-            <TreeTableColumn fx:id="idColumn" editable="false" prefWidth="75.0" text="Id" />
-            <TreeTableColumn fx:id="visibilityColumn" editable="true" text="Visibility" />
-            <TreeTableColumn fx:id="widthColumn" editable="false" text="W" />
-            <TreeTableColumn fx:id="heightColumn" editable="false" text="H" />
-            <TreeTableColumn fx:id="depthColumn" editable="false" text="D" />
-          </columns>
-        </TreeTableView>
-      </content>
-    </TitledPane>
-  </expandedPane>
+<Accordion fx:id="settings" minWidth="0.0" prefHeight="798.0" prefWidth="279.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="org.plateau.citygmleditor.citygmleditor.SettingsController">
   <panes>
-    <TitledPane fx:id="x4" animated="false" expanded="false" text="Options">
+    <TitledPane animated="false" expanded="false" text="Options" fx:id="x4">
       <content>
         <GridPane hgap="5.0" styleClass="settings" vgap="5.0">
           <children>
@@ -102,7 +82,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </GridPane>
       </content>
     </TitledPane>
-    <TitledPane fx:id="x2" animated="false" text="Lights">
+    <TitledPane animated="false" text="Lights" fx:id="x2">
       <content>
         <ScrollPane fitToWidth="true" prefHeight="200.0" prefWidth="200.0">
           <content>
@@ -182,7 +162,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </ScrollPane>
       </content>
     </TitledPane>
-    <TitledPane fx:id="x1" animated="false" text="Camera">
+    <TitledPane animated="false" text="Camera" fx:id="x1">
       <content>
         <GridPane hgap="5.0" padding="$x3" styleClass="settings" vgap="5.0">
           <children>
@@ -199,10 +179,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           </columnConstraints>
           <rowConstraints>
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints />
+                  <RowConstraints />
           </rowConstraints>
         </GridPane>
       </content>
     </TitledPane>
-    <fx:reference source="x5" />
+    <TitledPane animated="false" expanded="true" text="Hierarchy" fx:id="x5">
+      <content>
+        <TreeTableView fx:id="hierarchyTreeTable" editable="true" prefHeight="200.0" prefWidth="200.0">
+          <columns>
+            <TreeTableColumn fx:id="nodeColumn" editable="false" prefWidth="75.0" sortable="false" text="Node" />
+            <TreeTableColumn fx:id="idColumn" editable="false" prefWidth="75.0" text="Id" />
+            <TreeTableColumn fx:id="visibilityColumn" editable="true" text="Visibility" />
+            <TreeTableColumn fx:id="widthColumn" editable="false" text="W" />
+            <TreeTableColumn fx:id="heightColumn" editable="false" text="H" />
+            <TreeTableColumn fx:id="depthColumn" editable="false" text="D" />
+          </columns>
+        </TreeTableView>
+      </content>
+         <contextMenu>
+            <ContextMenu fx:id="hierarchyContextMenu">
+              <items>
+                <MenuItem fx:id="exportGltfMenu" onAction="#ExportGltf" mnemonicParsing="false" text="Export gLTF..." />
+                <MenuItem fx:id="exportObjMenu" onAction="#ExportObj" mnemonicParsing="false" text="Export OBJ..." />
+              </items>
+            </ContextMenu>
+         </contextMenu>
+    </TitledPane>
   </panes>
 </Accordion>

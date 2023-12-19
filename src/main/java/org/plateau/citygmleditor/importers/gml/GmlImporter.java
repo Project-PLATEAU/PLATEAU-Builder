@@ -63,6 +63,8 @@ public class GmlImporter {
             var cityModel = cityModelFactory.createCityModel((CityModel) citygml, fileUrl, in.getSchemaHandler());
 
             node.getChildren().add(cityModel);
+
+            world.setCityModel(cityModel);
         }
         reader.close();
 

@@ -1,19 +1,20 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import javafx.scene.Group;
+import javafx.scene.Parent;
+import javafx.scene.shape.MeshView;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.plateau.citygmleditor.citymodel.SurfaceData;
 
-import javafx.scene.Parent;
-import javafx.scene.shape.MeshView;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-public class LOD2Solid extends Parent implements ILODSolid {
+public class LOD3Solid extends Parent {
     private AbstractSolid gmlObject;
     private ArrayList<BoundarySurface> boundaries;
+    private HashMap<String, Group> group;
 
-    public LOD2Solid(AbstractSolid gmlObject) {
+    public LOD3Solid(AbstractSolid gmlObject) {
         this.gmlObject = gmlObject;
     }
 
@@ -47,27 +48,18 @@ public class LOD2Solid extends Parent implements ILODSolid {
     }
 
     public void addMeshView(MeshView meshView) {
-        getChildren().add(meshView);
+        //getChildren().add(meshView);
+        addMeshView("1", meshView);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public ArrayList<Polygon> getPolygons() {
-        var polygons = new ArrayList<Polygon>();
-
-        for (var boundary : boundaries) {
-            polygons.addAll(boundary.getPolygons());
+    public void addMeshView(String id, MeshView meshView) {
+        if (group == null)
+            group = new HashMap<String, Group>();
+        group.computeIfAbsent(id, k -> new Group());
+        if (group.get(id).getChildren().isEmpty()) {
+            getChildren().add(group.get(id));
+            group.get(id).setId(id);
         }
-
-        return polygons;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AbstractSolid getAbstractSolid() {
-        return gmlObject;
+        group.get(id).getChildren().add(meshView);
     }
 }
