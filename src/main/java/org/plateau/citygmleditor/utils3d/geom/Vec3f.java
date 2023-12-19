@@ -180,6 +180,18 @@ public class Vec3f {
         return this.x * v1.x + this.y * v1.y + this.z * v1.z;
     }
 
+
+    /**
+     * 頂点間の距離を計算します。
+     *
+     * @param other 比較対象の頂点
+     */
+    public float distance(Vec3f other) {
+        return (float)Math.sqrt(Math.pow(x - other.x, 2)
+                + Math.pow(y - other.y, 2)
+                + Math.pow(z - other.z, 2));
+    }
+
     /**
      * Returns the hashcode for this <code>Vec3f</code>.
      *
