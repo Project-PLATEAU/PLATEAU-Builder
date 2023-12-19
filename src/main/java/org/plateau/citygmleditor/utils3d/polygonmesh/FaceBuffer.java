@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 /**
  * ポリゴンメッシュの面の配列を保持しインデックス追加、削除、取得を行う機能を提供します。
+ * 面データは内部的には{@code ArrayList<Integer>}で保持され、各面は3点の頂点インデックスとテクスチャ座標インデックスの計6要素によって定義されます。
  */
 public class FaceBuffer {
     private final ArrayList<Integer> buffer = new ArrayList<>();
@@ -49,10 +50,6 @@ public class FaceBuffer {
     public int getTexCoordIndex(int index) {
         return buffer.get(index * 2 + 1);
     }
-
-//    public void addFace(Vec3f vertex) {
-//        buffer.add(vertex.x);
-//    }
 
     /**
      * 面を追加します。

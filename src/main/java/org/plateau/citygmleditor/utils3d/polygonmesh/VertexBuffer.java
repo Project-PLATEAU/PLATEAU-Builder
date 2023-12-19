@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 
 /**
  * ポリゴンメッシュの頂点の配列を保持し頂点追加、削除、取得を行う機能を提供します。
+ * 頂点データは内部的には{@code ArrayList<Float>}で保持され、各頂点はx, y, zの3要素で定義されます。
  */
 public class VertexBuffer {
     private final ArrayList<Float> buffer = new ArrayList<>();
