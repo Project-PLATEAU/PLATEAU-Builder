@@ -7,6 +7,7 @@ import org.citygml4j.model.gml.geometry.complexes.CompositeSurface;
 import org.citygml4j.model.gml.geometry.primitives.Solid;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
+import org.plateau.citygmleditor.citymodel.BuildingInstallationView;
 import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.citymodel.SurfaceData;
 import org.plateau.citygmleditor.citymodel.geometry.*;
@@ -160,8 +161,13 @@ public class GeometryFactory extends CityGMLFactory {
                 boundary.setPolygons(boundaryPolygons);
             }
         }
-        
         solid.setBoundaries(boundaries);
+
+        return solid;
+    }
+    
+    public BuildingInstallationView cretateBuildingInstallationView(AbstractBuilding gmlObject) {
+        var BuildingInstallationView = new BuildingInstallationView(gmlObject);
 
         // </bldg:outerBuildingInstallation>
         var geometrys = new ArrayList<Geometry>();
@@ -187,13 +193,13 @@ public class GeometryFactory extends CityGMLFactory {
                 meshView.setMesh(createTriangleMesh(polygonMesh));
                 meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
                 meshView.setId(surfaceMember.getGeometry().getId());
-                solid.addMeshView(buildingInstallation.getId(), meshView);
+                BuildingInstallationView.addLod3MeshView(buildingInstallation.getId(), meshView);
             }
             geometry.setPolygons(polygons);
         }
-        solid.setOuterBuildingInstallations(geometrys);
+        BuildingInstallationView.setLod3OuterBuildingInstallations(geometrys);
 
-        return solid;
+        return BuildingInstallationView;
     }
 
     public Polygon createPolygon(org.citygml4j.model.gml.geometry.primitives.Polygon gmlObject) {

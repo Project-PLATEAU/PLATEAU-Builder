@@ -16,6 +16,7 @@ public class Building extends Parent {
     private LOD1Solid lod1Solid;
     private LOD2Solid lod2Solid;
     private LOD3Solid lod3Solid;
+    private BuildingInstallationView buildingInstallationView;
 
     public Building(AbstractBuilding gmlObject) {
         this.gmlObject = gmlObject;
@@ -65,5 +66,15 @@ public class Building extends Parent {
 
     public LOD3Solid getLOD3Solid() {
         return this.lod3Solid;
+    }
+
+    public void setBuildingInstallationView(BuildingInstallationView buildingInstallationView) {
+        if(buildingInstallationView == null)
+            return;
+        if(this.buildingInstallationView == null){
+            this.getChildren().remove(this.buildingInstallationView);
+        }
+        this.buildingInstallationView = buildingInstallationView;
+        this.getChildren().add(buildingInstallationView);
     }
 }

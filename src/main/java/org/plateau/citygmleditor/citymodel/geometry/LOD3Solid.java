@@ -12,10 +12,7 @@ import java.util.HashMap;
 public class LOD3Solid extends Parent {
     private AbstractSolid gmlObject;
     private ArrayList<BoundarySurface> boundaries;
-    // private HashMap<String, ArrayList<Polygon>> group;
     private HashMap<String, Group> group;
-    // TODO Solidに含めるべきではない？
-    private ArrayList<Geometry> outerBuildingInstallations;
 
     public LOD3Solid(AbstractSolid gmlObject) {
         this.gmlObject = gmlObject;
@@ -35,14 +32,6 @@ public class LOD3Solid extends Parent {
 
     public void setBoundaries(ArrayList<BoundarySurface> boundaries) {
         this.boundaries = boundaries;
-    }
-
-    public ArrayList<Geometry> getOuterBuildingInstallations() {
-        return outerBuildingInstallations;
-    }
-
-    public void setOuterBuildingInstallations(ArrayList<Geometry> outerBuildingInstallations) {
-        this.outerBuildingInstallations = outerBuildingInstallations;
     }
 
     public HashMap<SurfaceData, ArrayList<Polygon>> getSurfaceDataPolygonsMap() {

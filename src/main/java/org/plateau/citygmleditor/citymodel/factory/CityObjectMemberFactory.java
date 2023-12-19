@@ -33,11 +33,16 @@ public class CityObjectMemberFactory extends CityGMLFactory {
         }
         var lod3Solid = geometryFactory.createLOD3Solid(gmlObject);
         if (lod3Solid != null) {
-            if(lod1Solid != null)
+            if (lod1Solid != null)
                 lod1Solid.setVisible(false);
-            if(lod2Solid != null)
+            if (lod2Solid != null)
                 lod2Solid.setVisible(false);
             building.setLOD3Solid(lod3Solid);
+        }
+        
+        var buildingInstallationView = geometryFactory.cretateBuildingInstallationView(gmlObject);
+        if (buildingInstallationView != null) {
+            building.setBuildingInstallationView(buildingInstallationView);
         }
 
         return building;
