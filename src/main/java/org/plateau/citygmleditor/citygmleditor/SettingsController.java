@@ -31,33 +31,42 @@
  */
 package org.plateau.citygmleditor.citygmleditor;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
+import org.plateau.citygmleditor.exporters.GltfExporter;
+import org.plateau.citygmleditor.exporters.ObjExporter;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.DoubleProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TitledPane;
-import javafx.scene.paint.Color;
-
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.input.KeyCode;
-import javafx.scene.transform.Transform;
+import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 
 /**
@@ -90,7 +99,7 @@ public class SettingsController implements Initializable {
     public Slider light3x;
     public Slider light3y;
     public Slider light3z;
-    public TreeTableView<Node> hierarachyTreeTable;
+    public TreeTableView<Node> hierarchyTreeTable;
     public TreeTableColumn<Node, String> nodeColumn;
     public TreeTableColumn<Node, String> idColumn;
     public TreeTableColumn<Node, Boolean> visibilityColumn;
@@ -103,6 +112,9 @@ public class SettingsController implements Initializable {
     public Slider farClipSlider;
     public Label nearClipLabel;
     public Label farClipLabel;
+    public ContextMenu hierarchyContextMenu;
+    public MenuItem exportGltfMenu;
+    public MenuItem exportObjMenu;
 
     @Override public void initialize(URL location, ResourceBundle resources) {
         // keep one pane open always
@@ -183,7 +195,7 @@ public class SettingsController implements Initializable {
         contentModel.getCamera().nearClipProperty().bind(new Power10DoubleBinding(nearClipSlider.valueProperty()));
         contentModel.getCamera().farClipProperty().bind(new Power10DoubleBinding(farClipSlider.valueProperty()));
 
-        hierarachyTreeTable.rootProperty().bind(new ObjectBinding<TreeItem<Node>>() {
+        hierarchyTreeTable.rootProperty().bind(new ObjectBinding<TreeItem<Node>>() {
 
             {
                 bind(contentModel.contentProperty());
@@ -199,15 +211,23 @@ public class SettingsController implements Initializable {
                 }
             }
         });
-        hierarachyTreeTable.setOnMouseClicked(t -> {
+        hierarchyTreeTable.setOnMouseClicked(t -> {
+            if (t.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
+                TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
+                if (selectedItem != null) {
+                    var item = selectedItem.valueProperty().get();
+                    exportGltfMenu.setDisable(!(item instanceof ILODSolid));
+                    exportObjMenu.setDisable(!(item instanceof ILODSolid));
+                }
+            }
             if (t.getClickCount() == 2) {
                 settings.setExpandedPane(x6);
                 t.consume();
             }
         });
-        hierarachyTreeTable.setOnKeyPressed(t -> {
+        hierarchyTreeTable.setOnKeyPressed(t -> {
             if (t.getCode() == KeyCode.SPACE) {
-                TreeItem<Node> selectedItem = hierarachyTreeTable.getSelectionModel().getSelectedItem();
+                TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
                 if (selectedItem != null) {
                     Node node = selectedItem.getValue();
                     node.setVisible(!node.isVisible());
@@ -280,6 +300,66 @@ public class SettingsController implements Initializable {
         sessionManager.bind(settings, "settingsPane");
     }
 
+    /**
+     * Export the selected solid to gLTF
+     * @param actionEvent the event
+     */
+    public void ExportGltf(ActionEvent actionEvent) {
+        FileChooser chooser = new FileChooser();
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("gLTF", "*.gltf", "*.glb")
+        );
+        chooser.setTitle("Export gLTF");
+        File newFile = chooser.showSaveDialog(hierarchyTreeTable.getScene().getWindow());
+        if (newFile == null)
+            return;
+
+        TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
+        if (selectedItem == null)
+            return;
+
+        var item = selectedItem.valueProperty().get();
+        if (!(item instanceof ILODSolid)) 
+            return;
+
+        ILODSolid solid = (ILODSolid)item;
+        try {
+            GltfExporter.export(newFile.toString(), solid);
+        } catch (Exception ex) {
+            Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * Export the selected solid to OBJ
+     * @param actionEvent the event
+     */
+    public void ExportObj(ActionEvent actionEvent) {
+        FileChooser chooser = new FileChooser();
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("OBJ", "*.obj")
+        );
+        chooser.setTitle("Export OBJ");
+        File newFile = chooser.showSaveDialog(hierarchyTreeTable.getScene().getWindow());
+        if (newFile == null)
+            return;
+
+        TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
+        if (selectedItem == null)
+            return;
+
+        var item = selectedItem.valueProperty().get();
+        if (!(item instanceof ILODSolid)) 
+            return;
+
+        ILODSolid solid = (ILODSolid)item;
+        try {
+            ObjExporter.export(newFile.toString(), solid);
+        } catch (Exception ex) {
+            Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     private class TreeItemImpl extends TreeItem<Node> {
 
         public TreeItemImpl(Node node) {
@@ -295,8 +375,8 @@ public class SettingsController implements Initializable {
                     parent.setExpanded(true);
                     parent = parent.getParent();
                 }
-                hierarachyTreeTable.getSelectionModel().select(TreeItemImpl.this);
-                hierarachyTreeTable.scrollTo(hierarachyTreeTable.getSelectionModel().getSelectedIndex());
+                hierarchyTreeTable.getSelectionModel().select(TreeItemImpl.this);
+                hierarchyTreeTable.scrollTo(hierarchyTreeTable.getSelectionModel().getSelectedIndex());
                 t.consume();
             });
         }

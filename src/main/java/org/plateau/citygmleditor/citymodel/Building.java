@@ -5,6 +5,7 @@ import org.citygml4j.model.citygml.CityGML;
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.plateau.citygmleditor.citymodel.factory.CityGMLFactory;
+import org.citygml4j.model.gml.feature.BoundingShape;
 import org.citygml4j.model.gml.geometry.primitives.*;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1Solid;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2Solid;
@@ -76,5 +77,9 @@ public class Building extends Parent {
         }
         this.buildingInstallationView = buildingInstallationView;
         this.getChildren().add(buildingInstallationView);
+    }
+
+    public Envelope getEnvelope() {
+        return this.gmlObject.getBoundedBy().getEnvelope();
     }
 }
