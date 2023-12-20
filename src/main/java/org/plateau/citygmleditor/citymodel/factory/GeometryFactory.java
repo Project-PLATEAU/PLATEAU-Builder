@@ -15,6 +15,7 @@ import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.world.World;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 

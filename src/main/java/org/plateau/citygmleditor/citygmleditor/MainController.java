@@ -118,7 +118,7 @@ public class MainController implements Initializable {
             // Gizmo Controls
             Parent gizmoPanel = FXMLLoader.load(MainController.class.getResource("gizmo.fxml"));
             gizmoPanel.setVisible(true);
-            // Gizmo Pain
+            // Gizmo Pane
             AnchorPane anchorPane = new AnchorPane();
             anchorPane.getChildren().add(gizmoPanel);
             ViewerPane.getChildren().add(anchorPane);
