@@ -59,6 +59,9 @@ import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
 import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
+import org.plateau.citygmleditor.converters.Gltf2LodConverter;
+import org.plateau.citygmleditor.converters.Obj2LodConverter;
 import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.exporters.TextureExporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
@@ -85,7 +88,7 @@ import javafx.scene.shape.TriangleMesh;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.plateau.citygmleditor.importers.Importer3D;
-import org.plateau.citygmleditor.importers.gltf.GltfImporter;
+import org.plateau.citygmleditor.importers.gml.GmlImporter;
 
 import org.plateau.citygmleditor.importers.Importer3D;
 import java.io.File;
@@ -210,12 +213,12 @@ public class MainController implements Initializable {
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", "*.gml"));
         if (loadedPath != null) {
-            chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
+        chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
         }
         chooser.setTitle("Select file to load");
         File newFile = chooser.showOpenDialog(openMenuBtn.getScene().getWindow());
         if (newFile != null) {
-            loadGml(newFile.toString());
+        loadGml(newFile.toString());
         }
     }
 
@@ -304,7 +307,7 @@ public class MainController implements Initializable {
         final Bounds bounds = content == null ? new BoundingBox(0, 0, 0, 0) : content.getBoundsInLocal();
         status.setText(
                 String.format("Nodes [%d] :: Meshes [%d] :: Triangles [%d] :: " +
-                        "Bounds [w=%.2f,h=%.2f,d=%.2f]",
+                                "Bounds [w=%.2f,h=%.2f,d=%.2f]",
                         nodeCount, meshCount, triangleCount,
                         bounds.getWidth(), bounds.getHeight(), bounds.getDepth()));
     }
@@ -446,7 +449,7 @@ public class MainController implements Initializable {
     }
 
     public void openGltf(ActionEvent actionEvent) {
-        FileChooser chooser = new FileChooser();
+                FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", "*.gltf"));
         if (loadedPath != null) {
             chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
@@ -454,33 +457,62 @@ public class MainController implements Initializable {
         chooser.setTitle("Select file to load");
         File newFile = chooser.showOpenDialog(openMenuBtn.getScene().getWindow());
         if (newFile != null) {
-            loadGltf(newFile.toString());
+            importLodObj(newFile.toString());
         }
     }
 
 
-    private void loadGltf(String fileUrl) {
+    private void importLodObj(String fileUrl) {
         try {
             try {
                 loadedPath = new File(new URL(fileUrl).toURI()).getAbsoluteFile();
             } catch (IllegalArgumentException | MalformedURLException | URISyntaxException ignored) {
                 loadedPath = null;
             }
-            doLoadGltf(fileUrl);
+            doImportLodObj(fileUrl);
         } catch (Exception ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void doLoadGltf(String fileUrl) {
+    private void doImportLodObj(String fileUrl) {
         loadedURL = fileUrl;
         sessionManager.getProperties().setProperty(CityGMLEditorApp.FILE_URL_PROPERTY, fileUrl);
         try {
-            var root = GltfImporter.loadGltf(fileUrl);
-            if (root != null) {
-                sceneContent.setContent(root);
+            ILODSolid lodSolid = Obj2LodConverter.convert(fileUrl);
+            if (lodSolid != null) {
+                // TODO:モデル差し替え
+            }
+
+        } catch (Exception ex) {
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        updateStatus();
+    }
+
+    private void importLodGltf(String fileUrl) {
+        try {
+            try {
+                loadedPath = new File(new URL(fileUrl).toURI()).getAbsoluteFile();
+            } catch (IllegalArgumentException | MalformedURLException | URISyntaxException ignored) {
+                loadedPath = null;
+            }
+            doImportLodGltf(fileUrl);
+        } catch (Exception ex) {
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void doImportLodGltf(String fileUrl) {
+        loadedURL = fileUrl;
+        sessionManager.getProperties().setProperty(CityGMLEditorApp.FILE_URL_PROPERTY, fileUrl);
+        try {
+            ILODSolid lodSolid = Gltf2LodConverter.convert(fileUrl);
+            if (lodSolid != null) {
+                // TODO:モデル差し替え
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
         updateStatus();
@@ -498,5 +530,4 @@ public class MainController implements Initializable {
             }
         });
     }
-
 }
