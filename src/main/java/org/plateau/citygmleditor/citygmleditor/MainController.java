@@ -52,13 +52,12 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
-import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.exporters.TextureExporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
@@ -416,7 +415,8 @@ public class MainController implements Initializable {
         if (cityModelNode == null)
             return;
 
-        var cityModel = (CityModel) cityModelNode;
+        var cityModel = (CityModelView)cityModelNode;
+
         try {
             // CityGMLのエクスポート
             GmlExporter.export(

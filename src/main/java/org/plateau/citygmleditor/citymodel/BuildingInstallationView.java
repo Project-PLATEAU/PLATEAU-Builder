@@ -6,13 +6,13 @@ import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.shape.MeshView;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
-import org.plateau.citygmleditor.citymodel.geometry.Geometry;
+import org.plateau.citygmleditor.citymodel.geometry.GeometryView;
 
 public class BuildingInstallationView extends Parent {
     private AbstractBuilding gmlObject;
     private Group lod3ParentGroup;
     private HashMap<String, Group> lod3Group;
-    private ArrayList<Geometry> lod3OuterBuildingInstallations;
+    private ArrayList<GeometryView> lod3OuterBuildingInstallations;
 
     public BuildingInstallationView(AbstractBuilding gmlObject) {
         this.gmlObject = gmlObject;
@@ -22,11 +22,11 @@ public class BuildingInstallationView extends Parent {
         return this.gmlObject;
     }
 
-    public void setLod3OuterBuildingInstallations(ArrayList<Geometry> outerBuildingInstallations) {
+    public void setLod3OuterBuildingInstallations(ArrayList<GeometryView> outerBuildingInstallations) {
         this.lod3OuterBuildingInstallations = outerBuildingInstallations;
     }
 
-    ArrayList<Geometry> getLod3OuterBuildingInstallations() {
+    ArrayList<GeometryView> getLod3OuterBuildingInstallations() {
         return this.lod3OuterBuildingInstallations;
     }
     

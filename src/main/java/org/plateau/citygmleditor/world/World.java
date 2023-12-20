@@ -10,7 +10,7 @@ import javafx.scene.input.*;
 
 import org.w3c.dom.events.MouseEvent;
 
-import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.geometry.GeoReference;
 
 public class World {
@@ -28,6 +28,16 @@ public class World {
         return root3D;
     }
 
+
+    private GeoReference geoReference;
+    private CityModelView cityModel;
+
+    private Material defaultMaterial;
+
+    public World() {
+        this.defaultMaterial = new PhongMaterial(Color.WHITE);
+    }
+
     public GeoReference getGeoReference() {
         return geoReference;
     }
@@ -36,25 +46,20 @@ public class World {
         return defaultMaterial;
     }
 
-    public CityModel getCityModel() {
-        return cityModel;
-    }
-
     public static void setActiveInstance(World world, Group group) {
         activeInstance = world;
         root3D = group;
     }
-
+    
     public void setGeoReference(GeoReference geoReference) {
         this.geoReference = geoReference;
     }
 
-    public void setCityModel(CityModel cityModel) {
+    public CityModelView getCityModel() {
+        return cityModel;
+    }
+
+    public void setCityModel(CityModelView cityModel) {
         this.cityModel = cityModel;
     }
-
-    public World() {
-        this.defaultMaterial = new PhongMaterial(Color.WHITE);
-    }
-
 }

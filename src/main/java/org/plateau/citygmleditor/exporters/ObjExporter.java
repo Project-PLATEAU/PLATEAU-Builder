@@ -11,33 +11,34 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
-import org.plateau.citygmleditor.citymodel.geometry.LOD1Solid;
-import org.plateau.citygmleditor.citymodel.geometry.LOD2Solid;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 
 import javafx.scene.paint.PhongMaterial;
+import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
 
 /**
- * A class for exporting a {@link ILODSolid} to a OBJ file
+ * A class for exporting a {@link ILODSolidView} to a OBJ file
  */
 public class ObjExporter {
     private static final MaterialModel defaultMaterialModel = new MaterialModel("defaultMaterialModel");
 
     /**
-     * Export the {@link ILODSolid} to a OBJ file
+     * Export the {@link ILODSolidView} to a OBJ file
      * @param fileUrl the file url
-     * @param lodSolid the {@link ILODSolid}
+     * @param lodSolid the {@link ILODSolidView}
      */
-    public static void export(String fileUrl, ILODSolid lodSolid) {
+    public static void export(String fileUrl, ILODSolidView lodSolid) {
         Map<String, MaterialModel> materialMap = new HashMap<>();
         materialMap.put("defaultMaterialModel", defaultMaterialModel);
         ArrayList<ObjectModel> objectModels = new ArrayList<>();
-        if (lodSolid instanceof LOD1Solid) {
-            objectModels.add(createObjectModel((LOD1Solid) lodSolid, materialMap));
-        } else if (lodSolid instanceof LOD2Solid) {
-            objectModels.addAll(createObjectModels((LOD2Solid) lodSolid, materialMap));
+        if (lodSolid instanceof LOD1SolidView) {
+            objectModels.add(createObjectModel((LOD1SolidView) lodSolid, materialMap));
+        } else if (lodSolid instanceof LOD2SolidView) {
+            objectModels.addAll(createObjectModels((LOD2SolidView) lodSolid, materialMap));
         } else {
-            throw new IllegalArgumentException("LOD1Solid or LOD2Solid is required.");
+            throw new IllegalArgumentException("LOD1SolidView or LOD2SolidView is required.");
         }
 
         File file = new File(fileUrl);
@@ -112,11 +113,11 @@ public class ObjExporter {
         }
     }
 
-    private static ObjectModel createObjectModel(LOD1Solid lod1Solid, Map<String, MaterialModel> materialMap) {
+    private static ObjectModel createObjectModel(LOD1SolidView lod1Solid, Map<String, MaterialModel> materialMap) {
         return createObjectModel("model", lod1Solid.getPolygons(), materialMap);
     }
 
-    private static ArrayList<ObjectModel> createObjectModels(LOD2Solid lod2Solid, Map<String, MaterialModel> materialMap) {
+    private static ArrayList<ObjectModel> createObjectModels(LOD2SolidView lod2Solid, Map<String, MaterialModel> materialMap) {
         var objectModels = new ArrayList<ObjectModel>();
         for (var boundary : lod2Solid.getBoundaries()) {
             var polygons = boundary.getPolygons();
@@ -126,58 +127,32 @@ public class ObjExporter {
         return objectModels;
     }
 
-    private static ObjectModel createObjectModel(String name, ArrayList<org.plateau.citygmleditor.citymodel.geometry.Polygon> polygons, Map<String, MaterialModel> materialMap) {
+    private static ObjectModel createObjectModel(String name, ArrayList<PolygonView> polygons, Map<String, MaterialModel> materialMap) {
         var indexCount = 0;
         for (var polygon : polygons) {
             indexCount += polygon.getFaces().length;
         }
 
         var faces = new int[indexCount];
-        var verticesSize = 0;
-        var uvsSize = 0;
         var faceIndex = 0;
         for (var polygon : polygons) {
-            var polygonFaces = polygon.getFaces();
-            for (var i = 0; i < polygonFaces.length; i += 2) {
+            var polygonFaceBuffer = polygon.getFaceBuffer();
+            for (var i = 0; i < polygonFaceBuffer.getFaceCount(); ++i) {
                 // 頂点インデックス
-                faces[faceIndex++] = polygonFaces[i] + verticesSize / 3;
+                faces[faceIndex++] = polygonFaceBuffer.getVertexIndex(i);
                 // UVインデックス
-                faces[faceIndex++] = polygonFaces[i + 1] + uvsSize / 2;
+                faces[faceIndex++] = polygonFaceBuffer.getTexCoordIndex(i);
             }
-
-            verticesSize += polygon.getAllVerticesSize();
-            uvsSize += polygon.getAllUVsSize();
-        }
-
-        var vertices = new float[verticesSize];
-        var vertexIndexOffset = 0;
-        for (var polygon : polygons) {
-            var subVertices = polygon.getAllVertices();
-            for (int i = 0; i < subVertices.length; ++i) {
-                vertices[vertexIndexOffset + i] = (float) subVertices[i];
-            }
-            vertexIndexOffset += subVertices.length;
-        }
-
-        var uvs = new float[uvsSize];
-        var uvIndexOffset = 0;
-        for (var polygon : polygons) {
-            var subUVs = polygon.getAllUVs();
-            for (int i = 0; i < subUVs.length; i += 2) {
-                // x
-                uvs[uvIndexOffset + i] = (float) subUVs[i];
-                // y
-                uvs[uvIndexOffset + i + 1] = (float) subUVs[i + 1];
-            }
-            uvIndexOffset += subUVs.length;
         }
 
         var materialModel = createOrGetMaterial(polygons.get(0), materialMap);
 
-        return new ObjectModel(name, faces, vertices, uvs, materialModel);
+        // ダミー
+        var vertices = new float[0];
+        return new ObjectModel(name, faces, , uvs, materialModel);
     }
 
-    private static MaterialModel createOrGetMaterial(org.plateau.citygmleditor.citymodel.geometry.Polygon polygon, Map<String, MaterialModel> materialMap) {
+    private static MaterialModel createOrGetMaterial(PolygonView polygon, Map<String, MaterialModel> materialMap) {
         MaterialModel materialModel = null;
         var surfaceData = polygon.getSurfaceData();
         if (surfaceData == null) return defaultMaterialModel;

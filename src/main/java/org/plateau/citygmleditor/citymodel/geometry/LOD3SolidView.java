@@ -4,17 +4,17 @@ import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.shape.MeshView;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
-import org.plateau.citygmleditor.citymodel.SurfaceData;
+import org.plateau.citygmleditor.citymodel.SurfaceDataView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class LOD3Solid extends Parent {
+public class LOD3SolidView extends Parent {
     private AbstractSolid gmlObject;
-    private ArrayList<BoundarySurface> boundaries;
+    private ArrayList<BoundarySurfaceView> boundaries;
     private HashMap<String, Group> group;
 
-    public LOD3Solid(AbstractSolid gmlObject) {
+    public LOD3SolidView(AbstractSolid gmlObject) {
         this.gmlObject = gmlObject;
     }
 
@@ -26,16 +26,16 @@ public class LOD3Solid extends Parent {
         this.gmlObject = gmlObject;
     }
 
-    public ArrayList<BoundarySurface> getBoundaries() {
+    public ArrayList<BoundarySurfaceView> getBoundaries() {
         return boundaries;
     }
 
-    public void setBoundaries(ArrayList<BoundarySurface> boundaries) {
+    public void setBoundaries(ArrayList<BoundarySurfaceView> boundaries) {
         this.boundaries = boundaries;
     }
 
-    public HashMap<SurfaceData, ArrayList<Polygon>> getSurfaceDataPolygonsMap() {
-        var map = new HashMap<SurfaceData, ArrayList<Polygon>>();
+    public HashMap<SurfaceDataView, ArrayList<PolygonView>> getSurfaceDataPolygonsMap() {
+        var map = new HashMap<SurfaceDataView, ArrayList<PolygonView>>();
 
         for (var boundary : boundaries) {
             for (var polygon : boundary.getPolygons()) {

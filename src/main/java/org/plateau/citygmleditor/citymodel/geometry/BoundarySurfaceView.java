@@ -4,19 +4,19 @@ import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 
 import java.util.ArrayList;
 
-public class BoundarySurface {
+public class BoundarySurfaceView {
     private AbstractBoundarySurface gmlObject;
-    private ArrayList<Polygon> polygons;
+    private ArrayList<PolygonView> polygons;
 
-    public BoundarySurface(AbstractBoundarySurface gmlObject) {
+    public BoundarySurfaceView(AbstractBoundarySurface gmlObject) {
         this.gmlObject = gmlObject;
     }
 
-    public ArrayList<Polygon> getPolygons() {
+    public ArrayList<PolygonView> getPolygons() {
         return polygons;
     }
 
-    public void setPolygons(ArrayList<Polygon> polygons) {
+    public void setPolygons(ArrayList<PolygonView> polygons) {
         this.polygons = polygons;
     }
 
