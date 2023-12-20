@@ -88,11 +88,7 @@ import javafx.scene.shape.TriangleMesh;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.plateau.citygmleditor.importers.Importer3D;
-import org.plateau.citygmleditor.importers.gml.GmlImporter;
 
-import org.plateau.citygmleditor.importers.Importer3D;
-import java.io.File;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.FieldPosition;
 import java.net.URISyntaxException;
@@ -110,7 +106,6 @@ import javafx.geometry.BoundingBox;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ButtonType;
 import java.nio.file.*;
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import org.plateau.citygmleditor.world.*;
 
