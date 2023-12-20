@@ -40,15 +40,62 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Box?>
 
 <VBox id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.plateau.citygmleditor.citygmleditor.MainController">
-  <ToolBar>
-    <SplitMenuButton fx:id="openMenuBtn" mnemonicParsing="false" onAction="#open" text="Open...">
+  <ToolBar id="toolbar" >
+    <SplitMenuButton fx:id="openMenuBtn" mnemonicParsing="false" onAction="#open" text="開く" contentDisplay="TOP" graphicTextGap="0.0" >
+      <graphic>
+        <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
+          <viewport>
+            <Rectangle2D />
+          </viewport>
+          <image>
+            <Image url="@icon_open.png" />
+          </image>
+        </ImageView>
+      </graphic>
       <CheckMenuItem mnemonicParsing="false" text="Load as Polygons" fx:id="loadAsPolygonsCheckBox"/>
     </SplitMenuButton>
-    <Button mnemonicParsing="false" onAction="#openGml" text="Import GML..."/>
-    <Button mnemonicParsing="false" onAction="#export" text="Export..."/>
-    <Button mnemonicParsing="false" onAction="#openValidationWindow" text="Validate"/>
+
+    <Button mnemonicParsing="false" onAction="#openGml" text="インポート" contentDisplay="TOP" graphicTextGap="0.0" >
+      <graphic>
+        <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
+          <viewport>
+            <Rectangle2D />
+          </viewport>
+          <image>
+            <Image url="@icon_import.png" />
+          </image>
+        </ImageView>
+      </graphic>
+    </Button>
+    <Button mnemonicParsing="false" onAction="#export" text="書き出し" contentDisplay="TOP" graphicTextGap="0.0" >
+      <graphic>
+        <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
+          <viewport>
+            <Rectangle2D />
+          </viewport>
+          <image>
+            <Image url="@icon_export.png" />
+          </image>
+        </ImageView>
+      </graphic>
+    </Button>
+    <Button mnemonicParsing="false" onAction="#openValidationWindow" text="品質検査" contentDisplay="TOP" graphicTextGap="0.0" >
+      <graphic>
+        <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
+          <viewport>
+            <Rectangle2D />
+          </viewport>
+          <image>
+            <Image url="@icon_check.png" />
+          </image>
+        </ImageView>
+      </graphic>
+    </Button>
     <!--HBox.hgrow="ALWAYS"-->
     <Pane maxWidth="1.7976931348623157E308" prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS"/>
 

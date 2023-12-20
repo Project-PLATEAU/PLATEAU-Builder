@@ -29,13 +29,53 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-.split-pane {
-    -fx-background-color: null;
-    -fx-background-insets: 0, 0;
-    -fx-padding: 0;
+
+/*******************************************************************************
+ * Theme Setting                                                               *
+ ******************************************************************************/
+.root {
+-fx-base: #444444;
+-fx-accent: #5F8AC1;
+-fx-default-button: #5F8AC1;
+-fx-focus-color: #5F8AC1;
+-fx-faint-focus-color: #039ED322;
+
+
 }
+.button{
+    -fx-font-size: 10px;
+}
+
+/*Tab*/
+.tab .tab-label {
+ 	-fx-alignment: CENTER;
+	-fx-text-fill: white;
+
+}
+.tab-header-area .tab-header-background {
+    -fx-background-color: #3A3A3A;
+}
+.tab-pane .tab {
+	-fx-background-color: #3A3A3A;
+}
+.tab-pane .tab:selected {
+	-fx-background-color: #444444;
+}
+.tab-pane {
+    -fx-tab-min-width: 42;
+    -fx-tab-max-width: 42;
+    -fx-tab-min-height: 42;
+    -fx-tab-max-height: 42;
+}
+
+/*******************************************************************************
+ * Custom ID Settings                                                          *
+ ******************************************************************************/
+
+
 #statusBar > .container {
     -fx-alignment: center;
+
 }
 #statusBar .text {
     -fx-font-size: 11px;
@@ -47,6 +87,7 @@
     -fx-background-insets: 0, 1;
     -fx-background-radius: 10, 10;
     -fx-padding: 2 0 2 0;
+
 }
 #zoomBar > .increment-button > .increment-arrow {
     -fx-padding: 4;
