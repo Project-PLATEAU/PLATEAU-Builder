@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.plateau.citygmleditor.citymodel.geometry.BoundarySurface;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1Solid;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2Solid;
@@ -39,19 +40,22 @@ public class GltfExporter {
         materialBuilder.setBaseColorFactor(0.9f, 0.9f, 0.9f, 1.0f);
         materialBuilder.setDoubleSided(true);
         defaultMaterialModel = materialBuilder.build();
+        defaultMaterialModel.setName("defaultMaterialModel");
     }
 
     /**
      * Export the {@link ILODSolid} to a gLTF file
-     * @param fileUrl the file url
-     * @param lodSolid the {@link ILODSolid}
+     * 
+     * @param fileUrl    the file url
+     * @param lodSolid   the {@link ILODSolid}
+     * @param buildingId the building id
      */
-    public static void export(String fileUrl, ILODSolid lodSolid) {
+    public static void export(String fileUrl, ILODSolid lodSolid, String buildingId) {
         DefaultSceneModel sceneModel = null;
         if (lodSolid instanceof LOD1Solid) {
-            sceneModel = createSceneModel((LOD1Solid) lodSolid);
+            sceneModel = createSceneModel((LOD1Solid) lodSolid, buildingId);
         } else if (lodSolid instanceof LOD2Solid) {
-            sceneModel = createSceneModel((LOD2Solid) lodSolid);
+            sceneModel = createSceneModel((LOD2Solid) lodSolid, buildingId);
         } else {
             throw new IllegalArgumentException("LOD1Solid or LOD2Solid is required.");
         }
@@ -68,7 +72,7 @@ public class GltfExporter {
 
         if (ext.toLowerCase().equals("gltf")) {
             try {
-                //writer.write(gltfModel, fileUrl);
+                // writer.write(gltfModel, fileUrl);
                 writer.writeEmbedded(gltfModel, file);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -82,13 +86,13 @@ public class GltfExporter {
         }
     }
 
-    private static DefaultSceneModel createSceneModel(LOD1Solid lod1Solid) {
+    private static DefaultSceneModel createSceneModel(LOD1Solid lod1Solid, String buildingId) {
         DefaultSceneModel sceneModel = new DefaultSceneModel();
         DefaultNodeModel nodeModel = new DefaultNodeModel();
         DefaultMeshModel meshModel = new DefaultMeshModel();
-        
+        meshModel.setName(buildingId);
         for (var polygon : lod1Solid.getPolygons()) {
-            DefaultMeshPrimitiveModel meshPrimitiveModel = createMeshPrimitive(polygon);
+            DefaultMeshPrimitiveModel meshPrimitiveModel = createMeshPrimitive(polygon, null);
             meshPrimitiveModel.setMaterialModel(defaultMaterialModel);
             meshModel.addMeshPrimitiveModel(meshPrimitiveModel);
         }
@@ -99,29 +103,27 @@ public class GltfExporter {
         return sceneModel;
     }
 
-    private static DefaultSceneModel createSceneModel(LOD2Solid lod2Solid) {
+    private static DefaultSceneModel createSceneModel(LOD2Solid lod2Solid, String buildingId) {
         DefaultSceneModel sceneModel = new DefaultSceneModel();
         Map<String, MaterialModelV2> materialMap = new HashMap<>();
-
+        DefaultNodeModel nodeModel = new DefaultNodeModel();
+        DefaultMeshModel meshModel = new DefaultMeshModel();
+        meshModel.setName(buildingId);
         for (var boundary : lod2Solid.getBoundaries()) {
-            DefaultNodeModel nodeModel = new DefaultNodeModel();
-            nodeModel.setName(boundary.getId());
-
-            DefaultMeshModel meshModel = new DefaultMeshModel();
             for (var polygon : boundary.getPolygons()) {
-                DefaultMeshPrimitiveModel meshPrimitiveModel = createMeshPrimitive(polygon);
+                DefaultMeshPrimitiveModel meshPrimitiveModel = createMeshPrimitive(polygon, boundary);
                 meshPrimitiveModel.setMaterialModel(createOrGetMaterialModel(materialMap, polygon));
                 meshModel.addMeshPrimitiveModel(meshPrimitiveModel);
             }
-
-            nodeModel.addMeshModel(meshModel);
-            sceneModel.addNode(nodeModel);
         }
+
+        nodeModel.addMeshModel(meshModel);
+        sceneModel.addNode(nodeModel);
 
         return sceneModel;
     }
-    
-    private static DefaultMeshPrimitiveModel createMeshPrimitive(org.plateau.citygmleditor.citymodel.geometry.Polygon polygon) {
+
+    private static DefaultMeshPrimitiveModel createMeshPrimitive(org.plateau.citygmleditor.citymodel.geometry.Polygon polygon, BoundarySurface boundary) {
         var polygonFaces = polygon.getFaces();
         var faces = new int[polygonFaces.length / 2];
         for (var i = 0; i < faces.length; i += 3) {
@@ -152,26 +154,47 @@ public class GltfExporter {
         meshPrimitiveBuilder.addTexCoords02D(FloatBuffer.wrap(uvs));
 
         DefaultMeshPrimitiveModel meshPrimitiveModel = meshPrimitiveBuilder.build();
+        if (boundary == null) return meshPrimitiveModel;
+
+        Map<String, String> extrasMap = new HashMap<>();
+        var cityGmlClass = boundary.getCityGMLClass();
+        if (cityGmlClass != null) {
+            extrasMap.put("type", cityGmlClass.toString());
+        }
+        var boundaryId = boundary.getId();
+        if (boundary.getId() != null) {
+            extrasMap.put("surfaceId", boundaryId);
+        }
+        var polygonId = polygon.getGMLID();
+        if (polygonId != null) {
+            extrasMap.put("polygonId", polygonId);
+        }
+        var linearRingId = polygon.getExteriorRing().getGMLID();
+        if (linearRingId != null) {
+            extrasMap.put("linearRingId", linearRingId);
+        }
+        if (extrasMap.size() > 0) {
+            meshPrimitiveModel.setExtras(extrasMap);
+        }
+
         return meshPrimitiveModel;
     }
 
     private static MaterialModelV2 createOrGetMaterialModel(Map<String, MaterialModelV2> materialMap, org.plateau.citygmleditor.citymodel.geometry.Polygon polygon) {
         MaterialModelV2 materialModel = null;
         var surfaceData = polygon.getSurfaceData();
-        if (surfaceData != null) {
-            var material = surfaceData.getMaterial();
-            if (material instanceof PhongMaterial) {
-                PhongMaterial phongMaterial = (PhongMaterial) material;
-                var url = phongMaterial.getDiffuseMap().getUrl();
-                if (materialMap.containsKey(url)) {
-                    materialModel = materialMap.get(url);
-                } else {
-                    materialModel = createMaterial(phongMaterial);
-                    materialMap.put(url, materialModel);
-                }
-            }
+        if (surfaceData == null) return defaultMaterialModel;
+
+        var material = surfaceData.getMaterial();
+        if (!(material instanceof PhongMaterial)) return defaultMaterialModel;
+
+        PhongMaterial phongMaterial = (PhongMaterial) material;
+        var url = phongMaterial.getDiffuseMap().getUrl();
+        if (materialMap.containsKey(url)) {
+            materialModel = materialMap.get(url);
         } else {
-            materialModel = defaultMaterialModel;
+            materialModel = createMaterial(phongMaterial);
+            materialMap.put(url, materialModel);
         }
 
         return materialModel;
@@ -189,6 +212,9 @@ public class GltfExporter {
         materialBuilder.setDoubleSided(true);
         materialBuilder.setBaseColorTexture(textureModel, 0);
 
-        return materialBuilder.build();
+        MaterialModelV2 materialModelV2 = materialBuilder.build();
+        materialModelV2.setName(materialFile.getName());
+
+        return materialModelV2;
     }
 }
