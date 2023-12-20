@@ -123,13 +123,13 @@ public class GltfExporter {
     }
     
     private static DefaultMeshPrimitiveModel createMeshPrimitive(PolygonView polygon) {
-        var polygonFaces = polygon.getFaces();
-        var faces = new int[polygonFaces.length / 2];
-        for (var i = 0; i < faces.length; i += 3) {
-            faces[i] = polygonFaces[i * 2];
-            faces[i + 1] = polygonFaces[i * 2 + 2];
-            faces[i + 2] = polygonFaces[i * 2 + 4];
-        }
+//        var polygonFaces = polygon.getFaces();
+//        var faces = new int[polygonFaces.length / 2];
+//        for (var i = 0; i < faces.length; i += 3) {
+//            faces[i] = polygonFaces[i * 2];
+//            faces[i + 1] = polygonFaces[i * 2 + 2];
+//            faces[i + 2] = polygonFaces[i * 2 + 4];
+//        }
 
         // 右手系Y-up
 //        var subVertices = polygon.getAllVertices();

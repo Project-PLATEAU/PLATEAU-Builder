@@ -17,6 +17,9 @@ import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 
 import javafx.scene.paint.PhongMaterial;
 import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
+import org.plateau.citygmleditor.utils3d.polygonmesh.FaceBuffer;
+import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
+import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 
 /**
  * A class for exporting a {@link ILODSolidView} to a OBJ file
@@ -114,30 +117,32 @@ public class ObjExporter {
     }
 
     private static ObjectModel createObjectModel(LOD1SolidView lod1Solid, Map<String, MaterialModel> materialMap) {
-        return createObjectModel("model", lod1Solid.getPolygons(), materialMap);
+        return createObjectModel("model", lod1Solid.getVertexBuffer(), lod1Solid.getTexCoordBuffer(), lod1Solid.getPolygons(), materialMap);
     }
 
     private static ArrayList<ObjectModel> createObjectModels(LOD2SolidView lod2Solid, Map<String, MaterialModel> materialMap) {
-        var objectModels = new ArrayList<ObjectModel>();
+        var polygons = new ArrayList<PolygonView>();
         for (var boundary : lod2Solid.getBoundaries()) {
-            var polygons = boundary.getPolygons();
-            objectModels.add(createObjectModel(boundary.getId(), polygons, materialMap));
+            polygons.addAll(boundary.getPolygons());
         }
+
+        var objectModels = new ArrayList<ObjectModel>();
+        objectModels.add(createObjectModel(lod2Solid.getParent().getId(), lod2Solid.getVertexBuffer(), lod2Solid.getTexCoordBuffer(), polygons, materialMap));
 
         return objectModels;
     }
 
-    private static ObjectModel createObjectModel(String name, ArrayList<PolygonView> polygons, Map<String, MaterialModel> materialMap) {
+    private static ObjectModel createObjectModel(String name, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer, ArrayList<PolygonView> polygons, Map<String, MaterialModel> materialMap) {
         var indexCount = 0;
         for (var polygon : polygons) {
-            indexCount += polygon.getFaces().length;
+            indexCount += polygon.getFaceBuffer().getPointCount() * 2;
         }
 
         var faces = new int[indexCount];
         var faceIndex = 0;
         for (var polygon : polygons) {
             var polygonFaceBuffer = polygon.getFaceBuffer();
-            for (var i = 0; i < polygonFaceBuffer.getFaceCount(); ++i) {
+            for (var i = 0; i < polygonFaceBuffer.getPointCount(); ++i) {
                 // 頂点インデックス
                 faces[faceIndex++] = polygonFaceBuffer.getVertexIndex(i);
                 // UVインデックス
@@ -147,9 +152,7 @@ public class ObjExporter {
 
         var materialModel = createOrGetMaterial(polygons.get(0), materialMap);
 
-        // ダミー
-        var vertices = new float[0];
-        return new ObjectModel(name, faces, , uvs, materialModel);
+        return new ObjectModel(name, faces, vertexBuffer.getBufferAsArray(), texCoordBuffer.getBufferAsArray(), materialModel);
     }
 
     private static MaterialModel createOrGetMaterial(PolygonView polygon, Map<String, MaterialModel> materialMap) {

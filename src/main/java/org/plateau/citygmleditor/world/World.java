@@ -17,25 +17,24 @@ public class World {
     private static World activeInstance;
     private static Group root3D;
     private GeoReference geoReference;
-    private CityModel cityModel;
+    private CityModelView cityModel;
     private Material defaultMaterial;
+
+    public World() {
+        this.defaultMaterial = new PhongMaterial(Color.WHITE);
+    }
 
     public static World getActiveInstance() {
         return activeInstance;
     }
 
-    public static Group getRoot3D() {
-        return root3D;
+    public static void setActiveInstance(World world, Group group) {
+        activeInstance = world;
+        root3D = group;
     }
 
-
-    private GeoReference geoReference;
-    private CityModelView cityModel;
-
-    private Material defaultMaterial;
-
-    public World() {
-        this.defaultMaterial = new PhongMaterial(Color.WHITE);
+    public static Group getRoot3D() {
+        return root3D;
     }
 
     public GeoReference getGeoReference() {
@@ -46,11 +45,6 @@ public class World {
         return defaultMaterial;
     }
 
-    public static void setActiveInstance(World world, Group group) {
-        activeInstance = world;
-        root3D = group;
-    }
-    
     public void setGeoReference(GeoReference geoReference) {
         this.geoReference = geoReference;
     }
