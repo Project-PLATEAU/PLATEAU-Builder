@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
+import org.citygml4j.model.citygml.CityGMLClass;
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public class BoundarySurface {
     public ArrayList<Polygon> getPolygons() {
         return polygons;
     }
-
+    
     public void setPolygons(ArrayList<Polygon> polygons) {
         this.polygons = polygons;
     }
@@ -26,5 +27,9 @@ public class BoundarySurface {
      */
     public String getId() {
         return gmlObject.getId();
+    }
+
+    public CityGMLClass getCityGMLClass() {
+        return gmlObject.getCityGMLClass();
     }
 }
