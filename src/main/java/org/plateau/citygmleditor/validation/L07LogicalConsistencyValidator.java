@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -52,7 +53,9 @@ public class L07LogicalConsistencyValidator implements IValidator {
         }
 
         public String toString() {
-            return "BuildingID= " + this.ID + "\n" + "LinearRing= " + this.linearRings + "\n" + "LineString= " + this.lineStrings;
+            String linearRingStr = this.linearRings == null ? "" : " LinearRing= " + this.linearRings;
+            String linearStringStr = this.lineStrings == null ? "" : " LineString= " + this.lineStrings;
+            return "bldg:Building gml:id=" + this.ID + "\n" + linearRingStr + "\n" + linearStringStr;
         }
     }
 
@@ -69,7 +72,7 @@ public class L07LogicalConsistencyValidator implements IValidator {
             NodeList tagLinearRings = building.getElementsByTagName(TagName.GML_LINEARRING);
             List<String> linearRingIDInvalids = this.getListTagIDInvalid(tagLinearRings);
             // get invalid lineString tags
-            NodeList tagLineStrings = building.getElementsByTagName(TagName.GML_LINEARRING);
+            NodeList tagLineStrings = building.getElementsByTagName(TagName.GML_LINESTRING);
             List<String> lineStringIDvalids = this.getListTagIDInvalid(tagLineStrings);
 
             if (CollectionUtil.isEmpty(linearRingIDInvalids) && CollectionUtil.isEmpty(lineStringIDvalids))
@@ -104,22 +107,31 @@ public class L07LogicalConsistencyValidator implements IValidator {
             String[] posString = tagElement.getTextContent().trim().split(" ");
 
             // split posList into points
-            List<Point3D> point3Ds = new ArrayList<>();
+            List<Point3D> point3Ds;
             try {
                 point3Ds = ThreeDUtil.createListPoint(posString);
             } catch (RuntimeException e) {
                 String attribute = tagElement.getAttribute(TagName.GML_ID);
-                tagInvalids.add(attribute);
+                tagInvalids.add(this.createAttributeGmlID(attribute, posString));
                 continue;
             }
 
             // check valid distance from two point int point3Ds
             if (this.isListPointValid(point3Ds)) continue;
             String attribute = tagElement.getAttribute(TagName.GML_ID);
-            tagInvalids.add(attribute);
+            tagInvalids.add(this.createAttributeGmlID(attribute, posString));
         }
 
         return tagInvalids;
+    }
+
+    private String createAttributeGmlID(String attribute, String[] posString) {
+        if (attribute.isBlank()) {
+            attribute = "[]" + Arrays.toString(posString);
+        } else {
+            attribute = "[gml:id=" + attribute + "]";
+        }
+        return attribute;
     }
 
     private boolean isListPointValid(List<Point3D> points) {
