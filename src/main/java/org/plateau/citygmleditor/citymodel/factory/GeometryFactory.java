@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class GeometryFactory extends CityGMLFactory {
-    protected GeometryFactory(CityModel target) {
+    public GeometryFactory(CityModel target) {
         super(target);
     }
 

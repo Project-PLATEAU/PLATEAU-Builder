@@ -218,14 +218,11 @@ public class L11LogicalConsistencyValidator implements IValidator {
     private double[] findPlaneEquation(Point3D point1, Point3D point2, Point3D point3) {
         Point3D vector12 = point2.subtract(point1);
         Point3D vector23 = point3.subtract(point2);
+        Vec3f u1 = new Vec3f((float) vector12.getX(), (float) vector12.getY(), (float) vector12.getZ());
+        Vec3f u2 = new Vec3f((float) vector23.getX(), (float) vector23.getY(), (float) vector23.getZ());
+        Vec3f normalVector = ThreeDUtil.findScalarProduct(u1, u2);
 
         double[] planeEquation = new double[4];
-        double xNormalVector = this.calculateDeterminant(vector12.getY(), vector12.getZ(), vector23.getY(), vector23.getZ());
-        double yNormalVector = this.calculateDeterminant(vector12.getZ(), vector12.getX(), vector23.getZ(), vector23.getX());
-        double zNormalVector = this.calculateDeterminant(vector12.getX(), vector12.getY(), vector23.getX(), vector23.getY());
-
-        Vec3f normalVector = new Vec3f((float) xNormalVector, (float) yNormalVector, (float) zNormalVector);
-        normalVector.normalize();
         // Coefficient A
         planeEquation[0] = normalVector.x;
         // Coefficient B
@@ -236,9 +233,5 @@ public class L11LogicalConsistencyValidator implements IValidator {
         planeEquation[3] = -(normalVector.x * point1.getX() + normalVector.y * point1.getY() + normalVector.z * point1.getZ());
 
         return planeEquation;
-    }
-
-    private double calculateDeterminant(double a1, double a2, double b1, double b2) {
-        return a1 * b2 - a2 * b1;
     }
 }

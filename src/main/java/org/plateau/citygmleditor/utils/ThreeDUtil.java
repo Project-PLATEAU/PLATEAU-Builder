@@ -1,6 +1,8 @@
 package org.plateau.citygmleditor.utils;
 
 import javafx.geometry.Point3D;
+import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.validation.LineSegment3D;
@@ -61,7 +63,7 @@ public class ThreeDUtil {
     }
 
     public static boolean isLineSegmentsIntersect(Point3D firstStart, Point3D firstEnd,
-        Point3D secondStart, Point3D secondEnd, boolean lineSegmentsAreContinuous) {
+                                                  Point3D secondStart, Point3D secondEnd, boolean lineSegmentsAreContinuous) {
 
         // check if 2 lines are continuous
         if (lineSegmentsAreContinuous) {
@@ -77,13 +79,13 @@ public class ThreeDUtil {
         if (line1Vector.crossProduct(line2Vector).equals(Point3D.ZERO)) {
             // Check if 2 line segments are coincident if one of the points of one line is on the other line segment
             return isPointOnLineSegment(firstStart, secondStart, secondEnd) || isPointOnLineSegment(
-                firstEnd, secondStart, secondEnd) || isPointOnLineSegment(secondStart, firstStart,
-                firstEnd) || isPointOnLineSegment(secondEnd, firstStart, firstEnd);
+                    firstEnd, secondStart, secondEnd) || isPointOnLineSegment(secondStart, firstStart,
+                    firstEnd) || isPointOnLineSegment(secondEnd, firstStart, firstEnd);
         }
 
         var parameterT1T2 = SolveEquationUtil.solveLinearEquation(line1Vector.getX(),
-            line2Vector.getX(), secondStart.getX() - firstStart.getX(), line1Vector.getY(),
-            line2Vector.getY(), secondStart.getY() - firstStart.getY());
+                line2Vector.getX(), secondStart.getX() - firstStart.getX(), line1Vector.getY(),
+                line2Vector.getY(), secondStart.getY() - firstStart.getY());
 
         if (parameterT1T2 == null) {
             // 2 lines are parallel or coincident
@@ -113,5 +115,36 @@ public class ThreeDUtil {
         double lengthSquared = direction.dotProduct(direction);
         double projectionLength = dotProduct / lengthSquared;
         return projectionLength >= 0 && projectionLength <= 1;
+    }
+
+    /**
+     * Calculate scalar product with 2 vector u1 and u2
+     *
+     * @param u1 known
+     * @param u2 known
+     */
+    public static Vec3f findScalarProduct(Vec3f u1, Vec3f u2) {
+        float x = calculateDeterminant(u1.y, u1.z, u2.y, u2.z);
+        float y = calculateDeterminant(u1.z, u1.x, u2.z, u2.x);
+        float z = calculateDeterminant(u1.x, u1.y, u2.x, u2.y);
+        Vec3f scalarProduct = new Vec3f(x, y, z);
+        scalarProduct.normalize();
+        return scalarProduct;
+    }
+
+    public static float calculateDeterminant(double a1, double a2, double b1, double b2) {
+        return (float) (a1 * b2 - a2 * b1);
+    }
+
+    public static Geometry createPolygon(List<Point3D> points) {
+        Coordinate[] coordinates = new Coordinate[points.size()];
+        for (int i = 0; i < points.size(); i++) {
+            Point3D point = points.get(i);
+            coordinates[i] = new Coordinate(point.getX(), point.getY(), point.getZ());
+        }
+
+        CoordinateSequence coordinateSequence = new CoordinateArraySequence(coordinates);
+        LinearRing linearRing = new LinearRing(coordinateSequence, new GeometryFactory());
+        return new GeometryFactory().createPolygon(linearRing);
     }
 }
