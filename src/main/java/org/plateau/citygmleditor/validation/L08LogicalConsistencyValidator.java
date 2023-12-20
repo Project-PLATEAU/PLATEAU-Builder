@@ -13,6 +13,11 @@ import javafx.geometry.Point3D;
 
 import javax.xml.parsers.ParserConfigurationException;
 import org.citygml4j.model.citygml.core.CityModel;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineSegment;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
@@ -51,18 +56,22 @@ public class L08LogicalConsistencyValidator implements IValidator {
   private void checkPointsIntersect(Node lineStringNode, Map<Node, Set<Node>> buildingWithErrorLineString) {
     Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(lineStringNode, TagName.BLDG_BUILDING, TagName.GML_ID);
 
-    List<LineSegment3D> lineSegments = getLineSegments(lineStringNode);
+    List<LineSegment> lineSegments = getLineSegments(lineStringNode);
 
     // If there is only 1 line segment, there is no intersection
     if (lineSegments.size() >= 2) {
       // Convolution combination 2 of ine segments
       for (int j = 0; j < lineSegments.size() - 1; j++) {
-        LineSegment3D first = lineSegments.get(j);
+        LineSegment first = lineSegments.get(j);
         for (int k = j + 1; k < lineSegments.size(); k++) {
-          LineSegment3D second = lineSegments.get(k);
+          LineSegment second = lineSegments.get(k);
           // Check if 2 line segments are intersected
           // if j == k-1, 2 line segments are continuous
-          if (ThreeDUtil.isLineSegmentsIntersect(first.getStart(), first.getEnd(), second.getStart(), second.getEnd(), j == k-1)) {
+          boolean isContinuous = j == k-1 && ThreeDUtil.isLinesContinuous(first, second);
+          boolean isIntersected = ThreeDUtil.isLineIntersect(first, second);
+
+          // If 2 line segments are not continuous and intersected
+          if (!isContinuous && isIntersected) {
             // Update error list of building
             Set<Node> errorList = buildingWithErrorLineString.getOrDefault(buildingNode, new HashSet<>());
             errorList.add(lineStringNode);
@@ -73,7 +82,8 @@ public class L08LogicalConsistencyValidator implements IValidator {
     }
   }
 
-  private List<LineSegment3D> getLineSegments(Node lineStringNode) {
+  private List<LineSegment> getLineSegments(Node lineStringNode) {
+
     Element lineStringElement = (Element) lineStringNode;
     String[] posString = lineStringElement.getElementsByTagName(TagName.GML_POSLIST).item(0).getTextContent().split(" ");
     // Convert string to 3d points

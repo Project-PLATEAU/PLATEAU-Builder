@@ -62,6 +62,7 @@ public class ValidationController implements Initializable {
                 add(new L06LogicalConsistencyValidator());
                 add(new L07LogicalConsistencyValidator());
                 add(new L08LogicalConsistencyValidator());
+                add(new L09LogicalConsistencyValidator());
                 add(new L11LogicalConsistencyValidator());
                 add(new L12LogicalConsistencyValidator());
                 add(new C04CompletenessValidator());

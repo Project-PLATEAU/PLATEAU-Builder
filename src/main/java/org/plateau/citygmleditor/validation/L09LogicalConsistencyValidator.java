@@ -2,6 +2,7 @@ package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
 import org.citygml4j.model.citygml.core.CityModel;
+import org.locationtech.jts.geom.LineSegment;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
@@ -48,30 +49,32 @@ public class L09LogicalConsistencyValidator implements IValidator {
   private void checkPointsIntersect(Node linearRingNode, Map<Node, Set<Node>> buildingWithErrorLinearRing) {
     Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(linearRingNode, TagName.BLDG_BUILDING, TagName.GML_ID);
 
-    List<LineSegment3D> lineSegments = getLineSegments(linearRingNode);
+    List<LineSegment> lineSegments = getLineSegments(linearRingNode);
 
     // If there is only 1 line segment, there is no intersection
     if (lineSegments.size() >= 2) {
       // Convolution combination 2 of ine segments
       for (int j = 0; j < lineSegments.size() - 1; j++) {
-        LineSegment3D first = lineSegments.get(j);
+        LineSegment first = lineSegments.get(j);
         for (int k = j + 1; k < lineSegments.size(); k++) {
-          LineSegment3D second = lineSegments.get(k);
+          LineSegment second = lineSegments.get(k);
           // Check if 2 line segments are intersected
           // if j == k-1, 2 line segments are continuous
           boolean isContinuous = j == k-1;
           // Line first and last are also continuous
           boolean isReverseContinuous = j == 0 && k == lineSegments.size() - 1;
 
-          boolean isIntersect;
+          boolean isValid;
 
-          if (isReverseContinuous) {
-            isIntersect = ThreeDUtil.isLineSegmentsIntersect(second.getStart(), second.getEnd(), first.getStart(), first.getEnd(), true);
+          if (isContinuous) {
+            isValid = ThreeDUtil.isLinesContinuous(first, second);
+          } else if (isReverseContinuous) {
+            isValid = ThreeDUtil.isLinesContinuous(second, first);
           } else {
-            isIntersect = ThreeDUtil.isLineSegmentsIntersect(first.getStart(), first.getEnd(), second.getStart(), second.getEnd(), isContinuous);
+            isValid = !ThreeDUtil.isLineIntersect(first, second);
           }
 
-          if (isIntersect) {
+          if (!isValid) {
             // Update error list of building
             Set<Node> errorList = buildingWithErrorLinearRing.getOrDefault(buildingNode, new HashSet<>());
             errorList.add(linearRingNode);
@@ -121,7 +124,7 @@ public class L09LogicalConsistencyValidator implements IValidator {
     return List.of();
   }
 
-  private List<LineSegment3D> getLineSegments(Node linearRingNode) {
+  private List<LineSegment> getLineSegments(Node linearRingNode) {
     // Convert 3d points to line segments
     return ThreeDUtil.getLineSegments(get3dPoints(linearRingNode));
   }
