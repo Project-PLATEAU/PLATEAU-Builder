@@ -37,7 +37,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.Building;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
@@ -385,8 +385,10 @@ public class SettingsController implements Initializable {
             return;
 
         ILODSolid solid = (ILODSolid)item;
+        Building building = (Building)solid.getParent();
+
         try {
-            GltfExporter.export(newFile.toString(), solid);
+            GltfExporter.export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -415,8 +417,10 @@ public class SettingsController implements Initializable {
             return;
 
         ILODSolid solid = (ILODSolid)item;
+        Building building = (Building)solid.getParent();
+
         try {
-            ObjExporter.export(newFile.toString(), solid);
+            ObjExporter.export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
         }
