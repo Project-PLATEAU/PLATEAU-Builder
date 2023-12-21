@@ -1,6 +1,8 @@
 package org.plateau.citygmleditor.utils;
 
 import javafx.geometry.Point3D;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineSegment;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.validation.LineSegment3D;
@@ -49,69 +51,54 @@ public class ThreeDUtil {
         return Math.sqrt(x * x + y * y + z * z);
     }
 
-    public static List<LineSegment3D> getLineSegments(List<Point3D> points) {
-        List<LineSegment3D> lineSegments = new ArrayList<>();
+    public static List<LineSegment> getLineSegments(List<Point3D> points) {
+        List<LineSegment> lineSegments = new ArrayList<>();
         for (int i = 0; i < points.size() - 1; i++) {
             Point3D start = points.get(i);
             Point3D end = points.get(i + 1);
-            LineSegment3D lineSegment = new LineSegment3D(start, end);
+            Coordinate startCoordinate = new Coordinate(start.getX(), start.getY(), start.getZ());
+            Coordinate endCoordinate = new Coordinate(end.getX(), end.getY(), end.getZ());
+            LineSegment lineSegment = new LineSegment(startCoordinate, endCoordinate);
             lineSegments.add(lineSegment);
         }
         return lineSegments;
     }
 
-    public static boolean isLineSegmentsIntersect(Point3D firstStart, Point3D firstEnd,
-        Point3D secondStart, Point3D secondEnd, boolean lineSegmentsAreContinuous) {
+    /**
+     * Check if 2 line segments are intersected
+     * 2 line are intersected if they are only intersected at 1 point
+     * @param first line segment
+     * @param second line segment
+     * @return true if 2 line segments are intersected and otherwise
+     */
+    public static boolean isLineIntersect(LineSegment first, LineSegment second) {
 
-        // check if 2 lines are continuous
-        if (lineSegmentsAreContinuous) {
-            if (firstEnd.equals(secondStart) && !firstStart.equals(secondEnd)) {
-                return false;
-            }
-        }
+        // Find one of the intersection points
+        var intersection = first.intersection(second);
 
-        Point3D line1Vector = firstEnd.subtract(firstStart);
-        Point3D line2Vector = secondEnd.subtract(secondStart);
-
-        // check if 2 lines are parallel or coincident
-        if (line1Vector.crossProduct(line2Vector).equals(Point3D.ZERO)) {
-            // Check if 2 line segments are coincident if one of the points of one line is on the other line segment
-            return isPointOnLineSegment(firstStart, secondStart, secondEnd) || isPointOnLineSegment(
-                firstEnd, secondStart, secondEnd) || isPointOnLineSegment(secondStart, firstStart,
-                firstEnd) || isPointOnLineSegment(secondEnd, firstStart, firstEnd);
-        }
-
-        var parameterT1T2 = SolveEquationUtil.solveLinearEquation(line1Vector.getX(),
-            line2Vector.getX(), secondStart.getX() - firstStart.getX(), line1Vector.getY(),
-            line2Vector.getY(), secondStart.getY() - firstStart.getY());
-
-        if (parameterT1T2 == null) {
-            // 2 lines are parallel or coincident
+        if (intersection == null) {
+            // No intersection
             return false;
         }
 
-        var t1 = parameterT1T2.getKey();
-        var t2 = parameterT1T2.getValue();
-
-        Point3D intersect = firstStart.add(line1Vector.multiply(t1));
-
-        return t1 >= 0 && t1 <= 1 && t2 >= 0 && t2 <= 1;
+        // 2 line segments are not parallel or coincident and have intersection
+        return first.angle() != second.angle();
     }
 
-    public static boolean isPointOnLineSegment(Point3D point, Point3D start, Point3D end) {
-        // Check if the point lies on the line defined by the start and end points
-        Point3D direction = end.subtract(start);
-        Point3D pointToStart = point.subtract(start);
-
-        // Check if the vectors are collinear
-        double dotProduct = direction.dotProduct(pointToStart);
-        if (Math.abs(dotProduct) < 0) {
-            return false;
+    /**
+     * Check if 2 line segments are continuous
+     * 2 line segments are continuous if end of first line segment is the same as start of second line segment
+     * but end of second line segment does not lie on first line segment
+     * @param first line segment
+     * @param second line segment
+     * @return true if 2 line segments are continuous and otherwise
+     */
+    public static boolean isLinesContinuous(LineSegment first, LineSegment second) {
+        if (first.p1.equals(second.p0) && first.distance(second.p1) != 0) {
+            // end of first line segment is the same as start of second line segment
+            // but end of second line segment does not lie on first line segment
+            return true;
         }
-
-        // Check if the point is within the line segment
-        double lengthSquared = direction.dotProduct(direction);
-        double projectionLength = dotProduct / lengthSquared;
-        return projectionLength >= 0 && projectionLength <= 1;
+        return false;
     }
 }
