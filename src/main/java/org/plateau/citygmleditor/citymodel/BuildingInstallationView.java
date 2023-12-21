@@ -5,29 +5,29 @@ import java.util.HashMap;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.shape.MeshView;
-import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.citygml4j.model.citygml.building.BuildingInstallation;
 import org.plateau.citygmleditor.citymodel.geometry.GeometryView;
 
 public class BuildingInstallationView extends Parent {
-    private AbstractBuilding gmlObject;
+    private BuildingInstallation gmlObject;
     private Group lod3ParentGroup;
     private HashMap<String, Group> lod3Group;
-    private ArrayList<GeometryView> lod3OuterBuildingInstallations;
+    private GeometryView lod3Geometry;
 
-    public BuildingInstallationView(AbstractBuilding gmlObject) {
+    public BuildingInstallationView(BuildingInstallation gmlObject) {
         this.gmlObject = gmlObject;
     }
 
-    public AbstractBuilding getGMLObject() {
+    public BuildingInstallation getGMLObject() {
         return this.gmlObject;
     }
 
-    public void setLod3OuterBuildingInstallations(ArrayList<GeometryView> outerBuildingInstallations) {
-        this.lod3OuterBuildingInstallations = outerBuildingInstallations;
+    public void setLod3Geometry(GeometryView geometry) {
+        this.lod3Geometry = geometry;
     }
 
-    ArrayList<GeometryView> getLod3OuterBuildingInstallations() {
-        return this.lod3OuterBuildingInstallations;
+    GeometryView getLod3Geometry() {
+        return this.lod3Geometry;
     }
     
     public void addLod3MeshView(String id, MeshView meshView) {

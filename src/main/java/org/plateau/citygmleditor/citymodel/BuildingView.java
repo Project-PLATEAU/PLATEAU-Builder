@@ -7,13 +7,16 @@ import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD3SolidView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BuildingView extends Parent {
     private AbstractBuilding gmlObject;
 
     private LOD1SolidView lod1Solid;
     private LOD2SolidView lod2Solid;
     private LOD3SolidView lod3Solid;
-    private BuildingInstallationView buildingInstallationView;
+    private List<BuildingInstallationView> buildingInstallationViews = new ArrayList<>();
 
     public BuildingView(AbstractBuilding gmlObject) {
         this.gmlObject = gmlObject;
@@ -65,13 +68,11 @@ public class BuildingView extends Parent {
         return this.lod3Solid;
     }
 
-    public void setBuildingInstallationView(BuildingInstallationView buildingInstallationView) {
+    public void addBuildingInstallationView(BuildingInstallationView buildingInstallationView) {
         if(buildingInstallationView == null)
             return;
-        if(this.buildingInstallationView == null){
-            this.getChildren().remove(this.buildingInstallationView);
-        }
-        this.buildingInstallationView = buildingInstallationView;
+
+        this.buildingInstallationViews.add(buildingInstallationView);
         this.getChildren().add(buildingInstallationView);
     }
 

@@ -9,6 +9,9 @@ import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * GMLでの輪郭形状(LinearRing)の可視化用オブジェクトを表します。
+ */
 public class LinearRingView extends GMLObjectView<LinearRing> {
     private VertexBuffer sharedVertexBuffer;
     private TexCoordBuffer sharedTexCoordBuffer;
@@ -38,6 +41,9 @@ public class LinearRingView extends GMLObjectView<LinearRing> {
         return vertexBuffer;
     }
 
+    /**
+     * テクスチャ座標を取得します。
+     */
     public TexCoordBuffer getTexCoords() {
         var texCoordBuffer = new TexCoordBuffer();
         for (var index : vertexIndices) {
@@ -46,6 +52,10 @@ public class LinearRingView extends GMLObjectView<LinearRing> {
         return texCoordBuffer;
     }
 
+    /**
+     * 輪郭点を{@code sharedVertexBuffer}内での頂点インデックスとして取得します。
+     * @return 各要素iに対し輪郭点は{@code sharedVertexBuffer.getVertex(i)}で取得できます。
+     */
     public List<Integer> getVertexIndices() {
         return vertexIndices;
     }

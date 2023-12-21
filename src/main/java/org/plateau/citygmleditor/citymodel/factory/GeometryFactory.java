@@ -3,7 +3,7 @@ package org.plateau.citygmleditor.citymodel.factory;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
-import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.citygml4j.model.citygml.building.BuildingInstallation;
 import org.citygml4j.model.gml.geometry.primitives.LinearRing;
 import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
@@ -20,7 +20,6 @@ import org.plateau.citygmleditor.world.World;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class GeometryFactory extends CityGMLFactory {
     VertexBuffer vertexBuffer = new VertexBuffer();
@@ -31,40 +30,37 @@ public class GeometryFactory extends CityGMLFactory {
         super(target);
     }
 
-    public BuildingInstallationView cretateBuildingInstallationView(AbstractBuilding gmlObject) {
-        var BuildingInstallationView = new BuildingInstallationView(gmlObject);
+    public BuildingInstallationView cretateBuildingInstallationView(BuildingInstallation gmlObject) {
+        if (gmlObject.getLod3Geometry() == null)
+            return null;
 
-        // </bldg:outerBuildingInstallation>
-        var geometrys = new ArrayList<GeometryView>();
-        for (var OuterBuildingInstallation : gmlObject.getOuterBuildingInstallation()) {
-            var buildingInstallation = OuterBuildingInstallation.getBuildingInstallation();
-            if (buildingInstallation.getLod3Geometry() == null)
+        var geometries = new ArrayList<GeometryView>();
+
+        var buildingInstallationView = new BuildingInstallationView(gmlObject);
+
+        var geometry = new GeometryView(gmlObject.getLod3Geometry().getGeometry());
+        var multiSurface = (MultiSurface) gmlObject.getLod3Geometry().getGeometry();
+        var polygons = new ArrayList<PolygonView>();
+        for (var surfaceMember : multiSurface.getSurfaceMember()) {
+            var polygon = (Polygon) surfaceMember.getSurface();
+            if (polygon == null)
                 continue;
-            var geometry = new GeometryView(buildingInstallation.getLod3Geometry().getGeometry());
-            geometrys.add(geometry);
-            var multiSurface = (MultiSurface) buildingInstallation.getLod3Geometry().getGeometry();
-            var polygons = new ArrayList<PolygonView>();
-            for (var surfaceMember : multiSurface.getSurfaceMember()) {
-                var polygon = (Polygon) surfaceMember.getSurface();
-                if (polygon == null)
-                    continue;
-                var polygonObject = createPolygon(polygon);
-                polygons.add(polygonObject);
+            var polygonObject = createPolygon(polygon);
+            polygons.add(polygonObject);
 
-                // ノードの最小単位＝ポリゴン
-                var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
-                var polygonMesh = new ArrayList<PolygonView>(List.of(polygonObject));
-                var meshView = new MeshView();
-                meshView.setMesh(createTriangleMesh(polygonMesh));
-                meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
-                meshView.setId(surfaceMember.getGeometry().getId());
-                BuildingInstallationView.addLod3MeshView(buildingInstallation.getId(), meshView);
-            }
-            geometry.setPolygons(polygons);
+            // ノードの最小単位＝ポリゴン
+            var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
+            var polygonMesh = new ArrayList<PolygonView>(List.of(polygonObject));
+            var meshView = new MeshView();
+            meshView.setMesh(createTriangleMesh(polygonMesh));
+            meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
+            meshView.setId(surfaceMember.getGeometry().getId());
+            buildingInstallationView.addLod3MeshView(gmlObject.getId(), meshView);
         }
-        BuildingInstallationView.setLod3OuterBuildingInstallations(geometrys);
+        geometry.setPolygons(polygons);
 
-        return BuildingInstallationView;
+        buildingInstallationView.setLod3Geometry(geometry);
+        return buildingInstallationView;
     }
 
     protected PolygonView createPolygon(Polygon gmlObject) {

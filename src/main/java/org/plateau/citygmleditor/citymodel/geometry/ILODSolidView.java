@@ -10,6 +10,7 @@ import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 
 /**
  * LODSolidのインターフェースを表します。
+ * これを実装するSolidクラスではSolidの頂点とテクスチャ座標情報が保持され、面情報は各Polygonが保持します。
  */
 public interface ILODSolidView {
     /**
