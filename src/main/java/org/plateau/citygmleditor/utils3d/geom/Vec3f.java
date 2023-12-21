@@ -160,14 +160,9 @@ public class Vec3f {
      * @param v2 the second vector
      */
     public void cross(Vec3f v1, Vec3f v2) {
-        float tmpX;
-        float tmpY;
-
-        tmpX = v1.y * v2.z - v1.z * v2.y;
-        tmpY = v2.x * v1.z - v2.z * v1.x;
+        this.x = v1.y * v2.z - v1.z * v2.y;
+        this.y = v2.x * v1.z - v2.z * v1.x;
         this.z = v1.x * v2.y - v1.y * v2.x;
-        this.x = tmpX;
-        this.y = tmpY;
     }
 
     /**

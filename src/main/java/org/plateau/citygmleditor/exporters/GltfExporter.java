@@ -9,9 +9,9 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
-import org.plateau.citygmleditor.citymodel.geometry.LOD1Solid;
-import org.plateau.citygmleditor.citymodel.geometry.LOD2Solid;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 
 import de.javagl.jgltf.model.creation.GltfModelBuilder;
 import de.javagl.jgltf.model.creation.ImageModels;
@@ -27,6 +27,7 @@ import de.javagl.jgltf.model.impl.DefaultTextureModel;
 import de.javagl.jgltf.model.io.GltfModelWriter;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
 import javafx.scene.paint.PhongMaterial;
+import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
 
 /**
  * A class for exporting a {@link DefaultGltfModel} to a gLTF file
@@ -42,18 +43,18 @@ public class GltfExporter {
     }
 
     /**
-     * Export the {@link ILODSolid} to a gLTF file
+     * Export the {@link ILODSolidView} to a gLTF file
      * @param fileUrl the file url
-     * @param lodSolid the {@link ILODSolid}
+     * @param lodSolid the {@link ILODSolidView}
      */
-    public static void export(String fileUrl, ILODSolid lodSolid) {
+    public static void export(String fileUrl, ILODSolidView lodSolid) {
         DefaultSceneModel sceneModel = null;
-        if (lodSolid instanceof LOD1Solid) {
-            sceneModel = createSceneModel((LOD1Solid) lodSolid);
-        } else if (lodSolid instanceof LOD2Solid) {
-            sceneModel = createSceneModel((LOD2Solid) lodSolid);
+        if (lodSolid instanceof LOD1SolidView) {
+            sceneModel = createSceneModel((LOD1SolidView) lodSolid);
+        } else if (lodSolid instanceof LOD2SolidView) {
+            sceneModel = createSceneModel((LOD2SolidView) lodSolid);
         } else {
-            throw new IllegalArgumentException("LOD1Solid or LOD2Solid is required.");
+            throw new IllegalArgumentException("LOD1SolidView or LOD2SolidView is required.");
         }
 
         GltfModelBuilder gltfModelBuilder = GltfModelBuilder.create();
@@ -82,7 +83,7 @@ public class GltfExporter {
         }
     }
 
-    private static DefaultSceneModel createSceneModel(LOD1Solid lod1Solid) {
+    private static DefaultSceneModel createSceneModel(LOD1SolidView lod1Solid) {
         DefaultSceneModel sceneModel = new DefaultSceneModel();
         DefaultNodeModel nodeModel = new DefaultNodeModel();
         DefaultMeshModel meshModel = new DefaultMeshModel();
@@ -99,7 +100,7 @@ public class GltfExporter {
         return sceneModel;
     }
 
-    private static DefaultSceneModel createSceneModel(LOD2Solid lod2Solid) {
+    private static DefaultSceneModel createSceneModel(LOD2SolidView lod2Solid) {
         DefaultSceneModel sceneModel = new DefaultSceneModel();
         Map<String, MaterialModelV2> materialMap = new HashMap<>();
 
@@ -121,41 +122,41 @@ public class GltfExporter {
         return sceneModel;
     }
     
-    private static DefaultMeshPrimitiveModel createMeshPrimitive(org.plateau.citygmleditor.citymodel.geometry.Polygon polygon) {
-        var polygonFaces = polygon.getFaces();
-        var faces = new int[polygonFaces.length / 2];
-        for (var i = 0; i < faces.length; i += 3) {
-            faces[i] = polygonFaces[i * 2];
-            faces[i + 1] = polygonFaces[i * 2 + 2];
-            faces[i + 2] = polygonFaces[i * 2 + 4];
-        }
+    private static DefaultMeshPrimitiveModel createMeshPrimitive(PolygonView polygon) {
+//        var polygonFaces = polygon.getFaces();
+//        var faces = new int[polygonFaces.length / 2];
+//        for (var i = 0; i < faces.length; i += 3) {
+//            faces[i] = polygonFaces[i * 2];
+//            faces[i + 1] = polygonFaces[i * 2 + 2];
+//            faces[i + 2] = polygonFaces[i * 2 + 4];
+//        }
 
         // 右手系Y-up
-        var subVertices = polygon.getAllVertices();
-        float positions[] = new float[subVertices.length];
-        for (int i = 0; i < subVertices.length; i += 3) {
-            positions[i] = (float) subVertices[i + 1];
-            positions[i + 1] = (float) subVertices[i + 2];
-            positions[i + 2] = (float) subVertices[i + 0];
-        }
+//        var subVertices = polygon.getAllVertices();
+//        float positions[] = new float[subVertices.length];
+//        for (int i = 0; i < subVertices.length; i += 3) {
+//            positions[i] = (float) subVertices[i + 1];
+//            positions[i + 1] = (float) subVertices[i + 2];
+//            positions[i + 2] = (float) subVertices[i + 0];
+//        }
 
-        var subUVs = polygon.getAllUVs();
-        var uvs = new float[subUVs.length];
-        for (int i = 0; i < subUVs.length; i += 2) {
-            uvs[i] = (float) subUVs[i];
-            uvs[i + 1] = 1 - (float) subUVs[i + 1];
-        }
-
+//        var subUVs = polygon.getAllUVs();
+//        var uvs = new float[subUVs.length];
+//        for (int i = 0; i < subUVs.length; i += 2) {
+//            uvs[i] = (float) subUVs[i];
+//            uvs[i + 1] = 1 - (float) subUVs[i + 1];
+//        }
+//
         MeshPrimitiveBuilder meshPrimitiveBuilder = MeshPrimitiveBuilder.create();
-        meshPrimitiveBuilder.setIntIndicesAsShort(IntBuffer.wrap(faces));
-        meshPrimitiveBuilder.addPositions3D(FloatBuffer.wrap(positions));
-        meshPrimitiveBuilder.addTexCoords02D(FloatBuffer.wrap(uvs));
+//        meshPrimitiveBuilder.setIntIndicesAsShort(IntBuffer.wrap(faces));
+//        meshPrimitiveBuilder.addPositions3D(FloatBuffer.wrap(positions));
+//        meshPrimitiveBuilder.addTexCoords02D(FloatBuffer.wrap(uvs));
 
         DefaultMeshPrimitiveModel meshPrimitiveModel = meshPrimitiveBuilder.build();
         return meshPrimitiveModel;
     }
 
-    private static MaterialModelV2 createOrGetMaterialModel(Map<String, MaterialModelV2> materialMap, org.plateau.citygmleditor.citymodel.geometry.Polygon polygon) {
+    private static MaterialModelV2 createOrGetMaterialModel(Map<String, MaterialModelV2> materialMap, PolygonView polygon) {
         MaterialModelV2 materialModel = null;
         var surfaceData = polygon.getSurfaceData();
         if (surfaceData != null) {

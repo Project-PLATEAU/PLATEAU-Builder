@@ -1,10 +1,20 @@
 package org.plateau.citygmleditor.citymodel.factory;
 
 import com.sun.j3d.utils.geometry.GeometryInfo;
+import org.plateau.citygmleditor.utils3d.polygonmesh.FaceBuffer;
+import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 
 import java.lang.reflect.Array;
 
 public class Tessellator {
+    public static void tessellate(VertexBuffer exterior, VertexBuffer interior, FaceBuffer outFaceBuffer) {
+        var faces = tessellate(
+                exterior.getBufferAsArray(),
+                interior == null ? null : interior.getBufferAsArray(),
+                3);
+        outFaceBuffer.addFaces(faces);
+    }
+
     public static int[] tessellate(float[] exterior, float[] interior, int dim) {
         if (interior == null) {
             // 最後の頂点は重複しているので削除
@@ -40,11 +50,14 @@ public class Tessellator {
     }
 
     private static int[] convertToSubMeshIndices(int[] indices) {
-        var convertedIndices = new int[indices.length * 2];
-        for (int i = 0; i < convertedIndices.length; i += 2) {
-            convertedIndices[i] = indices[i / 2];
-            // UVインデックスは0で埋める
-            convertedIndices[i + 1] = indices[i / 2];
+        var convertedIndices = new int[indices.length * 3];
+        for (int i = 0; i < convertedIndices.length; i += 3) {
+            // 頂点インデックス
+            convertedIndices[i] = indices[i / 3];
+            // 法線は各面に固有なため法線インデックスは面ごとに設定
+            convertedIndices[i + 1] = i / 3;
+            // UVインデックスは頂点インデックスと同じ
+            convertedIndices[i + 2] = indices[i / 3];
         }
         return convertedIndices;
     }

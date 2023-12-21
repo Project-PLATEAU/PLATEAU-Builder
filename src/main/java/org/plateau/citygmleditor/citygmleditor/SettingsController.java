@@ -37,8 +37,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.plateau.citygmleditor.citymodel.CityModel;
-import org.plateau.citygmleditor.citymodel.geometry.ILODSolid;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
 
@@ -258,8 +257,8 @@ public class SettingsController implements Initializable {
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
                 if (selectedItem != null) {
                     var item = selectedItem.valueProperty().get();
-                    exportGltfMenu.setDisable(!(item instanceof ILODSolid));
-                    exportObjMenu.setDisable(!(item instanceof ILODSolid));
+                    exportGltfMenu.setDisable(!(item instanceof ILODSolidView));
+                    exportObjMenu.setDisable(!(item instanceof ILODSolidView));
                 }
             }
             if (t.getClickCount() == 2) {
@@ -381,10 +380,10 @@ public class SettingsController implements Initializable {
             return;
 
         var item = selectedItem.valueProperty().get();
-        if (!(item instanceof ILODSolid)) 
+        if (!(item instanceof ILODSolidView))
             return;
 
-        ILODSolid solid = (ILODSolid)item;
+        ILODSolidView solid = (ILODSolidView)item;
         try {
             GltfExporter.export(newFile.toString(), solid);
         } catch (Exception ex) {
@@ -411,10 +410,10 @@ public class SettingsController implements Initializable {
             return;
 
         var item = selectedItem.valueProperty().get();
-        if (!(item instanceof ILODSolid)) 
+        if (!(item instanceof ILODSolidView))
             return;
 
-        ILODSolid solid = (ILODSolid)item;
+        ILODSolidView solid = (ILODSolidView)item;
         try {
             ObjExporter.export(newFile.toString(), solid);
         } catch (Exception ex) {
