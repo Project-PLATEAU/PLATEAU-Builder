@@ -22,6 +22,8 @@ module CityGMLEditor {
     requires jgltf.impl.v1;
     requires jgltf.impl.v2;
     requires com.fasterxml.jackson.core;
+    requires commons.math3;
+    requires org.locationtech.jts;
 
     provides Importer with
             ObjOrPolyObjImporter;

@@ -11,10 +11,7 @@ import org.plateau.citygmleditor.citymodel.BuildingInstallationView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.geometry.*;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
-import org.plateau.citygmleditor.utils3d.polygonmesh.FaceBuffer;
-import org.plateau.citygmleditor.utils3d.polygonmesh.PolygonMeshUtils;
-import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
-import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
+import org.plateau.citygmleditor.utils3d.polygonmesh.*;
 import org.plateau.citygmleditor.world.World;
 
 import java.util.ArrayList;

@@ -1,18 +1,19 @@
 package org.plateau.citygmleditor.utils3d.polygonmesh;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ポリゴンメッシュの面の配列を保持しインデックス追加、削除、取得を行う機能を提供します。
  * 面データは内部的には{@code ArrayList<Integer>}で保持され、各面は3点の頂点インデックス、法線インデックス、テクスチャ座標インデックスの計9要素によって定義されます。
  */
 public class FaceBuffer {
-    private final ArrayList<Integer> buffer = new ArrayList<>();
+    private final List<Integer> buffer = new ArrayList<>();
 
     /**
      * 内部保持されている面の生データを取得します。
      */
-    public ArrayList<Integer> getBuffer() {
+    public List<Integer> getBuffer() {
         return buffer;
     }
 
@@ -99,7 +100,7 @@ public class FaceBuffer {
     /**
      * 面を追加します。
      */
-    public void addFaces(ArrayList<Integer> faces) {
+    public void addFaces(List<Integer> faces) {
         buffer.addAll(faces);
     }
 }

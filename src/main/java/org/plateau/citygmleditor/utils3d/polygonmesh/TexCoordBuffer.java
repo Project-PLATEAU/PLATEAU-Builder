@@ -10,12 +10,12 @@ import java.util.List;
  * テクスチャ座標データは内部的には{@code ArrayList<Float>}で保持され、各座標はx, yの2要素で定義されます。
  */
 public class TexCoordBuffer {
-    private final ArrayList<Float> buffer = new ArrayList<>();
+    private final List<Float> buffer = new ArrayList<>();
 
     /**
      * 内部保持されている生データを取得します。
      */
-    public ArrayList<Float> getBuffer() {
+    public List<Float> getBuffer() {
         return buffer;
     }
 
