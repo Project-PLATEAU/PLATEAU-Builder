@@ -54,7 +54,7 @@ public final class Importer3D {
      * @return array of extension filters for supported file formats.
      */
     public static String[] getSupportedFormatExtensionFilters() {
-        return new String[]{"*.ma", "*.ase", "*.obj", "*.fxml", "*.dae"};
+        return new String[]{"*.ma", "*.ase", "*.obj", "*.fxml", "*.dae", "*.gml"};
     }
 
     /**

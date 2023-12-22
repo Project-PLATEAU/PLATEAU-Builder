@@ -70,15 +70,26 @@ public class GeometryFactory extends CityGMLFactory {
 
         var exterior = createLinearRing((LinearRing) gmlObject.getExterior().getRing());
         polygon.setExteriorRing(exterior);
-//        var interior = createLinearRing((org.citygml4j.model.gml.geometry.primitives.LinearRingView) gmlObject.getInterior().getRing());
+
+        var interiorBuffers = new ArrayList<VertexBuffer>();
+        for (var interiorRing : gmlObject.getInterior()) {
+            var interior = createLinearRing((LinearRing) interiorRing.getRing());
+            polygon.addInteriorRing(interior);
+            interiorBuffers.add(interior.getRing());
+        }
 
         // 輪郭をポリゴンメッシュ化
-        var ringFaceBuffer = new FaceBuffer();
-        Tessellator.tessellate(exterior.getRing(), null, ringFaceBuffer);
+        var subMeshFaceBuffer = new FaceBuffer();
+        Tessellator.tessellate(exterior.getRing(), interiorBuffers, null, subMeshFaceBuffer);
 
         // vertexBuffer内での頂点インデックスに変換
+        var interiorIndexRemaps = new ArrayList<List<Integer>>();
+        for (var interior : polygon.getInteriorRings()) {
+            interiorIndexRemaps.add(interior.getVertexIndices());
+        }
+        var indexRemap = PolygonMeshUtils.concatIndexRemaps(exterior.getVertexIndices(), interiorIndexRemaps);
         var polygonFaceBuffer = polygon.getFaceBuffer();
-        PolygonMeshUtils.applyIndexRemap(ringFaceBuffer, polygonFaceBuffer, exterior.getVertexIndices());
+        PolygonMeshUtils.applyIndexRemap(subMeshFaceBuffer, polygonFaceBuffer, indexRemap);
 
         // テクスチャ座標インデックス、法線インデックスをオフセット
         var normalOffset = faceBuffer.getPointCount();
@@ -87,6 +98,7 @@ public class GeometryFactory extends CityGMLFactory {
             polygonFaceBuffer.setNormalIndex(i, polygonFaceBuffer.getNormalIndex(i) + normalOffset);
         }
 
+        // Polygonの面情報をMeshの面情報として登録
         faceBuffer.addFaces(polygonFaceBuffer.getBuffer());
 
         return polygon;
@@ -97,13 +109,15 @@ public class GeometryFactory extends CityGMLFactory {
 
         var ringVertexBuffer = new VertexBuffer();
 
-        for (int i = 0; i < coordinates.size() - 1; i += 3) {
+        // 輪郭点をワールド内座標に変換して登録。始点と終点が重複するため終点を削除している。
+        for (int i = 0; i < coordinates.size() - 3 - 1; i += 3) {
             var geoCoordinate = new GeoCoordinate(coordinates.get(i), coordinates.get(i + 1), coordinates.get(i + 2));
             var position = World.getActiveInstance().getGeoReference().Project(geoCoordinate);
             ringVertexBuffer.addVertex(position);
         }
 
         var vertexIndices = new ArrayList<Integer>();
+        // ringの頂点をMeshの頂点として登録。重複する頂点は接合される。
         PolygonMeshUtils.weldVertices(
                 ringVertexBuffer, vertexBuffer, vertexIndices
         );
@@ -112,7 +126,22 @@ public class GeometryFactory extends CityGMLFactory {
                 gmlObject, vertexBuffer, texCoordBuffer,
                 vertexIndices, texCoordBuffer.getTexCoordCount());
 
+        var surfaceDataExists = extractSurfaceData(linearRing);
+        if (!surfaceDataExists) {
+            var texCoordCount = ringVertexBuffer.getVertexCount();
+            // UVない場合は0埋め
+            texCoordBuffer.addTexCoords(new float[texCoordCount * 2], false);
+        }
+
+        return linearRing;
+    }
+
+    private boolean extractSurfaceData(LinearRingView linearRing) {
+        if (getTarget() == null || getTarget().getRGBTextureAppearance() == null)
+            return false;
+
         var surfaceDataExists = false;
+
         for (var surfaceData : getTarget().getRGBTextureAppearance().getSurfaceData()) {
             var texCoords = surfaceData.getTextureCoordinatesByRing().get("#" + linearRing.getGMLID());
 
@@ -123,13 +152,7 @@ public class GeometryFactory extends CityGMLFactory {
                 break;
             }
         }
-        if (!surfaceDataExists) {
-            var texCoordCount = ringVertexBuffer.getVertexCount();
-            // UVない場合は0埋め
-            texCoordBuffer.addTexCoords(new float[texCoordCount * 2], false);
-        }
-
-        return linearRing;
+        return surfaceDataExists;
     }
 
     protected TriangleMesh createTriangleMesh(List<PolygonView> polygons) {
