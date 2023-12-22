@@ -2,6 +2,7 @@ package org.plateau.citygmleditor.citymodel.factory;
 
 import javafx.scene.shape.MeshView;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
 import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.SurfaceDataView;
@@ -29,24 +30,14 @@ public class LOD2SolidFactory extends GeometryFactory {
         for (var boundedBySurface : gmlObject.getBoundedBySurface()) {
             if (boundedBySurface.getBoundarySurface().getLod2MultiSurface() == null)
                 continue;
-            var boundary = new BoundarySurfaceView(boundedBySurface.getBoundarySurface());
+
+            var boundary = createBoundary(boundedBySurface);
             boundaries.add(boundary);
-
-            var boundaryPolygons = new ArrayList<PolygonView>();
-            for (var surfaceMember : boundedBySurface.getBoundarySurface().getLod2MultiSurface().getMultiSurface().getSurfaceMember()) {
-                var polygon = (Polygon) surfaceMember.getSurface();
-                if (polygon == null)
-                    continue;
-
-                var polygonObject = createPolygon(polygon);
-                boundaryPolygons.add(polygonObject);
-            }
-
-            boundary.setPolygons(boundaryPolygons);
         }
         solid.setBoundaries(boundaries);
 
         var polygonsMap = solid.getSurfaceDataPolygonsMap();
+        // 1メッシュにつき1マテリアルしか登録できないため、マテリアルごとに別メッシュとして生成
         for (Map.Entry<SurfaceDataView, ArrayList<PolygonView>> entry : polygonsMap.entrySet()) {
             var meshView = new MeshView();
             meshView.setMesh(createTriangleMesh(entry.getValue()));
@@ -59,5 +50,22 @@ public class LOD2SolidFactory extends GeometryFactory {
         }
 
         return solid;
+    }
+
+    private BoundarySurfaceView createBoundary(BoundarySurfaceProperty boundedBySurface) {
+        var boundary = new BoundarySurfaceView(boundedBySurface.getBoundarySurface());
+
+        var boundaryPolygons = new ArrayList<PolygonView>();
+        for (var surfaceMember : boundedBySurface.getBoundarySurface().getLod2MultiSurface().getMultiSurface().getSurfaceMember()) {
+            var polygon = (Polygon) surfaceMember.getSurface();
+            if (polygon == null)
+                continue;
+
+            var polygonObject = createPolygon(polygon);
+            boundaryPolygons.add(polygonObject);
+        }
+
+        boundary.setPolygons(boundaryPolygons);
+        return boundary;
     }
 }
