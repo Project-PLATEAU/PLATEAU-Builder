@@ -20,7 +20,7 @@ import java.util.List;
 
 public class GeometryFactory extends CityGMLFactory {
     VertexBuffer vertexBuffer = new VertexBuffer();
-    FaceBuffer faceBuffer = new FaceBuffer();
+    VertexBuffer normalBuffer = new VertexBuffer();
     TexCoordBuffer texCoordBuffer = new TexCoordBuffer();
 
     protected GeometryFactory(CityModelView target) {
@@ -77,7 +77,8 @@ public class GeometryFactory extends CityGMLFactory {
 
         // 輪郭をポリゴンメッシュ化
         var subMeshFaceBuffer = new FaceBuffer();
-        Tessellator.tessellate(exterior.getRing(), interiorBuffers, null, subMeshFaceBuffer);
+        var subMeshVertexBuffer = new VertexBuffer();
+        Tessellator.tessellate(exterior.getRing(), interiorBuffers, subMeshVertexBuffer, subMeshFaceBuffer);
 
         // vertexBuffer内での頂点インデックスに変換
         var interiorIndexRemaps = new ArrayList<List<Integer>>();
@@ -89,14 +90,15 @@ public class GeometryFactory extends CityGMLFactory {
         PolygonMeshUtils.applyIndexRemap(subMeshFaceBuffer, polygonFaceBuffer, indexRemap);
 
         // テクスチャ座標インデックス、法線インデックスをオフセット
-        var normalOffset = faceBuffer.getPointCount();
+        var normalOffset = normalBuffer.getVertexCount();
         for (int i = 0; i < polygonFaceBuffer.getPointCount(); ++i) {
             polygonFaceBuffer.setTexCoordIndex(i, polygonFaceBuffer.getTexCoordIndex(i) + texCoordOffset);
             polygonFaceBuffer.setNormalIndex(i, polygonFaceBuffer.getNormalIndex(i) + normalOffset);
         }
 
-        // Polygonの面情報をMeshの面情報として登録
-        faceBuffer.addFaces(polygonFaceBuffer.getBuffer());
+        // 法線計算
+        var subMeshNormals = PolygonMeshUtils.calculateNormal(subMeshVertexBuffer, subMeshFaceBuffer);
+        normalBuffer.addVertices(subMeshNormals);
 
         return polygon;
     }
@@ -152,17 +154,24 @@ public class GeometryFactory extends CityGMLFactory {
         return surfaceDataExists;
     }
 
+    /**
+     * Polygonの一覧からTriangleMeshを生成します。
+     * 面情報以外（頂点、法線、テクスチャ座標）は他Polygonのものも含むため、部分的なPolygonに対して呼び出される場合冗長なデータが生成されます。
+     */
     protected TriangleMesh createTriangleMesh(List<PolygonView> polygons) {
         var mesh = new TriangleMesh();
         mesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
         mesh.getPoints().addAll(vertexBuffer.getBufferAsArray());
-        mesh.getFaces().addAll(faceBuffer.getBufferAsArray());
         mesh.getTexCoords().addAll(texCoordBuffer.getBufferAsArray());
+        mesh.getNormals().addAll(normalBuffer.getBufferAsArray());
 
-        var normals = PolygonMeshUtils.calculateNormal(vertexBuffer, faceBuffer);
-        mesh.getNormals().addAll(normals);
+        var faces = new FaceBuffer();
+        for (var polygon : polygons) {
+            faces.addFaces(polygon.getFaceBuffer().getBuffer());
+        }
+        mesh.getFaces().addAll(faces.getBufferAsArray());
 
-        var smooth = new int[faceBuffer.getBuffer().size() / mesh.getFaceElementSize()];
+        var smooth = new int[faces.getFaceCount()];
         Arrays.fill(smooth, 1);
         mesh.getFaceSmoothingGroups().addAll(smooth);
 
