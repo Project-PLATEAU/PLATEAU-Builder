@@ -4,6 +4,7 @@ import javafx.scene.Parent;
 import org.citygml4j.model.citygml.CityGML;
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.plateau.citygmleditor.citygmleditor.BuildingUnit;
 import org.plateau.citygmleditor.citymodel.factory.CityGMLFactory;
 import org.citygml4j.model.gml.feature.BoundingShape;
 import org.citygml4j.model.gml.geometry.primitives.*;
@@ -11,7 +12,7 @@ import org.plateau.citygmleditor.citymodel.geometry.LOD1Solid;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2Solid;
 import org.plateau.citygmleditor.citymodel.geometry.LOD3Solid;
 
-public class Building extends Parent {
+public class Building extends BuildingUnit {
     private AbstractBuilding gmlObject;
 
     private LOD1Solid lod1Solid;
@@ -48,6 +49,7 @@ public class Building extends Parent {
         }
         this.lod2Solid = solid;
         this.getChildren().add(solid);
+        super.updateOrigin();
     }
 
     public LOD2Solid getLOD2Solid() {
@@ -63,6 +65,7 @@ public class Building extends Parent {
         }
         this.lod3Solid = solid;
         this.getChildren().add(solid);
+        super.updateOrigin();
     }
 
     public LOD3Solid getLOD3Solid() {
@@ -77,6 +80,7 @@ public class Building extends Parent {
         }
         this.buildingInstallationView = buildingInstallationView;
         this.getChildren().add(buildingInstallationView);
+        super.updateOrigin();
     }
 
     public Envelope getEnvelope() {

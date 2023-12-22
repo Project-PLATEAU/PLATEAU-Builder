@@ -155,6 +155,8 @@ public class ContentModel {
     private double mouseDeltaX;
     private double mouseDeltaY;
 
+    private boolean isHookingMousePrimaryButtonEvent;
+
     private final EventHandler<MouseEvent> mouseEventHandler = event -> {
         // System.out.println("MouseEvent ...");
 
@@ -206,8 +208,10 @@ public class ContentModel {
                 cameraXform2.t.setY(cameraXform2.t.getY() + yFlip*mouseDeltaY*modifierFactor*modifier*0.3);  // -
             }
             else if (alt && event.isPrimaryButtonDown()) {
-                cameraXform.ry.setAngle(cameraXform.ry.getAngle() - yFlip*mouseDeltaX*modifierFactor*modifier*2.0);  // +
-                cameraXform.rx.setAngle(cameraXform.rx.getAngle() + flip*mouseDeltaY*modifierFactor*modifier*2.0);  // -
+                if (!isHookingMousePrimaryButtonEvent) {
+                    cameraXform.ry.setAngle(cameraXform.ry.getAngle() - yFlip*mouseDeltaX*modifierFactor*modifier*2.0);  // +
+                    cameraXform.rx.setAngle(cameraXform.rx.getAngle() + flip*mouseDeltaY*modifierFactor*modifier*2.0);  // -
+                }
             }
             else if (alt && event.isSecondaryButtonDown()) {
                 double z = cameraPosition.getZ();
@@ -549,6 +553,10 @@ public class ContentModel {
 
     public Rotate getCameraLookZRotate() {
         return cameraLookZRotate;
+    }
+
+    public void setHookingMousePrimaryButtonEvent(boolean isHook) {
+        isHookingMousePrimaryButtonEvent = isHook;
     }
 
     private void createAxes() {
