@@ -174,14 +174,13 @@ public class L11LogicalConsistencyValidator implements IValidator {
         }
 
         for (int i = 3; i < points.size(); i++) {
-            boolean isValidStandard;
             if (Objects.equals(standard, L11)) {
-                isValidStandard = this.distanceFromPointToPlane(points.get(i), planeEquation) == 0.0;
-                return isValidStandard;
+                boolean inValidStandard = this.distanceFromPointToPlane(points.get(i), planeEquation) != 0.0;
+                if (inValidStandard) return false;
             }
             if (Objects.equals(standard, L12)) {
-                isValidStandard = this.distanceFromPointToPlane(points.get(i), planeEquation) <= 0.03;
-                return isValidStandard;
+                boolean inValidStandard = this.distanceFromPointToPlane(points.get(i), planeEquation) > 0.03;
+                if (inValidStandard) return false;
             }
         }
 
