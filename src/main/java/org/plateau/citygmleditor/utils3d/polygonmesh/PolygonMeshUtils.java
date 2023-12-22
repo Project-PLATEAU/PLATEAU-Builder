@@ -83,6 +83,18 @@ public class PolygonMeshUtils {
         }
     }
 
+    /**
+     * インデックスのリマップ情報を結合します。
+     */
+    public static List<Integer> concatIndexRemaps(List<Integer> exteriorRemap, List<List<Integer>> interiorRemaps) {
+        var result = new ArrayList<Integer>(exteriorRemap);
+
+        for (var vertexIndexRemap : interiorRemaps) {
+            result.addAll(vertexIndexRemap);
+        }
+        return result;
+    }
+
     public static Vec3f calculateNormal(Vec3f p1, Vec3f p2, Vec3f p3) {
         Vec3f v1 = new Vec3f();
         v1.sub(p2, p1);

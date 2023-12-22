@@ -5,21 +5,57 @@ import org.plateau.citygmleditor.utils3d.polygonmesh.FaceBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Tessellator {
-    public static void tessellate(VertexBuffer exterior, VertexBuffer interior, FaceBuffer outFaceBuffer) {
+    /**
+     * 輪郭点からポリゴンメッシュを生成します。
+     * GMLの各輪郭は始点と終点が重複しているため、事前に終点を削除してからこの関数に入力してください。
+     * @param exterior 外輪郭
+     * @param interiors 内輪郭(空洞)の一覧
+     * @param outVertexBuffer tessellate処理で生成されたメッシュの頂点
+     * @param outFaceBuffer tessellate処理で生成されたメッシュの面情報
+     */
+    public static void tessellate(
+            VertexBuffer exterior, List<VertexBuffer> interiors,
+            VertexBuffer outVertexBuffer, FaceBuffer outFaceBuffer) {
+        if (interiors == null || interiors.isEmpty()) {
+            var faces = tessellate(
+                    exterior.getBufferAsArray(),
+                    null,
+                    3);
+            outFaceBuffer.addFaces(faces);
+
+            if (outVertexBuffer != null)
+                outVertexBuffer.addVertices(exterior.getBuffer());
+
+            return;
+        }
+
+        var interiorArrays = new ArrayList<float[]>();
+        for (var interior : interiors) {
+            interiorArrays.add(interior.getBufferAsArray());
+        }
         var faces = tessellate(
                 exterior.getBufferAsArray(),
-                interior == null ? null : interior.getBufferAsArray(),
+                interiorArrays,
                 3);
         outFaceBuffer.addFaces(faces);
+
+        if (outVertexBuffer == null)
+            return;
+
+        outVertexBuffer.addVertices(exterior.getBuffer());
+        for (var interior : interiors) {
+            outVertexBuffer.addVertices(interior.getBuffer());
+        }
     }
 
-    public static int[] tessellate(float[] exterior, float[] interior, int dim) {
-        if (interior == null) {
-            // 最後の頂点は重複しているので削除
-            var vertices = new float[exterior.length - 1];
-            System.arraycopy(exterior, 0, vertices, 0, exterior.length - 1);
+    private static int[] tessellate(float[] exterior, List<float[]> interiors, int dim) {
+        if (interiors == null || interiors.isEmpty()) {
+            var vertices = new float[exterior.length];
+            System.arraycopy(exterior, 0, vertices, 0, vertices.length);
 
             GeometryInfo ginfo = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
             ginfo.setCoordinates(vertices);
@@ -33,14 +69,30 @@ public class Tessellator {
             return convertToSubMeshIndices(indices);
         }
 
-        var vertices = new float[exterior.length + interior.length];
+        int interiorArraySize = 0;
+        for (var interior : interiors) {
+            interiorArraySize += interior.length;
+        }
+
+        var vertices = new float[exterior.length + interiorArraySize];
         System.arraycopy(exterior, 0, vertices, 0, exterior.length);
-        System.arraycopy(interior, 0, vertices, exterior.length, interior.length);
+
+        int arrayDestPosition = exterior.length;
+        for (var interior : interiors) {
+            System.arraycopy(interior, 0, vertices, arrayDestPosition, interior.length);
+            arrayDestPosition += interior.length;
+        }
 
         GeometryInfo ginfo = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
         ginfo.setCoordinates(vertices);
-        ginfo.setContourCounts(new int[]{2});
-        ginfo.setStripCounts(new int[]{exterior.length / 3, interior.length / 3});
+        ginfo.setContourCounts(new int[]{interiors.size() + 1});
+
+        var stripCounts = new int[interiors.size() + 1];
+        stripCounts[0] = exterior.length / 3;
+        for (int i = 0; i < interiors.size(); ++i) {
+            stripCounts[i + 1] = interiors.get(i).length / 3;
+        }
+        ginfo.setStripCounts(stripCounts);
 
         // Triangulate実行
         ginfo.convertToIndexedTriangles();

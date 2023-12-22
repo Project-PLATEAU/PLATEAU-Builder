@@ -5,13 +5,15 @@ import org.plateau.citygmleditor.citymodel.GMLObjectView;
 import org.plateau.citygmleditor.citymodel.SurfaceDataView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.FaceBuffer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PolygonView extends GMLObjectView<Polygon> {
     private final FaceBuffer faceBuffer = new FaceBuffer();
 
     private LinearRingView exteriorRing;
 
-    // TODO: InteriorRing対応
-    //private ArrayList<LinearRingView> interiorRings = new ArrayList<>();
+    private List<LinearRingView> interiorRings = new ArrayList<>();
 
     public PolygonView(Polygon original) {
         super(original);
@@ -21,8 +23,17 @@ public class PolygonView extends GMLObjectView<Polygon> {
         return this.exteriorRing;
 
     }
+
     public void setExteriorRing(LinearRingView exteriorRing) {
         this.exteriorRing = exteriorRing;
+    }
+
+    public void addInteriorRing(LinearRingView interiorRing) {
+        this.interiorRings.add(interiorRing);
+    }
+
+    public List<LinearRingView> getInteriorRings() {
+        return this.interiorRings;
     }
 
     public SurfaceDataView getSurfaceData() {

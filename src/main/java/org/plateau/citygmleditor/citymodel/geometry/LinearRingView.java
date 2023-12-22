@@ -31,7 +31,7 @@ public class LinearRingView extends GMLObjectView<LinearRing> {
     }
 
     /**
-     * 輪郭点を取得します。ここで取得される点は始点と終点が重複しています。
+     * 輪郭点を取得します。ここで取得される点はGMLの輪郭点から終点が削除されています。
      */
     public VertexBuffer getRing() {
         var vertexBuffer = new VertexBuffer();
