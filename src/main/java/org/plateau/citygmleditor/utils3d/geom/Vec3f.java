@@ -32,6 +32,8 @@
 
 package org.plateau.citygmleditor.utils3d.geom;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+
 /**
  * A 3-dimensional, single-precision, floating-point vector.
  */
@@ -64,6 +66,10 @@ public class Vec3f {
         this.x = v.x;
         this.y = v.y;
         this.z = v.z;
+    }
+
+    public Vector3D convertToVector3D() {
+        return new Vector3D(x, y, z);
     }
 
     public void set(Vec3f v) {

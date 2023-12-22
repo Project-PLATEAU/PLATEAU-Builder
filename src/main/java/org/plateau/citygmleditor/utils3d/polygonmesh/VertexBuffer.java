@@ -4,6 +4,7 @@ import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -11,12 +12,12 @@ import java.util.NoSuchElementException;
  * 頂点データは内部的には{@code ArrayList<Float>}で保持され、各頂点はx, y, zの3要素で定義されます。
  */
 public class VertexBuffer {
-    private final ArrayList<Float> buffer = new ArrayList<>();
+    private final List<Float> buffer = new ArrayList<>();
 
     /**
      * 内部保持されている頂点の生データを取得します。
      */
-    public ArrayList<Float> getBuffer() {
+    public List<Float> getBuffer() {
         return buffer;
     }
 
@@ -32,6 +33,16 @@ public class VertexBuffer {
         return result;
     }
 
+    /**
+     * 内部保持されている頂点の生データをVec3fのリストに変換して取得します。
+     */
+    public List<Vec3f> getVertices() {
+        var result = new ArrayList<Vec3f>();
+        for (int i = 0; i < getVertexCount(); ++i) {
+            result.add(getVertex(i));
+        }
+        return result;
+    }
 
     /**
      * {@code getVertex}関数で扱えるインデックス数を取得します。
@@ -65,7 +76,7 @@ public class VertexBuffer {
     /**
      * 頂点を追加します。
      */
-    public void addVertices(ArrayList<Float> vertices) {
+    public void addVertices(List<Float> vertices) {
         buffer.addAll(vertices);
     }
 }

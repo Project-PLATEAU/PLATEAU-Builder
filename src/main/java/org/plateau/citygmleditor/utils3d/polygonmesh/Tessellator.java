@@ -1,8 +1,6 @@
-package org.plateau.citygmleditor.citymodel.factory;
+package org.plateau.citygmleditor.utils3d.polygonmesh;
 
 import com.sun.j3d.utils.geometry.GeometryInfo;
-import org.plateau.citygmleditor.utils3d.polygonmesh.FaceBuffer;
-import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
