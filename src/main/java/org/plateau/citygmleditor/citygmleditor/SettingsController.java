@@ -37,6 +37,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
@@ -59,25 +60,15 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TitledPane;
 import javafx.scene.paint.Color;
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
-import javafx.scene.transform.Transform;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.DoubleProperty;
 import javafx.util.StringConverter;
 import org.plateau.citygmleditor.world.*;
 
@@ -384,8 +375,9 @@ public class SettingsController implements Initializable {
             return;
 
         ILODSolidView solid = (ILODSolidView)item;
+        BuildingView building = (BuildingView)solid.getParent();
         try {
-            GltfExporter.export(newFile.toString(), solid);
+            GltfExporter.export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -414,8 +406,9 @@ public class SettingsController implements Initializable {
             return;
 
         ILODSolidView solid = (ILODSolidView)item;
+        BuildingView building = (BuildingView)solid.getParent();
         try {
-            ObjExporter.export(newFile.toString(), solid);
+            ObjExporter.export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
         }
