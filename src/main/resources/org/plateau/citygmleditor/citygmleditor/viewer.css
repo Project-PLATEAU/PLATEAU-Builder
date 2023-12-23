@@ -40,7 +40,6 @@
 -fx-focus-color: #5F8AC1;
 -fx-faint-focus-color: #039ED322;
 
-
 }
 .button{
     -fx-font-size: 10px;
@@ -66,6 +65,14 @@
     -fx-tab-max-width: 42;
     -fx-tab-min-height: 42;
     -fx-tab-max-height: 42;
+}
+
+.table-view,
+.tree-table-view {
+    /* Constants used throughout the tableview. */
+    -fx-table-header-border-color: -fx-box-border;
+    -fx-table-cell-border-color: derive(-fx-color,5%);
+    -fx-background-color: #444444;
 }
 
 /*******************************************************************************
