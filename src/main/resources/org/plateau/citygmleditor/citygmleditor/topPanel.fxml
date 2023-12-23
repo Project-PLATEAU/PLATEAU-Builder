@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
+
+
+<ToolBar id="toolbar" prefHeight="80.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.MainController">
+    <!--開く-->
+    <Button mnemonicParsing="false" onAction="#openGml" text="開く" contentDisplay="TOP" graphicTextGap="0.0" >
+        <graphic>
+            <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
+                <viewport>
+                    <Rectangle2D />
+                </viewport>
+                <image>
+                    <Image url="@icon_open.png" />
+                </image>
+            </ImageView>
+        </graphic>
+    </Button>
+    <!--インポート-->
+    <Button mnemonicParsing="false" onAction="#openGml" text="インポート" contentDisplay="TOP" graphicTextGap="0.0" >
+        <graphic>
+            <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
+                <viewport>
+                    <Rectangle2D />
+                </viewport>
+                <image>
+                    <Image url="@icon_import.png" />
+                </image>
+            </ImageView>
+        </graphic>
+    </Button>
+    <!--書き出し-->
+    <Button mnemonicParsing="false" onAction="#export" text="書き出し" contentDisplay="TOP" graphicTextGap="0.0" >
+        <graphic>
+            <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
+                <viewport>
+                    <Rectangle2D />
+                </viewport>
+                <image>
+                    <Image url="@icon_export.png" />
+                </image>
+            </ImageView>
+        </graphic>
+    </Button>
+    <!--品質検査-->
+    <Button mnemonicParsing="false" onAction="#openValidationWindow" text="品質検査" contentDisplay="TOP" graphicTextGap="0.0" >
+        <graphic>
+            <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
+                <viewport>
+                    <Rectangle2D />
+                </viewport>
+                <image>
+                    <Image url="@icon_check.png" />
+                </image>
+            </ImageView>
+        </graphic>
+    </Button>
+
+</ToolBar>
