@@ -41,6 +41,8 @@ import java.awt.image.BufferedImage;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public class TextureExporter {
     public static void export(String folderPath, CityModel cityModel) {
@@ -64,6 +66,7 @@ public class TextureExporter {
         ArrayList<SurfaceData> tempSurfaceDatas = tempAppearance.getSurfaceData();
         String appearanceDirName = "";
         int count = 0;
+
         for (SurfaceData surfaceData : tempSurfaceDatas) {
             if (count == 0) {
                 var filePathComponents = appearanceList.get(0).split("/");
