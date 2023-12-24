@@ -146,7 +146,7 @@ public class GltfExporter {
                 vertexIndexMap.put(index, vertexIndexMap.size());
                 vertexList.add(vertexBuffer.getVertex(index));
                 if (materialModel != defaultMaterialModel) {
-                    texCoordList.add(texCoordBuffer.getTexCoord(index));
+                    texCoordList.add(texCoordBuffer.getTexCoord(index, false));
                 }
             }
             faces[i] = vertexIndexMap.get(index);

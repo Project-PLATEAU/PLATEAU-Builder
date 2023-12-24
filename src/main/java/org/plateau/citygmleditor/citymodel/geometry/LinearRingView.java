@@ -42,17 +42,6 @@ public class LinearRingView extends GMLObjectView<LinearRing> {
     }
 
     /**
-     * テクスチャ座標を取得します。
-     */
-    public TexCoordBuffer getTexCoords() {
-        var texCoordBuffer = new TexCoordBuffer();
-        for (var index : vertexIndices) {
-            texCoordBuffer.addTexCoord(sharedTexCoordBuffer.getTexCoord(index), true);
-        }
-        return texCoordBuffer;
-    }
-
-    /**
      * 輪郭点を{@code sharedVertexBuffer}内での頂点インデックスとして取得します。
      * @return 各要素iに対し輪郭点は{@code sharedVertexBuffer.getVertex(i)}で取得できます。
      */
