@@ -45,6 +45,10 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.locationtech.jts/jts
     implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.19.0'
+
+    // https://mvnrepository.com/artifact/org.osgeo/proj4j
+    implementation group: 'org.osgeo', name: 'proj4j', version: '0.1.0'
+
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 }

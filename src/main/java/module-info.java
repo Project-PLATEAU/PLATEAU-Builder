@@ -24,6 +24,7 @@ module CityGMLEditor {
     requires com.fasterxml.jackson.core;
     requires commons.math3;
     requires org.locationtech.jts;
+    requires proj4j;
 
     provides Importer with
             ObjOrPolyObjImporter;
