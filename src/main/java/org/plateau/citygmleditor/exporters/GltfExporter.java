@@ -128,7 +128,7 @@ public class GltfExporter {
 
         return sceneModel;
     }
-    
+
     private static DefaultMeshPrimitiveModel createMeshPrimitive(ILODSolidView lodSolid, PolygonView polygon, MaterialModelV2 materialModel) {
         var faceBuffer = polygon.getFaceBuffer();
         var pointCount = faceBuffer.getPointCount();
@@ -139,17 +139,18 @@ public class GltfExporter {
         var texCoordBuffer = lodSolid.getTexCoordBuffer();
         List<Vec3f> vertexList = new ArrayList<>();
         List<Vec2f> texCoordList = new ArrayList<>();
-        Map<Integer, Integer> vertexIndexMap = new LinkedHashMap<>();
+        Map<Integer, Integer> vertexIndexMap = new HashMap<>();
         for (int i = 0; i < pointCount; i++) {
-            var index = faceBuffer.getVertexIndex(i);
-            if (!vertexIndexMap.containsKey(index))  {
-                vertexIndexMap.put(index, vertexIndexMap.size());
-                vertexList.add(vertexBuffer.getVertex(index));
+            var vertexIndex = faceBuffer.getVertexIndex(i);
+            if (!vertexIndexMap.containsKey(vertexIndex))  {
+                vertexIndexMap.put(vertexIndex, vertexIndexMap.size());
+                vertexList.add(vertexBuffer.getVertex(vertexIndex));
                 if (materialModel != defaultMaterialModel) {
-                    texCoordList.add(texCoordBuffer.getTexCoord(index, false));
+                    var texCoordIndex = faceBuffer.getTexCoordIndex(i);
+                    texCoordList.add(texCoordBuffer.getTexCoord(texCoordIndex, true));
                 }
             }
-            faces[i] = vertexIndexMap.get(index);
+            faces[i] = vertexIndexMap.get(vertexIndex);
         }
 
         MeshPrimitiveBuilder meshPrimitiveBuilder = MeshPrimitiveBuilder.create();
