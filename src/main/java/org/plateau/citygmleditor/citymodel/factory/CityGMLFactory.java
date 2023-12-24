@@ -1,19 +1,19 @@
 package org.plateau.citygmleditor.citymodel.factory;
 
-import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 
 public abstract class CityGMLFactory {
-    private CityModel target;
+    private CityModelView target;
 
-    protected CityGMLFactory(CityModel target) {
+    protected CityGMLFactory(CityModelView target) {
         this.target = target;
     }
 
-    public CityModel getTarget() {
+    public CityModelView getTarget() {
         return target;
     }
 
-    public void setTarget(CityModel target) {
+    public void setTarget(CityModelView target) {
         this.target = target;
     }
 }

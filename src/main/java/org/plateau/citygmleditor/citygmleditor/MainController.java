@@ -52,13 +52,12 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
-import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.exporters.TextureExporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
@@ -154,21 +153,15 @@ public class MainController implements Initializable {
             e.printStackTrace();
         }
 
-        // listen for drops
-        supportedFormatRegex = Importer3D.getSupportedFormatExtensionFilters();
-        for (int i = 0; i < supportedFormatRegex.length; i++) {
-            supportedFormatRegex[i] = "." + supportedFormatRegex[i].replaceAll("\\.", "\\.");
-        }
+        // ドロップによるGMLインポート
         sceneContent.getSubScene().setOnDragOver(event -> {
-            Dragboard db = event.getDragboard();
+                Dragboard db = event.getDragboard();
             if (db.hasFiles()) {
                 boolean hasSupportedFile = false;
                 fileLoop: for (File file : db.getFiles()) {
-                    for (String format : supportedFormatRegex) {
-                        if (file.getName().matches(format)) {
-                            hasSupportedFile = true;
-                            break fileLoop;
-                        }
+                    if (file.getName().matches(".*\\.gml")) {
+                        hasSupportedFile = true;
+                        break fileLoop;
                     }
                 }
                 if (hasSupportedFile)
@@ -182,11 +175,9 @@ public class MainController implements Initializable {
             if (db.hasFiles()) {
                 File supportedFile = null;
                 fileLoop: for (File file : db.getFiles()) {
-                    for (String format : supportedFormatRegex) {
-                        if (file.getName().matches(format)) {
-                            supportedFile = file;
-                            break fileLoop;
-                        }
+                    if (file.getName().matches(".*\\.gml")) {
+                        supportedFile = file;
+                        break fileLoop;
                     }
                 }
                 if (supportedFile != null) {
@@ -194,7 +185,7 @@ public class MainController implements Initializable {
                     if (supportedFile.getAbsolutePath().indexOf('%') != -1) {
                         supportedFile = new File(URLDecoder.decode(supportedFile.getAbsolutePath()));
                     }
-                    load(supportedFile);
+                    loadGml(supportedFile.getAbsolutePath());
                 }
                 success = true;
             }
@@ -429,10 +420,8 @@ public class MainController implements Initializable {
                         e.printStackTrace();
                     }
                 }
-
             }
         }
-
     }
 
     public void openValidationWindow(ActionEvent event) throws IOException {

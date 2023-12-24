@@ -2,306 +2,177 @@ package org.plateau.citygmleditor.citymodel.factory;
 
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
-import org.citygml4j.model.citygml.building.AbstractBuilding;
-import org.citygml4j.model.gml.geometry.complexes.CompositeSurface;
-import org.citygml4j.model.gml.geometry.primitives.Solid;
-import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
+import javafx.scene.shape.VertexFormat;
+import org.citygml4j.model.citygml.building.BuildingInstallation;
+import org.citygml4j.model.gml.geometry.primitives.LinearRing;
+import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
 import org.plateau.citygmleditor.citymodel.BuildingInstallationView;
-import org.plateau.citygmleditor.citymodel.CityModel;
-import org.plateau.citygmleditor.citymodel.SurfaceData;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.geometry.*;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
+import org.plateau.citygmleditor.utils3d.polygonmesh.*;
 import org.plateau.citygmleditor.world.World;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class GeometryFactory extends CityGMLFactory {
-    protected GeometryFactory(CityModel target) {
+    VertexBuffer vertexBuffer = new VertexBuffer();
+    VertexBuffer normalBuffer = new VertexBuffer();
+    TexCoordBuffer texCoordBuffer = new TexCoordBuffer();
+
+    protected GeometryFactory(CityModelView target) {
         super(target);
     }
 
-    public LOD1Solid createLOD1Solid(Solid gmlObject) {
-        var exterior = gmlObject.getExterior();
-        var compositeSurface = (CompositeSurface) exterior.getObject();
+    public BuildingInstallationView cretateBuildingInstallationView(BuildingInstallation gmlObject) {
+        if (gmlObject.getLod3Geometry() == null)
+            return null;
 
-        List<SurfaceProperty> surfaceMember = compositeSurface.getSurfaceMember();
+        var geometries = new ArrayList<GeometryView>();
 
-        var polygons = new ArrayList<Polygon>();
+        var buildingInstallationView = new BuildingInstallationView(gmlObject);
 
-        for (SurfaceProperty surfaceMemberElement : surfaceMember) {
-            var polygon = (org.citygml4j.model.gml.geometry.primitives.Polygon) surfaceMemberElement.getSurface();
+        var geometry = new GeometryView(gmlObject.getLod3Geometry().getGeometry());
+        var multiSurface = (MultiSurface) gmlObject.getLod3Geometry().getGeometry();
+        var polygons = new ArrayList<PolygonView>();
+        for (var surfaceMember : multiSurface.getSurfaceMember()) {
+            var polygon = (Polygon) surfaceMember.getSurface();
             if (polygon == null)
                 continue;
-
             var polygonObject = createPolygon(polygon);
             polygons.add(polygonObject);
-        }
 
-        var mesh = createTriangleMesh(polygons);
-
-        var solid = new LOD1Solid(gmlObject);
-        solid.setPolygons(polygons);
-        solid.setMesh(mesh);
-        solid.setMaterial(World.getActiveInstance().getDefaultMaterial());
-
-        return solid;
-    }
-
-    public LOD2Solid createLOD2Solid(AbstractBuilding gmlObject) {
-        if (gmlObject.getLod2Solid() == null)
-            return null;
-
-        var solid = new LOD2Solid(gmlObject.getLod2Solid().getObject());
-
-        var boundaries = new ArrayList<BoundarySurface>();
-
-        for (var boundedBySurface : gmlObject.getBoundedBySurface()) {
-            if (boundedBySurface.getBoundarySurface().getLod2MultiSurface() == null)
-                continue;
-            var boundary = new BoundarySurface(boundedBySurface.getBoundarySurface());
-            boundaries.add(boundary);
-
-            var boundaryPolygons = new ArrayList<Polygon>();
-            for (var surfaceMember : boundedBySurface.getBoundarySurface().getLod2MultiSurface().getMultiSurface().getSurfaceMember()) {
-                var polygon = (org.citygml4j.model.gml.geometry.primitives.Polygon) surfaceMember.getSurface();
-                if (polygon == null)
-                    continue;
-
-                var polygonObject = createPolygon(polygon);
-                boundaryPolygons.add(polygonObject);
-            }
-
-            boundary.setPolygons(boundaryPolygons);
-        }
-        solid.setBoundaries(boundaries);
-
-        var polygonsMap = solid.getSurfaceDataPolygonsMap();
-        for (Map.Entry<SurfaceData, ArrayList<Polygon>> entry : polygonsMap.entrySet()) {
+            // ノードの最小単位＝ポリゴン
+            var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
+            var polygonMesh = new ArrayList<PolygonView>(List.of(polygonObject));
             var meshView = new MeshView();
-            meshView.setMesh(createTriangleMesh(entry.getValue()));
-            if (entry.getKey() == null) {
-                meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
-            } else {
-                meshView.setMaterial(entry.getKey().getMaterial());
-            }
-            solid.addMeshView(meshView);
+            meshView.setMesh(createTriangleMesh(polygonMesh));
+            meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
+            meshView.setId(surfaceMember.getGeometry().getId());
+            buildingInstallationView.addLod3MeshView(gmlObject.getId(), meshView);
         }
+        geometry.setPolygons(polygons);
 
-        return solid;
+        buildingInstallationView.setLod3Geometry(geometry);
+        return buildingInstallationView;
     }
 
-    public LOD3Solid createLOD3Solid(AbstractBuilding gmlObject) {
-        if (gmlObject.getLod3Solid() == null)
-            return null;
+    protected PolygonView createPolygon(Polygon gmlObject) {
+        var texCoordOffset = texCoordBuffer.getTexCoordCount();
 
-        var solid = new LOD3Solid(gmlObject.getLod3Solid().getObject());
+        var polygon = new PolygonView(gmlObject);
 
-        var boundaries = new ArrayList<BoundarySurface>();
-
-        // <bldg:boundedBy>
-        for (var boundedBySurface : gmlObject.getBoundedBySurface()) {
-            var boundarySurface = boundedBySurface.getBoundarySurface();
-
-            // <bldg:lod3MultiSurface>
-            if (boundarySurface.getLod3MultiSurface() != null) {
-                var boundary = new BoundarySurface(boundarySurface);
-                boundaries.add(boundary);
-
-                var boundaryPolygons = new ArrayList<Polygon>();
-                for (var surfaceMember : boundarySurface.getLod3MultiSurface().getMultiSurface().getSurfaceMember()) {
-                    var polygon = (org.citygml4j.model.gml.geometry.primitives.Polygon) surfaceMember.getSurface();
-                    if (polygon == null)
-                        continue;
-
-                    var polygonObject = createPolygon(polygon);
-                    boundaryPolygons.add(polygonObject);
-
-                    // ノードの最小単位＝ポリゴン
-                    var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
-                    var polygonMesh = new ArrayList<Polygon>(List.of(polygonObject));
-                    var meshView = new MeshView();
-                    meshView.setMesh(createTriangleMesh(polygonMesh));
-                    meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
-                    meshView.setId(surfaceMember.getGeometry().getId());
-                    solid.addMeshView(boundarySurface.getId(), meshView);
-                }
-                boundary.setPolygons(boundaryPolygons);
-            }
-            // <bldg:opening>
-            if (boundarySurface.getOpening() != null) {
-                var boundary = new BoundarySurface(boundarySurface);
-                boundaries.add(boundary);
-
-                var boundaryPolygons = new ArrayList<Polygon>();
-                for (var opening : boundarySurface.getOpening()) {
-                    for (var surfaceMember : opening.getOpening().getLod3MultiSurface().getMultiSurface().getSurfaceMember()) {
-                        var polygon = (org.citygml4j.model.gml.geometry.primitives.Polygon) surfaceMember.getSurface();
-                        if (polygon == null)
-                            continue;
-
-                        var polygonObject = createPolygon(polygon);
-                        boundaryPolygons.add(polygonObject);
-
-                        // ノードの最小単位＝ポリゴン
-                        var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
-                        var polygonMesh = new ArrayList<Polygon>(List.of(polygonObject));
-                        var meshView = new MeshView();
-                        meshView.setMesh(createTriangleMesh(polygonMesh));
-                        meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
-                        meshView.setId(surfaceMember.getGeometry().getId());
-                        // TODO どの壁に属するのかわからなくなる？
-                        //solid.addMeshView(boundarySurface.getId(), meshView);
-                        solid.addMeshView(opening.getOpening().getId(), meshView);
-                    }
-                }
-                boundary.setPolygons(boundaryPolygons);
-            }
-        }
-        solid.setBoundaries(boundaries);
-
-        return solid;
-    }
-    
-    public BuildingInstallationView cretateBuildingInstallationView(AbstractBuilding gmlObject) {
-        var BuildingInstallationView = new BuildingInstallationView(gmlObject);
-
-        // </bldg:outerBuildingInstallation>
-        var geometrys = new ArrayList<Geometry>();
-        for (var OuterBuildingInstallation : gmlObject.getOuterBuildingInstallation()) {
-            var buildingInstallation = OuterBuildingInstallation.getBuildingInstallation();
-            if (buildingInstallation.getLod3Geometry() == null)
-                continue;
-            var geometry = new Geometry(buildingInstallation.getLod3Geometry().getGeometry());
-            geometrys.add(geometry);
-            var multiSurface = (MultiSurface) buildingInstallation.getLod3Geometry().getGeometry();
-            var polygons = new ArrayList<Polygon>();
-            for (var surfaceMember : multiSurface.getSurfaceMember()) {
-                var polygon = (org.citygml4j.model.gml.geometry.primitives.Polygon) surfaceMember.getSurface();
-                if (polygon == null)
-                    continue;
-                var polygonObject = createPolygon(polygon);
-                polygons.add(polygonObject);
-
-                // ノードの最小単位＝ポリゴン
-                var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
-                var polygonMesh = new ArrayList<Polygon>(List.of(polygonObject));
-                var meshView = new MeshView();
-                meshView.setMesh(createTriangleMesh(polygonMesh));
-                meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
-                meshView.setId(surfaceMember.getGeometry().getId());
-                BuildingInstallationView.addLod3MeshView(buildingInstallation.getId(), meshView);
-            }
-            geometry.setPolygons(polygons);
-        }
-        BuildingInstallationView.setLod3OuterBuildingInstallations(geometrys);
-
-        return BuildingInstallationView;
-    }
-
-    public Polygon createPolygon(org.citygml4j.model.gml.geometry.primitives.Polygon gmlObject) {
-        var polygon = new Polygon(gmlObject);
-
-        var exterior = createLinearRing((org.citygml4j.model.gml.geometry.primitives.LinearRing) gmlObject.getExterior().getRing());
+        var exterior = createLinearRing((LinearRing) gmlObject.getExterior().getRing());
         polygon.setExteriorRing(exterior);
-//        var interior = createLinearRing((org.citygml4j.model.gml.geometry.primitives.LinearRing) gmlObject.getInterior().getRing());
 
-        var faces = Tessellator.tessellate(exterior.getVertices(), null, 3);
+        var interiorBuffers = new ArrayList<VertexBuffer>();
+        for (var interiorRing : gmlObject.getInterior()) {
+            var interior = createLinearRing((LinearRing) interiorRing.getRing());
+            polygon.addInteriorRing(interior);
+            interiorBuffers.add(interior.getRing());
+        }
 
-        polygon.setFaces(faces);
+        // 輪郭をポリゴンメッシュ化
+        var subMeshFaceBuffer = new FaceBuffer();
+        var subMeshVertexBuffer = new VertexBuffer();
+        Tessellator.tessellate(exterior.getRing(), interiorBuffers, subMeshVertexBuffer, subMeshFaceBuffer);
+
+        // vertexBuffer内での頂点インデックスに変換
+        var interiorIndexRemaps = new ArrayList<List<Integer>>();
+        for (var interior : polygon.getInteriorRings()) {
+            interiorIndexRemaps.add(interior.getVertexIndices());
+        }
+        var indexRemap = PolygonMeshUtils.concatIndexRemaps(exterior.getVertexIndices(), interiorIndexRemaps);
+        var polygonFaceBuffer = polygon.getFaceBuffer();
+        PolygonMeshUtils.applyIndexRemap(subMeshFaceBuffer, polygonFaceBuffer, indexRemap);
+
+        // テクスチャ座標インデックス、法線インデックスをオフセット
+        var normalOffset = normalBuffer.getVertexCount();
+        for (int i = 0; i < polygonFaceBuffer.getPointCount(); ++i) {
+            polygonFaceBuffer.setTexCoordIndex(i, polygonFaceBuffer.getTexCoordIndex(i) + texCoordOffset);
+            polygonFaceBuffer.setNormalIndex(i, polygonFaceBuffer.getNormalIndex(i) + normalOffset);
+        }
+
+        // 法線計算
+        var subMeshNormals = PolygonMeshUtils.calculateNormal(subMeshVertexBuffer, subMeshFaceBuffer);
+        normalBuffer.addVertices(subMeshNormals);
 
         return polygon;
     }
 
-    public LinearRing createLinearRing(org.citygml4j.model.gml.geometry.primitives.LinearRing gmlObject) {
-        var linearRing = new LinearRing(gmlObject);
+    protected LinearRingView createLinearRing(LinearRing gmlObject) {
         List<Double> coordinates = gmlObject.getPosList().toList3d();
 
-        var vertices = new float[coordinates.size()];
+        var ringVertexBuffer = new VertexBuffer();
 
-        for (int i = 0; i < coordinates.size() - 1; i += 3) {
+        // 輪郭点をワールド内座標に変換して登録。始点と終点が重複するため終点を削除している。
+        for (int i = 0; i < coordinates.size() - 3 - 1; i += 3) {
             var geoCoordinate = new GeoCoordinate(coordinates.get(i), coordinates.get(i + 1), coordinates.get(i + 2));
             var position = World.getActiveInstance().getGeoReference().Project(geoCoordinate);
-            vertices[i] = position.x;
-            vertices[i + 1] = position.y;
-            vertices[i + 2] = position.z;
+            ringVertexBuffer.addVertex(position);
         }
 
-        linearRing.setVertices(vertices);
+        var vertexIndices = new ArrayList<Integer>();
+        // ringの頂点をMeshの頂点として登録。重複する頂点は接合される。
+        PolygonMeshUtils.weldVertices(
+                ringVertexBuffer, vertexBuffer, vertexIndices
+        );
 
-        for (var surfaceData : getTarget().getRGBTextureAppearance().getSurfaceData()) {
-            var texCoords = surfaceData.getTextureCoordinatesByRing().get("#" + linearRing.getGMLID());
+        var linearRing = new LinearRingView(
+                gmlObject, vertexBuffer, texCoordBuffer,
+                vertexIndices, texCoordBuffer.getTexCoordCount());
 
-            if (texCoords != null) {
-                linearRing.setUVs(texCoords);
-                linearRing.setSurfaceData(surfaceData);
-                break;
-            }
-        }
-        if (linearRing.getUVs() == null) {
-            linearRing.setUVs(new float[linearRing.getVertices().length / 3 * 2]);
+        var surfaceDataExists = extractSurfaceData(linearRing);
+        if (!surfaceDataExists) {
+            var texCoordCount = ringVertexBuffer.getVertexCount();
+            // UVない場合は0埋め
+            texCoordBuffer.addTexCoords(new float[texCoordCount * 2], false);
         }
 
         return linearRing;
     }
 
-    public static TriangleMesh createTriangleMesh(ArrayList<Polygon> polygons) {
-        var indexCount = 0;
-        for (var polygon : polygons) {
-            indexCount += polygon.getFaces().length;
-        }
+    private boolean extractSurfaceData(LinearRingView linearRing) {
+        if (getTarget() == null || getTarget().getRGBTextureAppearance() == null)
+            return false;
 
-        var faces = new int[indexCount];
-        var verticesSize = 0;
-        var uvsSize = 0;
-        var faceIndex = 0;
-        for (var polygon : polygons) {
-            var polygonFaces = polygon.getFaces();
-            for (var i = 0; i < polygonFaces.length; i += 2) {
-                // 頂点インデックス
-                faces[faceIndex++] = polygonFaces[i] + verticesSize / 3;
-                // UVインデックス
-                faces[faceIndex++] = polygonFaces[i + 1] + uvsSize / 2;
+        var surfaceDataExists = false;
+
+        for (var surfaceData : getTarget().getRGBTextureAppearance().getSurfaceData()) {
+            var texCoords = surfaceData.getTextureCoordinatesByRing().get("#" + linearRing.getGMLID());
+
+            if (texCoords != null) {
+                texCoordBuffer.addTexCoords(texCoords, true);
+                linearRing.setSurfaceData(surfaceData);
+                surfaceDataExists = true;
+                break;
             }
-
-            verticesSize += polygon.getAllVerticesSize();
-            uvsSize += polygon.getAllUVsSize();
         }
+        return surfaceDataExists;
+    }
 
-        var vertices = new float[verticesSize];
-        var vertexIndexOffset = 0;
-        for (var polygon : polygons) {
-            var subVertices = polygon.getAllVertices();
-            for (int i = 0; i < subVertices.length; ++i) {
-                vertices[vertexIndexOffset + i] = (float) subVertices[i];
-            }
-            vertexIndexOffset += subVertices.length;
-        }
-
-        var uvs = new float[uvsSize];
-        var uvIndexOffset = 0;
-        for (var polygon : polygons) {
-            var subUVs = polygon.getAllUVs();
-            for (int i = 0; i < subUVs.length; i += 2) {
-                // x
-                uvs[uvIndexOffset + i] = (float) subUVs[i];
-                // y
-                uvs[uvIndexOffset + i + 1] = 1 - (float) subUVs[i + 1];
-            }
-            uvIndexOffset += subUVs.length;
-        }
-
+    /**
+     * Polygonの一覧からTriangleMeshを生成します。
+     * 面情報以外（頂点、法線、テクスチャ座標）は他Polygonのものも含むため、部分的なPolygonに対して呼び出される場合冗長なデータが生成されます。
+     */
+    protected TriangleMesh createTriangleMesh(List<PolygonView> polygons) {
         var mesh = new TriangleMesh();
-        mesh.getPoints().addAll(vertices);
-        mesh.getFaces().addAll(faces);
-        mesh.getTexCoords().addAll(uvs);
+        mesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
+        mesh.getPoints().addAll(vertexBuffer.getBufferAsArray());
+        mesh.getTexCoords().addAll(texCoordBuffer.getBufferAsArray());
+        mesh.getNormals().addAll(normalBuffer.getBufferAsArray());
 
-        var smooth = new int[faces.length / mesh.getFaceElementSize()];
-        for (int i = 0; i < smooth.length; ++i) {
-            smooth[i] = i;
+        var faces = new FaceBuffer();
+        for (var polygon : polygons) {
+            faces.addFaces(polygon.getFaceBuffer().getBuffer());
         }
+        mesh.getFaces().addAll(faces.getBufferAsArray());
+
+        var smooth = new int[faces.getFaceCount()];
+        Arrays.fill(smooth, 1);
         mesh.getFaceSmoothingGroups().addAll(smooth);
 
         return mesh;

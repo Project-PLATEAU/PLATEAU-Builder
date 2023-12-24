@@ -6,11 +6,11 @@ import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.citygml.core.CityObjectMember;
 import org.citygml4j.xml.schema.SchemaHandler;
-import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 
 public class CityModelFactory {
-    public CityModel createCityModel(org.citygml4j.model.citygml.core.CityModel gmlObject, String gmlPath, SchemaHandler schemaHandler) {
-        var cityModel = new CityModel(gmlObject, schemaHandler);
+    public CityModelView createCityModel(org.citygml4j.model.citygml.core.CityModel gmlObject, String gmlPath, SchemaHandler schemaHandler) {
+        var cityModel = new CityModelView(gmlObject, schemaHandler);
         cityModel.setGmlPath(gmlPath);
 
         for (var appearanceMember : gmlObject.getAppearanceMember()) {
