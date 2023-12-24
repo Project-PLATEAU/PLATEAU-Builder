@@ -1,54 +1,73 @@
 package org.plateau.citygmleditor.geometry;
 
+import org.osgeo.proj4j.*;
 import org.plateau.citygmleditor.utils3d.geom.Vec3d;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 
 public class GeoReference {
-    private static double WGS84_A = 6378137.0;
-    private static double WGS84_IF = 298.257223563;
-    private static double WGS84_F = 1 / WGS84_IF;
-    private static double WGS84_B = WGS84_A * (1 - WGS84_F);
-    private static double WGS84_E = Math.sqrt(2 * WGS84_F - WGS84_F * WGS84_F);
-
-    private GeoCoordinate origin;
-    private Vec3d referenceECEF;
+    private final CoordinateTransform projectTransform;
+    private final CoordinateTransform unprojectTransform;
+    private final Vec3d origin;
 
     public GeoReference(GeoCoordinate origin) {
-        this.origin = origin;
-        this.referenceECEF = latLonToECEF(origin);
+        // CRSの定義
+        CRSFactory crsFactory = new CRSFactory();
+        // GMLでのSRCはEPSG:4326（緯度経度座標、高さは扱わないためEPSG:6697とほぼ同義）
+        CoordinateReferenceSystem wgs84 = crsFactory.createFromName("EPSG:4326");
+        // TODO: 座標系選択
+        // 投影後のSRCはEPSG:2451（平面直角座標9系）
+        CoordinateReferenceSystem jpr = crsFactory.createFromName("EPSG:2451");
+
+        // 座標変換のセットアップ
+        CoordinateTransformFactory ctFactory = new CoordinateTransformFactory();
+        projectTransform = ctFactory.createTransform(wgs84, jpr);
+        unprojectTransform = ctFactory.createTransform(jpr, wgs84);
+
+        var originCoord = new ProjCoordinate(origin.lon, origin.lat);
+        var originXY = new ProjCoordinate();
+        projectTransform.transform(originCoord, originXY);
+        this.origin = new Vec3d(originXY.x, originXY.y, origin.alt);
     }
 
     /**
-     * 緯度経度から原点中心の平面座標(ENU)に変換します。
-     * 参考：<a href="https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates">Local tangent plane coordinates</a>
+     * 緯度経度座標を平面直角座標に投影後{@code origin}からの相対座標に変換します。
+     * @param coordinate 緯度経度座標
      */
-    public Vec3f Project(GeoCoordinate coordinate) {
-        var ecef = latLonToECEF(coordinate);
+    public Vec3f project(GeoCoordinate coordinate) {
+        // 変換する座標
+        ProjCoordinate srcCoord = new ProjCoordinate(coordinate.lon, coordinate.lat);
+        ProjCoordinate destCoord = new ProjCoordinate();
 
-        double clat = Math.cos(Math.toRadians(origin.lat));
-        double slat = Math.sin(Math.toRadians(origin.lat));
-        double clon = Math.cos(Math.toRadians(origin.lon));
-        double slon = Math.sin(Math.toRadians(origin.lon));
-        ecef.sub(referenceECEF);
+        // 座標変換の実行
+        projectTransform.transform(srcCoord, destCoord);
 
-        return new Vec3f(
-                (float) (-slon * ecef.x + clon * ecef.y),
-                (float) (-slat * clon * ecef.x - slat * slon * ecef.y + clat * ecef.z),
-                (float) (clat * clon * ecef.x + clat * slon * ecef.y + slat * ecef.z)
-        );
+        var position = new Vec3d(destCoord.x, destCoord.y, coordinate.alt);
+        position.sub(origin);
+        return new Vec3f((float)position.x, (float)position.y, (float)position.z);
     }
 
-    public static Vec3d latLonToECEF(GeoCoordinate coordinate) {
-        double clat = Math.cos(Math.toRadians(coordinate.lat));
-        double slat = Math.sin(Math.toRadians(coordinate.lat));
-        double clon = Math.cos(Math.toRadians(coordinate.lon));
-        double slon = Math.sin(Math.toRadians(coordinate.lon));
+    /**
+     * ローカル座標に{@code origin}を加算し平面直角座標に変換後緯度経度座標に逆投影します。
+     * @param position ローカル座標
+     * @return 緯度経度座標
+     */
+    public GeoCoordinate unproject(Vec3f position) {
+        var position3d = new Vec3d(position.x, position.y, position.z);
+        position3d.add(origin);
 
-        double N = WGS84_A / Math.sqrt(1.0 - WGS84_E * WGS84_E * slat * slat);
-        return new Vec3d(
-                (N + coordinate.alt) * clat * clon,
-                (N + coordinate.alt) * clat * slon,
-                (N * (1.0 - WGS84_E * WGS84_E) + coordinate.alt) * slat
-        );
+        ProjCoordinate srcCoord = new ProjCoordinate(position3d.x, position3d.y);
+        ProjCoordinate destCoord = new ProjCoordinate();
+
+        // 座標変換の実行
+        unprojectTransform.transform(srcCoord, destCoord);
+
+        return new GeoCoordinate(destCoord.y, destCoord.x, position3d.z);
+    }
+
+    /**
+     * 平面直角座標系での原点を取得します。
+     */
+    public Vec3d getOrigin() {
+        return origin;
     }
 }

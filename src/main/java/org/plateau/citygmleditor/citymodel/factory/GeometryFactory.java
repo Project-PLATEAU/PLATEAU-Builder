@@ -111,7 +111,7 @@ public class GeometryFactory extends CityGMLFactory {
         // 輪郭点をワールド内座標に変換して登録。始点と終点が重複するため終点を削除している。
         for (int i = 0; i < coordinates.size() - 3 - 1; i += 3) {
             var geoCoordinate = new GeoCoordinate(coordinates.get(i), coordinates.get(i + 1), coordinates.get(i + 2));
-            var position = World.getActiveInstance().getGeoReference().Project(geoCoordinate);
+            var position = World.getActiveInstance().getGeoReference().project(geoCoordinate);
             ringVertexBuffer.addVertex(position);
         }
 
