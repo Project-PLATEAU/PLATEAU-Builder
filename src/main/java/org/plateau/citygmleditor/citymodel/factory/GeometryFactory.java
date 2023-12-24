@@ -162,7 +162,7 @@ public class GeometryFactory extends CityGMLFactory {
         var mesh = new TriangleMesh();
         mesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
         mesh.getPoints().addAll(vertexBuffer.getBufferAsArray());
-        mesh.getTexCoords().addAll(texCoordBuffer.getBufferAsArray());
+        mesh.getTexCoords().addAll(texCoordBuffer.getBufferAsArray(false));
         mesh.getNormals().addAll(normalBuffer.getBufferAsArray());
 
         var faces = new FaceBuffer();

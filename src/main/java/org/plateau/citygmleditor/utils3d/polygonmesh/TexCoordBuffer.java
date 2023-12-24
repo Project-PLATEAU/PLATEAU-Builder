@@ -22,15 +22,23 @@ public class TexCoordBuffer {
     /**
      * 内部保持されている生データを配列に変換して取得します。
      */
-    public float[] getBufferAsArray() {
+    public float[] getBufferAsArray(boolean flip) {
         var result = new float[buffer.size()];
-        var index = 0;
-        for (var value : buffer) {
-            result[index++] = value;
+
+        if (!flip) {
+            var index = 0;
+            for (var value : buffer) {
+                result[index++] = value;
+            }
+            return result;
+        }
+
+        for (int i = 0; i < buffer.size(); i += 2) {
+            result[i] = buffer.get(i);
+            result[i + 1] = 1.0f - buffer.get(i + 1);
         }
         return result;
     }
-
 
     /**
      * {@code getTexCoord}関数で扱えるインデックス数を取得します。
@@ -39,8 +47,10 @@ public class TexCoordBuffer {
         return buffer.size() / 2;
     }
 
-    public Vec2f getTexCoord(int index) {
-        return new Vec2f(buffer.get(index * 2), buffer.get(index * 2 + 1));
+    public Vec2f getTexCoord(int index, boolean flip) {
+        return flip
+                ? new Vec2f(buffer.get(index * 2), 1.0f - buffer.get(index * 2 + 1))
+                : new Vec2f(buffer.get(index * 2), buffer.get(index * 2 + 1));
     }
 
     /**

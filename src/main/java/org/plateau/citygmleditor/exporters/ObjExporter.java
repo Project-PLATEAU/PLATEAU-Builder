@@ -115,7 +115,7 @@ public class ObjExporter {
 
         var materialModel = createOrGetMaterial(polygons);
 
-        return new ObjectModel(name, faces, lodSolid.getVertexBuffer().getBufferAsArray(), lodSolid.getVertexBuffer().getBufferAsArray(), materialModel);
+        return new ObjectModel(name, faces, lodSolid.getVertexBuffer().getBufferAsArray(), lodSolid.getTexCoordBuffer().getBufferAsArray(true), materialModel);
     }
 
     private static MaterialModel createOrGetMaterial(ArrayList<PolygonView> polygons) {
