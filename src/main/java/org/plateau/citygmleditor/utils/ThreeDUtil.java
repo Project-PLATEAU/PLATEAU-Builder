@@ -6,6 +6,7 @@ import org.locationtech.jts.geom.LineSegment;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.validation.LineSegment3D;
+import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.plateau.citygmleditor.world.World;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class ThreeDUtil {
 
     public static List<Point3D> createListPoint(String[] posString) {
         int length = posString.length;
-        if (length == 0 || length % 3 != 0) throw new RuntimeException("Invalid String");
+        if (length == 0 || length % 3 != 0) throw new InvalidPosStringException("Invalid String");
 
         List<Point3D> point3DS = new ArrayList<>();
         for (int i = 0; i <= length - 3; ) {
@@ -29,7 +30,7 @@ public class ThreeDUtil {
                 point3DS.add(point);
             } catch (NumberFormatException e) {
                 logger.severe("Error when parse from string to double");
-                throw new RuntimeException("Invalid String");
+                throw new InvalidPosStringException("Invalid String");
             }
         }
         return point3DS;

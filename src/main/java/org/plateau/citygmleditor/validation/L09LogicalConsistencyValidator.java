@@ -5,8 +5,10 @@ import org.locationtech.jts.geom.LineSegment;
 import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
+import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
+import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -46,8 +48,15 @@ public class L09LogicalConsistencyValidator implements IValidator {
 
   private void checkPointsIntersect(Node linearRingNode, Map<Node, Set<Node>> buildingWithErrorLinearRing) {
     Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(linearRingNode, TagName.BLDG_BUILDING, TagName.GML_ID);
+    List<LineSegment> lineSegments;
 
-    List<LineSegment> lineSegments = getLineSegments(linearRingNode);
+    try {
+      lineSegments = getLineSegments(linearRingNode);
+    } catch (InvalidPosStringException e) {
+      // If there is any error when parsing posString, update error list of building
+      CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, linearRingNode);
+      return;
+    }
 
     // If there is only 1 line segment, there is no intersection
     if (lineSegments.size() >= 2) {
@@ -74,9 +83,7 @@ public class L09LogicalConsistencyValidator implements IValidator {
 
           if (!isValid) {
             // Update error list of building
-            Set<Node> errorList = buildingWithErrorLinearRing.getOrDefault(buildingNode, new HashSet<>());
-            errorList.add(linearRingNode);
-            buildingWithErrorLinearRing.put(buildingNode, errorList);
+            CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, linearRingNode);
           }
         }
       }
@@ -86,18 +93,22 @@ public class L09LogicalConsistencyValidator implements IValidator {
   private void checkPointsNonDuplicatedAndClosed(Node linearRingNode, Map<Node, Set<Node>> buildingWithErrorLinearRing) {
     Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(linearRingNode, TagName.BLDG_BUILDING, TagName.GML_ID);
 
-    List<Point3D> points = get3dPoints(linearRingNode);
+    try {
 
-    boolean isClosed = points.get(0).equals(points.get(points.size() - 1));
+      List<Point3D> points = get3dPoints(linearRingNode);
 
-    // Only first and last point are duplicated
-    // Check if there is any other duplicated point
-    boolean isDuplicated = new HashSet<>(points).size() != points.size() - 1;
+      boolean isClosed = points.get(0).equals(points.get(points.size() - 1));
 
-    if (!isClosed || isDuplicated) {
-      Set<Node> errorList = buildingWithErrorLinearRing.getOrDefault(buildingNode, new HashSet<>());
-      errorList.add(linearRingNode);
-      buildingWithErrorLinearRing.put(buildingNode, errorList);
+      // Only first and last point are duplicated
+      // Check if there is any other duplicated point
+      boolean isDuplicated = new HashSet<>(points).size() != points.size() - 1;
+
+      if (!isClosed || isDuplicated) {
+        CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, linearRingNode);
+      }
+    } catch (InvalidPosStringException e) {
+      // If there is any error when parsing posString, update error list of building
+      CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, linearRingNode);
     }
   }
 
