@@ -27,25 +27,25 @@ public class GizmoModel extends Parent {
 
     private ControlMode controlMode;
 
-    private Node moveX;
-    private Node moveY;
-    private Node moveZ;
+    private Node moveXGizmo;
+    private Node moveYGizmo;
+    private Node moveZGizmo;
 
-    private Node rotationX;
-    private Node rotationY;
-    private Node rotationZ;
+    private Node rotationXGizmo;
+    private Node rotationYGizmo;
+    private Node rotationZGizmo;
     
-    private Node scaleX;
-    private Node scaleY;
-    private Node scaleZ;
+    private Node scaleXGizmo;
+    private Node scaleYGizmo;
+    private Node scaleZGizmo;
 
     private Group moveGizmo;
     private Group rotationGizmo;
     private Group scaleGizmo;
 
-    private Node attachedBuilding;
+    private BuildingUnit attachedBuilding;
 
-    private Node currentNode;
+    private Node currentGizmo;
 
     private Box debugBoundingBox;
     
@@ -54,21 +54,21 @@ public class GizmoModel extends Parent {
         rotationGizmo = new Group();
         scaleGizmo = new Group();
         try{
-            moveX = Importer3D.load(ContentModel.class.getResource("Locater_moveX.obj").toExternalForm());
-            moveY = Importer3D.load(ContentModel.class.getResource("Locater_moveY.obj").toExternalForm());
-            moveZ = Importer3D.load(ContentModel.class.getResource("Locater_moveZ.obj").toExternalForm());
-            rotationX = Importer3D.load(ContentModel.class.getResource("Locater_rotateX.obj").toExternalForm());
-            rotationY = Importer3D.load(ContentModel.class.getResource("Locater_rotateY.obj").toExternalForm());
-            rotationZ = Importer3D.load(ContentModel.class.getResource("Locater_rotateZ.obj").toExternalForm());
-            scaleX = Importer3D.load(ContentModel.class.getResource("Locater_scaleX.obj").toExternalForm());
-            scaleY = Importer3D.load(ContentModel.class.getResource("Locater_scaleY.obj").toExternalForm());
-            scaleZ = Importer3D.load(ContentModel.class.getResource("Locater_scaleZ.obj").toExternalForm());
+            moveXGizmo = Importer3D.load(ContentModel.class.getResource("Locater_moveX.obj").toExternalForm());
+            moveYGizmo = Importer3D.load(ContentModel.class.getResource("Locater_moveY.obj").toExternalForm());
+            moveZGizmo = Importer3D.load(ContentModel.class.getResource("Locater_moveZ.obj").toExternalForm());
+            rotationXGizmo = Importer3D.load(ContentModel.class.getResource("Locater_rotateX.obj").toExternalForm());
+            rotationYGizmo = Importer3D.load(ContentModel.class.getResource("Locater_rotateY.obj").toExternalForm());
+            rotationZGizmo = Importer3D.load(ContentModel.class.getResource("Locater_rotateZ.obj").toExternalForm());
+            scaleXGizmo = Importer3D.load(ContentModel.class.getResource("Locater_scaleX.obj").toExternalForm());
+            scaleYGizmo = Importer3D.load(ContentModel.class.getResource("Locater_scaleY.obj").toExternalForm());
+            scaleZGizmo = Importer3D.load(ContentModel.class.getResource("Locater_scaleZ.obj").toExternalForm());
             
-            moveGizmo.getChildren().addAll(moveX, moveY, moveZ);
-            rotationGizmo.getChildren().addAll(rotationX, rotationY, rotationZ);
-            scaleGizmo.getChildren().addAll(scaleX, scaleY, scaleZ);
+            moveGizmo.getChildren().addAll(moveXGizmo, moveYGizmo, moveZGizmo);
+            rotationGizmo.getChildren().addAll(rotationXGizmo, rotationYGizmo, rotationZGizmo);
+            scaleGizmo.getChildren().addAll(scaleXGizmo, scaleYGizmo, scaleZGizmo);
             
-            //モデル補正
+            // モデル回転方向補正
             var rot1 = new Rotate(90.0d, Rotate.X_AXIS);
             var rot2 = new Rotate(-90.0d, Rotate.Y_AXIS);
             moveGizmo.getTransforms().addAll(rot1, rot2);
@@ -97,24 +97,20 @@ public class GizmoModel extends Parent {
     }
     
     public void attachBuilding(Node building) {
+        attachedBuilding = (BuildingUnit) building;
+        
+        // ギズモの座標変換を初期化
+        getTransforms().clear();
+        // ギズモの位置を建物のPivotに合わせて座標変換
+        getTransforms().add(new Translate(attachedBuilding.getOrigin().getX(), attachedBuilding.getOrigin().getY(), attachedBuilding.getOrigin().getZ()));
+        // 建物の座標変換情報からギズモの座標変換を作成
+        getTransforms().addAll(createGizmoTransforms(attachedBuilding));
+
+        setVisibleGizmo();
+
+        // デバッグ用バウンディングボックス表示
         BoundingBox bb = (BoundingBox) building.getBoundsInParent();
         System.out.println(building.getId() + " x:" + bb.getCenterX() + " y:" + bb.getCenterY() + " z:" + bb.getCenterZ());
-        // setTranslateX(bb.getCenterX());
-        // setTranslateY(bb.getCenterY());
-        // setTranslateZ(bb.getCenterZ());
-        
-        // 座標変換を初期化
-        getTransforms().clear();
-        
-        // setTranslateX(((BuildingUnit) building).getOrigin().getX());
-        // setTranslateY(((BuildingUnit) building).getOrigin().getY());
-        // setTranslateZ(((BuildingUnit) building).getOrigin().getZ());
-        getTransforms().add(new Translate(((BuildingUnit) building).getOrigin().getX(), ((BuildingUnit) building).getOrigin().getY(), ((BuildingUnit) building).getOrigin().getZ()));
-
-        var transforms2 = createGizmoTransforms((BuildingUnit) building);
-        
-        getTransforms().addAll(transforms2);
-
         if (debugBoundingBox != null) {
             getChildren().remove(debugBoundingBox);
         }
@@ -123,91 +119,71 @@ public class GizmoModel extends Parent {
         debugBoundingBox.setTranslateX(0.0d);
         debugBoundingBox.setTranslateY(0.0d);
         debugBoundingBox.setTranslateZ(bb.getDepth() / 2);
-
-        attachedBuilding = building;
-
-        setVisibleGizmo();
     }
     
-    public void setCurrentNode(Node node) {
-        currentNode = node;
+    public void setCurrentGizmo(Node node) {
+        currentGizmo = node;
     }
 
     public void updateTransform(Point3D delta) {
-        System.err.println("gizmo:" + new Point3D(getTranslateX(), getTranslateY(), getTranslateZ()));
-        System.err.println("building:" + new Point3D(attachedBuilding.getTranslateX(), attachedBuilding.getTranslateY(), attachedBuilding.getTranslateZ()));
-        System.err.println("delta:" + delta);
-        System.err.println("attach:" + attachedBuilding.getTranslateX() + " " + attachedBuilding.getTranslateX() + " " + attachedBuilding.getTranslateZ());
-        // getTransforms().add(new Translate(delta.getX(), delta.getY(), delta.getZ()));
+        System.out.println("gizmo:" + new Point3D(getTranslateX(), getTranslateY(), getTranslateZ()));
+        System.out.println("building:" + new Point3D(attachedBuilding.getTranslateX(), attachedBuilding.getTranslateY(), attachedBuilding.getTranslateZ()));
+        System.out.println("delta:" + delta);
         
-        if (isNodeInTree(currentNode, moveGizmo)) {
+        // 建物の座標変換情報を操作値をもとに更新
+
+        // 移動ギズモ
+        if (isNodeInTree(currentGizmo, moveGizmo)) {
             //TODO  軸に沿って移動
-            if (isNodeInTree(currentNode, moveX)) {
-                // getTransforms().add(new Translate(delta.getX(), 0, 0));
-                // attachedBuilding.getTransforms().add(new Translate(delta.getX(), 0, 0));
-                updateTransforms((BuildingUnit)attachedBuilding, 0, new Point3D(delta.getX(), 0, 0));
+            if (isNodeInTree(currentGizmo, moveXGizmo)) {
+                attachedBuilding.setLocation(new Point3D(attachedBuilding.getLocation().getX() + delta.getX(), attachedBuilding.getLocation().getY(), attachedBuilding.getLocation().getZ()));
             }
-            if (isNodeInTree(currentNode, moveY)) {
-                // getTransforms().add(new Translate(0, delta.getY(), 0));
-                // attachedBuilding.getTransforms().add(new Translate(0, delta.getY(), 0));
-                updateTransforms((BuildingUnit)attachedBuilding, 0, new Point3D(0, delta.getY(), 0));
+            if (isNodeInTree(currentGizmo, moveYGizmo)) {
+                attachedBuilding.setLocation(new Point3D(attachedBuilding.getLocation().getX(), attachedBuilding.getLocation().getY() + delta.getY(), attachedBuilding.getLocation().getZ()));
             }
-            if (isNodeInTree(currentNode, moveZ)) {
-                // getTransforms().add(new Translate(0, 0, delta.getZ()));
-                // attachedBuilding.getTransforms().add(new Translate(0, 0, delta.getZ()));
-                updateTransforms((BuildingUnit)attachedBuilding, 0, new Point3D(0, 0, delta.getZ()));
+            if (isNodeInTree(currentGizmo, moveZGizmo)) {
+                attachedBuilding.setLocation(new Point3D(attachedBuilding.getLocation().getX(), attachedBuilding.getLocation().getY(), attachedBuilding.getLocation().getZ() + delta.getZ()));
             }
         }
-        else if (isNodeInTree(currentNode, rotationGizmo)) {
-            // var pivot = ((BuildingUnit) attachedBuilding).getLocation();
-
-            if (isNodeInTree(currentNode, rotationX)) {
-                // getTransforms().add(new Rotate(delta.getX(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.X_AXIS));   
-                // attachedBuilding.getTransforms().add(new Rotate(delta.getX(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.X_AXIS));
-                updateTransforms((BuildingUnit)attachedBuilding, 1, new Point3D(delta.getX(), 0, 0));
+        // 回転ギズモ
+        else if (isNodeInTree(currentGizmo, rotationGizmo)) {
+            if (isNodeInTree(currentGizmo, rotationXGizmo)) {
+                attachedBuilding.setRotation(new Point3D(attachedBuilding.getRotation().getX() + delta.getX(), attachedBuilding.getRotation().getY(), attachedBuilding.getRotation().getZ()));
             }
-            if (isNodeInTree(currentNode, rotationY)) {
-                // getTransforms().add(new Rotate(delta.getX(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Y_AXIS));
-                // attachedBuilding.getTransforms().add(new Rotate(delta.getX(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Y_AXIS));
-                updateTransforms((BuildingUnit)attachedBuilding, 1, new Point3D(0, delta.getY(), 0));
+            if (isNodeInTree(currentGizmo, rotationYGizmo)) {
+                attachedBuilding.setRotation(new Point3D(attachedBuilding.getRotation().getX(), attachedBuilding.getRotation().getY() + delta.getY(), attachedBuilding.getRotation().getZ()));
             }
-            if (isNodeInTree(currentNode, rotationZ)) {
-                // getTransforms().add(new Rotate(delta.getX(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS));
-                // attachedBuilding.getTransforms().add(new Rotate(delta.getX(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS));
-                updateTransforms((BuildingUnit)attachedBuilding, 1, new Point3D(0, 0, delta.getZ()));
+            if (isNodeInTree(currentGizmo, rotationZGizmo)) {
+                attachedBuilding.setRotation(new Point3D(attachedBuilding.getRotation().getX(), attachedBuilding.getRotation().getY(), attachedBuilding.getRotation().getZ() + delta.getZ()));
             }
         }
-        else if (isNodeInTree(currentNode, scaleGizmo)) {
-            // var pivot = ((BuildingUnit) attachedBuilding).getLocation();
-            
-            if (isNodeInTree(currentNode, scaleX)) {
-                // double scalingFactor = 1.0 + delta.getX() / 100.0;
-                // attachedBuilding.getTransforms().add(new Scale(scalingFactor, 1.0, 1.0, pivot.getX(), pivot.getY(), pivot.getZ()));
+        // スケールギズモ
+        else if (isNodeInTree(currentGizmo, scaleGizmo)) {
+            if (isNodeInTree(currentGizmo, scaleXGizmo)) {
                 double scalingFactor = delta.getX() / 100.0;
-                updateTransforms((BuildingUnit)attachedBuilding, 2, new Point3D(scalingFactor, 0, 0));
+                attachedBuilding.setScale(new Point3D(attachedBuilding.getScale().getX() + scalingFactor, attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ()));
             }
-            if (isNodeInTree(currentNode, scaleY)) {
-                // double scalingFactor = 1.0 + delta.getY() / 100.0;
-                // attachedBuilding.getTransforms().add(new Scale(1.0, scalingFactor, 1.0, pivot.getX(), pivot.getY(), pivot.getZ()));
+            if (isNodeInTree(currentGizmo, scaleYGizmo)) {
                 double scalingFactor = delta.getY() / 100.0;
-                updateTransforms((BuildingUnit)attachedBuilding, 2, new Point3D(0, scalingFactor, 0));
+                attachedBuilding.setScale(new Point3D(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY() + scalingFactor, attachedBuilding.getScale().getZ()));
             }
-            if (isNodeInTree(currentNode, scaleZ)) {
-                // double scalingFactor = 1.0 + delta.getZ() / 100.0;
-                // attachedBuilding.getTransforms().add(new Scale(1.0, 1.0, scalingFactor, pivot.getX(), pivot.getY(), pivot.getZ()));
+            if (isNodeInTree(currentGizmo, scaleZGizmo)) {
                 double scalingFactor = delta.getZ() / 100.0;
-                updateTransforms((BuildingUnit)attachedBuilding, 2, new Point3D(0, 0, scalingFactor));
+                attachedBuilding.setScale(new Point3D(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ() + scalingFactor));
             }
         }
-        var transforms = createTransforms((BuildingUnit)attachedBuilding);
-
+        
+        // 建物の座標変換を初期化
         attachedBuilding.getTransforms().clear();
-        attachedBuilding.getTransforms().addAll(transforms);
+        // 建物の座標変換情報から建物の座標変換を作成
+        attachedBuilding.getTransforms().addAll(createTransforms(attachedBuilding));
 
-        var transforms2 = createGizmoTransforms((BuildingUnit)attachedBuilding);
+        // ギズモの座標変換を初期化
         getTransforms().clear();
-        getTransforms().add(new Translate(((BuildingUnit) attachedBuilding).getOrigin().getX(), ((BuildingUnit) attachedBuilding).getOrigin().getY(), ((BuildingUnit) attachedBuilding).getOrigin().getZ()));
-        getTransforms().addAll(transforms2);
+        // ギズモの位置を建物のPivotに合わせて座標変換
+        getTransforms().add(new Translate(attachedBuilding.getOrigin().getX(), attachedBuilding.getOrigin().getY(), attachedBuilding.getOrigin().getZ()));
+        // 建物の座標変換情報からギズモの座標変換を作成
+        getTransforms().addAll(createGizmoTransforms(attachedBuilding));
     }
     
     public void fixTransform() {
@@ -217,33 +193,14 @@ public class GizmoModel extends Parent {
         // TODO GMLへ反映
     }
 
-    private void updateTransforms(BuildingUnit buildingUnit, int type, Point3D delta) {
-        switch (type) {
-            case 0:
-                buildingUnit.setLocation(new Point3D(buildingUnit.getLocation().getX() + delta.getX(), buildingUnit.getLocation().getY() + delta.getY(), buildingUnit.getLocation().getZ() + delta.getZ()));
-                break;
-            case 1:
-                buildingUnit.setRotation(new Point3D(buildingUnit.getRotation().getX() + delta.getX(), buildingUnit.getRotation().getY() + delta.getY(), buildingUnit.getRotation().getZ() + delta.getZ()));
-                break;
-            case 2:
-                buildingUnit.setScale(new Point3D(buildingUnit.getScale().getX() + delta.getX(), buildingUnit.getScale().getY() + delta.getY(), buildingUnit.getScale().getZ() + delta.getZ()));
-                break;
-        }
-    }
-    
     private ArrayList<Transform> createTransforms(BuildingUnit buildingUnit) {
-        var pivot = buildingUnit.getOrigin();//new Point3D(buildingUnit.getLocation().getX() + buildingUnit.getOrigin().getX(), buildingUnit.getLocation().getY() + buildingUnit.getOrigin().getY(), buildingUnit.getLocation().getZ() + buildingUnit.getOrigin().getZ());
-        System.err.println("p0:"+pivot);
+        var pivot = buildingUnit.getOrigin();
         Translate translate = new Translate(buildingUnit.getLocation().getX(), buildingUnit.getLocation().getY(), buildingUnit.getLocation().getZ());
-        // pivot = translate.transform(pivot);System.err.println("pt:"+pivot);
         Rotate rotateX = new Rotate(buildingUnit.getRotation().getX(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.X_AXIS);
-        // pivot = rotateX.transform(pivot);System.err.println("pr1:"+pivot);
         Rotate rotateY = new Rotate(buildingUnit.getRotation().getY(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Y_AXIS);
-        // pivot = rotateY.transform(pivot);System.err.println("pr2:"+pivot);
         Rotate rotateZ = new Rotate(buildingUnit.getRotation().getZ(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS);
-        // pivot = rotateZ.transform(pivot);System.err.println("pr3:"+pivot);
         Scale scale = new Scale(buildingUnit.getScale().getX(), buildingUnit.getScale().getY(), buildingUnit.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ());
-        // pivot = scale.transform(pivot);System.err.println("ps:"+pivot);
+        
         ArrayList<Transform> ret = new ArrayList<Transform>();
         ret.add(translate);
         ret.add(rotateX);
@@ -254,25 +211,20 @@ public class GizmoModel extends Parent {
     }
 
     private ArrayList<Transform> createGizmoTransforms(BuildingUnit buildingUnit) {
-        var pivot = buildingUnit.getOrigin();//new Point3D(buildingUnit.getLocation().getX() + buildingUnit.getOrigin().getX(), buildingUnit.getLocation().getY() + buildingUnit.getOrigin().getY(), buildingUnit.getLocation().getZ() + buildingUnit.getOrigin().getZ());
-        System.err.println("p0:"+pivot);
+        // var pivot = buildingUnit.getOrigin();
         Translate translate = new Translate(buildingUnit.getLocation().getX(), buildingUnit.getLocation().getY(), buildingUnit.getLocation().getZ());
-        // pivot = translate.transform(pivot);System.err.println("pt:"+pivot);
         Rotate rotateX = new Rotate(buildingUnit.getRotation().getX(), 0, 0, 0, Rotate.X_AXIS);
-        // pivot = rotateX.transform(pivot);System.err.println("pr1:"+pivot);
         Rotate rotateY = new Rotate(buildingUnit.getRotation().getY(), 0, 0, 0, Rotate.Y_AXIS);
-        // pivot = rotateY.transform(pivot);System.err.println("pr2:"+pivot);
         Rotate rotateZ = new Rotate(buildingUnit.getRotation().getZ(), 0, 0, 0, Rotate.Z_AXIS);
-        // pivot = rotateZ.transform(pivot);System.err.println("pr3:"+pivot);
-        Scale scale = new Scale(buildingUnit.getScale().getX(), buildingUnit.getScale().getY(), buildingUnit.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ());
-        // pivot = scale.transform(pivot);System.err.println("ps:"+pivot);
+        // Scale scale = new Scale(buildingUnit.getScale().getX(), buildingUnit.getScale().getY(), buildingUnit.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ());
+        
         ArrayList<Transform> ret = new ArrayList<Transform>();
         ret.add(translate);
         ret.add(rotateX);
         ret.add(rotateY);
         ret.add(rotateZ);
-        //ギズモにスケールは適用しない
-        //ret.add(scale);
+        // ギズモにスケールは適用しない
+        // ret.add(scale);
         return ret;
     }
     private void setVisibleGizmo() {

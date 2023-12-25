@@ -89,7 +89,7 @@ public class GizmoController implements Initializable {
                     mouseDraggig = true;
                     contentModel.setHookingMousePrimaryButtonEvent(true);
 
-                    gizmoModel.setCurrentNode(result.getIntersectedNode());
+                    gizmoModel.setCurrentGizmo(result.getIntersectedNode());
                             
                     vecIni = unProjectDirection(event.getSceneX(), event.getSceneY(), contentModel.getSubScene().getWidth(), contentModel.getSubScene().getHeight());//scene.getWidth(),scene.getHeight());
                     distance=result.getIntersectedDistance();
