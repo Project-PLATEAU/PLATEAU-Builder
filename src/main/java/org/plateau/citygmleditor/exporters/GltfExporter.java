@@ -8,7 +8,6 @@ import java.nio.IntBuffer;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +53,7 @@ public class GltfExporter {
      * @param lodSolid the {@link ILODSolidView}
      * @param buildingId the building id
      */
-    public static void export(String fileUrl, ILODSolidView lodSolid, String buildingId) {
+    public void export(String fileUrl, ILODSolidView lodSolid, String buildingId) {
         DefaultSceneModel sceneModel = null;
         if (lodSolid instanceof LOD1SolidView) {
             sceneModel = createSceneModel((LOD1SolidView) lodSolid, buildingId);
@@ -90,7 +89,7 @@ public class GltfExporter {
         }
     }
 
-    private static DefaultSceneModel createSceneModel(LOD1SolidView lod1Solid, String buildingId) {
+    private DefaultSceneModel createSceneModel(LOD1SolidView lod1Solid, String buildingId) {
         DefaultSceneModel sceneModel = new DefaultSceneModel();
         DefaultNodeModel nodeModel = new DefaultNodeModel();
         DefaultMeshModel meshModel = new DefaultMeshModel();
@@ -107,7 +106,7 @@ public class GltfExporter {
         return sceneModel;
     }
 
-    private static DefaultSceneModel createSceneModel(LOD2SolidView lod2Solid, String buildingId) {
+    private DefaultSceneModel createSceneModel(LOD2SolidView lod2Solid, String buildingId) {
         DefaultSceneModel sceneModel = new DefaultSceneModel();
         Map<String, MaterialModelV2> materialMap = new HashMap<>();
         DefaultNodeModel nodeModel = new DefaultNodeModel();
@@ -129,12 +128,10 @@ public class GltfExporter {
         return sceneModel;
     }
 
-    private static DefaultMeshPrimitiveModel createMeshPrimitive(ILODSolidView lodSolid, PolygonView polygon, MaterialModelV2 materialModel) {
+    private DefaultMeshPrimitiveModel createMeshPrimitive(ILODSolidView lodSolid, PolygonView polygon, MaterialModelV2 materialModel) {
         var faceBuffer = polygon.getFaceBuffer();
         var pointCount = faceBuffer.getPointCount();
         var faces = new int[pointCount];
-
-        // 右手系Y-up
         var vertexBuffer = lodSolid.getVertexBuffer();
         var texCoordBuffer = lodSolid.getTexCoordBuffer();
         List<Vec3f> vertexList = new ArrayList<>();
@@ -156,6 +153,7 @@ public class GltfExporter {
         MeshPrimitiveBuilder meshPrimitiveBuilder = MeshPrimitiveBuilder.create();
         meshPrimitiveBuilder.setIntIndicesAsShort(IntBuffer.wrap(faces));
 
+        // 右手系Y-up
         var positions = new float[vertexList.size() * 3];
         for (int i = 0; i < vertexList.size(); i++) {
             var vertex = vertexList.get(i);
@@ -165,7 +163,7 @@ public class GltfExporter {
         }
         meshPrimitiveBuilder.addPositions3D(FloatBuffer.wrap(positions));
 
-        if (materialModel != defaultMaterialModel) {
+        if (texCoordList.size() > 0) {
             var uvs = new float[texCoordList.size() * 2];
             for (int i = 0; i < texCoordList.size(); i++) {
                 var texCoord = texCoordList.get(i);
@@ -178,7 +176,7 @@ public class GltfExporter {
         return meshPrimitiveBuilder.build();
     }
 
-    private static MaterialModelV2 createOrGetMaterialModel(Map<String, MaterialModelV2> materialMap, PolygonView polygon) {
+    private MaterialModelV2 createOrGetMaterialModel(Map<String, MaterialModelV2> materialMap, PolygonView polygon) {
         MaterialModelV2 materialModel = null;
         var surfaceData = polygon.getSurfaceData();
         if (surfaceData == null) return defaultMaterialModel;
@@ -198,7 +196,7 @@ public class GltfExporter {
         return materialModel;
     }
 
-    private static MaterialModelV2 createMaterial(PhongMaterial material) {
+    private MaterialModelV2 createMaterial(PhongMaterial material) {
         var materialFile = new File(material.getDiffuseMap().getUrl());
         var inputUri = Paths.get(materialFile.getAbsolutePath()).toUri().normalize().toString();
         DefaultImageModel imageModel = ImageModels.create(inputUri, materialFile.getName());

@@ -377,7 +377,7 @@ public class SettingsController implements Initializable {
         ILODSolidView solid = (ILODSolidView)item;
         BuildingView building = (BuildingView)solid.getParent();
         try {
-            GltfExporter.export(newFile.toString(), solid, building.getId());
+            new GltfExporter().export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -408,7 +408,7 @@ public class SettingsController implements Initializable {
         ILODSolidView solid = (ILODSolidView)item;
         BuildingView building = (BuildingView)solid.getParent();
         try {
-            ObjExporter.export(newFile.toString(), solid, building.getId());
+            new ObjExporter().export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
         }

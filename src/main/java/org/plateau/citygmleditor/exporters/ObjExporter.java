@@ -27,7 +27,7 @@ public class ObjExporter {
      * @param lodSolid the {@link ILODSolidView}
      * @param buildingId the building id
      */
-    public static void export(String fileUrl, ILODSolidView lodSolid, String buildingId) {
+    public void export(String fileUrl, ILODSolidView lodSolid, String buildingId) {
         ObjectModel objectModel = createObjectModel(buildingId, lodSolid);
 
         File file = new File(fileUrl);
@@ -94,7 +94,7 @@ public class ObjExporter {
         }
     }
 
-    private static ObjectModel createObjectModel(String name, ILODSolidView lodSolid) {
+    private ObjectModel createObjectModel(String name, ILODSolidView lodSolid) {
         var polygons = lodSolid.getPolygons();
         var indexCount = 0;
         for (var polygon : polygons) {
@@ -118,7 +118,7 @@ public class ObjExporter {
         return new ObjectModel(name, faces, lodSolid.getVertexBuffer().getBufferAsArray(), lodSolid.getTexCoordBuffer().getBufferAsArray(true), materialModel);
     }
 
-    private static MaterialModel createOrGetMaterial(ArrayList<PolygonView> polygons) {
+    private MaterialModel createOrGetMaterial(ArrayList<PolygonView> polygons) {
         for (var polygon : polygons) {
             var surfaceData = polygon.getSurfaceData();
             if (surfaceData == null) continue;
@@ -132,7 +132,7 @@ public class ObjExporter {
         return defaultMaterialModel;
     }
 
-    private static MaterialModel createMaterialModel(PhongMaterial material) {
+    private MaterialModel createMaterialModel(PhongMaterial material) {
         var materialUrl = new File(material.getDiffuseMap().getUrl());
         var fileName = materialUrl.getName();
         var name = fileName.substring(0, fileName.lastIndexOf("."));
