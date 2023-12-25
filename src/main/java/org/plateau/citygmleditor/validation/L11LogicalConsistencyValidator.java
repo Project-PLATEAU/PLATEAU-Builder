@@ -1,9 +1,10 @@
 package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
-import org.citygml4j.model.citygml.core.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
+import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
@@ -79,10 +80,9 @@ public class L11LogicalConsistencyValidator implements IValidator {
     }
 
     @Override
-    public List<ValidationResultMessage> validate(CityModel cityModel) throws ParserConfigurationException, IOException, SAXException {
-        File gmlFile = new File(World.getActiveInstance().getCityModel().getGmlPath());
+    public List<ValidationResultMessage> validate(CityModel cityModelView) throws ParserConfigurationException, IOException, SAXException {
         // get buildings from gml file
-        NodeList buildings = XmlUtil.getAllTagFromXmlFile(gmlFile, TagName.BLDG_BUILDING);
+        NodeList buildings = CityGmlUtil.getAllTagFromCityModel(cityModelView, TagName.BLDG_BUILDING);
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
 
         for (int i = 0; i < buildings.getLength(); i++) {

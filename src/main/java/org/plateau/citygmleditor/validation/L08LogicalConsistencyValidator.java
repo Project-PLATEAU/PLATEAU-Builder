@@ -1,43 +1,32 @@
 package org.plateau.citygmleditor.validation;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
 import javafx.geometry.Point3D;
-
-import javax.xml.parsers.ParserConfigurationException;
-import org.citygml4j.model.citygml.core.CityModel;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineSegment;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Point;
+import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.constant.TagName;
+import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
-import org.plateau.citygmleditor.world.World;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Logger;
 
 
 public class L08LogicalConsistencyValidator implements IValidator {
 
   public static Logger logger = Logger.getLogger(L08LogicalConsistencyValidator.class.getName());
 
-  public List<ValidationResultMessage> validate(CityModel cityModel)
+  public List<ValidationResultMessage> validate(CityModel cityModelView)
       throws ParserConfigurationException, IOException, SAXException {
     List<ValidationResultMessage> messages = new ArrayList<>();
 
-    File file = new File(World.getActiveInstance().getCityModel().getGmlPath());
-    NodeList lineStringNodes = XmlUtil.getAllTagFromXmlFile(file, TagName.GML_LINESTRING);
+    NodeList lineStringNodes = CityGmlUtil.getAllTagFromCityModel(cityModelView, TagName.GML_LINESTRING);
     Map<Node, Set<Node>> buildingWithErrorLineString = new HashMap<>();
 
     for (int i = 0; i < lineStringNodes.getLength(); i++) {

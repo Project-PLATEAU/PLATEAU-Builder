@@ -1,19 +1,18 @@
 package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
-import org.citygml4j.model.citygml.core.CityModel;
 import org.locationtech.jts.geom.LineSegment;
+import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.constant.TagName;
+import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
-import org.plateau.citygmleditor.world.World;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -23,12 +22,11 @@ public class L09LogicalConsistencyValidator implements IValidator {
 
   public static Logger logger = Logger.getLogger(L09LogicalConsistencyValidator.class.getName());
 
-  public List<ValidationResultMessage> validate(CityModel cityModel)
+  public List<ValidationResultMessage> validate(CityModel cityModelView)
       throws ParserConfigurationException, IOException, SAXException {
     List<ValidationResultMessage> messages = new ArrayList<>();
 
-    File file = new File(World.getActiveInstance().getCityModel().getGmlPath());
-    NodeList linearRingNodes = XmlUtil.getAllTagFromXmlFile(file, TagName.GML_LINEARRING);
+    NodeList linearRingNodes = CityGmlUtil.getAllTagFromCityModel(cityModelView, TagName.GML_LINEARRING);
     Map<Node, Set<Node>> buildingWithErrorLinearRing = new HashMap<>();
 
     for (int i = 0; i < linearRingNodes.getLength(); i++) {

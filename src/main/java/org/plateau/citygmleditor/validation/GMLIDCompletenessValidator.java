@@ -1,7 +1,7 @@
 package org.plateau.citygmleditor.validation;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.citygml4j.model.citygml.core.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.world.World;

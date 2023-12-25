@@ -1,20 +1,18 @@
 package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
-import org.citygml4j.model.citygml.core.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
+import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
-import org.plateau.citygmleditor.utils.XmlUtil;
-import org.plateau.citygmleditor.world.World;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -59,10 +57,9 @@ public class L07LogicalConsistencyValidator implements IValidator {
         }
     }
 
-    public List<ValidationResultMessage> validate(CityModel cityModel) throws ParserConfigurationException, IOException, SAXException {
+    public List<ValidationResultMessage> validate(CityModel cityModelView) throws ParserConfigurationException, IOException, SAXException {
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
-        File file = new File(World.getActiveInstance().getCityModel().getGmlPath());
-        NodeList buildings = XmlUtil.getAllTagFromXmlFile(file, TagName.BLDG_BUILDING);
+        NodeList buildings = CityGmlUtil.getAllTagFromCityModel(cityModelView, TagName.BLDG_BUILDING);
 
         for (int i = 0; i < buildings.getLength(); i++) {
             Element building = (Element) buildings.item(i);

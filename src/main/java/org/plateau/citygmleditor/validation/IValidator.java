@@ -1,6 +1,6 @@
 package org.plateau.citygmleditor.validation;
 
-import org.citygml4j.model.citygml.core.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModel;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
