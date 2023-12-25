@@ -189,7 +189,7 @@ public class GizmoModel extends Parent {
         if (attachedBuilding == null)
             return;
 
-        // TODO GMLへ反映
+        attachedBuilding.refrectGML();
     }
 
     private ArrayList<Transform> createTransforms(BuildingUnit buildingUnit) {

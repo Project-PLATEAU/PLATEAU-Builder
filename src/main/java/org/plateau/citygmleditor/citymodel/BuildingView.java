@@ -83,4 +83,44 @@ public class BuildingView extends BuildingUnit {
     public Envelope getEnvelope() {
         return this.gmlObject.getBoundedBy().getEnvelope();
     }
+
+    public void refrectGML() {
+        if (lod1Solid != null) {
+            for (var polygon : lod1Solid.getPolygons()) {
+                var coordinates = polygon.getExteriorRing().getOriginal().getPosList().toList3d();
+                polygon.getExteriorRing().getOriginal().getPosList().setValue(super.unProjectTransforms(coordinates));
+
+                for (var interiorRing : polygon.getInteriorRings()) {
+                    var coordinatesInteriorRing = interiorRing.getOriginal().getPosList().toList3d();
+                    polygon.getExteriorRing().getOriginal().getPosList().setValue(super.unProjectTransforms(coordinatesInteriorRing));
+                }
+            }
+        }
+        if (lod2Solid != null) {
+            for (var polygon : lod2Solid.getPolygons()) {
+                var coordinates = polygon.getExteriorRing().getOriginal().getPosList().toList3d();
+                polygon.getExteriorRing().getOriginal().getPosList()
+                        .setValue(super.unProjectTransforms(coordinates));
+
+                for (var interiorRing : polygon.getInteriorRings()) {
+                    var coordinatesInteriorRing =
+                            interiorRing.getOriginal().getPosList().toList3d();
+                    polygon.getExteriorRing().getOriginal().getPosList()
+                            .setValue(super.unProjectTransforms(coordinatesInteriorRing));
+                }
+            }
+        }
+        // TODO LOD3
+        // if (lod3Solid != null) {
+        //     for (var polygon : lod3Solid.getPolygons()) {
+        //         var coordinates = polygon.getExteriorRing().getOriginal().getPosList().toList3d();
+        //         polygon.getExteriorRing().getOriginal().getPosList().setValue(super.unProjectTransforms(coordinates));
+
+        //         for (var interiorRing : polygon.getInteriorRings()) {
+        //             var coordinatesInteriorRing = interiorRing.getOriginal().getPosList().toList3d();
+        //             polygon.getExteriorRing().getOriginal().getPosList().setValue(super.unProjectTransforms(coordinatesInteriorRing));
+        //         }
+        //     }
+        // }
+    }
 }
