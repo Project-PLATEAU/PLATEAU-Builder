@@ -1,7 +1,7 @@
 package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
-import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
@@ -57,7 +57,7 @@ public class L07LogicalConsistencyValidator implements IValidator {
         }
     }
 
-    public List<ValidationResultMessage> validate(CityModel cityModelView) throws ParserConfigurationException, IOException, SAXException {
+    public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
         NodeList buildings = CityGmlUtil.getAllTagFromCityModel(cityModelView, TagName.BLDG_BUILDING);
 

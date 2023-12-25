@@ -2,7 +2,7 @@ package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
 import org.locationtech.jts.geom.LineSegment;
-import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
@@ -22,7 +22,7 @@ public class L08LogicalConsistencyValidator implements IValidator {
 
   public static Logger logger = Logger.getLogger(L08LogicalConsistencyValidator.class.getName());
 
-  public List<ValidationResultMessage> validate(CityModel cityModelView)
+  public List<ValidationResultMessage> validate(CityModelView cityModelView)
       throws ParserConfigurationException, IOException, SAXException {
     List<ValidationResultMessage> messages = new ArrayList<>();
 

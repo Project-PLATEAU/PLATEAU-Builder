@@ -4,7 +4,8 @@
  *
  * This file is available and licensed under the following license:
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution and use in source and binary forms, wit
+ * h or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
@@ -88,8 +89,7 @@ public class SessionManager {
                     reader.close();
                 }
             } catch (IOException ex) {
-                Logger.getLogger(SessionManager.class.getName()).
-                        log(Level.SEVERE, null, ex);
+                Logger.getLogger(SessionManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -100,27 +100,29 @@ public class SessionManager {
                 props.store(new FileWriter(SESSION_PROPERTIES_FILENAME), name + " session properties");
             } catch (FileNotFoundException ignored) {
             } catch (IOException ex) {
-                Logger.getLogger(SessionManager.class.getName()).
-                        log(Level.SEVERE, null, ex);
+                Logger.getLogger(SessionManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
     public void bind(final BooleanProperty property, final String propertyName) {
         String value = props.getProperty(propertyName);
-        if (value != null) property.set(Boolean.valueOf(value));
+        if (value != null)
+            property.set(Boolean.valueOf(value));
         property.addListener(o -> props.setProperty(propertyName, property.getValue().toString()));
     }
 
     public void bind(final ObjectProperty<Color> property, final String propertyName) {
         String value = props.getProperty(propertyName);
-        if (value != null) property.set(Color.valueOf(value));
+        if (value != null)
+            property.set(Color.valueOf(value));
         property.addListener(o -> props.setProperty(propertyName, property.getValue().toString()));
     }
 
     public void bind(final DoubleProperty property, final String propertyName) {
         String value = props.getProperty(propertyName);
-        if (value != null) property.set(Double.valueOf(value));
+        if (value != null)
+            property.set(Double.valueOf(value));
         property.addListener(o -> props.setProperty(propertyName, property.getValue().toString()));
     }
 
@@ -137,7 +139,8 @@ public class SessionManager {
             if (toggleGroup.getSelectedToggle() == null) {
                 props.remove(propertyName);
             } else {
-                props.setProperty(propertyName, Integer.toString(toggleGroup.getToggles().indexOf(toggleGroup.getSelectedToggle())));
+                props.setProperty(propertyName,
+                        Integer.toString(toggleGroup.getToggles().indexOf(toggleGroup.getSelectedToggle())));
             }
         });
     }

@@ -2,8 +2,9 @@ package org.plateau.citygmleditor.utils;
 
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
+import org.citygml4j.model.citygml.core.CityModel;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
-import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -30,7 +31,7 @@ public class CityGmlUtil {
      * @throws IOException
      * @throws SAXException
      */
-    public static NodeList getAllTagFromCityModel(CityModel cityModelView, String tagName) throws ParserConfigurationException, IOException, SAXException {
+    public static NodeList getAllTagFromCityModel(CityModelView cityModelView, String tagName) throws ParserConfigurationException, IOException, SAXException {
         File gmlFile = createFileFromCityModel(cityModelView);
         try {
             return XmlUtil.getAllTagFromXmlFile(gmlFile, tagName);
@@ -39,7 +40,7 @@ public class CityGmlUtil {
         }
     }
 
-    public static File createFileFromCityModel(CityModel cityModel) {
+    public static File createFileFromCityModel(CityModelView cityModel) {
         try {
             String path = HOME_PATH + "/Temp/" + UUID.randomUUID() + ".gml";
             GmlExporter.export(path, cityModel.getGmlObject(), cityModel.getSchemaHandler());

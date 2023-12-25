@@ -1,7 +1,7 @@
 package org.plateau.citygmleditor.validation;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.world.World;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 public class GMLIDCompletenessValidator implements IValidator {
-    public List<ValidationResultMessage> validate(CityModel cityModel) throws ParserConfigurationException, IOException, SAXException {
+    public List<ValidationResultMessage> validate(CityModelView cityModel) throws ParserConfigurationException, IOException, SAXException {
         Set<String> gmlIDs = new HashSet<>();
         List<ValidationResultMessage> messages = new ArrayList<>();
 

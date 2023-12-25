@@ -1,6 +1,6 @@
 package org.plateau.citygmleditor.validation;
 
-import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
@@ -23,7 +23,7 @@ public class L12LogicalConsistencyValidator implements IValidator {
     private final String L12 = "L12";
 
     @Override
-    public List<ValidationResultMessage> validate(CityModel cityModelView) throws ParserConfigurationException, IOException, SAXException {
+    public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
         // get buildings from gml file
         NodeList buildings = CityGmlUtil.getAllTagFromCityModel(cityModelView, TagName.BLDG_BUILDING);
         List<L11LogicalConsistencyValidator.BuildingInvalid> buildingInvalids = new ArrayList<>();

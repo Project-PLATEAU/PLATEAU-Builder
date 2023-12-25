@@ -2,33 +2,53 @@ package org.plateau.citygmleditor.citymodel.factory;
 
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.geometry.primitives.Solid;
-import org.plateau.citygmleditor.citymodel.Building;
-import org.plateau.citygmleditor.citymodel.CityModel;
-
-import java.util.Random;
+import org.plateau.citygmleditor.citymodel.BuildingView;
+import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 
 public class CityObjectMemberFactory extends CityGMLFactory {
-    protected CityObjectMemberFactory(CityModel target) {
+    protected CityObjectMemberFactory(CityModelView target) {
         super(target);
     }
 
-    public Building createBuilding(AbstractBuilding gmlObject) {
-        var building = new Building(gmlObject);
+    public BuildingView createBuilding(AbstractBuilding gmlObject) {
+        var building = new BuildingView(gmlObject);
         building.setId(gmlObject.getId());
 
-        var geometryFactory = new GeometryFactory(getTarget());
-        var lod1Solid = geometryFactory.createLOD1Solid((Solid) gmlObject.getLod1Solid().getObject());
-        building.setLOD1Solid(lod1Solid);
-        var lod2Solid = geometryFactory.createLOD2Solid(gmlObject);
+        var lod1SolidFactory = new LOD1SolidFactory(getTarget());
+        LOD1SolidView lod1Solid = null;
+        if (gmlObject.getLod1Solid() != null && gmlObject.getLod1Solid().getObject() != null) {
+            lod1Solid = lod1SolidFactory.createLOD1Solid((Solid) gmlObject.getLod1Solid().getObject());
+            building.setLOD1Solid(lod1Solid);
+        }
+
+
+        var lod2SolidFactory = new LOD2SolidFactory(getTarget());
+        var lod2Solid = lod2SolidFactory.createLOD2Solid(gmlObject);
         if (lod2Solid != null) {
-            lod1Solid.setVisible(false);
+            if (lod1Solid != null)
+                lod1Solid.setVisible(false);
 
             building.setLOD2Solid(lod2Solid);
+        }
 
-//            Random rand = new Random();
-//            int num = rand.nextInt(100);
-//            if (num > 16)
-//                lod2Solid.setVisible(false);
+        var lod3SolidFactory = new LOD3SolidFactory(getTarget());
+        var lod3Solid = lod3SolidFactory.createLOD3Solid(gmlObject);
+        if (lod3Solid != null) {
+            if (lod1Solid != null)
+                lod1Solid.setVisible(false);
+            if (lod2Solid != null)
+                lod2Solid.setVisible(false);
+            building.setLOD3Solid(lod3Solid);
+        }
+
+         // </bldg:outerBuildingInstallation>
+        for (var outerBuildingInstallation : gmlObject.getOuterBuildingInstallation()) {
+            var geometryFactory = new GeometryFactory(getTarget());
+            var buildingInstallationView = geometryFactory.cretateBuildingInstallationView(outerBuildingInstallation.getObject());
+            if (buildingInstallationView != null) {
+                building.addBuildingInstallationView(buildingInstallationView);
+            }
         }
 
         return building;

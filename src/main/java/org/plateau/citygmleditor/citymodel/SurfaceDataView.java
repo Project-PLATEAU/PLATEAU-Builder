@@ -5,13 +5,13 @@ import org.citygml4j.model.citygml.appearance.AbstractSurfaceData;
 
 import java.util.HashMap;
 
-public class SurfaceData extends GMLObject<AbstractSurfaceData> {
+public class SurfaceDataView extends GMLObjectView<AbstractSurfaceData> {
 
     private final HashMap<String, float[]> textureCoordinatesByRing = new HashMap<>();
 
     private Material material;
 
-    public SurfaceData(AbstractSurfaceData original) {
+    public SurfaceDataView(AbstractSurfaceData original) {
         super(original);
     }
 
