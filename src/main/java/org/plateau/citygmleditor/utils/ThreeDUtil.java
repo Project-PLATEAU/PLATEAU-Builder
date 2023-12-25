@@ -89,16 +89,44 @@ public class ThreeDUtil {
      * Check if 2 line segments are continuous
      * 2 line segments are continuous if end of first line segment is the same as start of second line segment
      * but end of second line segment does not lie on first line segment
+     * and start of first line segment does not lie on second line segment
      * @param first line segment
      * @param second line segment
      * @return true if 2 line segments are continuous and otherwise
      */
     public static boolean isLinesContinuous(LineSegment first, LineSegment second) {
-        if (first.p1.equals(second.p0) && first.distance(second.p1) != 0) {
-            // end of first line segment is the same as start of second line segment
-            // but end of second line segment does not lie on first line segment
+        if (first.p1.equals(second.p0)) {
+            if (isPointOnLineSegment(second.p1, first.p0, first.p1)) {
+                // if end of second line segment lies on first line segment
+                return false;
+            }
+            if (isPointOnLineSegment(first.p0, second.p0, second.p1)) {
+                // if start of first line segment lies on second line segment
+                return false;
+            }
             return true;
         }
         return false;
+    }
+
+    public static boolean isPointOnLineSegment(Coordinate pointCoordinate, Coordinate startCoordinate, Coordinate endCoordinate) {
+        Point3D point = new Point3D(pointCoordinate.x, pointCoordinate.y, pointCoordinate.z);
+        Point3D start = new Point3D(startCoordinate.x, startCoordinate.y, startCoordinate.z);
+        Point3D end = new Point3D(endCoordinate.x, endCoordinate.y, endCoordinate.z);
+
+        // Check if the point lies on the line defined by the start and end points
+        Point3D direction = end.subtract(start);
+        Point3D pointToStart = point.subtract(start);
+
+        // Check if the vectors are collinear
+        double dotProduct = direction.dotProduct(pointToStart);
+        if (Math.abs(dotProduct) < 0) {
+            return false;
+        }
+
+        // Check if the point is within the line segment
+        double lengthSquared = direction.dotProduct(direction);
+        double projectionLength = dotProduct / lengthSquared;
+        return projectionLength >= 0 && projectionLength <= 1;
     }
 }

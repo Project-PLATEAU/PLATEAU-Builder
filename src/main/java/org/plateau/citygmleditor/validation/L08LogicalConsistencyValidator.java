@@ -56,11 +56,22 @@ public class L08LogicalConsistencyValidator implements IValidator {
           LineSegment second = lineSegments.get(k);
           // Check if 2 line segments are intersected
           // if j == k-1, 2 line segments are continuous
-          boolean isContinuous = j == k-1 && ThreeDUtil.isLinesContinuous(first, second);
-          boolean isIntersected = ThreeDUtil.isLineIntersect(first, second);
+          boolean isContinuous = j == k-1;
+          // Line first and last are also continuous
+          boolean isReverseContinuous = j == 0 && k == lineSegments.size() - 1;
+
+          boolean isValid;
+
+          if (isContinuous) {
+            isValid = ThreeDUtil.isLinesContinuous(first, second);
+          } else if (isReverseContinuous) {
+            isValid = ThreeDUtil.isLinesContinuous(second, first);
+          } else {
+            isValid = !ThreeDUtil.isLineIntersect(first, second);
+          }
 
           // If 2 line segments are not continuous and intersected
-          if (!isContinuous && isIntersected) {
+          if (!isValid) {
             // Update error list of building
             Set<Node> errorList = buildingWithErrorLineString.getOrDefault(buildingNode, new HashSet<>());
             errorList.add(lineStringNode);
