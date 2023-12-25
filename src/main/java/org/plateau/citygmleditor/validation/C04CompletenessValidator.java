@@ -1,18 +1,21 @@
 package org.plateau.citygmleditor.validation;
 
 import org.plateau.citygmleditor.citymodel.CityModel;
+import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class C04CompletenessValidator implements IValidator {
 
@@ -43,6 +46,36 @@ public class C04CompletenessValidator implements IValidator {
         }
     }
 
+    static class UROBuildingAtrribute {
+        String uroBuildingID;
+        String brandID;
+        String partID;
+
+        public String getUroBuildingID() {
+            return uroBuildingID;
+        }
+
+        public void setUroBuildingID(String uroBuildingID) {
+            this.uroBuildingID = uroBuildingID;
+        }
+
+        public String getBrandID() {
+            return brandID;
+        }
+
+        public void setBrandID(String brandID) {
+            this.brandID = brandID;
+        }
+
+        public String getPartID() {
+            return partID;
+        }
+
+        public void setPartID(String partID) {
+            this.partID = partID;
+        }
+    }
+
     @Override
     public List<ValidationResultMessage> validate(CityModel cityModelView) throws ParserConfigurationException, IOException, SAXException {
         NodeList buildings = CityGmlUtil.getAllTagFromCityModel(cityModelView, TagName.BLDG_BUILDING);
@@ -52,7 +85,7 @@ public class C04CompletenessValidator implements IValidator {
             Element building = (Element) buildings.item(i);
             String buildingID = building.getAttribute(TagName.GML_ID);
             // get tag <uro:BuildingID> duplicate
-            List<Node> uroBuildingIDDuplicate = this.getUroBuildingIDDuplicate(building);
+            List<UROBuildingAtrribute> uroBuildingIDDuplicate = this.getUroBuildingIDDuplicate(building);
             // get tag <uro:BuildingID> invalid
             List<String> uroBuildingIDInvalids = this.getUroBuildingIDInvalid(uroBuildingIDDuplicate);
 
@@ -65,45 +98,84 @@ public class C04CompletenessValidator implements IValidator {
 
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
-        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("%sは重複して使用されています。\n", "C04: " + buildingInvalids)));
+        for (BuildingInvalid invalid : buildingInvalids) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                    MessageFormat.format(MessageError.ERR_C04_001, invalid)));
+        }
         return messages;
     }
 
-    private List<Node> getUroBuildingIDDuplicate(Element building) {
-        List<Node> duplicate = new ArrayList<>();
-        NodeList tagUroBuildingIDs = building.getElementsByTagName(TagName.URO_BULDING_ID);
-
-        length = tagUroBuildingIDs.getLength();
+    private List<UROBuildingAtrribute> getUroBuildingIDDuplicate(Element building) {
+        NodeList uroBuildingAttr = building.getElementsByTagName(TagName.URO_BUILDING_ID_ATTRIBUTE);
+        length = uroBuildingAttr.getLength();
         if (length == 0) return List.of();
-        List<String> conditions = new ArrayList<>();
-        Node uroBuildingIDNode = tagUroBuildingIDs.item(0);
-        String uroBuildingID = uroBuildingIDNode.getTextContent().trim();
-        conditions.add(uroBuildingID);
 
-        for (int i = 1; i < length; i++) {
-            Node node = tagUroBuildingIDs.item(i);
-            String id = node.getTextContent().trim();
+        List<UROBuildingAtrribute> duplicateID = new ArrayList<>();
+        List<UROBuildingAtrribute> uroByNodelist = this.createUROBuildingAtrribute(uroBuildingAttr);
 
-            if (conditions.contains(id)) {
-                duplicate.add(node);
+        // get all uroBuilding duplicate
+        outerLoop:
+        for (int i = 0; i < uroByNodelist.size(); i++) {
+            UROBuildingAtrribute uroBuilding = uroByNodelist.get(i);
+            String uroID1 = uroBuilding.getUroBuildingID();
+            for (int j = 0; j < uroByNodelist.size(); j++) {
+                // ignores the case compared to itself
+                if (j == i) continue;
+
+                String uroID2 = uroByNodelist.get(j).getUroBuildingID();
+                if (Objects.equals(uroID1, uroID2)) {
+                    duplicateID.add(uroBuilding);
+                    continue outerLoop;
+                }
             }
-            conditions.add(id);
         }
-        return duplicate;
+
+        return duplicateID;
     }
 
-    private List<String> getUroBuildingIDInvalid(List<Node> duplicate) {
-        List<String> uroBuildingIDInvalids = new ArrayList<>();
-        for (Node uroBuilding : duplicate) {
-            Element eUroBuilding = (Element) uroBuilding;
-            NodeList uroBrandID = eUroBuilding.getElementsByTagName(TagName.URO_BRANCH_ID);
-            NodeList uroPartID = eUroBuilding.getElementsByTagName(TagName.URO_PART_ID);
+    private List<UROBuildingAtrribute> createUROBuildingAtrribute(NodeList uroBuildingAttr) {
+        List<UROBuildingAtrribute> results = new ArrayList<>();
+        for (int i = 0; i < uroBuildingAttr.getLength(); i++) {
+            Element uro = (Element) uroBuildingAttr.item(i);
+            NodeList uroID = uro.getElementsByTagName(TagName.URO_BULDING_ID);
+            if (uroID.getLength() == 0) continue;
+            NodeList brandID = uro.getElementsByTagName(TagName.URO_BRANCH_ID);
+            NodeList partID = uro.getElementsByTagName(TagName.URO_PART_ID);
 
-            if (uroBrandID.getLength() == 0 || uroPartID.getLength() == 0) {
-                String uroBuildingIDInvalid = eUroBuilding.getTextContent();
-                uroBuildingIDInvalids.add(uroBuildingIDInvalid);
+            UROBuildingAtrribute uroBuildingAtrribute = new UROBuildingAtrribute();
+            uroBuildingAtrribute.setUroBuildingID(uroID.item(0).getTextContent().trim());
+            if (brandID.getLength() == 0) {
+                uroBuildingAtrribute.setBrandID("");
+            } else {
+                uroBuildingAtrribute.setBrandID(brandID.item(0).getTextContent().trim());
+            }
+            if (partID.getLength() == 0) {
+                uroBuildingAtrribute.setPartID("");
+            } else {
+                uroBuildingAtrribute.setPartID(partID.item(0).getTextContent().trim());
+            }
+
+            results.add(uroBuildingAtrribute);
+        }
+        return results;
+    }
+
+    private List<String> getUroBuildingIDInvalid(List<UROBuildingAtrribute> duplicate) {
+        List<String> uroBuildingIDInvalids = new ArrayList<>();
+        int count = 0;
+        for (UROBuildingAtrribute uroBuilding : duplicate) {
+            String uroBrandID = uroBuilding.getBrandID();
+            String uroPartID = uroBuilding.getPartID();
+
+            // only when both uroPartID and uroBrandID are missing should it be considered an error
+            if (uroPartID.isEmpty() && uroBrandID.isEmpty()) {
+                count++;
+                if (count > 1) {
+                    String uroBuildingIDInvalid = uroBuilding.getUroBuildingID();
+                    uroBuildingIDInvalids.add(uroBuildingIDInvalid);
+                }
             }
         }
-        return uroBuildingIDInvalids;
+        return uroBuildingIDInvalids.stream().distinct().collect(Collectors.toList());
     }
 }
