@@ -111,7 +111,7 @@ public class L09LogicalConsistencyValidator implements IValidator {
 
     if (posListNodes.getLength() > 0) {
       String[] posString = posListNodes.item(0).getTextContent().split(" ");
-      ThreeDUtil.createListPoint(posString);
+      return ThreeDUtil.createListPoint(posString);
     } else if (posNodes.getLength() > 0) {
       List<Point3D> point3DS = new ArrayList<>();
       for (int i = 0; i < posNodes.getLength(); i++) {
