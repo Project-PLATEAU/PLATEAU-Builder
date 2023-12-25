@@ -78,7 +78,7 @@ public class ValidationController implements Initializable {
         var warningCount = 0;
 
         for (var validator : validators) {
-            var messages = validator.validate(cityModel);
+            var messages = validator.validate(cityModelView);
 
             for (var message : messages) {
                 showMessage(message);

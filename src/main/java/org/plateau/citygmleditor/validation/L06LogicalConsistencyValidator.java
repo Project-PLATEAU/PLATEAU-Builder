@@ -1,8 +1,8 @@
 package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
-import org.citygml4j.model.citygml.core.CityModel;
 import org.citygml4j.model.gml.geometry.primitives.DirectPosition;
+import org.plateau.citygmleditor.citymodel.CityModel;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
@@ -24,17 +24,12 @@ public class L06LogicalConsistencyValidator implements IValidator {
     /**
      * The function checks L06 validate
      *
-     * @param cityModel the model of city contain: building, surfaceMember, polygon, ...
+     * @param cityModelView the model of city contain: building, surfaceMember, polygon, ...
      */
     @Override
-    public List<ValidationResultMessage> validate(CityModel cityModel) throws ParserConfigurationException, IOException, SAXException {
+    public List<ValidationResultMessage> validate(CityModel cityModelView) throws ParserConfigurationException, IOException, SAXException {
         List<ValidationResultMessage> messages = new ArrayList<>();
-
-        if (Objects.isNull(cityModel)) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                    "The model Null"));
-            return messages;
-        }
+        org.citygml4j.model.citygml.core.CityModel cityModel = cityModelView.getGmlObject();
 
         // Read all posList objects in gml file
         File input = new File(World.getActiveInstance().getCityModel().getGmlPath());

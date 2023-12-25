@@ -1,26 +1,20 @@
 package org.plateau.citygmleditor.validation;
 
 import org.apache.commons.lang3.StringUtils;
-import org.citygml4j.model.citygml.core.CityModel;
+import org.plateau.citygmleditor.citymodel.CityModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static org.plateau.citygmleditor.constant.TagName.srsNameURI;
 
 public class L05LogicalConsistencyValidator implements IValidator{
     @Override
-    public List<ValidationResultMessage> validate(CityModel cityModel) {
+    public List<ValidationResultMessage> validate(CityModel cityModelView) {
         List<ValidationResultMessage> messages = new ArrayList<>();
 
-        if (Objects.isNull(cityModel)) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "The model Null"));
-            return messages;
-        }
-
         try {
-            String uri = cityModel.getBoundedBy().getEnvelope().getSrsName();
+            String uri = cityModelView.getGmlObject().getBoundedBy().getEnvelope().getSrsName();
             if (StringUtils.isBlank(uri)) {
                 messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "L05: Url is blank"));
                 return messages;
