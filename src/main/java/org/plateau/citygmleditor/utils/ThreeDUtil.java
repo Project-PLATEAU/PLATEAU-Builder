@@ -115,18 +115,14 @@ public class ThreeDUtil {
         Point3D end = new Point3D(endCoordinate.x, endCoordinate.y, endCoordinate.z);
 
         // Check if the point lies on the line defined by the start and end points
-        Point3D direction = end.subtract(start);
-        Point3D pointToStart = point.subtract(start);
+        Point3D lineDirectionVector = end.subtract(start);
+        Point3D startToPointVector = point.subtract(start);
 
-        // Check if the vectors are collinear
-        double dotProduct = direction.dotProduct(pointToStart);
-        if (Math.abs(dotProduct) < 0) {
-            return false;
-        }
+        var angle = lineDirectionVector.angle(startToPointVector);
 
-        // Check if the point is within the line segment
-        double lengthSquared = direction.dotProduct(direction);
-        double projectionLength = dotProduct / lengthSquared;
-        return projectionLength >= 0 && projectionLength <= 1;
+        // Check angle between 2 vectors
+        // If angle is 0 or 180, and the sum of distance from start to point and from point to end is equal to distance from start to end
+        // It means that the point lies on the line segment
+        return angle == 0 || angle == 180 && (point.distance(start) + point.distance(end) == start.distance(end));
     }
 }
