@@ -2,7 +2,7 @@ package org.plateau.citygmleditor.citygmleditor;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import org.plateau.citygmleditor.citymodel.Building;
+import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.importers.Importer3D;
 import javafx.collections.ObservableList;
 import javafx.geometry.BoundingBox;
@@ -20,7 +20,6 @@ import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 
 public class GizmoModel extends Parent {
-    
     public enum ControlMode {
         SELECT, MOVE, ROTATION, SCALE,
     }
@@ -54,15 +53,15 @@ public class GizmoModel extends Parent {
         rotationGizmo = new Group();
         scaleGizmo = new Group();
         try{
-            moveXGizmo = Importer3D.load(ContentModel.class.getResource("Locater_moveX.obj").toExternalForm());
-            moveYGizmo = Importer3D.load(ContentModel.class.getResource("Locater_moveY.obj").toExternalForm());
-            moveZGizmo = Importer3D.load(ContentModel.class.getResource("Locater_moveZ.obj").toExternalForm());
-            rotationXGizmo = Importer3D.load(ContentModel.class.getResource("Locater_rotateX.obj").toExternalForm());
-            rotationYGizmo = Importer3D.load(ContentModel.class.getResource("Locater_rotateY.obj").toExternalForm());
-            rotationZGizmo = Importer3D.load(ContentModel.class.getResource("Locater_rotateZ.obj").toExternalForm());
-            scaleXGizmo = Importer3D.load(ContentModel.class.getResource("Locater_scaleX.obj").toExternalForm());
-            scaleYGizmo = Importer3D.load(ContentModel.class.getResource("Locater_scaleY.obj").toExternalForm());
-            scaleZGizmo = Importer3D.load(ContentModel.class.getResource("Locater_scaleZ.obj").toExternalForm());
+            moveXGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveX.obj").toExternalForm());
+            moveYGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveY.obj").toExternalForm());
+            moveZGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveZ.obj").toExternalForm());
+            rotationXGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateX.obj").toExternalForm());
+            rotationYGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateY.obj").toExternalForm());
+            rotationZGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateZ.obj").toExternalForm());
+            scaleXGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleX.obj").toExternalForm());
+            scaleYGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleY.obj").toExternalForm());
+            scaleZGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleZ.obj").toExternalForm());
             
             moveGizmo.getChildren().addAll(moveXGizmo, moveYGizmo, moveZGizmo);
             rotationGizmo.getChildren().addAll(rotationXGizmo, rotationYGizmo, rotationZGizmo);

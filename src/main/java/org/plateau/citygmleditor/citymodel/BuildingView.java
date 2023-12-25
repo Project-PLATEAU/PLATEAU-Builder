@@ -1,26 +1,25 @@
 package org.plateau.citygmleditor.citymodel;
 
 import javafx.scene.Parent;
-import org.citygml4j.model.citygml.CityGML;
-import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.plateau.citygmleditor.citygmleditor.BuildingUnit;
-import org.plateau.citygmleditor.citymodel.factory.CityGMLFactory;
-import org.citygml4j.model.gml.feature.BoundingShape;
 import org.citygml4j.model.gml.geometry.primitives.*;
-import org.plateau.citygmleditor.citymodel.geometry.LOD1Solid;
-import org.plateau.citygmleditor.citymodel.geometry.LOD2Solid;
-import org.plateau.citygmleditor.citymodel.geometry.LOD3Solid;
+import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD3SolidView;
 
-public class Building extends BuildingUnit {
+import java.util.ArrayList;
+import java.util.List;
+
+public class BuildingView extends BuildingUnit {
     private AbstractBuilding gmlObject;
 
-    private LOD1Solid lod1Solid;
-    private LOD2Solid lod2Solid;
-    private LOD3Solid lod3Solid;
-    private BuildingInstallationView buildingInstallationView;
+    private LOD1SolidView lod1Solid;
+    private LOD2SolidView lod2Solid;
+    private LOD3SolidView lod3Solid;
+    private List<BuildingInstallationView> buildingInstallationViews = new ArrayList<>();
 
-    public Building(AbstractBuilding gmlObject) {
+    public BuildingView(AbstractBuilding gmlObject) {
         this.gmlObject = gmlObject;
     }
 
@@ -28,7 +27,7 @@ public class Building extends BuildingUnit {
         return this.gmlObject;
     }
 
-    public void setLOD1Solid(LOD1Solid solid) {
+    public void setLOD1Solid(LOD1SolidView solid) {
         if (this.lod1Solid == null) {
             this.getChildren().remove(this.lod1Solid);
         }
@@ -36,11 +35,11 @@ public class Building extends BuildingUnit {
         this.getChildren().add(solid);
     }
 
-    public LOD1Solid getLOD1Solid() {
+    public LOD1SolidView getLOD1Solid() {
         return this.lod1Solid;
     }
 
-    public void setLOD2Solid(LOD2Solid solid) {
+    public void setLOD2Solid(LOD2SolidView solid) {
         if (solid == null)
             return;
 
@@ -52,11 +51,11 @@ public class Building extends BuildingUnit {
         super.updateOrigin();
     }
 
-    public LOD2Solid getLOD2Solid() {
+    public LOD2SolidView getLOD2Solid() {
         return this.lod2Solid;
     }
 
-    public void setLOD3Solid(LOD3Solid solid) {
+    public void setLOD3Solid(LOD3SolidView solid) {
         if (solid == null)
             return;
 
@@ -68,17 +67,15 @@ public class Building extends BuildingUnit {
         super.updateOrigin();
     }
 
-    public LOD3Solid getLOD3Solid() {
+    public LOD3SolidView getLOD3Solid() {
         return this.lod3Solid;
     }
 
-    public void setBuildingInstallationView(BuildingInstallationView buildingInstallationView) {
+    public void addBuildingInstallationView(BuildingInstallationView buildingInstallationView) {
         if(buildingInstallationView == null)
             return;
-        if(this.buildingInstallationView == null){
-            this.getChildren().remove(this.buildingInstallationView);
-        }
-        this.buildingInstallationView = buildingInstallationView;
+
+        this.buildingInstallationViews.add(buildingInstallationView);
         this.getChildren().add(buildingInstallationView);
         super.updateOrigin();
     }

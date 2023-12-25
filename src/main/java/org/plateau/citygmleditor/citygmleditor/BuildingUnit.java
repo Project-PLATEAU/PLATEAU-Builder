@@ -5,8 +5,6 @@ import javafx.geometry.Point3D;
 import javafx.scene.Parent;
 
 public class BuildingUnit extends Parent {
-    private ContentModel contentModel = CityGMLEditorApp.getContentModel();
-
     private Point3D location;
     private Point3D rotation;
     private Point3D scale;
@@ -25,10 +23,6 @@ public class BuildingUnit extends Parent {
 
     public void setLocation(Point3D locate) {
         this.location = locate;
-
-        // setTranslateX(locate.getX());
-        // setTranslateY(locate.getY());
-        // setTranslateZ(locate.getZ());
     }
     
     public Point3D getRotation() {

@@ -2,12 +2,12 @@ package org.plateau.citygmleditor.citymodel;
 
 import org.citygml4j.model.gml.base.AbstractGML;
 
-public class GMLObject<T extends AbstractGML> {
+public class GMLObjectView<T extends AbstractGML> {
     private final T original;
 
     private final String gmlID;
 
-    public GMLObject(T original) {
+    public GMLObjectView(T original) {
         this.original = original;
         this.gmlID = original.getId();
     }

@@ -11,14 +11,15 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.transform.Translate;
-import org.plateau.citygmleditor.citymodel.Building;
+import org.plateau.citygmleditor.citymodel.BuildingView;
+import org.plateau.citygmleditor.world.SceneContent;
+import org.plateau.citygmleditor.world.World;
 
 /**
  * 
  */
 public class GizmoController implements Initializable {
-    
-    private ContentModel contentModel = CityGMLEditorApp.getContentModel();
+    private SceneContent sceneContent = CityGMLEditorApp.getSceneContent();
 
     public RadioButton selectButton;
     public RadioButton moveButton;
@@ -42,10 +43,10 @@ public class GizmoController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        contentModel.getSubScene().addEventHandler(MouseEvent.ANY, mouseEventHandler);
+        sceneContent.getSubScene().addEventHandler(MouseEvent.ANY, mouseEventHandler);
 
         gizmoModel = new GizmoModel();
-        contentModel.getRoot3D().getChildren().add(gizmoModel);
+        World.getRoot3D().getChildren().add(gizmoModel);
     }
     
     
@@ -87,18 +88,18 @@ public class GizmoController implements Initializable {
             {
                 if (event.isPrimaryButtonDown()) {
                     mouseDraggig = true;
-                    contentModel.setHookingMousePrimaryButtonEvent(true);
+                    CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(true);
 
                     gizmoModel.setCurrentGizmo(result.getIntersectedNode());
                             
-                    vecIni = unProjectDirection(event.getSceneX(), event.getSceneY(), contentModel.getSubScene().getWidth(), contentModel.getSubScene().getHeight());//scene.getWidth(),scene.getHeight());
+                    vecIni = unProjectDirection(event.getSceneX(), event.getSceneY(), sceneContent.getSubScene().getWidth(), sceneContent.getSubScene().getHeight());//scene.getWidth(),scene.getHeight());
                     distance=result.getIntersectedDistance();
                 }
             }
         }
         else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
             mouseDraggig = false;
-            contentModel.setHookingMousePrimaryButtonEvent(false);
+            CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(false);
 
             gizmoModel.fixTransform();
         }
@@ -124,7 +125,7 @@ public class GizmoController implements Initializable {
             
             System.out.println("Mouse Dragging ...");
 
-            vecPos = unProjectDirection(mousePosX, mousePosY, contentModel.getSubScene().getWidth(),contentModel.getSubScene().getHeight());
+            vecPos = unProjectDirection(mousePosX, mousePosY, sceneContent.getSubScene().getWidth(),sceneContent.getSubScene().getHeight());
             Point3D delta = vecPos.subtract(vecIni).multiply(distance);
             //gizmoModel.getTransforms().add(new Translate(p.getX(),p.getY(),p.getZ()));
             gizmoModel.updateTransform(delta);
@@ -134,7 +135,7 @@ public class GizmoController implements Initializable {
     };
     
     public Point3D unProjectDirection(double sceneX, double sceneY, double sWidth, double sHeight) {
-        double tanHFov = Math.tan(Math.toRadians(contentModel.getCamera().getFieldOfView()) * 0.5f);
+        double tanHFov = Math.tan(Math.toRadians(CityGMLEditorApp.getCamera().getCamera().getFieldOfView()) * 0.5f);
         Point3D vMouse = new Point3D(tanHFov*(2*sceneX/sWidth-1), tanHFov*(2*sceneY/sWidth-sHeight/sWidth), 1);
 
         Point3D result = localToSceneDirection(vMouse);
@@ -142,9 +143,9 @@ public class GizmoController implements Initializable {
     }
 
     public Point3D localToScene(Point3D pt) {
-        Point3D res = contentModel.getCamera().localToParentTransformProperty().get().transform(pt);
-        if (contentModel.getCamera().getParent() != null) {
-            res = contentModel.getCamera().getParent().localToSceneTransformProperty().get().transform(res);
+        Point3D res = CityGMLEditorApp.getCamera().getCamera().localToParentTransformProperty().get().transform(pt);
+        if (CityGMLEditorApp.getCamera().getCamera().getParent() != null) {
+            res = CityGMLEditorApp.getCamera().getCamera().getParent().localToSceneTransformProperty().get().transform(res);
         }
         return res;
     }
@@ -159,7 +160,7 @@ public class GizmoController implements Initializable {
             return null;
 
         //Building型かチェック
-        if(node instanceof Building)
+        if(node instanceof BuildingView)
             return node;
 
         //再帰検索
