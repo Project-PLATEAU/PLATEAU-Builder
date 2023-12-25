@@ -3,6 +3,7 @@ package org.plateau.citygmleditor.citygmleditor;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import org.plateau.citygmleditor.validation.*;
@@ -19,6 +20,9 @@ import java.util.ResourceBundle;
 public class ValidationController implements Initializable {
     @FXML
     VBox resultTextContainer;
+
+    @FXML
+    ScrollPane scrollContentError;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -39,6 +43,7 @@ public class ValidationController implements Initializable {
                 break;
         }
         resultTextContainer.getChildren().add(text);
+        scrollContentError.setContent(resultTextContainer);
     }
 
     public void execute(ActionEvent event) throws ParserConfigurationException, IOException, SAXException {

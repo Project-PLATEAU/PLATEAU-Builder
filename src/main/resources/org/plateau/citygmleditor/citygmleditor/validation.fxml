@@ -11,7 +11,9 @@
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
                <children>
                   <VBox fx:id="resultTextContainer" prefHeight="600.0" prefWidth="500.0" />
-               </children></AnchorPane>
+                   <ScrollPane fx:id="scrollContentError" prefHeight="600.0" prefWidth="500.0" />
+               </children>
+          </AnchorPane>
         </content>
       </ScrollPane>
    </children>
