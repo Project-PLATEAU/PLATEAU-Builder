@@ -6,21 +6,20 @@ import org.citygml4j.model.citygml.CityGMLClass;
 import org.citygml4j.model.citygml.appearance.AppearanceMember;
 import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
 import org.citygml4j.model.citygml.appearance.TexCoordList;
-import org.plateau.citygmleditor.citymodel.Appearance;
-import org.plateau.citygmleditor.citymodel.CityModel;
-import org.plateau.citygmleditor.citymodel.SurfaceData;
+import org.plateau.citygmleditor.citymodel.AppearanceView;
+import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.citymodel.SurfaceDataView;
 
-import java.awt.*;
 import java.nio.file.Paths;
 
 public class AppearanceFactory extends CityGMLFactory {
 
-    protected AppearanceFactory(CityModel target) {
+    protected AppearanceFactory(CityModelView target) {
         super(target);
     }
 
-    public Appearance createAppearance(AppearanceMember gmlObject) {
-        var appearance = new Appearance(gmlObject.getAppearance());
+    public AppearanceView createAppearance(AppearanceMember gmlObject) {
+        var appearance = new AppearanceView(gmlObject.getAppearance());
 
         var surfaceDataMembers = gmlObject.getAppearance().getSurfaceDataMember();
         for (var surfaceData : surfaceDataMembers) {
@@ -36,7 +35,7 @@ public class AppearanceFactory extends CityGMLFactory {
         return appearance;
     }
 
-    private SurfaceData createParameterizedTexture(ParameterizedTexture parameterizedTexture) {
+    private SurfaceDataView createParameterizedTexture(ParameterizedTexture parameterizedTexture) {
         var imageRelativePath = Paths.get(parameterizedTexture.getImageURI());
         var imageAbsolutePath = Paths.get(getTarget().getGmlPath()).getParent().resolve(imageRelativePath);
 
@@ -46,7 +45,7 @@ public class AppearanceFactory extends CityGMLFactory {
         var material = new PhongMaterial();
         material.setDiffuseMap(image);
 
-        var surfaceData = new SurfaceData(parameterizedTexture);
+        var surfaceData = new SurfaceDataView(parameterizedTexture);
         surfaceData.setMaterial(material);
 
         for (var target : parameterizedTexture.getTarget()) {

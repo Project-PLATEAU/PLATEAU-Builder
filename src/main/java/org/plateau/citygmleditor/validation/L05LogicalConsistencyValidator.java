@@ -1,16 +1,16 @@
 package org.plateau.citygmleditor.validation;
 
 import org.apache.commons.lang3.StringUtils;
-import org.plateau.citygmleditor.citymodel.CityModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 
 import static org.plateau.citygmleditor.constant.TagName.srsNameURI;
 
 public class L05LogicalConsistencyValidator implements IValidator{
     @Override
-    public List<ValidationResultMessage> validate(CityModel cityModelView) {
+    public List<ValidationResultMessage> validate(CityModelView cityModelView) {
         List<ValidationResultMessage> messages = new ArrayList<>();
 
         try {

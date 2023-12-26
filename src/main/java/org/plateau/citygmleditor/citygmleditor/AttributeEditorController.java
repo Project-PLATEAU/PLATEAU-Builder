@@ -9,11 +9,9 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
-import org.citygml4j.model.citygml.ade.binding.ADEModelObject;
 import org.citygml4j.model.citygml.ade.generic.ADEGenericElement;
-import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.plateau.citygmleditor.citymodel.AttributeItem;
-import org.plateau.citygmleditor.citymodel.Building;
+import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Node;
 
@@ -95,7 +93,7 @@ public class AttributeEditorController implements Initializable {
         });
     }
 
-    private static void addADEPropertyToTree(Building building, TreeItem<AttributeItem> root) {
+    private static void addADEPropertyToTree(BuildingView building, TreeItem<AttributeItem> root) {
         for (var adeComponent : building.getGMLObject().getGenericApplicationPropertyOfAbstractBuilding()) {
             var adeElement = (ADEGenericElement) adeComponent;
             addXMLElementToTree(adeElement.getContent(), root);
