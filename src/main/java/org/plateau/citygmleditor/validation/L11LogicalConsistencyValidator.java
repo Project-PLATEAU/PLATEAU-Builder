@@ -9,14 +9,13 @@ import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
-import org.plateau.citygmleditor.world.World;
+import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -153,7 +152,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
                 // split posList into points
                 List<Point3D> point3Ds = ThreeDUtil.createListPoint(posString);
                 return this.arePointsInAPlane(point3Ds, standard);
-            } catch (RuntimeException e) {
+            } catch (InvalidPosStringException e) {
                 return false;
             }
         }
