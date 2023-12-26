@@ -66,13 +66,13 @@ public class ThreeDUtil {
     }
 
     /**
-     * Check if 2 line segments are intersected
+     * Check if 2 line segments are intersected at only 1 point
      * 2 line are intersected if they are only intersected at 1 point
      * @param first line segment
      * @param second line segment
      * @return true if 2 line segments are intersected and otherwise
      */
-    public static boolean isLineIntersect(LineSegment first, LineSegment second) {
+    public static boolean haveExactlyOneIntersection(LineSegment first, LineSegment second) {
 
         // Find one of the intersection points
         var intersection = first.intersection(second);
