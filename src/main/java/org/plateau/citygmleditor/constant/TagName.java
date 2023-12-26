@@ -9,6 +9,9 @@ public interface TagName {
     String GML_POSLIST = "gml:posList";
     String GML_ID = "gml:id";
     String GML_POLYGON = "gml:Polygon";
+    String GML_SURFACE_PATCH = "gml:_SurfacePatch";
+    String GML_EXTERIOR = "gml:exterior";
+    String GML_INTERIOR = "gml:interior";
     String URO_BULDING_ID = "uro:buildingID";
     String URO_BRANCH_ID = "uro:branchID";
     String URO_PART_ID = "uro:partID";
