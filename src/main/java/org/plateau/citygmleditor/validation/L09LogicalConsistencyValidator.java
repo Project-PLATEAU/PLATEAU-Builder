@@ -78,7 +78,8 @@ public class L09LogicalConsistencyValidator implements IValidator {
           } else if (isReverseContinuous) {
             isValid = ThreeDUtil.isLinesContinuous(second, first);
           } else {
-            isValid = !ThreeDUtil.isLineIntersect(first, second);
+            // 2 line segments should not have no intersection
+            isValid = first.intersection(second) == null;
           }
 
           if (!isValid) {
