@@ -87,26 +87,24 @@ public class BuildingView extends BuildingUnit {
     public void refrectGML() {
         if (lod1Solid != null) {
             for (var polygon : lod1Solid.getPolygons()) {
-                var coordinates = polygon.getExteriorRing().getOriginal().getPosList().toList3d();
+                var coordinates = polygon.getExteriorRing().getOriginCoords();//.getOriginal().getPosList().toList3d();
                 polygon.getExteriorRing().getOriginal().getPosList().setValue(super.unProjectTransforms(coordinates));
 
                 for (var interiorRing : polygon.getInteriorRings()) {
-                    var coordinatesInteriorRing = interiorRing.getOriginal().getPosList().toList3d();
+                    var coordinatesInteriorRing = interiorRing.getOriginCoords();//.getOriginal().getPosList().toList3d();
                     polygon.getExteriorRing().getOriginal().getPosList().setValue(super.unProjectTransforms(coordinatesInteriorRing));
                 }
             }
         }
         if (lod2Solid != null) {
             for (var polygon : lod2Solid.getPolygons()) {
-                var coordinates = polygon.getExteriorRing().getOriginal().getPosList().toList3d();
+                var coordinates = polygon.getExteriorRing().getOriginCoords();//.getOriginal().getPosList().toList3d();
                 polygon.getExteriorRing().getOriginal().getPosList()
                         .setValue(super.unProjectTransforms(coordinates));
 
                 for (var interiorRing : polygon.getInteriorRings()) {
-                    var coordinatesInteriorRing =
-                            interiorRing.getOriginal().getPosList().toList3d();
-                    polygon.getExteriorRing().getOriginal().getPosList()
-                            .setValue(super.unProjectTransforms(coordinatesInteriorRing));
+                    var coordinatesInteriorRing = interiorRing.getOriginCoords();//.getOriginal().getPosList().toList3d();
+                    polygon.getExteriorRing().getOriginal().getPosList().setValue(super.unProjectTransforms(coordinatesInteriorRing));
                 }
             }
         }

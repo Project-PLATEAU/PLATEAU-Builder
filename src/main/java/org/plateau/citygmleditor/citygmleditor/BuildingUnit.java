@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.transform.Translate;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
+import javafx.scene.transform.Transform;
 
 public abstract class BuildingUnit extends Parent {
     private Point3D location;
@@ -66,23 +67,26 @@ public abstract class BuildingUnit extends Parent {
 
         for (int i = 0; i < coordinates.size(); i = i + 3) {
             var geoCoordinate = new GeoCoordinate(coordinates.get(i), coordinates.get(i + 1), coordinates.get(i + 2));
+            
+            // ワールド座標に投影
             var position = World.getActiveInstance().getGeoReference().project(geoCoordinate);
+
+            // 座標変換情報から座標変換
             Point3D point = new Point3D(position.x, position.y, position.z);
             var pivot = getOrigin();
-            Translate translate = new Translate(getLocation().getX(), getLocation().getY(), getLocation().getZ());
-            point = translate.transform(point);
-            Rotate rotateX = new Rotate(getRotation().getX(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.X_AXIS);
-            point = rotateX.transform(point);
-            Rotate rotateY = new Rotate(getRotation().getY(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Y_AXIS);
-            point = rotateY.transform(point);
-            Rotate rotateZ = new Rotate(getRotation().getZ(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS);
-            point = rotateZ.transform(point);
-            Scale scale = new Scale(getScale().getX(), getScale().getY(), getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ());
-            point = scale.transform(point);
-            var position2 = World.getActiveInstance().getGeoReference().unproject(new Vec3f((float)point.getX(), (float)point.getY(), (float)point.getZ()));
-            ret.add(position2.lat);
-            ret.add(position2.lon);
-            ret.add(position2.alt);
+            Transform transform = new Translate(getLocation().getX(), getLocation().getY(), getLocation().getZ());
+            transform = transform.createConcatenation(new Rotate(getRotation().getX(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.X_AXIS));
+            transform = transform.createConcatenation(new Rotate(getRotation().getY(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Y_AXIS));
+            transform = transform.createConcatenation(new Rotate(getRotation().getZ(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS));
+            transform = transform.createConcatenation(new Scale(getScale().getX(), getScale().getY(), getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+            point = transform.transform(point);
+            
+            // ワールド座標から逆投影
+            var geoCoordinateConvert = World.getActiveInstance().getGeoReference().unproject(new Vec3f((float)point.getX(), (float)point.getY(), (float)point.getZ()));
+            
+            ret.add(geoCoordinateConvert.lat);
+            ret.add(geoCoordinateConvert.lon);
+            ret.add(geoCoordinateConvert.alt);
         }
 
         return ret;
