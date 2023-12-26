@@ -7,6 +7,7 @@ import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
+import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -107,7 +108,7 @@ public class L07LogicalConsistencyValidator implements IValidator {
             List<Point3D> point3Ds;
             try {
                 point3Ds = ThreeDUtil.createListPoint(posString);
-            } catch (RuntimeException e) {
+            } catch (InvalidPosStringException e) {
                 String attribute = tagElement.getAttribute(TagName.GML_ID);
                 tagInvalids.add(this.createAttributeGmlID(attribute, posString));
                 continue;
