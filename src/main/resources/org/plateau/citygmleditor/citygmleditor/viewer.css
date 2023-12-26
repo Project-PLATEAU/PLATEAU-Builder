@@ -79,6 +79,15 @@
     -fx-background-color: #3A3A3A ;
     -fx-text-fill: white ;
 }
+/*
+.tool-bar {
+    -fx-background-color:#444444;
+    -fx-background-insets: 0 0 0 0, 1 0 1 0;
+    -fx-padding: 0.416667em 0.5em 0.416667em 0.5em;
+    -fx-spacing: 0.333em;
+    -fx-alignment: CENTER_LEFT;
+}
+*/
 
 /*******************************************************************************
  * Custom ID Settings                                                          *
@@ -95,7 +104,6 @@
     -fx-border-style: solid;
 }
 #statusBar{
-
     -fx-border-color: #5c5c5c;
     -fx-border-width: 1 0 0 0  ;
     -fx-border-style: solid;
