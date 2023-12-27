@@ -363,7 +363,7 @@ public class MainController implements Initializable {
             textDialog = new TextInputDialog(defaultDirName);
             textDialog.setTitle("フォルダ名を入力してください");
             textDialog.setHeaderText(headerText);
-            textDialog.setContentText("ルートフォルダネーム：");
+            textDialog.setContentText("ルートフォルダ名：");
             textDialogResult = textDialog.showAndWait();
             rootDirName = textDialog.getResult();
 
