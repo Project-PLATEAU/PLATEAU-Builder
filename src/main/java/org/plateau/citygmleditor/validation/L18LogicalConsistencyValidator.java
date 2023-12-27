@@ -67,7 +67,7 @@ public class L18LogicalConsistencyValidator implements IValidator {
             //Check each compositeSurfaces one by one
             for (int j = 0; j < compositeSurfaces.getLength(); j++) {
                 Element compositeSurface = (Element) compositeSurfaces.item(j);
-                List<String> compositeInvalids = this.getListCompositeSurfaceInvalid(compositeSurface);
+                List<String> compositeInvalids = this.getListInvalidCompositeSurface(compositeSurface);
                 if (compositeInvalids.isEmpty()) continue;
                 BuildingInvalid invalid = new BuildingInvalid();
                 invalid.setBuildingID(buildingID);
@@ -93,7 +93,7 @@ public class L18LogicalConsistencyValidator implements IValidator {
      *
      * @return List Geomey by poslis in compositeSurface
      */
-    private List<Geometry> createGeometry(Element compositeSurface) {
+    private List<Geometry> createPolygon(Element compositeSurface) {
         List<Geometry> polygons = new ArrayList<>();
         NodeList posList = compositeSurface.getElementsByTagName(TagName.GML_POSLIST);
         for (int i = 0; i < posList.getLength(); i++) {
@@ -119,20 +119,20 @@ public class L18LogicalConsistencyValidator implements IValidator {
      * @param compositeSurface Element
      * @return list invalid planes in compositeSurface
      */
-    private List<String> getListCompositeSurfaceInvalid(Element compositeSurface) {
-        List<Geometry> geometries = this.createGeometry(compositeSurface);
-        List<String> geometrys = new ArrayList<>();
+    private List<String> getListInvalidCompositeSurface(Element compositeSurface) {
+        List<Geometry> geometries = this.createPolygon(compositeSurface);
+        List<String> invalidComposite = new ArrayList<>();
         for (int i = 0; i < geometries.size(); i++) {
             Geometry geo1 = geometries.get(i);
             for (int j = i + 1; j < geometries.size() - 1; j++) {
                 Geometry geo2 = geometries.get(j);
                 if (!geo1.touches(geo2)) {
                     String geoString = geo2.toString();
-                    geometrys.add(geoString);
+                    invalidComposite.add(geoString);
                 }
             }
         }
 
-        return geometrys;
+        return invalidComposite;
     }
 }
