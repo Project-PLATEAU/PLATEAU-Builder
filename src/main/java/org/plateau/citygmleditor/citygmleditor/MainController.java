@@ -353,7 +353,7 @@ public class MainController implements Initializable {
         String defaultDirName;
         Optional<String> textDialogResult;
         TextInputDialog textDialog;
-        String headerText = "■フォルダ名の規約 (3D 都市モデル標準製品仕様書 第 3.0 版に基づく)\n[都市コード]_[都市名英名]_[提供者区分]_[整備年度]_citygml_[更新回数]_[オプション]_[op(オープンデータ)]";
+        String headerText = "■フォルダ名は以下形式で設定してください。 (3D 都市モデル標準製品仕様書 第 3.0 版に基づく)\n[都市コード]_[都市名英名]_[提供者区分]_[整備年度]_citygml_[更新回数]_[オプション]_[op(オープンデータ)]";
 
         if (sceneContent.getContent() != null) {
             // ダイアログで表示される初期のフォルダ名を指定
