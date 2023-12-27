@@ -1,11 +1,10 @@
 package org.plateau.citygmleditor.utils;
 
 import javafx.geometry.Point3D;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.LineSegment;
+import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
-import org.plateau.citygmleditor.validation.LineSegment3D;
 import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.plateau.citygmleditor.world.World;
 
@@ -125,5 +124,17 @@ public class ThreeDUtil {
         // If angle is 0 or 180, and the sum of distance from start to point and from point to end is equal to distance from start to end
         // It means that the point lies on the line segment
         return angle == 0 || angle == 180 && (point.distance(start) + point.distance(end) == start.distance(end));
+    }
+
+    public static Geometry createPolygon(List<Point3D> points) {
+        Coordinate[] coordinates = new Coordinate[points.size()];
+        for (int i = 0; i < points.size(); i++) {
+            Point3D point = points.get(i);
+            coordinates[i] = new Coordinate(point.getX(), point.getY(), point.getZ());
+        }
+
+        CoordinateSequence coordinateSequence = new CoordinateArraySequence(coordinates);
+        LinearRing linearRing = new LinearRing(coordinateSequence, new GeometryFactory());
+        return new GeometryFactory().createPolygon(linearRing);
     }
 }
