@@ -8,6 +8,7 @@ import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
+import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.plateau.citygmleditor.world.World;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -105,7 +107,7 @@ public class L18LogicalConsistencyValidator implements IValidator {
                 List<Point3D> point3Ds = ThreeDUtil.createListPoint(posString);
                 Geometry polygon = ThreeDUtil.createPolygon(point3Ds);
                 polygons.add(polygon);
-            } catch (RuntimeException e) {
+            } catch (InvalidPosStringException e) {
                 logger.severe("Error when convert point to geometry");
                 throw new RuntimeException("Invalid String");
             }
@@ -124,15 +126,30 @@ public class L18LogicalConsistencyValidator implements IValidator {
         List<String> invalidComposite = new ArrayList<>();
         for (int i = 0; i < geometries.size(); i++) {
             Geometry geo1 = geometries.get(i);
-            for (int j = i + 1; j < geometries.size() - 1; j++) {
-                Geometry geo2 = geometries.get(j);
-                if (!geo1.touches(geo2)) {
-                    String geoString = geo2.toString();
-                    invalidComposite.add(geoString);
-                }
-            }
+            boolean isTouches = this.checkTouches(geo1, geometries, i);
+            boolean isIntersect = this.checkIntersect(geo1, geometries, i);
+            // if 2 polygons are touches and aren't intersect => valid, others case is invalid
+            if (isTouches && !isIntersect) continue;
+            String geoString = Arrays.toString(geo1.getCoordinates());
+            invalidComposite.add(geoString);
         }
 
         return invalidComposite;
+    }
+
+    private boolean checkTouches(Geometry geo1, List<Geometry> listFace, int index) {
+        for (int i = index + 1; i < listFace.size() - 1; i++) {
+            Geometry geo2 = listFace.get(i);
+            if (geo1.touches(geo2)) return true;
+        }
+        return false;
+    }
+
+    private boolean checkIntersect(Geometry geo1, List<Geometry> listFace, int index) {
+        for (int i = index + 1; i < listFace.size() - 1; i++) {
+            Geometry geo2 = listFace.get(i);
+            if (!geo1.touches(geo2) && geo1.intersects(geo2)) return true;
+        }
+        return false;
     }
 }
