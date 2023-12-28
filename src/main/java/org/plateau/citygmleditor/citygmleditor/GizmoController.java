@@ -1,6 +1,7 @@
 package org.plateau.citygmleditor.citygmleditor;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,6 +12,8 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.transform.Translate;
+import javafx.scene.shape.Box;
+import javafx.scene.shape.Sphere;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.world.SceneContent;
 import org.plateau.citygmleditor.world.World;
@@ -36,10 +39,12 @@ public class GizmoController implements Initializable {
     private double mouseOldY;
     private double mouseDeltaX;
     private double mouseDeltaY;
-    private boolean mouseDraggig;
+    private boolean mouseDragging;
 
     private Point3D vecIni, vecPos;
     private double distance;
+
+    private ArrayList<Sphere> spheres;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -47,8 +52,19 @@ public class GizmoController implements Initializable {
 
         gizmoModel = new GizmoModel();
         World.getRoot3D().getChildren().add(gizmoModel);
+
+        // TODO Debug
+        spheres = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                var sphere = new Sphere(5);
+                sphere.setTranslateX(j * 15);
+                sphere.setTranslateY(150 + (i * 20));
+                World.getRoot3D().getChildren().add(sphere);
+                spheres.add(sphere);
+            }
+        }
     }
-    
     
     public void onSelect(ActionEvent actionEvent) {
         System.out.println("onSelect()");
@@ -70,41 +86,46 @@ public class GizmoController implements Initializable {
         gizmoModel.setControlMode(GizmoModel.ControlMode.SCALE);
     }
 
-    
     private final EventHandler<MouseEvent> mouseEventHandler = event -> {
         // System.out.println("MouseEvent ...");
         if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-            System.out.println("MouseEvent ...");
             var result = event.getPickResult();
             var building = FindBuilding(result.getIntersectedNode());
             if (building != null) {
                 gizmoModel.attachBuilding(building);
             }
+
+            for (int i = 0; i < spheres.size(); i++) {
+                if (result.getIntersectedNode().equals(spheres.get(i))) {
+                    gizmoModel.snapTransform(i, 5);
+                }
+            }
         }
-        else if (event.getEventType() == MouseEvent.DRAG_DETECTED) {
+        else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
             var result = event.getPickResult();
-              
             if(gizmoModel.isGizmoDragging(result.getIntersectedNode())) 
             {
                 if (event.isPrimaryButtonDown()) {
-                    mouseDraggig = true;
                     CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(true);
 
-                    gizmoModel.setCurrentGizmo(result.getIntersectedNode());
+                    if (! mouseDragging)
+                        gizmoModel.setCurrentGizmo(result.getIntersectedNode());
                             
                     vecIni = unProjectDirection(event.getSceneX(), event.getSceneY(), sceneContent.getSubScene().getWidth(), sceneContent.getSubScene().getHeight());//scene.getWidth(),scene.getHeight());
-                    distance=result.getIntersectedDistance();
+                    distance = result.getIntersectedDistance();
+                    
+                    mouseDragging = true;
                 }
             }
         }
         else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
-            mouseDraggig = false;
+            mouseDragging = false;
             CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(false);
 
             gizmoModel.fixTransform();
         }
 
-        if (mouseDraggig) {
+        if (mouseDragging) {
             var result = event.getPickResult();
             
             double modifier = 1.0;

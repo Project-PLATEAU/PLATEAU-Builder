@@ -20,10 +20,14 @@ public abstract class BuildingUnit extends Parent {
 
     private Point3D origin;
 
+    private Transform transformCache;
+
     public BuildingUnit() {
         this.location = new Point3D(0, 0, 0);
         this.rotation = new Point3D(0, 0, 0);
         this.scale = new Point3D(1, 1, 1);
+
+        transformCache = new Translate();
     }
 
     public Point3D getLocation() {
@@ -59,6 +63,14 @@ public abstract class BuildingUnit extends Parent {
         return origin;
     }
 
+    public Transform getTransformCache() {
+        return transformCache;
+    }
+
+    public void addTransformCache(Transform transformDelta) {
+        transformCache = transformCache.createConcatenation(transformDelta);
+    }
+
     abstract public void refrectGML();
     
     
@@ -74,10 +86,8 @@ public abstract class BuildingUnit extends Parent {
             // 座標変換情報から座標変換
             Point3D point = new Point3D(position.x, position.y, position.z);
             var pivot = getOrigin();
-            Transform transform = new Translate(getLocation().getX(), getLocation().getY(), getLocation().getZ());
-            transform = transform.createConcatenation(new Rotate(getRotation().getX(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.X_AXIS));
-            transform = transform.createConcatenation(new Rotate(getRotation().getY(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Y_AXIS));
-            transform = transform.createConcatenation(new Rotate(getRotation().getZ(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS));
+            Transform transform = new Translate();
+            transform = transform.createConcatenation(transformCache);
             transform = transform.createConcatenation(new Scale(getScale().getX(), getScale().getY(), getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
             point = transform.transform(point);
             
