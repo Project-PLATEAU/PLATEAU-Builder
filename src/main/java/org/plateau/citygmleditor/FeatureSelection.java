@@ -50,16 +50,20 @@ public class FeatureSelection {
                 feature = feature.getParent();
             }
 
+            if (feature == null)
+                return;
+
             if (newSelectedMesh instanceof MeshView) {
                 var meshView = (MeshView) newSelectedMesh;
 
                 outLine.setMesh(meshView.getMesh());
             }
 
-            if (feature == null)
-                return;
-
             this.active.set((BuildingView) feature);
         });
+    }
+
+    public MeshView getOutLine() {
+        return outLine;
     }
 }

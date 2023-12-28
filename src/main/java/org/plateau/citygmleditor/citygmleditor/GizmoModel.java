@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
+import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
@@ -104,6 +105,17 @@ public class GizmoModel extends Parent {
 
         setVisibleGizmo();
 
+        var pivot = attachedBuilding.getOrigin();
+        
+        // 選択中ワイヤーフレームにも適用
+        MeshView outline = CityGMLEditorApp.getFeatureSellection().getOutLine();
+        // 建物の座標変換を初期化
+        outline.getTransforms().clear();
+        // 建物の座標変換情報から建物の座標変換を作成
+        outline.getTransforms().add(attachedBuilding.getTransformCache());
+        // スケールを適用
+        outline.getTransforms().add(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        
         // デバッグ用バウンディングボックス表示
         // BoundingBox bb = (BoundingBox) building.getBoundsInParent();
         // if (debugBoundingBox != null) {
@@ -263,6 +275,16 @@ public class GizmoModel extends Parent {
         getTransforms().add(attachedBuilding.getTransformCache());
         // ギズモの位置を建物のPivotに合わせて座標変換
         getTransforms().add(new Translate(attachedBuilding.getOrigin().getX(), attachedBuilding.getOrigin().getY(), attachedBuilding.getOrigin().getZ()));
+        
+        // 選択中ワイヤーフレームにも適用
+        MeshView outline = CityGMLEditorApp.getFeatureSellection().getOutLine();
+        // 建物の座標変換を初期化
+        outline.getTransforms().clear();
+        // 建物の座標変換情報から建物の座標変換を作成
+        outline.getTransforms().add(attachedBuilding.getTransformCache());
+        // スケールを適用
+        outline.getTransforms().add(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+
     }
     
     public void fixTransform() {
