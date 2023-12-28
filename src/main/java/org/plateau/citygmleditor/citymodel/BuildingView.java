@@ -7,7 +7,7 @@ import org.citygml4j.model.gml.geometry.primitives.*;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD3SolidView;
-
+import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,6 +95,12 @@ public class BuildingView extends BuildingUnit {
                     polygon.getExteriorRing().getOriginal().getPosList().setValue(super.unProjectTransforms(coordinatesInteriorRing));
                 }
             }
+            var vertexBuffer = new VertexBuffer();
+            var vertices = unProjectVertexTransforms(lod1Solid.getVertexBuffer().getVertices());
+            for(var vertex : vertices){
+                vertexBuffer.addVertex(vertex);
+            }
+            lod1Solid.setVertexBuffer(vertexBuffer);
         }
         if (lod2Solid != null) {
             for (var polygon : lod2Solid.getPolygons()) {
@@ -107,6 +113,12 @@ public class BuildingView extends BuildingUnit {
                     polygon.getExteriorRing().getOriginal().getPosList().setValue(super.unProjectTransforms(coordinatesInteriorRing));
                 }
             }
+            var vertexBuffer = new VertexBuffer();
+            var vertices = unProjectVertexTransforms(lod2Solid.getVertexBuffer().getVertices());
+            for(var vertex : vertices){
+                vertexBuffer.addVertex(vertex);
+            }
+            lod2Solid.setVertexBuffer(vertexBuffer);
         }
         // TODO LOD3
         // if (lod3Solid != null) {

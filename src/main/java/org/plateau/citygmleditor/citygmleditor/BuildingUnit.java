@@ -73,7 +73,6 @@ public abstract class BuildingUnit extends Parent {
 
     abstract public void refrectGML();
     
-    
     public List<Double> unProjectTransforms(List<Double> coordinates) {
         List<Double> ret = new ArrayList<>();
 
@@ -97,6 +96,21 @@ public abstract class BuildingUnit extends Parent {
             ret.add(geoCoordinateConvert.lat);
             ret.add(geoCoordinateConvert.lon);
             ret.add(geoCoordinateConvert.alt);
+        }
+
+        return ret;
+    }
+    
+    public List<Vec3f> unProjectVertexTransforms(List<Vec3f> vertices) {
+        List<Vec3f> ret = new ArrayList<>();
+
+        for (var vertex : vertices) {
+            var pivot = getOrigin();
+            Transform transform = new Translate();
+            transform = transform.createConcatenation(transformCache);
+            transform = transform.createConcatenation(new Scale(getScale().getX(), getScale().getY(), getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+            var point = transform.transform(new Point3D(vertex.x, vertex.y, vertex.z));
+            ret.add(new Vec3f((float) point.getX(), (float) point.getY(), (float) point.getZ()));
         }
 
         return ret;
