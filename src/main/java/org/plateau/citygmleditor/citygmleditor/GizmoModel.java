@@ -43,7 +43,7 @@ public class GizmoModel extends Parent {
 
     private Node currentGizmo;
 
-    private Box debugBoundingBox;
+    // private Box debugBoundingBox;
     
     public GizmoModel() {
         moveGizmo = new Group();
@@ -105,16 +105,15 @@ public class GizmoModel extends Parent {
         setVisibleGizmo();
 
         // デバッグ用バウンディングボックス表示
-        BoundingBox bb = (BoundingBox) building.getBoundsInParent();
-        System.out.println(building.getId() + " x:" + bb.getCenterX() + " y:" + bb.getCenterY() + " z:" + bb.getCenterZ());
-        if (debugBoundingBox != null) {
-            getChildren().remove(debugBoundingBox);
-        }
-        debugBoundingBox = createBoundingBoxVisual(bb);
-        getChildren().add(debugBoundingBox);
-        debugBoundingBox.setTranslateX(0.0d);
-        debugBoundingBox.setTranslateY(0.0d);
-        debugBoundingBox.setTranslateZ(bb.getDepth() / 2);
+        // BoundingBox bb = (BoundingBox) building.getBoundsInParent();
+        // if (debugBoundingBox != null) {
+        //     getChildren().remove(debugBoundingBox);
+        // }
+        // debugBoundingBox = createBoundingBoxVisual(bb);
+        // getChildren().add(debugBoundingBox);
+        // debugBoundingBox.setTranslateX(0.0d);
+        // debugBoundingBox.setTranslateY(0.0d);
+        // debugBoundingBox.setTranslateZ(bb.getDepth() / 2);
     }
     
     public void setCurrentGizmo(Node node) {

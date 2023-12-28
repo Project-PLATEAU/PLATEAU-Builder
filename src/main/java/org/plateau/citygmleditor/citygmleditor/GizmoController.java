@@ -1,7 +1,6 @@
 package org.plateau.citygmleditor.citygmleditor;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,9 +10,6 @@ import javafx.scene.Node;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.transform.Translate;
-import javafx.scene.shape.Box;
-import javafx.scene.shape.Sphere;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.world.SceneContent;
 import org.plateau.citygmleditor.world.World;
@@ -44,61 +40,36 @@ public class GizmoController implements Initializable {
     private Point3D vecIni, vecPos;
     private double distance;
 
-    private ArrayList<Sphere> spheres;
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         sceneContent.getSubScene().addEventHandler(MouseEvent.ANY, mouseEventHandler);
 
         gizmoModel = new GizmoModel();
         World.getRoot3D().getChildren().add(gizmoModel);
-
-        // TODO Debug
-        spheres = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                var sphere = new Sphere(5);
-                sphere.setTranslateX(j * 15);
-                sphere.setTranslateY(150 + (i * 20));
-                World.getRoot3D().getChildren().add(sphere);
-                spheres.add(sphere);
-            }
-        }
     }
     
     public void onSelect(ActionEvent actionEvent) {
-        System.out.println("onSelect()");
         gizmoModel.setControlMode(GizmoModel.ControlMode.SELECT);
     }
     
     public void onMove(ActionEvent actionEvent) {
-        System.out.println("onMove()");
         gizmoModel.setControlMode(GizmoModel.ControlMode.MOVE);
     }
     
     public void onRotation(ActionEvent actionEvent) {
-        System.out.println("onRotation()");
         gizmoModel.setControlMode(GizmoModel.ControlMode.ROTATION);
     }
     
     public void onScale(ActionEvent actionEvent) {
-        System.out.println("onScale()");
         gizmoModel.setControlMode(GizmoModel.ControlMode.SCALE);
     }
 
     private final EventHandler<MouseEvent> mouseEventHandler = event -> {
-        // System.out.println("MouseEvent ...");
         if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
             var result = event.getPickResult();
             var building = FindBuilding(result.getIntersectedNode());
             if (building != null) {
                 gizmoModel.attachBuilding(building);
-            }
-
-            for (int i = 0; i < spheres.size(); i++) {
-                if (result.getIntersectedNode().equals(spheres.get(i))) {
-                    gizmoModel.snapTransform(i, 5);
-                }
             }
         }
         else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
@@ -144,11 +115,8 @@ public class GizmoController implements Initializable {
             mouseDeltaX = (mousePosX - mouseOldX);
             mouseDeltaY = (mousePosY - mouseOldY);
             
-            System.out.println("Mouse Dragging ...");
-
             vecPos = unProjectDirection(mousePosX, mousePosY, sceneContent.getSubScene().getWidth(),sceneContent.getSubScene().getHeight());
             Point3D delta = vecPos.subtract(vecIni).multiply(distance);
-            //gizmoModel.getTransforms().add(new Translate(p.getX(),p.getY(),p.getZ()));
             gizmoModel.updateTransform(delta);
             vecIni=vecPos;
             distance=result.getIntersectedDistance();
