@@ -14,4 +14,7 @@ public interface TagName {
     String URO_PART_ID = "uro:partID";
     String URO_BUILDING_ID_ATTRIBUTE = "uro:BuildingIDAttribute";
     String GML_COMPOSITE_SURFACE = "gml:CompositeSurface";
+    String BLDG_LOD1SOLID = "bldg:lod1Solid";
+    String BLDG_LOD2SOLID = "bldg:lod2Solid";
+    String GML_EXTERIOR = "gml:exterior";
 }

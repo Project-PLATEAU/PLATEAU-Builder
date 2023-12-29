@@ -1,14 +1,16 @@
 package org.plateau.citygmleditor.utils;
 
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
+import org.citygml4j.model.citygml.CityGML;
 import org.citygml4j.model.citygml.ade.ADEException;
-import org.citygml4j.model.citygml.core.CityModel;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;

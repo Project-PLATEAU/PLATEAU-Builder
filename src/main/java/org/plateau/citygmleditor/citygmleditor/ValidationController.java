@@ -62,6 +62,7 @@ public class ValidationController implements Initializable {
 
         List<IValidator> validators = new ArrayList<>() {
             {
+                add(new LBldg01LogicalConsistencyValidator());
                 add(new GMLIDCompletenessValidator());
                 add(new L05LogicalConsistencyValidator());
                 add(new L06LogicalConsistencyValidator());

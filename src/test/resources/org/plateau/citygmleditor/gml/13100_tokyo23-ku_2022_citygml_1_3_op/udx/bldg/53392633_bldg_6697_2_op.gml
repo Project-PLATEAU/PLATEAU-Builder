@@ -5787,7 +5787,7 @@
 						</gml:MultiSurface>
 					</bldg:lod2MultiSurface>
 				</bldg:GroundSurface>
-			</bldg:boundedBy>
+			</bldg:boundedBy>a
 			<bldg:boundedBy>
 				<bldg:RoofSurface gml:id="roof_HNAP0665_p4895_0">
 					<bldg:lod2MultiSurface>
