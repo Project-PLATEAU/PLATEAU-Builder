@@ -391,7 +391,7 @@ public class MainController implements Initializable {
                     var cityModelNode = content.getChildren().get(0);
                     if (cityModelNode == null)
                         return;
-                    var cityModel = (CityModel) cityModelNode;
+                    var cityModel = (CityModelView) cityModelNode;
 
                     try {
                         // CityGMLのエクスポート
