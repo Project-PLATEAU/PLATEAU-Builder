@@ -62,6 +62,7 @@ import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.exporters.TextureExporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
 import org.plateau.citygmleditor.world.World;
+import org.plateau.citygmleditor.utils.*;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -109,6 +110,10 @@ import java.nio.file.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import org.plateau.citygmleditor.world.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.awt.Desktop;
 
 /**
  * Controller class for main fxml file.
@@ -343,90 +348,80 @@ public class MainController implements Initializable {
     }
 
     public void export(ActionEvent event) {
-
-        String[] destRootDirComponents = importGmlPathComponents[importGmlPathComponents.length - 4].split("_");// インポートしたcitygmlのルートフォルダネームを_で分解
-        String cityCode = destRootDirComponents[0];
-        String cityName = destRootDirComponents[1];
-        String developmentYear = destRootDirComponents[2];
-        String updateCount = Integer.toString(Integer.parseInt(destRootDirComponents[4]) + 1);
-        String options;
         String rootDirName;// エクスポート先のルートフォルダの名前
         String udxDirName = "udx";
         String bldgDirName = "bldg";
+        String defaultDirName;
+        Optional<String> textDialogResult;
+        TextInputDialog textDialog;
+        String headerText = "■フォルダ名は以下形式で設定してください。 (3D 都市モデル標準製品仕様書 第 3.0 版に基づく)\n[都市コード]_[都市名英名]_[提供者区分]_[整備年度]_citygml_[更新回数]_[オプション]_[op(オープンデータ)]";
 
-        // ダイアログで表示される初期のフォルダ名を指定
-        String defaultDirName = "";
-        if (destRootDirComponents[destRootDirComponents.length - 1].equals("op")) {
-            if (destRootDirComponents.length == 7) {
-                options = destRootDirComponents[5];
-                defaultDirName = cityCode + "_" + cityName + "_" + developmentYear + "_" + "citygml" + "_" +
-                        updateCount + "_" + options + "_" + "op";
-            } else {
-                defaultDirName = cityCode + "_" + cityName + "_" + developmentYear + "_" + "citygml" + "_" +
-                        updateCount + "_" + "op";
+        if (sceneContent.getContent() != null) {
+            // ダイアログで表示される初期のフォルダ名を指定
+            defaultDirName = importGmlPathComponents[importGmlPathComponents.length - 4];
+            // テキスト入力ダイアログを表示し、ユーザーにフォルダ名を入力させる(元のフォルダ名を表示)
+            textDialog = new TextInputDialog(defaultDirName);
+            textDialog.setTitle("フォルダ名を入力してください");
+            textDialog.setHeaderText(headerText);
+            textDialog.setContentText("ルートフォルダ名：");
+            textDialogResult = textDialog.showAndWait();
+            rootDirName = textDialog.getResult();
+
+            if (textDialogResult.isPresent()) {
+                DirectoryChooser directoryChooser = new DirectoryChooser();
+                if (loadedPath != null) {
+                    directoryChooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());// 初期ディレクトリ指定
+                }
+                // 初期ディレクトリを設定（オプション）
+                // directoryChooser.setInitialDirectory(new File("/path/to/initial/directory"));
+                directoryChooser.setTitle("Export CityGML");
+                var selectedDirectory = directoryChooser.showDialog(null);
+                if (selectedDirectory != null) {
+
+                    // インポート元からエクスポート先のフォルダへコピー
+                    try {
+                        String skipPath = sourceRootDirPath.replace("\\", "\\\\") + "\\\\udx\\\\.*";
+                        if (!FileUtils.copyDirectory(Paths.get(sourceRootDirPath),
+                                Paths.get(selectedDirectory.getAbsolutePath() + "\\\\" + rootDirName),skipPath) )
+                            return;
+                    } catch (IOException e) {
+                        System.out.println(e);
+                    }
+
+                    var content = (Group) sceneContent.getContent();
+                    var cityModelNode = content.getChildren().get(0);
+                    if (cityModelNode == null)
+                        return;
+                    var cityModel = (CityModelView) cityModelNode;
+
+                    try {
+                        // CityGMLのエクスポート
+                        GmlExporter.export(
+                                Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" +
+                                        udxDirName + "/"
+                                        + bldgDirName
+                                        + "/" + importGmlPathComponents[importGmlPathComponents.length - 1])
+                                        .toString(),
+                                cityModel.getGmlObject(),
+                                cityModel.getSchemaHandler());
+                        // Appearanceのエクスポート
+                        TextureExporter.export(
+                                selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" + udxDirName + "/"
+                                        + bldgDirName,
+                                cityModel);
+                    } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
+                        throw new RuntimeException(e);
+                    }
+                    // エクスポート後にフォルダを開く
+                    try {
+                        Desktop desktop = Desktop.getDesktop();
+                        desktop.open(new File(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/"));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        } else {
-            if (destRootDirComponents.length == 6) {
-                options = destRootDirComponents[5];
-                defaultDirName = cityCode + "_" + cityName + "_" + developmentYear + "_" + "citygml" + "_" +
-                        updateCount + "_" + options;
-            } else {
-                defaultDirName = cityCode + "_" + cityName + "_" + developmentYear + "_" + "citygml" + "_" +
-                        updateCount;
-            }
         }
-        // テキスト入力ダイアログを表示し、ユーザーにフォルダ名を入力させる(仮のフォルダ名は表示)
-        TextInputDialog dialog = new TextInputDialog(defaultDirName);
-        dialog.setTitle("Input Root Folder Name");
-        dialog.setHeaderText(null);
-        dialog.setContentText("Folder Name:");
-
-        Optional<String> result = dialog.showAndWait();
-        rootDirName = dialog.getResult();
-
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        if (loadedPath != null) {
-            directoryChooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());// 初期ディレクトリ指定
-        }
-        // 初期ディレクトリを設定（オプション）
-        // directoryChooser.setInitialDirectory(new File("/path/to/initial/directory"));
-        directoryChooser.setTitle("Export CityGML");
-        var selectedDirectory = directoryChooser.showDialog(null);
-
-        // インポート元からエクスポート先のフォルダへコピー
-        try {
-            folderCopy(Paths.get(sourceRootDirPath),
-                    Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/"));
-        } catch (IOException e) {
-            System.out.println(e);
-        }
-
-        var content = (Group) sceneContent.getContent();
-        var cityModelNode = content.getChildren().get(0);
-
-        if (cityModelNode == null)
-            return;
-
-        var cityModel = (CityModelView)cityModelNode;
-
-        try {
-            // CityGMLのエクスポート
-            GmlExporter.export(
-                    Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" +
-                            udxDirName + "/"
-                            + bldgDirName
-                            + "/" + importGmlPathComponents[importGmlPathComponents.length - 1])
-                            .toString(),
-                    cityModel.getGmlObject(),
-                    cityModel.getSchemaHandler());
-            // Appearanceのエクスポート
-            TextureExporter.export(
-                    selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" + udxDirName + "/" + bldgDirName,
-                    cityModel);
-        } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
-            throw new RuntimeException(e);
-        }
-
     }
 
     public void openValidationWindow(ActionEvent event) throws IOException {
@@ -449,7 +444,6 @@ public class MainController implements Initializable {
             loadGltf(newFile.toString());
         }
     }
-
 
     private void loadGltf(String fileUrl) {
         try {
@@ -477,18 +471,4 @@ public class MainController implements Initializable {
         }
         updateStatus();
     }
-    // フォルダコピーメソッド(udx以下は無視)
-    public void folderCopy(Path sourcePath, Path destinationPath) throws IOException {
-        String skipPattern = sourceRootDirPath.replace("\\", "\\\\") + "\\\\udx\\\\.*";
-        Files.walk(sourcePath).forEach(path -> {
-            if (!path.toString().matches(skipPattern)) {
-                try {
-                    Files.copy(path, destinationPath.resolve(sourcePath.relativize(path)));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
 }

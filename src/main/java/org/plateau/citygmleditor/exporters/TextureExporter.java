@@ -6,6 +6,7 @@ import org.citygml4j.model.citygml.CityGMLClass;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.AppearanceView;
 import org.plateau.citygmleditor.citymodel.SurfaceDataView;
+import org.plateau.citygmleditor.utils.*;
 
 import javax.imageio.ImageIO;
 import javafx.embed.swing.SwingFXUtils;
@@ -17,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public class TextureExporter {
     public static void export(String folderPath, CityModelView cityModel) {
@@ -40,11 +43,15 @@ public class TextureExporter {
         ArrayList<SurfaceDataView> tempSurfaceDatas = tempAppearance.getSurfaceData();
         String appearanceDirName = "";
         int count = 0;
+
         for (SurfaceDataView surfaceData : tempSurfaceDatas) {
             if (count == 0) {
                 var filePathComponents = appearanceList.get(0).split("/");
                 appearanceDirName = filePathComponents[0];
                 try {
+                    if(new File(folderPath + "/" + appearanceDirName).exists()){
+                        FileUtils.deleteDirectory(Paths.get(folderPath + "/" + appearanceDirName));
+                    }
                     Files.createDirectory(Paths.get(folderPath + "/" + appearanceDirName));
                 } catch (IOException e) {
                     System.out.println(e);
