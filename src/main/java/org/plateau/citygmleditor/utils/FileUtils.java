@@ -128,7 +128,7 @@ public class FileUtils {
             alert.showAndWait();
             buttonResult = alert.getResult();
         }
-        if (buttonResult == null) {
+        if (buttonResult == null || buttonResult == ButtonType.YES) {
             Files.walk(sourcePath).forEach(path -> {
                 if (!path.toString().matches(skipPath)) {
                     try {
@@ -139,22 +139,6 @@ public class FileUtils {
                     }
                 }
             });
-            return true;
-        } else if (buttonResult == ButtonType.YES) {
-            Path destinationPathTmp = Paths.get(destinationPath.toString() + "_tmp");
-            Files.walk(sourcePath).forEach(path -> {
-                if (!path.toString().matches(skipPath)) {
-                    try {
-                        Files.copy(path, destinationPathTmp.resolve(sourcePath.relativize(path)),
-                                StandardCopyOption.REPLACE_EXISTING);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            // 元々あったフォルダを削除し、tmpフォルダの名称を修正
-            deleteDirectory(destinationPath);
-            Files.move(destinationPathTmp, destinationPath);
             return true;
         } else {
             return false;
