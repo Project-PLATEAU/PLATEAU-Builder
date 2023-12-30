@@ -62,6 +62,7 @@ import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.exporters.TextureExporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
 import org.plateau.citygmleditor.world.World;
+import org.plateau.citygmleditor.utils.*;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -358,7 +359,6 @@ public class MainController implements Initializable {
         if (sceneContent.getContent() != null) {
             // ダイアログで表示される初期のフォルダ名を指定
             defaultDirName = importGmlPathComponents[importGmlPathComponents.length - 4];
-
             // テキスト入力ダイアログを表示し、ユーザーにフォルダ名を入力させる(元のフォルダ名を表示)
             textDialog = new TextInputDialog(defaultDirName);
             textDialog.setTitle("フォルダ名を入力してください");
@@ -380,8 +380,9 @@ public class MainController implements Initializable {
 
                     // インポート元からエクスポート先のフォルダへコピー
                     try {
-                        if (!copyDirectory(Paths.get(sourceRootDirPath),
-                                Paths.get(selectedDirectory.getAbsolutePath() + "\\\\" + rootDirName)) )
+                        String skipPath = sourceRootDirPath.replace("\\", "\\\\") + "\\\\udx\\\\.*";
+                        if (!FileUtils.copyDirectory(Paths.get(sourceRootDirPath),
+                                Paths.get(selectedDirectory.getAbsolutePath() + "\\\\" + rootDirName),skipPath) )
                             return;
                     } catch (IOException e) {
                         System.out.println(e);
@@ -411,7 +412,6 @@ public class MainController implements Initializable {
                     } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
                         throw new RuntimeException(e);
                     }
-
                     // エクスポート後にフォルダを開く
                     try {
                         Desktop desktop = Desktop.getDesktop();
@@ -470,67 +470,5 @@ public class MainController implements Initializable {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
         updateStatus();
-    }
-
-    // フォルダコピーメソッド(udx以下は無視)
-    private boolean copyDirectory(Path sourcePath, Path destinationPath) throws IOException {
-        ButtonType buttonResult = null;
-        String skipPattern = sourceRootDirPath.replace("\\", "\\\\") + "\\\\udx\\\\.*";
-        if (Files.exists(destinationPath)) {
-            Alert alert = new Alert(AlertType.CONFIRMATION, "同一名称のフォルダが存在します。上書きしますか？", ButtonType.YES, ButtonType.NO);
-            alert.setTitle("上書き確認");
-            alert.setHeaderText(null);
-            alert.showAndWait();
-            buttonResult = alert.getResult();
-
-        }
-        if (buttonResult == null) {
-            Files.walk(sourcePath).forEach(path -> {
-                if (!path.toString().matches(skipPattern)) {
-                    try {
-                        Files.copy(path, destinationPath.resolve(sourcePath.relativize(path)),
-                                StandardCopyOption.REPLACE_EXISTING);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            return true;
-        } else if (buttonResult == ButtonType.YES) {
-            Path destinationPathTmp = Paths.get(destinationPath.toString() + "_tmp");
-            Files.walk(sourcePath).forEach(path -> {
-                if (!path.toString().matches(skipPattern)) {
-                    try {
-                        Files.copy(path, destinationPathTmp.resolve(sourcePath.relativize(path)),
-                                StandardCopyOption.REPLACE_EXISTING);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            // 元々あったフォルダを削除し、tmpフォルダの名称を修正
-            deleteDirectory(destinationPath);
-            Files.move(destinationPathTmp, destinationPath);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // フォルダコピー削除
-    private void deleteDirectory(Path directoryPath) throws IOException {
-        Files.walkFileTree(directoryPath, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.delete(file);
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                Files.delete(dir);
-                return FileVisitResult.CONTINUE;
-            }
-        });
     }
 }
