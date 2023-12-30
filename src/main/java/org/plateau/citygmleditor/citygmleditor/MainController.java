@@ -380,8 +380,8 @@ public class MainController implements Initializable {
 
                     // インポート元からエクスポート先のフォルダへコピー
                     try {
-                        if (CopyDirectory(Paths.get(sourceRootDirPath),
-                                Paths.get(selectedDirectory.getAbsolutePath() + "\\\\" + rootDirName)) == -1)
+                        if (!CopyDirectory(Paths.get(sourceRootDirPath),
+                                Paths.get(selectedDirectory.getAbsolutePath() + "\\\\" + rootDirName)) )
                             return;
                     } catch (IOException e) {
                         System.out.println(e);
@@ -473,7 +473,7 @@ public class MainController implements Initializable {
     }
 
     // フォルダコピーメソッド(udx以下は無視)
-    private int CopyDirectory(Path sourcePath, Path destinationPath) throws IOException {
+    private boolean CopyDirectory(Path sourcePath, Path destinationPath) throws IOException {
         ButtonType buttonResult = null;
         String skipPattern = sourceRootDirPath.replace("\\", "\\\\") + "\\\\udx\\\\.*";
         if (Files.exists(destinationPath)) {
@@ -495,7 +495,7 @@ public class MainController implements Initializable {
                     }
                 }
             });
-            return 0;
+            return true;
         } else if (buttonResult == ButtonType.YES) {
             Path destinationPathTmp = Paths.get(destinationPath.toString() + "_tmp");
             Files.walk(sourcePath).forEach(path -> {
@@ -511,9 +511,9 @@ public class MainController implements Initializable {
             // 元々あったフォルダを削除し、tmpフォルダの名称を修正
             deleteDirectory(destinationPath);
             Files.move(destinationPathTmp, destinationPath);
-            return 0;
+            return true;
         } else {
-            return -1;
+            return false;
         }
     }
 
