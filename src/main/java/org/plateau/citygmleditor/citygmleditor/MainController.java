@@ -380,7 +380,7 @@ public class MainController implements Initializable {
 
                     // インポート元からエクスポート先のフォルダへコピー
                     try {
-                        if (!CopyDirectory(Paths.get(sourceRootDirPath),
+                        if (!copyDirectory(Paths.get(sourceRootDirPath),
                                 Paths.get(selectedDirectory.getAbsolutePath() + "\\\\" + rootDirName)) )
                             return;
                     } catch (IOException e) {
@@ -473,7 +473,7 @@ public class MainController implements Initializable {
     }
 
     // フォルダコピーメソッド(udx以下は無視)
-    private boolean CopyDirectory(Path sourcePath, Path destinationPath) throws IOException {
+    private boolean copyDirectory(Path sourcePath, Path destinationPath) throws IOException {
         ButtonType buttonResult = null;
         String skipPattern = sourceRootDirPath.replace("\\", "\\\\") + "\\\\udx\\\\.*";
         if (Files.exists(destinationPath)) {
