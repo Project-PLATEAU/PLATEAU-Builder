@@ -17,15 +17,20 @@ import org.w3c.dom.Node;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.scene.control.Label;
+
 
 public class AttributeEditorController implements Initializable {
     public TreeTableView<AttributeItem> attributeTreeTable;
     public TreeTableColumn<AttributeItem, String> keyColumn;
     public TreeTableColumn<AttributeItem, String> valueColumn;
-
     @FXML
     private TitledPane titledPane;
-
+    @FXML
+    private Label featureID;
+    @FXML
+    private Label featureType;
+    
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         var activeFeatureProperty = CityGMLEditorApp.getFeatureSellection().getActiveFeatureProperty();
@@ -41,11 +46,12 @@ public class AttributeEditorController implements Initializable {
                     return null;
 
                 // タイトル更新
-                titledPane.setText(String.format("属性情報（%s）", feature.getGMLObject().getId()));
-
+                //titledPane.setText(String.format("属性情報（%s）", feature.getGMLObject().getId()));
+    
+                featureID.setText("地物ID：" + feature.getGMLObject().getId());
+                featureType.setText("地物型：建築物（Buildings）");
                 var root = new TreeItem<>(new AttributeItem("", ""));
                 var gmlObject = feature.getGMLObject();
-
                 {
                     var attribute = new AttributeItem(
                             "measuredHeight",
