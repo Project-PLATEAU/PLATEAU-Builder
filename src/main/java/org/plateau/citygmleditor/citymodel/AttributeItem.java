@@ -11,6 +11,7 @@ public class AttributeItem {
     public StringProperty keyProperty() {
         return key;
     }
+
     public StringProperty valueProperty() {
         return value;
     }

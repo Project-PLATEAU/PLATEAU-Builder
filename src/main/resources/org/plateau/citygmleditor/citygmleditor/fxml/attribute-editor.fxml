@@ -13,6 +13,6 @@
         </columns>
     </TreeTableView>
    <graphic>
-      <Button mnemonicParsing="false" text="+" />
+      <Button mnemonicParsing="false" text="+" onAction="#onClickAddButton" />
    </graphic>
 </TitledPane>

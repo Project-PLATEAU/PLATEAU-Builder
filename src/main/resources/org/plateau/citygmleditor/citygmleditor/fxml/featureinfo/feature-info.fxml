@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.text.Text?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.plateau.citygmleditor.fxml.featureinfo.FeatureInfoController">
+    <VBox prefWidth="100.0" spacing="5.0">
+        <children>
+            <HBox prefWidth="200.0">
+                <children>
+                    <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物ID">
+                        <HBox.margin>
+                            <Insets right="50.0"/>
+                        </HBox.margin>
+                    </Text>
+                    <Text fx:id="featureIDText" fill="WHITE" layoutX="10.0" layoutY="23.0" strokeType="OUTSIDE"
+                          strokeWidth="0.0" />
+                </children>
+                <VBox.margin>
+                    <Insets/>
+                </VBox.margin>
+            </HBox>
+            <HBox maxWidth="1.7976931348623157E308" prefWidth="200.0">
+                <children>
+                    <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物型">
+                        <HBox.margin>
+                            <Insets right="50.0"/>
+                        </HBox.margin>
+                    </Text>
+                    <Text fx:id="featureTypeText" fill="WHITE" layoutX="10.0" layoutY="23.0" strokeType="OUTSIDE"
+                          strokeWidth="0.0" />
+                </children>
+                <padding>
+                    <Insets bottom="5.0"/>
+                </padding>
+            </HBox>
+        </children>
+        <padding>
+            <Insets left="5.0" right="5.0" top="5.0"/>
+        </padding>
+    </VBox>
+<!--    TODO: 属性情報等をここに移植    -->
+</AnchorPane>

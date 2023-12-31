@@ -33,6 +33,8 @@ package org.plateau.citygmleditor.citygmleditor;
 
 import java.util.Objects;
 
+import javax.swing.text.Document;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -44,6 +46,8 @@ import javafx.stage.Window;
 import org.plateau.citygmleditor.control.CityModelViewMode;
 import org.plateau.citygmleditor.world.*;
 import org.plateau.citygmleditor.control.FeatureSelection;
+import org.plateau.citygmleditor.citymodel.*;
+import org.w3c.dom.*;
 
 /**
  * JavaFX 3D Viewer Application
@@ -57,6 +61,8 @@ public class CityGMLEditorApp extends Application {
     private static AntiAliasing antiAliasing;
     private static AutoScalingGroup autoScalingGroups;
     private static CityModelViewMode cityModelViewMode;
+    private static UroAttributeInfo uroAttributeInfo;
+    private static String datasetPath;
 
     private SessionManager sessionManager;
 
@@ -97,12 +103,32 @@ public class CityGMLEditorApp extends Application {
     public static FeatureSelection getFeatureSellection() {
         return selection;
     }
-    public static CityModelViewMode getCityModelViewMode() { return cityModelViewMode; }
+
+    public static CityModelViewMode getCityModelViewMode() {
+        return cityModelViewMode;
+    }
+
+    public static org.w3c.dom.Document getUroAttributeDocument() {
+        return uroAttributeInfo.getUroAttributeDocument();
+    }
+
+    public static void settingUroAttributeInfo(String path) {
+        uroAttributeInfo.readUroSchemas(path);
+    }
+
+    public static void setDatasetPath(String path) {
+        datasetPath = path;
+    }
+
+    public static String getDatasetPath() {
+        return datasetPath;
+    }
 
     @Override
     public void start(Stage stage) throws Exception {
         sessionManager = SessionManager.createSessionManager("CityGMLEditor");
         sessionManager.loadSession();
+        uroAttributeInfo = new UroAttributeInfo();
 
         World.setActiveInstance(new World(), new Group());
         autoScalingGroups = new AutoScalingGroup(2);
