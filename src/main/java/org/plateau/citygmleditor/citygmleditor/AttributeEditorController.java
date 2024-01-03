@@ -34,7 +34,7 @@ public class AttributeEditorController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        var activeFeatÍureProperty = CityGMLEditorApp.getFeatureSellection().getActiveFeatureProperty();
+        var activeFeatureProperty = CityGMLEditorApp.getFeatureSellection().getActiveFeatureProperty();
         attributeTreeTable.rootProperty().bind(new ObjectBinding<>() {
             {
                 bind(activeFeatureProperty);
