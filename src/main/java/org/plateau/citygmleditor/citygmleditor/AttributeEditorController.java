@@ -14,11 +14,12 @@ import org.plateau.citygmleditor.citymodel.AttributeItem;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+import org.w3c.dom.Attr;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.scene.control.Label;
-
 
 public class AttributeEditorController implements Initializable {
     public TreeTableView<AttributeItem> attributeTreeTable;
@@ -30,10 +31,10 @@ public class AttributeEditorController implements Initializable {
     private Label featureID;
     @FXML
     private Label featureType;
-    
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        var activeFeatureProperty = CityGMLEditorApp.getFeatureSellection().getActiveFeatureProperty();
+        var activeFeatÍureProperty = CityGMLEditorApp.getFeatureSellection().getActiveFeatureProperty();
         attributeTreeTable.rootProperty().bind(new ObjectBinding<>() {
             {
                 bind(activeFeatureProperty);
@@ -46,17 +47,18 @@ public class AttributeEditorController implements Initializable {
                     return null;
 
                 // タイトル更新
-                //titledPane.setText(String.format("属性情報（%s）", feature.getGMLObject().getId()));
-    
+                // titledPane.setText(String.format("属性情報（%s）",
+                // feature.getGMLObject().getId()));
+
                 featureID.setText("地物ID：" + feature.getGMLObject().getId());
                 featureType.setText("地物型：建築物（Buildings）");
+                System.out.println(feature.getClass().getName());
                 var root = new TreeItem<>(new AttributeItem("", ""));
                 var gmlObject = feature.getGMLObject();
                 {
                     var attribute = new AttributeItem(
                             "measuredHeight",
-                            Double.toString(gmlObject.getMeasuredHeight().getValue())
-                    );
+                            Double.toString(gmlObject.getMeasuredHeight().getValue()));
                     attribute.valueProperty().addListener((observable, oldValue, newValue) -> {
                         gmlObject.getMeasuredHeight().setValue(Double.parseDouble(newValue));
                     });
@@ -78,17 +80,17 @@ public class AttributeEditorController implements Initializable {
         keyColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("key"));
         valueColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
 
-//                attributeTreeTable.setOnKeyPressed(t -> {
-//                    if (t.getCode() == KeyCode.SPACE) {
-//                        TreeItem<Node> selectedItem = attributeTreeTable.getSelectionModel().getSelectedItem();
-//                        if (selectedItem != null) {
-//                            Node node = selectedItem.getValue();
-//                            node.setVisible(!node.isVisible());
-//                        }
-//                        t.consume();
-//                    }
-//                });
-
+        // attributeTreeTable.setOnKeyPressed(t -> {
+        // if (t.getCode() == KeyCode.SPACE) {
+        // TreeItem<Node> selectedItem =
+        // attributeTreeTable.getSelectionModel().getSelectedItem();
+        // if (selectedItem != null) {
+        // Node node = selectedItem.getValue();
+        // node.setVisible(!node.isVisible());
+        // }
+        // t.consume();
+        // }
+        // });
 
         valueColumn.setCellFactory(
                 TextFieldTreeTableCell.forTreeTableColumn());
@@ -102,13 +104,19 @@ public class AttributeEditorController implements Initializable {
     private static void addADEPropertyToTree(BuildingView building, TreeItem<AttributeItem> root) {
         for (var adeComponent : building.getGMLObject().getGenericApplicationPropertyOfAbstractBuilding()) {
             var adeElement = (ADEGenericElement) adeComponent;
-            addXMLElementToTree(adeElement.getContent(), root);
+            addXMLElementToTree(adeElement.getContent(), null, root);
         }
     }
 
-    private static void addXMLElementToTree(Node node, TreeItem<AttributeItem> root) {
+    private static void addXMLElementToTree(Node node, Node parentNode, TreeItem<AttributeItem> root) {
         // 子が末尾の要素であるかチェック
         var firstChild = node.getFirstChild();
+        String nodeTagName = ((Element) node).getTagName().toLowerCase();
+        String parentNodeTagName = "";
+
+        if (parentNode != null)
+            parentNodeTagName = ((Element) parentNode).getTagName().toLowerCase();
+
         if (node.getChildNodes().getLength() == 1 && firstChild instanceof CharacterData) {
             // 子の内容を属性値として登録して再帰処理を終了
             var attribute = new AttributeItem(node.getNodeName(), firstChild.getNodeValue());
@@ -121,12 +129,12 @@ public class AttributeEditorController implements Initializable {
         }
 
         var item = new TreeItem<>(
-                new AttributeItem(node.getNodeName(), "", false)
-        );
+                new AttributeItem(node.getNodeName(), "", false));
         item.setExpanded(true);
 
         // XMLの子要素を再帰的に追加
         var children = node.getChildNodes();
+
         for (int i = 0; i < children.getLength(); ++i) {
             var xmlElement = children.item(i);
 
@@ -134,9 +142,14 @@ public class AttributeEditorController implements Initializable {
             if (xmlElement instanceof CharacterData)
                 continue;
 
-            addXMLElementToTree(xmlElement, item);
+            // 親ノードのタグ名と同じ（小文字大文字は無視）であれば、そのノードは無視
+            if (parentNode != null && nodeTagName.equals(parentNodeTagName)) {
+                addXMLElementToTree(xmlElement, node, root);
+            } else
+                addXMLElementToTree(xmlElement, node, item);
         }
-
+        if (parentNode != null && nodeTagName.equals(parentNodeTagName))
+            return;
         root.getChildren().add(item);
     }
 }
