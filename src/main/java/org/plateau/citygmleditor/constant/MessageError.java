@@ -10,4 +10,6 @@ public interface MessageError {
     String ERR_C04_001 = "C04: Building have ({0}) is invalid";
     String ERR_L18_001 = "L18: Building have ({0}) is invalid";
     String ERR_T03_001 = "T03: Xhref ({0}) is invalid";
+    String ERR_BLDG03_001 = "BLDG 03: Window tag does not exist inside boundedBy";
+    String ERR_BLDG03_002 = "BLDG 03: Door tag does not exist inside boundedBy";
 }
