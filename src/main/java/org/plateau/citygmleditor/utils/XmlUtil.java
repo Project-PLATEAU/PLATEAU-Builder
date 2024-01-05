@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 
 
@@ -107,7 +109,7 @@ public class XmlUtil {
     }
     return result;
   }
-  
+
   public static void recursiveFindNodeByAttribute(Node node, List<Node> resultList, String attribute) {
     if (node.hasChildNodes()) {
       NodeList childNodes = node.getChildNodes();
@@ -118,6 +120,23 @@ public class XmlUtil {
         }
         recursiveFindNodeByAttribute(childNode, resultList, attribute);
       }
+    }
+  }
+
+  public static void recursiveFindAttributeContent(Node node, Set<String> resultList, String attribute) {
+    if (!node.hasChildNodes()) return;
+    NodeList childNodes = node.getChildNodes();
+    for (int i = 0; i < childNodes.getLength(); i++) {
+      var childNode = childNodes.item(i);
+      if (childNode.getAttributes() != null && childNode.getAttributes().getNamedItem(attribute) != null) {
+        String xHref = childNode.getAttributes().getNamedItem(attribute).getTextContent().trim();
+        if (!xHref.isBlank()) {
+          String xHrefSub = xHref.substring(0, 1);
+          // if x-href begin with # remove
+          resultList.add(Objects.equals(xHrefSub, "#") ? xHref.substring(1) : xHref);
+        }
+      }
+      recursiveFindAttributeContent(childNode, resultList, attribute);
     }
   }
 }
