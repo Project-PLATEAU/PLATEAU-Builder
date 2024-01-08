@@ -60,10 +60,14 @@ public class L13LogicalConsistencyValidator implements IValidator {
 
     buildingWithErrorPolygonsSurfacePaths.forEach((buildingNode, errorPolygonSurfacePath) -> {
       String buildingGmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
-      errorPolygonSurfacePath.forEach(polygonSurfacePath -> {
-        String gmlId = polygonSurfacePath.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
-        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageFormat.format(MessageError.ERR_L13_001, buildingGmlId, gmlId)));
-      });
+
+      var nodeErrorDetail = errorPolygonSurfacePath.stream()
+          .map(node -> {
+            var gmlId = node.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
+            return String.format("%s gml:id=\"%s\"", node.getNodeName(), gmlId);
+          }).collect(Collectors.joining(", "));
+
+      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageFormat.format(MessageError.ERR_L13_001, buildingGmlId, nodeErrorDetail)));
     });
 
     return messages;
@@ -86,7 +90,8 @@ public class L13LogicalConsistencyValidator implements IValidator {
     }
 
     // Validate Standard 1: に内周が存在し、以下の条件のいずれかに合致する場合、エラーとする
-    var invalidStandard1 = interiors.stream().anyMatch(interior -> interior.crosses(exterior));
+    // All interiors should be within exterior
+    var invalidStandard1 = interiors.stream().anyMatch(interior -> !interior.within(exterior));
 
     // Validate Standard 3: 内周同士が重なる、または包含関係にある。
     var invalidStandard3 = !isValidStandard3(interiors);
