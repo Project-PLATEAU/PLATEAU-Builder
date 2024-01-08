@@ -94,6 +94,19 @@ public class XmlUtil {
     }
   }
 
+  public static Node findNearestParentByName(Node node, String name) {
+    Node parentNode = node.getParentNode();
+    if (parentNode == null) {
+      return null;
+    } else {
+      if (parentNode.getNodeName() != null && parentNode.getNodeName().equals(name)) {
+        return parentNode;
+      } else {
+        return findNearestParentByName(parentNode, name);
+      }
+    }
+  }
+
   public static List<Node> getTagsByRegex(String regex, Node tagInput) {
     List<Node> result = new ArrayList<>();
     Element element = (Element) tagInput;

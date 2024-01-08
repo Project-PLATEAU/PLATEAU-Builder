@@ -7,6 +7,9 @@ public interface TagName {
     String srsNameURI = "http://www.opengis.net/def/crs/EPSG/0/6697";
     String GML_POS = "gml:pos";
     String GML_POSLIST = "gml:posList";
+    String BLDG_WINDOW = "bldg:Window";
+    String BLDG_DOOR = "bldg:door";
+    String BLDG_BOUNDARY_SURFACE = "bldg:_BoundarySurface";
     String GML_ID = "gml:id";
     String GML_POLYGON = "gml:Polygon";
     String GML_SURFACE_PATCH = "gml:_SurfacePatch";
