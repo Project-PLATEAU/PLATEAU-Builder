@@ -1,6 +1,6 @@
 [
   {
-    "id": "C01",
+    "id": "C04",
     "title": "gml:idの完全性",
     "enabled": true
   },
@@ -101,11 +101,6 @@
   },
   {
     "id": "T-03",
-    "title": "主題正確度・分類の正しさ(xlink:hrefの地物型の正確度)",
-    "enabled": true
-  },
-  {
-    "id": "L-bldg-03",
     "title": "主題正確度・分類の正しさ(xlink:hrefの地物型の正確度)",
     "enabled": true
   },

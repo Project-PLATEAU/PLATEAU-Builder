@@ -52,7 +52,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.osgeo/proj4j
     implementation group: 'org.osgeo', name: 'proj4j', version: '0.1.0'
-
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1'
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 }

@@ -26,13 +26,14 @@ module CityGMLEditor {
     requires com.fasterxml.jackson.core;
     requires commons.math3;
     requires proj4j;
+    requires com.fasterxml.jackson.databind;
 
     provides Importer with
             ObjOrPolyObjImporter;
 
     exports org.plateau.citygmleditor.importers;
     exports org.plateau.citygmleditor.importers.obj;
-
+    exports org.plateau.citygmleditor.modelstandard;
     exports org.plateau.citygmleditor;
     opens org.plateau.citygmleditor to javafx.fxml, javafx.graphics;
     exports org.plateau.citygmleditor.citygmleditor;

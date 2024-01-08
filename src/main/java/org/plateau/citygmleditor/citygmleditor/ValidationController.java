@@ -1,21 +1,27 @@
 package org.plateau.citygmleditor.citygmleditor;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import org.plateau.citygmleditor.modelstandard.Standard;
 import org.plateau.citygmleditor.validation.*;
 import org.plateau.citygmleditor.world.World;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import static org.plateau.citygmleditor.constant.StandardID.*;
 
 public class ValidationController implements Initializable {
     @FXML
@@ -60,29 +66,9 @@ public class ValidationController implements Initializable {
         if (cityModel == null)
             return;
 
-        List<IValidator> validators = new ArrayList<>() {
-            {
-                add(new Tbldg02ThematicAccuaracyValidator());
-                add(new T03ThematicAccuaracyValidator());
-                add(new GMLIDCompletenessValidator());
-                add(new L05LogicalConsistencyValidator());
-                add(new L06LogicalConsistencyValidator());
-                add(new L07LogicalConsistencyValidator());
-                add(new L08LogicalConsistencyValidator());
-                add(new L09LogicalConsistencyValidator());
-                add(new L10LogicalConsistencyValidator());
-                add(new L11LogicalConsistencyValidator());
-                add(new L12LogicalConsistencyValidator());
-                add(new L13LogicalConsistencyValidator());
-                add(new C04CompletenessValidator());
-                add(new L18LogicalConsistencyValidator());
-                add(new Lbldg03LogicalAccuaracyValidator());
-            }
-        };
-
         var errorCount = 0;
         var warningCount = 0;
-
+        List<IValidator> validators = this.loadValidators();
         for (var validator : validators) {
             var messages = validator.validate(cityModelView);
 
@@ -103,5 +89,60 @@ public class ValidationController implements Initializable {
                 ValidationResultMessageType.Info,
                 String.format("品質検査が完了しました。（エラー数:%d, 警告数:%d）", errorCount, warningCount)
         ));
+    }
+
+    private List<IValidator> loadValidators() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        List<Standard> standards = mapper.readValue(new File(AppConst.VALIDATION_CONFIG_PATH), new TypeReference<>() {});
+        List<IValidator> result = new ArrayList<>();
+
+        for (Standard standard : standards) {
+            if (!standard.isEnabled()) continue;
+            switch (standard.getId()) {
+                case C04:
+                    result.add(new C04CompletenessValidator());
+                    break;
+                case L05:
+                    result.add(new L05LogicalConsistencyValidator());
+                    break;
+                case L06:
+                    result.add(new L06LogicalConsistencyValidator());
+                    break;
+                case L07:
+                    result.add(new L07LogicalConsistencyValidator());
+                    break;
+                case L08:
+                    result.add(new L08LogicalConsistencyValidator());
+                    break;
+                case L09:
+                    result.add(new L09LogicalConsistencyValidator());
+                    break;
+                case L10:
+                    result.add(new L10LogicalConsistencyValidator());
+                    break;
+                case L11:
+                    result.add(new L11LogicalConsistencyValidator());
+                    break;
+                case L12:
+                    result.add(new L12LogicalConsistencyValidator());
+                    break;
+                case L13:
+                    result.add(new L13LogicalConsistencyValidator());
+                    break;
+                case L18:
+                    result.add(new L18LogicalConsistencyValidator());
+                    break;
+                case T03:
+                    result.add(new T03ThematicAccuaracyValidator());
+                    break;
+                case L_BLDG_03:
+                    result.add(new Lbldg03LogicalAccuaracyValidator());
+                    break;
+                case T_BLDG_02:
+                    result.add(new Tbldg02ThematicAccuaracyValidator());
+                    break;
+            }
+        }
+        return result;
     }
 }
