@@ -38,13 +38,8 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.awt.FileDialog;
-import java.awt.Frame;
-import java.awt.event.FocusEvent;
 
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -58,11 +53,12 @@ import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.GmlExporter;
+import org.plateau.citygmleditor.exporters.ObjExporter;
 import org.plateau.citygmleditor.exporters.TextureExporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
-import org.plateau.citygmleditor.world.World;
-import org.plateau.citygmleditor.utils.*;
+import org.plateau.citygmleditor.utils.FileUtils;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -86,28 +82,14 @@ import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.plateau.citygmleditor.importers.Importer3D;
 
-import org.plateau.citygmleditor.importers.Importer3D;
-import java.io.File;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.FieldPosition;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.StyledEditorKit;
-
 import javafx.stage.DirectoryChooser;
 import javafx.geometry.BoundingBox;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.ButtonType;
-import java.nio.file.*;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import org.plateau.citygmleditor.world.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -469,5 +451,18 @@ public class MainController implements Initializable {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
         updateStatus();
+    }
+    // フォルダコピーメソッド(udx以下は無視)
+    public void folderCopy(Path sourcePath, Path destinationPath) throws IOException {
+        String skipPattern = sourceRootDirPath.replace("\\", "\\\\") + "\\\\udx\\\\.*";
+        Files.walk(sourcePath).forEach(path -> {
+            if (!path.toString().matches(skipPattern)) {
+                try {
+                    Files.copy(path, destinationPath.resolve(sourcePath.relativize(path)));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }
