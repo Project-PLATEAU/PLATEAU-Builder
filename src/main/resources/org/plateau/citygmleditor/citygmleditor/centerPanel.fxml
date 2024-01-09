@@ -7,50 +7,44 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <ToolBar maxWidth="1.7976931348623157E308" minWidth="200.0" prefHeight="40.0">
-         <items>
-            <ToggleButton fx:id="toggle" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" selected="true">
-               <toggleGroup>
-                  <ToggleGroup fx:id="toggleGroup" />
-               </toggleGroup>
-               <graphic>
-                  <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@icon_select.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-            </ToggleButton>
-            <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
-               <graphic>
-                  <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@icon_move.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-            </ToggleButton>
-            <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
-               <graphic>
-                  <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@icon_rotate.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-            </ToggleButton>
-            <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
-               <graphic>
-                  <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@icon_scale.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-            </ToggleButton>
-         </items>
-      </ToolBar>
-   </children>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.AnchorPane?>
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.plateau.citygmleditor.citygmleditor.CenterPanelController">
+   <ToolBar maxWidth="1.7976931348623157E308" minWidth="200.0" prefHeight="40.0">
+      <ToggleButton fx:id="toggle" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" selected="true">
+         <toggleGroup>
+            <ToggleGroup fx:id="toggleGroup"/>
+         </toggleGroup>
+         <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+               <Image url="@icon_select.png"/>
+            </ImageView>
+         </graphic>
+      </ToggleButton>
+      <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
+         <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+               <Image url="@icon_move.png"/>
+            </ImageView>
+         </graphic>
+      </ToggleButton>
+      <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
+         <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+               <Image url="@icon_rotate.png"/>
+            </ImageView>
+         </graphic>
+      </ToggleButton>
+      <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
+         <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+               <Image url="@icon_scale.png"/>
+            </ImageView>
+         </graphic>
+      </ToggleButton>
+   </ToolBar>
+   <Pane fx:id="subSceneContainer" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS" style="-fx-background-color: #FFFFFF">
+   </Pane>
 </VBox>

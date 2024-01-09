@@ -72,6 +72,12 @@ public class SubSceneResizer extends Pane {
         });
         setMinSize(50,50);
         setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
+
+        setStyle("-fx-background-color: #00FF00");
+
+        if (controlsPanel == null)
+            return;
+
         getChildren().add(controlsPanel);
     }
 
@@ -82,6 +88,10 @@ public class SubSceneResizer extends Pane {
             subScene.setWidth(width);
             subScene.setHeight(height);
         }
+
+        if (controlsPanel == null)
+            return;
+
         final double controlsWidth = snapSizeX(controlsPanel.prefWidth(-1));
         final double controlsHeight = snapSizeY(controlsPanel.prefHeight(-1));
         controlsPanel.resizeRelocate(width-controlsWidth,0,controlsWidth,controlsHeight);

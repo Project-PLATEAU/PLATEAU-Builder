@@ -7,22 +7,9 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.shape.Line?>
 
-<ToolBar id="toolbar" maxWidth="1.7976931348623157E308" prefHeight="80.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.MainController">
-    <!--開く-->
-    <Button contentDisplay="TOP" graphicTextGap="0.0" mnemonicParsing="false" onAction="#openGml" text="開く">
-        <graphic>
-            <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
-                <viewport>
-                    <Rectangle2D />
-                </viewport>
-                <image>
-                    <Image url="@icon_open.png" />
-                </image>
-            </ImageView>
-        </graphic>
-    </Button>
+<ToolBar id="toolbar" maxWidth="1.7976931348623157E308" prefHeight="80.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.TopPanelController">
     <!--インポート-->
-    <Button contentDisplay="TOP" graphicTextGap="0.0" mnemonicParsing="false" onAction="#openGml" text="インポート">
+    <Button contentDisplay="TOP" graphicTextGap="0.0" mnemonicParsing="false" onAction="#importGml" text="インポート">
         <graphic>
             <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
                 <viewport>

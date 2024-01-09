@@ -33,6 +33,7 @@ package org.plateau.citygmleditor.citygmleditor;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -49,6 +50,7 @@ import org.plateau.citygmleditor.FeatureSelection;
  */
 public class CityGMLEditorApp extends Application {
     public static final String FILE_URL_PROPERTY = "fileUrl";
+    private static Scene scene;
     private static Camera camera;
     private static AxisGizmo axisGizmo;
     private static Light light;
@@ -76,6 +78,10 @@ public class CityGMLEditorApp extends Application {
         return sceneContent;
     }
 
+    public static Scene getScene() {
+        return scene;
+    }
+
     public static AntiAliasing getAntiAliasing() {
         return antiAliasing;
     }
@@ -90,7 +96,7 @@ public class CityGMLEditorApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        sessionManager = SessionManager.createSessionManager("Jfx3dViewerApp");
+        sessionManager = SessionManager.createSessionManager("CityGMLEditor");
         sessionManager.loadSession();
 
         List<String> args = getParameters().getRaw();
@@ -112,8 +118,13 @@ public class CityGMLEditorApp extends Application {
         axisGizmo = new AxisGizmo();
         selection = new FeatureSelection();
 
-        Scene scene = new Scene(
-                FXMLLoader.<Parent>load(CityGMLEditorApp.class.getResource("main.fxml")),
+        World.getRoot3D().getChildren().add(camera.getCameraXform());
+        World.getRoot3D().getChildren().add(autoScalingGroups);
+
+        sceneContent.rebuildSubScene();
+
+        scene = new Scene(
+                FXMLLoader.<Parent>load(Objects.requireNonNull(CityGMLEditorApp.class.getResource("main02.fxml"))),
                 1024, 600, true);
 
         stage.setScene(scene);

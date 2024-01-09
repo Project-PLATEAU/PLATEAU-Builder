@@ -26,7 +26,7 @@
 
 <!--suppress JavaFxUnresolvedStyleClassReference -->
 
-<VBox fx:id="rightSidePanel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.SettingsController">
+<VBox fx:id="rightSidePanel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.RightSidePanelController">
    <children>
       <TabPane prefHeight="798.0" prefWidth="278.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
@@ -45,7 +45,7 @@
                                 <panes>
                                   <TitledPane animated="false" text="属性情報" VBox.vgrow="ALWAYS">
                                        <content>
-                                      <TreeTableView fx:id="tabContentsArea" editable="true" maxWidth="1.7976931348623157E308">
+                                      <TreeTableView editable="true" maxWidth="1.7976931348623157E308">
                                         <columns>
                                           <TreeTableColumn maxWidth="-1.0" minWidth="100.0" prefWidth="-1.0" text="地物ID" />
                                           <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="地物型" />
@@ -56,9 +56,9 @@
                                       </TreeTableView>
                                        </content>
                                     </TitledPane>
-                                  <TitledPane fx:id="tabContentsArea" animated="false" expanded="false" text="テクスチャ">
+                                  <TitledPane animated="false" expanded="false" text="テクスチャ">
                                        <content>
-                                          <GridPane fx:id="tabContentsArea">
+                                          <GridPane>
                                             <columnConstraints>
                                               <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                               <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -104,7 +104,7 @@
                                 <panes>
                                   <TitledPane animated="false" text="設定">
                                        <content>
-                                          <VBox fx:id="tabContentsArea" maxWidth="1.7976931348623157E308" spacing="10.0">
+                                          <VBox maxWidth="1.7976931348623157E308" spacing="10.0">
                                              <children>
                                                 <HBox alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" prefWidth="200.0">
                                                    <children>
@@ -207,7 +207,7 @@
                                 <panes>
                                   <TitledPane animated="false" expanded="false" prefHeight="120.0" text="アンビエント">
                                        <content>
-                                          <VBox fx:id="tabContentsArea" maxWidth="1.7976931348623157E308" prefHeight="180.0" spacing="10.0">
+                                          <VBox maxWidth="1.7976931348623157E308" prefHeight="180.0" spacing="10.0">
                                              <children>
                                                 <HBox prefWidth="200.0">
                                                    <children>
@@ -235,7 +235,7 @@
                                     </TitledPane>
                                   <TitledPane animated="false" expanded="false" prefHeight="200.0" text="ライト１(カメラ)">
                                        <content>
-                                          <VBox fx:id="tabContentsArea" spacing="10.0">
+                                          <VBox spacing="10.0">
                                              <padding>
                                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                              </padding>
@@ -285,7 +285,7 @@
                                        </content></TitledPane>
                                     <TitledPane animated="false" prefHeight="180.0" text="ライト2">
                                        <content>
-                                          <VBox fx:id="tabContentsArea" spacing="10.0">
+                                          <VBox spacing="10.0">
                                              <padding>
                                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                              </padding>
@@ -328,7 +328,7 @@
                                     </TitledPane>
                                     <TitledPane animated="false" prefHeight="180.0" text="ライト3">
                                        <content>
-                                          <VBox fx:id="tabContentsArea" spacing="10.0">
+                                          <VBox spacing="10.0">
                                              <padding>
                                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                              </padding>

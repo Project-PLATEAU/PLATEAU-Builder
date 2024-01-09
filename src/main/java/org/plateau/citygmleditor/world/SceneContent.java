@@ -1,24 +1,12 @@
 package org.plateau.citygmleditor.world;
 
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.PerspectiveCamera;
-import javafx.scene.PointLight;
 import javafx.scene.input.*;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Box;
-import javafx.scene.shape.Sphere;
-import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Translate;
 import javafx.beans.property.ObjectProperty;
-import javafx.event.EventHandler;
-import javafx.util.Duration;
-import javafx.event.EventHandler;
 import javafx.scene.SubScene;
 
 import org.plateau.citygmleditor.citygmleditor.*;
@@ -27,7 +15,7 @@ import org.plateau.citygmleditor.citygmleditor.*;
  * Class responsible for Management of Scenes and Contents within the View
  */
 public class SceneContent {
-    private final SimpleObjectProperty<SubScene> subScene = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<SubScene> subSceneProperty = new SimpleObjectProperty<>();
     private ObjectProperty<Node> content = new SimpleObjectProperty<>();
     private AutoScalingGroup autoScalingGroup;
     private AntiAliasing antiAliasing;
@@ -35,7 +23,7 @@ public class SceneContent {
     private Group root3D;
 
     public SimpleObjectProperty<SubScene> subSceneProperty() {
-        return this.subScene;
+        return this.subSceneProperty;
     }
 
     public ObjectProperty<Node> contentProperty() {
@@ -43,7 +31,7 @@ public class SceneContent {
     }
 
     public SubScene getSubScene() {
-        return this.subScene.get();
+        return this.subSceneProperty.get();
     }
 
     public Node getContent() {
@@ -62,7 +50,7 @@ public class SceneContent {
     }
 
     public void rebuildSubScene() {
-        SubScene oldSubScene = subScene.get();
+        SubScene oldSubScene = subSceneProperty.get();
         if (oldSubScene != null) {
             oldSubScene.setRoot(new Region());
             oldSubScene.setCamera(null);
@@ -74,8 +62,8 @@ public class SceneContent {
         javafx.scene.SceneAntialiasing aaVal = antiAliasing.getMsaa() ? javafx.scene.SceneAntialiasing.BALANCED
                 : javafx.scene.SceneAntialiasing.DISABLED;
         SubScene subScene = new SubScene(root3D, 400, 400, true, aaVal);
-        this.subScene.set(subScene);
-        subScene.setFill(Color.ALICEBLUE);
+        this.subSceneProperty.set(subScene);
+        subScene.setFill(Color.GRAY);
         subScene.setCamera(camera.getCamera());
         // SCENE EVENT HANDLING FOR cameraA NAV
         subScene.addEventHandler(MouseEvent.ANY, camera.getMouseEventHandler());
