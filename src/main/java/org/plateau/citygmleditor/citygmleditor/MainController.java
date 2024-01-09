@@ -53,6 +53,8 @@ import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.converters.Obj2LodConverter;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
@@ -184,16 +186,17 @@ public class MainController implements Initializable {
     }
 
     public void openGml(ActionEvent actionEvent) {
-        FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", "*.gml"));
-        if (loadedPath != null) {
-            chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
-        }
-        chooser.setTitle("Select file to load");
-        File newFile = chooser.showOpenDialog(openMenuBtn.getScene().getWindow());
-        if (newFile != null) {
-            loadGml(newFile.toString());
-        }
+        // FileChooser chooser = new FileChooser();
+        // chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", "*.gml"));
+        // if (loadedPath != null) {
+        //     chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
+        // }
+        // chooser.setTitle("Select file to load");
+        // File newFile = chooser.showOpenDialog(openMenuBtn.getScene().getWindow());
+        // if (newFile != null) {
+        //     loadGml(newFile.toString());
+        // }
+        loadGml("E:\\Work\\synesthesia\\PLATEAU-CityGML-Editor\\src\\test\\resources\\org\\plateau\\citygmleditor\\gml\\13100_tokyo23-ku_2022_citygml_1_3_op\\udx\\bldg\\53392633_bldg_6697_2_op.gml");
     }
 
     private void loadGml(String fileUrl) {
@@ -413,45 +416,6 @@ public class MainController implements Initializable {
         newWindow.showAndWait();
     }
 
-    public void openGltf(ActionEvent actionEvent) {
-        FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", "*.gltf"));
-        if (loadedPath != null) {
-            chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
-        }
-        chooser.setTitle("Select file to load");
-        File newFile = chooser.showOpenDialog(openMenuBtn.getScene().getWindow());
-        if (newFile != null) {
-            loadGltf(newFile.toString());
-        }
-    }
-
-    private void loadGltf(String fileUrl) {
-        try {
-            try {
-                loadedPath = new File(new URL(fileUrl).toURI()).getAbsoluteFile();
-            } catch (IllegalArgumentException | MalformedURLException | URISyntaxException ignored) {
-                loadedPath = null;
-            }
-            doLoadGltf(fileUrl);
-        } catch (Exception ex) {
-            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private void doLoadGltf(String fileUrl) {
-        loadedURL = fileUrl;
-        sessionManager.getProperties().setProperty(CityGMLEditorApp.FILE_URL_PROPERTY, fileUrl);
-        try {
-            // var root = GltfImporter.loadGltf(fileUrl);
-            // if (root != null) {
-            //     sceneContent.setContent(root);
-            // }
-        } catch (Exception ex) {
-            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        updateStatus();
-    }
     // フォルダコピーメソッド(udx以下は無視)
     public void folderCopy(Path sourcePath, Path destinationPath) throws IOException {
         String skipPattern = sourceRootDirPath.replace("\\", "\\\\") + "\\\\udx\\\\.*";
@@ -464,5 +428,133 @@ public class MainController implements Initializable {
                 }
             }
         });
+    }
+
+    public void importLodObj(ActionEvent actionEvent) {
+        // FileChooser chooser = new FileChooser();
+        // chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", "*.gltf"));
+        // if (loadedPath != null) {
+        //     chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
+        // }
+        // chooser.setTitle("Select file to load");
+        // File newFile = chooser.showOpenDialog(openMenuBtn.getScene().getWindow());
+        // if (newFile != null) {
+        //     importLodObj(newFile.toString());
+        // }
+        importLodObj("E:\\Temp\\export\\obj\\LOD2Solid.obj");
+    }
+
+
+    private void importLodObj(String fileUrl) {
+        try {
+            try {
+                loadedPath = new File(new URL(fileUrl).toURI()).getAbsoluteFile();
+            } catch (IllegalArgumentException | MalformedURLException | URISyntaxException ignored) {
+                loadedPath = null;
+            }
+            doImportLodObj(fileUrl);
+        } catch (Exception ex) {
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void doImportLodObj(String fileUrl) {
+        var content = (Group)sceneContent.getContent();
+        var cityModelNode = content.getChildren().get(0);
+        if (cityModelNode == null)
+            return;
+
+        var cityModel = (CityModelView)cityModelNode;
+        try {
+            ILODSolidView lodSolid = new Obj2LodConverter(cityModel).convert(fileUrl);
+            if (lodSolid != null) {
+                // TODO:モデル差し替え
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        updateStatus();
+    }
+
+    // public void importLodGltf(ActionEvent actionEvent) {
+    //     // FileChooser chooser = new FileChooser();
+    //     // chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", "*.gltf"));
+    //     // if (loadedPath != null) {
+    //     //     chooser.setInitialDirectory(loadedPath.getAbsoluteFile().getParentFile());
+    //     // }
+    //     // chooser.setTitle("Select file to load");
+    //     // File newFile = chooser.showOpenDialog(openMenuBtn.getScene().getWindow());
+    //     // if (newFile != null) {
+    //     //     importLodGltf(newFile.toString());
+    //     // }
+    //     importLodGltf("E:\\Temp\\export\\gltf\\LOD2Solid.gltf");
+    // }
+
+    // private void importLodGltf(String fileUrl) {
+    //     try {
+    //         try {
+    //             loadedPath = new File(new URL(fileUrl).toURI()).getAbsoluteFile();
+    //         } catch (IllegalArgumentException | MalformedURLException | URISyntaxException ignored) {
+    //             loadedPath = null;
+    //         }
+    //         doImportLodGltf(fileUrl);
+    //     } catch (Exception ex) {
+    //         Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+    //     }
+    // }
+
+    // private void doImportLodGltf(String fileUrl) {
+    //     loadedURL = fileUrl;
+    //     sessionManager.getProperties().setProperty(CityGMLEditorApp.FILE_URL_PROPERTY, fileUrl);
+    //     try {
+    //         ILODSolidView lodSolid = new Gltf2LodConverter().convert(fileUrl);
+    //         if (lodSolid != null) {
+    //             // TODO:モデル差し替え
+    //         }
+    //     } catch (Exception ex) {
+    //         ex.printStackTrace();
+    //         Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+    //     }
+    //     updateStatus();
+    // }
+
+    public void exportObj(ActionEvent actionEvent) {
+        var content = (Group)sceneContent.getContent();
+        var cityModelNode = content.getChildren().get(0);
+        if (cityModelNode == null)
+            return;
+
+        var cityModel = (CityModelView)cityModelNode;
+        var building = cityModel.getCityObjectMembersUnmodifiable().get(1);
+
+        try {
+            new ObjExporter().export("E:\\Temp\\export\\obj\\LOD1Solid.obj", building.getLOD1Solid(), building.getId());
+            new ObjExporter().export("E:\\Temp\\export\\obj\\LOD2Solid.obj", building.getLOD2Solid(), building.getId());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println(e.getStackTrace());
+        }
+    }
+
+    public void exportGltf(ActionEvent actionEvent) {
+        var content = (Group)sceneContent.getContent();
+        var cityModelNode = content.getChildren().get(0);
+        if (cityModelNode == null)
+            return;
+
+        var cityModel = (CityModelView)cityModelNode;
+        var building = cityModel.getCityObjectMembersUnmodifiable().get(1);
+
+        try {
+            //GltfExporter.export("E:\\Temp\\export\\gltf\\LOD1Solid.gltf", building.getLOD1Solid(), building.getId());
+            new GltfExporter().export("E:\\Temp\\export\\gltf\\LOD2Solid.gltf", building.getLOD2Solid(), building.getId());
+            //GltfExporter.export("E:\\Temp\\export\\gltf\\LOD1Solid.glb", building.getLOD1Solid(), building.getId());
+            //GltfExporter.export("E:\\Temp\\export\\gltf\\LOD2Solid.glb", building.getLOD2Solid(), building.getId());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println(e.getStackTrace());
+        }
     }
 }
