@@ -19,6 +19,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -34,10 +35,6 @@ public class L11LogicalConsistencyValidator implements IValidator {
         private String lodTag;
 
         private List<String> polygon;
-
-        public String getLodTag() {
-            return lodTag;
-        }
 
         public void setLodTag(String lodTag) {
             this.lodTag = lodTag;
@@ -130,36 +127,36 @@ public class L11LogicalConsistencyValidator implements IValidator {
 
         for (int i = 0; i < tagPolygons.getLength(); i++) {
             Element polygon = (Element) tagPolygons.item(i);
-            String content = polygon.getTextContent().trim();
+            String polygonID = polygon.getAttribute(TagName.GML_ID);
             NodeList tagPosList = polygon.getElementsByTagName(TagName.GML_POSLIST);
 
-            if (!this.isPosListValid(tagPosList, standard)) {
-                polygonIdInvalids.add(content);
-            }
+            List<String> invalidPoslist = this.getListCoordinateInvalid(tagPosList, standard);
+            if (invalidPoslist.isEmpty()) continue;
+            polygonIdInvalids.add(polygonID.isBlank() ? String.valueOf(invalidPoslist) : polygonID);
         }
 
         return polygonIdInvalids;
     }
 
-    private boolean isPosListValid(NodeList tagPoslists, String standard) {
+    private List<String> getListCoordinateInvalid(NodeList tagPoslists, String standard) {
+        List<String> invalid = new ArrayList<>();
+
         for (int i = 0; i < tagPoslists.getLength(); i++) {
             Node tagPosList = tagPoslists.item(i);
             Element posList = (Element) tagPosList;
 
             String[] posString = posList.getTextContent().trim().split(" ");
-
             try {
                 // split posList into points
                 List<Point3D> point3Ds = ThreeDUtil.createListPoint(posString);
-                return this.arePointsInAPlane(point3Ds, standard);
+                if (this.arePointsInAPlane(point3Ds, standard)) continue;
+                invalid.add(Arrays.toString(posString));
             } catch (InvalidPosStringException e) {
-                return false;
+                invalid.add(Arrays.toString(posString));
             }
         }
-
-        return true;
+        return invalid;
     }
-
 
     private boolean arePointsInAPlane(List<Point3D> points, String standard) {
         if (points.size() <= 3) return true;
@@ -218,11 +215,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
         Point3D vector23 = point3.subtract(point2);
 
         double[] planeEquation = new double[4];
-        double xNormalVector = this.calculateDeterminant(vector12.getY(), vector12.getZ(), vector23.getY(), vector23.getZ());
-        double yNormalVector = this.calculateDeterminant(vector12.getZ(), vector12.getX(), vector23.getZ(), vector23.getX());
-        double zNormalVector = this.calculateDeterminant(vector12.getX(), vector12.getY(), vector23.getX(), vector23.getY());
-
-        Vec3f normalVector = new Vec3f((float) xNormalVector, (float) yNormalVector, (float) zNormalVector);
+        Vec3f normalVector = createNormal(vector12, vector23);
         normalVector.normalize();
         // Coefficient A
         planeEquation[0] = normalVector.x;
@@ -234,6 +227,14 @@ public class L11LogicalConsistencyValidator implements IValidator {
         planeEquation[3] = -(normalVector.x * point1.getX() + normalVector.y * point1.getY() + normalVector.z * point1.getZ());
 
         return planeEquation;
+    }
+
+    private Vec3f createNormal(Point3D vector12, Point3D vector23) {
+        double xNormalVector = this.calculateDeterminant(vector12.getY(), vector12.getZ(), vector23.getY(), vector23.getZ());
+        double yNormalVector = this.calculateDeterminant(vector12.getZ(), vector12.getX(), vector23.getZ(), vector23.getX());
+        double zNormalVector = this.calculateDeterminant(vector12.getX(), vector12.getY(), vector23.getX(), vector23.getY());
+
+        return new Vec3f((float) xNormalVector, (float) yNormalVector, (float) zNormalVector);
     }
 
     private double calculateDeterminant(double a1, double a2, double b1, double b2) {
