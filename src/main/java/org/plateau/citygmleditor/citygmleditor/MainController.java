@@ -85,7 +85,6 @@ import javafx.scene.shape.TriangleMesh;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.plateau.citygmleditor.importers.Importer3D;
-import org.plateau.citygmleditor.importers.gltf.GltfImporter;
 
 import org.plateau.citygmleditor.importers.Importer3D;
 import java.io.File;
@@ -462,10 +461,10 @@ public class MainController implements Initializable {
         loadedURL = fileUrl;
         sessionManager.getProperties().setProperty(CityGMLEditorApp.FILE_URL_PROPERTY, fileUrl);
         try {
-            var root = GltfImporter.loadGltf(fileUrl);
-            if (root != null) {
-                sceneContent.setContent(root);
-            }
+            // var root = GltfImporter.loadGltf(fileUrl);
+            // if (root != null) {
+            //     sceneContent.setContent(root);
+            // }
         } catch (Exception ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
