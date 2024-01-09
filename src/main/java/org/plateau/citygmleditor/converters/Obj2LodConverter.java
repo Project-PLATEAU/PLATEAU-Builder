@@ -399,7 +399,13 @@ public class Obj2LodConverter {
         var exterior = (LinearRing)polygon.getExterior().getRing();
         System.out.println(String.format("\t\t<gml:LinearRing gml:id=\"%s\">", exterior.getId()));
         System.out.print("\t\t\t<gml:posList>");
+        var first = true;
         for (var c : exterior.getCoord()) {
+            if (first) {
+                first = false;
+            } else {
+                System.out.print(" ");
+            }
             System.out.print(String.format("%f %f %f", c.getX(), c.getY(), c.getZ()));
         }
         System.out.println("</gml:posList>");
