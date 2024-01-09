@@ -66,10 +66,18 @@ public class GizmoController implements Initializable {
 
     private final EventHandler<MouseEvent> mouseEventHandler = event -> {
         if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-            var result = event.getPickResult();
-            var building = FindBuilding(result.getIntersectedNode());
-            if (building != null) {
-                gizmoModel.attachBuilding(building);
+            if (event.isPrimaryButtonDown()) {
+                var result = event.getPickResult();
+                var building = FindBuilding(result.getIntersectedNode());
+                if (building != null) {
+                    gizmoModel.attachBuilding(building);
+                }
+                if (gizmoModel.isGizmoDragging(result.getIntersectedNode())) {
+                    CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(true);
+                    gizmoModel.setCurrentGizmo(result.getIntersectedNode());
+                    mouseDragging = true;
+                    return;
+                }
             }
         }
         else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
@@ -77,15 +85,8 @@ public class GizmoController implements Initializable {
             if(gizmoModel.isGizmoDragging(result.getIntersectedNode())) 
             {
                 if (event.isPrimaryButtonDown()) {
-                    CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(true);
-
-                    if (! mouseDragging)
-                        gizmoModel.setCurrentGizmo(result.getIntersectedNode());
-                            
-                    vecIni = unProjectDirection(event.getSceneX(), event.getSceneY(), sceneContent.getSubScene().getWidth(), sceneContent.getSubScene().getHeight());//scene.getWidth(),scene.getHeight());
+                    vecIni = unprojectDirection(event.getSceneX(), event.getSceneY(), sceneContent.getSubScene().getWidth(), sceneContent.getSubScene().getHeight());//scene.getWidth(),scene.getHeight());
                     distance = result.getIntersectedDistance();
-                    
-                    mouseDragging = true;
                 }
             }
         }
@@ -115,7 +116,7 @@ public class GizmoController implements Initializable {
             mouseDeltaX = (mousePosX - mouseOldX);
             mouseDeltaY = (mousePosY - mouseOldY);
             
-            vecPos = unProjectDirection(mousePosX, mousePosY, sceneContent.getSubScene().getWidth(),sceneContent.getSubScene().getHeight());
+            vecPos = unprojectDirection(mousePosX, mousePosY, sceneContent.getSubScene().getWidth(),sceneContent.getSubScene().getHeight());
             Point3D delta = vecPos.subtract(vecIni).multiply(distance);
             gizmoModel.updateTransform(delta);
             vecIni=vecPos;
@@ -123,7 +124,11 @@ public class GizmoController implements Initializable {
         }
     };
     
-    public Point3D unProjectDirection(double sceneX, double sceneY, double sWidth, double sHeight) {
+    public Point3D unprojectDirection(double sceneX,
+    double sceneY,
+    double sWidth,
+    double sHeight)
+    {
         double tanHFov = Math.tan(Math.toRadians(CityGMLEditorApp.getCamera().getCamera().getFieldOfView()) * 0.5f);
         Point3D vMouse = new Point3D(tanHFov*(2*sceneX/sWidth-1), tanHFov*(2*sceneY/sWidth-sHeight/sWidth), 1);
 
