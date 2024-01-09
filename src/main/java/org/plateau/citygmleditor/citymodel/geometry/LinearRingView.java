@@ -20,6 +20,8 @@ public class LinearRingView extends GMLObjectView<LinearRing> {
 
     private SurfaceDataView surfaceData;
 
+    private List<Double> originCoords;
+
     public LinearRingView(LinearRing original, VertexBuffer sharedVertexBuffer,
                           TexCoordBuffer sharedTexCoordBuffer, List<Integer> vertexIndices,
                           int texCoordOffset) {
@@ -66,5 +68,12 @@ public class LinearRingView extends GMLObjectView<LinearRing> {
 
     public void setSurfaceData(SurfaceDataView surfaceData) {
         this.surfaceData = surfaceData;
+    }
+
+    public List<Double> getOriginCoords() {
+        if(originCoords != null)
+            return originCoords;
+        
+        return originCoords = new ArrayList<Double>(getOriginal().getPosList().toList3d());
     }
 }

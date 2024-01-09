@@ -33,6 +33,10 @@ public class LOD1SolidView extends MeshView implements ILODSolidView {
         return this.vertexBuffer;
     }
 
+    public void setVertexBuffer(VertexBuffer vertexBuffer) {
+        this.vertexBuffer = vertexBuffer;
+    }
+
     @Override
     public TexCoordBuffer getTexCoordBuffer() {
         return this.texCoordBuffer;

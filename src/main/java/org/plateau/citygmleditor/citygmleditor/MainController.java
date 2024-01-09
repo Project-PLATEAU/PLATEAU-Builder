@@ -52,6 +52,7 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
@@ -145,9 +146,17 @@ public class MainController implements Initializable {
             // CREATE SETTINGS PANEL
             sidebar = FXMLLoader.load(MainController.class.getResource("sidebar.fxml"));
             // SETUP SPLIT PANE
-            splitPane.getItems().addAll(new SubSceneResizer(sceneContent.subSceneProperty(), navigationPanel),
-                    sidebar);
+            var ViewerPane = new SubSceneResizer(sceneContent.subSceneProperty(), navigationPanel);
+            splitPane.getItems().addAll(ViewerPane, sidebar);
             splitPane.getDividers().get(0).setPosition(1);
+            
+            // Gizmo Controls
+            Parent gizmoPanel = FXMLLoader.load(MainController.class.getResource("gizmo.fxml"));
+            gizmoPanel.setVisible(true);
+            // Gizmo Pane
+            AnchorPane anchorPane = new AnchorPane();
+            anchorPane.getChildren().add(gizmoPanel);
+            ViewerPane.getChildren().add(anchorPane);
 
         } catch (IOException e) {
             System.err.println(e.getMessage());
