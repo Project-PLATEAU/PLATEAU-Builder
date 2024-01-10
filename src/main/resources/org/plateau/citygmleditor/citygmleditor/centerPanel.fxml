@@ -45,6 +45,6 @@
          </graphic>
       </ToggleButton>
    </ToolBar>
-   <Pane fx:id="subSceneContainer" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS" style="-fx-background-color: #FFFFFF">
+   <Pane fx:id="subSceneContainer" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
    </Pane>
 </VBox>

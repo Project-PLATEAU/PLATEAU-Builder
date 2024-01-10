@@ -1,15 +1,18 @@
 package org.plateau.citygmleditor.world;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.input.*;
+import javafx.scene.SubScene;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.input.ZoomEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.beans.property.ObjectProperty;
-import javafx.scene.SubScene;
-
-import org.plateau.citygmleditor.citygmleditor.*;
+import org.plateau.citygmleditor.citygmleditor.AutoScalingGroup;
+import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 
 /**
  * Class responsible for Management of Scenes and Contents within the View
@@ -63,7 +66,7 @@ public class SceneContent {
                 : javafx.scene.SceneAntialiasing.DISABLED;
         SubScene subScene = new SubScene(root3D, 400, 400, true, aaVal);
         this.subSceneProperty.set(subScene);
-        subScene.setFill(Color.GRAY);
+        subScene.setFill(Color.valueOf("#353535"));
         subScene.setCamera(camera.getCamera());
         // SCENE EVENT HANDLING FOR cameraA NAV
         subScene.addEventHandler(MouseEvent.ANY, camera.getMouseEventHandler());

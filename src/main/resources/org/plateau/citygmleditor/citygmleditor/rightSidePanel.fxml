@@ -1,465 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Accordion?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ColorPicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.control.TreeTableColumn?>
-<?import javafx.scene.control.TreeTableView?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
 <?scenebuilder-stylesheet viewer.css?>
 
-<!--suppress JavaFxUnresolvedStyleClassReference -->
-
-<VBox fx:id="rightSidePanel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.RightSidePanelController">
-   <children>
-      <TabPane prefHeight="798.0" prefWidth="278.0" tabClosingPolicy="UNAVAILABLE">
-        <tabs>
-            <Tab>
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物情報">
-                                 <font>
-                                    <Font size="16.0" />
-                                 </font>
-                              </Text>
-                              <Accordion>
-                                <panes>
-                                  <TitledPane animated="false" text="属性情報" VBox.vgrow="ALWAYS">
-                                       <content>
-                                      <TreeTableView editable="true" maxWidth="1.7976931348623157E308">
-                                        <columns>
-                                          <TreeTableColumn maxWidth="-1.0" minWidth="100.0" prefWidth="-1.0" text="地物ID" />
-                                          <TreeTableColumn maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="地物型" />
-                                        </columns>
-                                             <columnResizePolicy>
-                                                <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                             </columnResizePolicy>
-                                      </TreeTableView>
-                                       </content>
-                                    </TitledPane>
-                                  <TitledPane animated="false" expanded="false" text="テクスチャ">
-                                       <content>
-                                          <GridPane>
-                                            <columnConstraints>
-                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                            </columnConstraints>
-                                            <rowConstraints>
-                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                            </rowConstraints>
-                                          </GridPane>
-                                       </content>
-                                    </TitledPane>
-                                </panes>
-                              </Accordion>
-                           </children>
-                           <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </padding>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-              </content>
-              <graphic>
-                <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                  <image>
-                    <Image url="@icon_info.png" />
-                  </image>
-                </ImageView>
-              </graphic>
-            </Tab>
-          <Tab>
-            <content>
-                  <AnchorPane maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefWidth="258.0">
-                     <children>
-                        <VBox layoutY="-13.0" spacing="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="表示">
-                                 <font>
-                                    <Font size="16.0" />
-                                 </font>
-                              </Text>
-                              <Accordion>
-                                <panes>
-                                  <TitledPane animated="false" text="設定">
-                                       <content>
-                                          <VBox maxWidth="1.7976931348623157E308" spacing="10.0">
-                                             <children>
-                                                <HBox alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" prefWidth="200.0">
-                                                   <children>
-                                                      <CheckBox fx:id="showAxisCheckBox" mnemonicParsing="false" text="軸の表示" />
-                                                   </children>
-                                                   <padding>
-                                                      <Insets left="100.0" />
-                                                   </padding>
-                                                </HBox>
-                                                <HBox maxHeight="1.7976931348623157E308" prefWidth="200.0">
-                                                   <children>
-                                                      <CheckBox fx:id="yUpCheckBox" mnemonicParsing="false" text="YUP" />
-                                                   </children>
-                                                   <VBox.margin>
-                                                      <Insets />
-                                                   </VBox.margin>
-                                                   <padding>
-                                                      <Insets left="100.0" />
-                                                   </padding>
-                                                </HBox>
-                                                <HBox layoutX="20.0" layoutY="80.0" maxHeight="1.7976931348623157E308" prefWidth="200.0">
-                                                   <children>
-                                                      <CheckBox fx:id="msaaCheckBox" mnemonicParsing="false" text="MSAAアンチエリアシング" />
-                                                   </children>
-                                                   <padding>
-                                                      <Insets left="100.0" />
-                                                   </padding>
-                                                </HBox>
-                                                <HBox alignment="CENTER_LEFT" layoutX="20.0" layoutY="108.0" maxHeight="1.7976931348623157E308" minHeight="30.0" prefHeight="0.0" spacing="5.0">
-                                                   <children>
-                                                      <ColorPicker fx:id="backgroundColorPicker1" prefWidth="120.0" />
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="背景色" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER" maxHeight="1.7976931348623157E308" prefWidth="200.0" spacing="5.0">
-                                                   <children>
-                                                <Label alignment="CENTER" contentDisplay="CENTER" text="Smooth Texture Map" />
-                                                   </children>
-                                                </HBox>
-                                            <GridPane fx:id="accordionContents" hgap="10.0" prefHeight="171.2" prefWidth="279.2" styleClass="settings" vgap="10.0">
-                                              <children>
-                                                <Region maxHeight="1.7976931348623157E308" prefHeight="-1.0" prefWidth="-1.0" GridPane.columnIndex="0" GridPane.rowIndex="8" />
-                                              </children>
-                                              <columnConstraints>
-                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="0.0" prefWidth="100.0" />
-                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                              </columnConstraints>
-                                              <padding>
-                                                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" fx:id="x3" />
-                                              </padding>
-                                              <rowConstraints>
-                                                <RowConstraints minHeight="10.0" prefHeight="-1.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" prefHeight="-1.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" prefHeight="-1.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                                                <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
-                                              </rowConstraints>
-                                            </GridPane>
-                                             </children>
-                                             <padding>
-                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                             </padding>
-                                          </VBox>
-                                       </content>
-                                    </TitledPane>
-                                </panes>
-                              </Accordion>
-                           </children>
-                           <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </padding>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-            </content>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<VBox fx:id="rightSidePanel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <TabPane prefHeight="798.0" prefWidth="278.0" tabClosingPolicy="UNAVAILABLE">
+        <Tab>
             <graphic>
-              <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                <image>
-                  <Image url="@icon_settings.png" />
-                </image>
-              </ImageView>
+                <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
+                    <Image url="@icon_info.png"/>
+                </ImageView>
             </graphic>
-          </Tab>
-            <Tab>
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ライト">
-                                 <font>
-                                    <Font size="16.0" />
-                                 </font>
-                              </Text>
-                              <Accordion>
-                                <panes>
-                                  <TitledPane animated="false" expanded="false" prefHeight="120.0" text="アンビエント">
-                                       <content>
-                                          <VBox maxWidth="1.7976931348623157E308" prefHeight="180.0" spacing="10.0">
-                                             <children>
-                                                <HBox prefWidth="200.0">
-                                                   <children>
-                                                      <CheckBox fx:id="ambientEnableCheckbox" mnemonicParsing="false" text="有効" />
-                                                   </children>
-                                                   <VBox.margin>
-                                                      <Insets />
-                                                   </VBox.margin>
-                                                   <padding>
-                                                      <Insets left="100.0" />
-                                                   </padding>
-                                                </HBox>
-                                                <HBox alignment="CENTER_LEFT">
-                                                   <children>
-                                                      <ColorPicker fx:id="ambientColorPicker" prefWidth="120.0" />
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="背景色" />
-                                                   </children>
-                                                </HBox>
-                                             </children>
-                                             <padding>
-                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                             </padding>
-                                          </VBox>
-                                       </content>
-                                    </TitledPane>
-                                  <TitledPane animated="false" expanded="false" prefHeight="200.0" text="ライト１(カメラ)">
-                                       <content>
-                                          <VBox spacing="10.0">
-                                             <padding>
-                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                             </padding>
-                                             <children>
-                                                <HBox maxWidth="1.7976931348623157E308">
-                                                   <padding>
-                                                      <Insets left="100.0" />
-                                                   </padding>
-                                                   <children>
-                                                      <CheckBox fx:id="light1EnabledCheckBox" mnemonicParsing="false" text="有効" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" minHeight="30.0" prefHeight="100.0" spacing="5.0">
-                                                   <children>
-                                                      <ColorPicker id="ambientColorPicker" fx:id="light1ColorPicker" prefWidth="120.0" />
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ライトカラー" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox prefHeight="100.0" prefWidth="200.0">
-                                                   <children>
-                                                      <CheckBox fx:id="light1followCameraCheckBox" mnemonicParsing="false" text="Lock to Camera" />
-                                                   </children>
-                                                   <padding>
-                                                      <Insets left="100.0" />
-                                                   </padding>
-                                                </HBox>
-                                                <HBox alignment="CENTER" minHeight="30.0" spacing="10.0">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="X" />
-                                                      <Slider fx:id="light1x1" majorTickUnit="20.0" max="100.0" maxWidth="1.7976931348623157E308" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" showTickMarks="false" value="0.0" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox minHeight="30.0" spacing="10.0">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Y" />
-                                                      <Slider fx:id="light1y1" majorTickUnit="20.0" max="100.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" showTickMarks="false" value="0.0" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox minHeight="30.0" spacing="10.0">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Z" />
-                                                      <Slider fx:id="light1z" majorTickUnit="20.0" max="100.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" showTickMarks="false" value="0.0" />
-                                                   </children>
-                                                </HBox>
-                                             </children>
-                                          </VBox>
-                                       </content></TitledPane>
-                                    <TitledPane animated="false" prefHeight="180.0" text="ライト2">
-                                       <content>
-                                          <VBox spacing="10.0">
-                                             <padding>
-                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                             </padding>
-                                             <children>
-                                                <HBox maxWidth="1.7976931348623157E308">
-                                                   <padding>
-                                                      <Insets left="100.0" />
-                                                   </padding>
-                                                   <children>
-                                                      <CheckBox fx:id="light2EnabledCheckBox" mnemonicParsing="false" text="有効" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" minHeight="30.0" prefHeight="100.0" spacing="5.0">
-                                                   <children>
-                                                      <ColorPicker id="ambientColorPicker" fx:id="light2ColorPicker" prefWidth="120.0" />
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ライトカラー" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER" minHeight="30.0" spacing="10.0">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="X" />
-                                                      <Slider fx:id="light2x" majorTickUnit="20.0" max="100.0" maxWidth="1.7976931348623157E308" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" showTickMarks="false" value="0.0" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox minHeight="30.0" spacing="10.0">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Y" />
-                                                      <Slider fx:id="light2y" majorTickUnit="20.0" max="100.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" showTickMarks="false" value="0.0" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox minHeight="30.0" spacing="10.0">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Z" />
-                                                      <Slider fx:id="light2z" majorTickUnit="20.0" max="100.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" showTickMarks="false" value="0.0" />
-                                                   </children>
-                                                </HBox>
-                                             </children>
-                                          </VBox>
-                                       </content>
-                                    </TitledPane>
-                                    <TitledPane animated="false" prefHeight="180.0" text="ライト3">
-                                       <content>
-                                          <VBox spacing="10.0">
-                                             <padding>
-                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                             </padding>
-                                             <children>
-                                                <HBox maxWidth="1.7976931348623157E308">
-                                                   <padding>
-                                                      <Insets left="100.0" />
-                                                   </padding>
-                                                   <children>
-                                                      <CheckBox fx:id="light3EnabledCheckBox" mnemonicParsing="false" text="有効" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" minHeight="30.0" prefHeight="100.0" spacing="5.0">
-                                                   <children>
-                                                      <ColorPicker id="ambientColorPicker" fx:id="light3ColorPicker" prefWidth="120.0" />
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ライトカラー" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER" minHeight="30.0" spacing="10.0">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="X" />
-                                                      <Slider fx:id="light3x" majorTickUnit="20.0" max="100.0" maxWidth="1.7976931348623157E308" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" showTickMarks="false" value="0.0" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox minHeight="30.0" spacing="10.0">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Y" />
-                                                      <Slider fx:id="light3y" majorTickUnit="20.0" max="100.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" showTickMarks="false" value="0.0" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox minHeight="30.0" spacing="10.0">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Z" />
-                                                      <Slider fx:id="light3z" majorTickUnit="20.0" max="100.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" showTickMarks="false" value="0.0" />
-                                                   </children>
-                                                </HBox>
-                                             </children>
-                                          </VBox>
-                                       </content>
-                                    </TitledPane>
-                                </panes>
-                              </Accordion>
-                           </children>
-                           <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </padding>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-              </content>
-              <graphic>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                    </padding>
+                    <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物情報">
+                        <font>
+                            <Font size="16.0"/>
+                        </font>
+                    </Text>
+                    <Accordion>
+                        <panes>
+                            <fx:include source="attribute-editor.fxml" />
+                            <TitledPane animated="false" expanded="false" text="テクスチャ">
+                                <GridPane>
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                           prefWidth="100.0"/>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                           prefWidth="100.0"/>
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0"
+                                                        vgrow="SOMETIMES"/>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0"
+                                                        vgrow="SOMETIMES"/>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0"
+                                                        vgrow="SOMETIMES"/>
+                                    </rowConstraints>
+                                </GridPane>
+                            </TitledPane>
+                        </panes>
+                    </Accordion>
+                </VBox>
+            </AnchorPane>
+        </Tab>
+        <Tab>
+            <graphic>
                 <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                  <image>
-                    <Image url="@icon_Light.png" />
-                  </image>
+                    <Image url="@icon_settings.png"/>
                 </ImageView>
-              </graphic>
-            </Tab>
-            <Tab>
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="カメラ">
-                                 <font>
-                                    <Font size="16.0" />
-                                 </font>
-                              </Text>
-                              <Accordion>
-                                <panes>
-                                  <TitledPane animated="false" text="設定">
-                                       <content>
-                                          <VBox fx:id="tabContentsArea" prefHeight="250.0" spacing="10.0">
-                                             <padding>
-                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                             </padding>
-                                             <children>
-                                                <HBox alignment="CENTER" maxWidth="1.7976931348623157E308">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Field of view" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox prefHeight="100.0" prefWidth="200.0">
-                                                   <children>
-                                                      <Slider fx:id="fovSlider" majorTickUnit="40.0" max="180.0" maxWidth="1.7976931348623157E308" min="0.0" minorTickCount="4" prefWidth="250.0" showTickLabels="true" showTickMarks="true" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER" maxWidth="1.7976931348623157E308">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Near clipping pane:    %.5f" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox prefHeight="100.0" prefWidth="200.0">
-                                                   <children>
-                                                      <Slider fx:id="nearClipSlider" majorTickUnit="1" max="5" maxWidth="1.7976931348623157E308" min="-5" minorTickCount="4" prefWidth="250.0" showTickLabels="true" showTickMarks="true" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER" maxWidth="1.7976931348623157E308">
-                                                   <children>
-                                                      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Far clipping pane:    %.5f" />
-                                                   </children>
-                                                </HBox>
-                                                <HBox prefHeight="100.0" prefWidth="200.0">
-                                                   <children>
-                                                      <Slider fx:id="farClipSlider" majorTickUnit="1" max="5" maxWidth="1.7976931348623157E308" min="-5" minorTickCount="4" prefWidth="250.0" showTickLabels="true" showTickMarks="true" />
-                                                   </children>
-                                                </HBox>
-                                             </children>
-                                          </VBox>
-                                       </content>
-                                    </TitledPane>
-                                </panes>
-                              </Accordion>
-                           </children>
-                           <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </padding>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-              </content>
-              <graphic>
+            </graphic>
+            <fx:include source="view-settings.fxml" />
+        </Tab>
+        <Tab>
+            <graphic>
                 <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                  <image>
-                    <Image url="@icon_camera.png" />
-                  </image>
+                    <Image url="@icon_Light.png"/>
                 </ImageView>
-              </graphic>
-            </Tab>
-        </tabs>
-      </TabPane>
-   </children>
+            </graphic>
+            <fx:include source="light-settings.fxml" />
+        </Tab>
+        <Tab>
+            <graphic>
+                <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
+                    <Image url="@icon_camera.png"/>
+                </ImageView>
+            </graphic>
+            <fx:include source="camera-settings.fxml"/>
+        </Tab>
+    </TabPane>
 </VBox>
