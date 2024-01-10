@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 
 import javafx.scene.Parent;
+import org.plateau.citygmleditor.citygmleditor.BuildingUnit;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 
@@ -42,4 +43,8 @@ public interface ILODSolidView {
      * @return テクスチャ座標バッファ
      */
     public TexCoordBuffer getTexCoordBuffer();
+
+    public BuildingUnit getBuildingUnit();
+
+    public void refrectGML();
 }

@@ -11,6 +11,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
 import org.plateau.citygmleditor.citymodel.BuildingView;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.world.SceneContent;
 import org.plateau.citygmleditor.world.World;
 
@@ -70,7 +71,7 @@ public class GizmoController implements Initializable {
                 var result = event.getPickResult();
                 var building = FindBuilding(result.getIntersectedNode());
                 if (building != null) {
-                    gizmoModel.attachBuilding(building);
+                    gizmoModel.attachBuilding(((ILODSolidView)building).getBuildingUnit());
                 }
                 if (gizmoModel.isGizmoDragging(result.getIntersectedNode())) {
                     CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(true);
@@ -154,7 +155,7 @@ public class GizmoController implements Initializable {
             return null;
 
         //Building型かチェック
-        if(node instanceof BuildingView)
+        if(node instanceof ILODSolidView)
             return node;
 
         //再帰検索

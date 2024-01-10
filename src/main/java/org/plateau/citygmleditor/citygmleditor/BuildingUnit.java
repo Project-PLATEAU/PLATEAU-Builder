@@ -7,13 +7,16 @@ import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.world.World;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.transform.Translate;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 
-public abstract class BuildingUnit extends Parent {
+public class BuildingUnit {
+    private Node solid;
+
     private Point3D location;
     private Point3D rotation;
     private Point3D scale;
@@ -22,12 +25,18 @@ public abstract class BuildingUnit extends Parent {
 
     private Transform transformCache;
 
-    public BuildingUnit() {
+    public BuildingUnit(Node node) {
+        solid = node;
+
         this.location = new Point3D(0, 0, 0);
         this.rotation = new Point3D(0, 0, 0);
         this.scale = new Point3D(1, 1, 1);
 
         transformCache = new Translate();
+    }
+
+    public Node getSolidView() {
+        return solid;
     }
 
     public Point3D getLocation() {
@@ -55,7 +64,7 @@ public abstract class BuildingUnit extends Parent {
     }
 
     public void updateOrigin() {
-        BoundingBox bb = (BoundingBox) getBoundsInParent();
+        BoundingBox bb = (BoundingBox) solid.getBoundsInParent();
         origin = new Point3D(bb.getCenterX(), bb.getCenterY(), bb.getMinZ());
     }
 
@@ -71,9 +80,7 @@ public abstract class BuildingUnit extends Parent {
         transformCache = transformCache.createConcatenation(transformDelta);
     }
 
-    abstract public void refrectGML();
-    
-    public List<Double> unProjectTransforms(List<Double> coordinates) {
+    public List<Double> unprojectTransforms(List<Double> coordinates) {
         List<Double> ret = new ArrayList<>();
 
         for (int i = 0; i < coordinates.size(); i = i + 3) {
@@ -101,7 +108,7 @@ public abstract class BuildingUnit extends Parent {
         return ret;
     }
     
-    public List<Vec3f> unProjectVertexTransforms(List<Vec3f> vertices) {
+    public List<Vec3f> unprojectVertexTransforms(List<Vec3f> vertices) {
         List<Vec3f> ret = new ArrayList<>();
 
         for (var vertex : vertices) {

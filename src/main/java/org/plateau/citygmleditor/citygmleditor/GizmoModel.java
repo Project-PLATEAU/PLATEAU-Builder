@@ -16,6 +16,7 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 
 public class GizmoModel extends Parent {
     public enum ControlMode {
@@ -93,8 +94,8 @@ public class GizmoModel extends Parent {
         }
     }
     
-    public void attachBuilding(Node building) {
-        attachedBuilding = (BuildingUnit) building;
+    public void attachBuilding(BuildingUnit building) {
+        attachedBuilding = building;
         
         // ギズモの座標変換を初期化
         getTransforms().clear();
@@ -158,11 +159,11 @@ public class GizmoModel extends Parent {
         attachedBuilding.setScale(new Point3D(attachedBuilding.getScale().getX() + scaleX, attachedBuilding.getScale().getY() + scaleY, attachedBuilding.getScale().getZ() + scaleZ));
 
         // 建物の座標変換を初期化
-        attachedBuilding.getTransforms().clear();
+        attachedBuilding.getSolidView().getTransforms().clear();
         // 建物の座標変換情報から建物の座標変換を作成
-        attachedBuilding.getTransforms().add(attachedBuilding.getTransformCache());
+        attachedBuilding.getSolidView().getTransforms().add(attachedBuilding.getTransformCache());
         // スケールを適用
-        attachedBuilding.getTransforms().add(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        attachedBuilding.getSolidView().getTransforms().add(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
 
         // ギズモの座標変換を初期化
         getTransforms().clear();
@@ -263,11 +264,11 @@ public class GizmoModel extends Parent {
         }
 
         // 建物の座標変換を初期化
-        attachedBuilding.getTransforms().clear();
+        attachedBuilding.getSolidView().getTransforms().clear();
         // 建物の座標変換情報から建物の座標変換を作成
-        attachedBuilding.getTransforms().add(attachedBuilding.getTransformCache());
+        attachedBuilding.getSolidView().getTransforms().add(attachedBuilding.getTransformCache());
         // スケールを適用
-        attachedBuilding.getTransforms().add(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        attachedBuilding.getSolidView().getTransforms().add(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
 
         // ギズモの座標変換を初期化
         getTransforms().clear();
@@ -292,7 +293,7 @@ public class GizmoModel extends Parent {
             return;
 
         // GMLに書き戻す
-        attachedBuilding.refrectGML();
+        ((ILODSolidView)attachedBuilding.getSolidView()).refrectGML();
     }
 
     private void setVisibleGizmo() {
