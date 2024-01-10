@@ -118,7 +118,7 @@ public class GizmoModel extends Parent {
         outline.getTransforms().add(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
         
         // デバッグ用バウンディングボックス表示
-        // BoundingBox bb = (BoundingBox) building.getBoundsInParent();
+        // BoundingBox bb = (BoundingBox) attachedBuilding.getSolidView().getBoundsInParent();
         // if (debugBoundingBox != null) {
         //     getChildren().remove(debugBoundingBox);
         // }
@@ -185,21 +185,30 @@ public class GizmoModel extends Parent {
         
         // 移動ギズモ
         if (isNodeInTree(currentGizmo, moveGizmo)) {
-            Point3D axisVector = new Point3D(0, 0, 0);
+            double transformFactorX = 0;
+            double transformFactorY = 0;
+            double transformFactorZ = 0;
             if (isNodeInTree(currentGizmo, moveXGizmo)) {
-                axisVector = worldToLocalTransform.transform(Rotate.X_AXIS).normalize();
+                var axisVector = worldToLocalTransform.transform(Rotate.X_AXIS).normalize();
+                var projectionMagnitude = delta.dotProduct(axisVector);
+                var projection = axisVector.multiply(projectionMagnitude);
+                transformFactorX = projection.getX();
             }
             if (isNodeInTree(currentGizmo, moveYGizmo)) {
-                axisVector = worldToLocalTransform.transform(Rotate.Y_AXIS).normalize();
+                var axisVector = worldToLocalTransform.transform(Rotate.Y_AXIS).normalize();
+                var projectionMagnitude = delta.dotProduct(axisVector);
+                var projection = axisVector.multiply(projectionMagnitude);
+                transformFactorY = projection.getY();
             }
             if (isNodeInTree(currentGizmo, moveZGizmo)) {
-                axisVector = worldToLocalTransform.transform(Rotate.Z_AXIS).normalize();
+                var axisVector = worldToLocalTransform.transform(Rotate.Z_AXIS).normalize();
+                var projectionMagnitude = delta.dotProduct(axisVector);
+                var projection = axisVector.multiply(projectionMagnitude);
+                transformFactorZ = projection.getZ();
             }
-            var projectionMagnitude = delta.dotProduct(axisVector);
-            var projection = axisVector.multiply(projectionMagnitude);
-            attachedBuilding.setLocation(new Point3D(attachedBuilding.getLocation().getX() + projection.getX(), attachedBuilding.getLocation().getY() + projection.getY(), attachedBuilding.getLocation().getZ() + projection.getZ()));
+            attachedBuilding.setLocation(new Point3D(attachedBuilding.getLocation().getX() + transformFactorX, attachedBuilding.getLocation().getY() + transformFactorY, attachedBuilding.getLocation().getZ() + transformFactorZ));
             
-            attachedBuilding.addTransformCache(new Translate(projection.getX(), projection.getY(), projection.getZ()));
+            attachedBuilding.addTransformCache(new Translate(transformFactorX, transformFactorY, transformFactorZ));
         }
         // 回転ギズモ
         else if (isNodeInTree(currentGizmo, rotationGizmo)) {
