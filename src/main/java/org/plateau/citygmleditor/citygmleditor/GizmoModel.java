@@ -1,10 +1,11 @@
 package org.plateau.citygmleditor.citygmleditor;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import org.plateau.citygmleditor.importers.Importer3D;
+import javafx.animation.AnimationTimer;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
+import javafx.scene.DepthTest;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -16,7 +17,11 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 
+/**
+ * 
+ */
 public class GizmoModel extends Parent {
     public enum ControlMode {
         SELECT, MOVE, ROTATION, SCALE,
@@ -40,12 +45,15 @@ public class GizmoModel extends Parent {
     private Group rotationGizmo;
     private Group scaleGizmo;
 
-    private BuildingUnit attachedBuilding;
+    private TransformManipulator manipulator;
 
     private Node currentGizmo;
 
     // private Box debugBoundingBox;
     
+    /**
+     * コンストラクタ
+     */
     public GizmoModel() {
         moveGizmo = new Group();
         rotationGizmo = new Group();
@@ -61,6 +69,20 @@ public class GizmoModel extends Parent {
             scaleYGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleY.obj").toExternalForm());
             scaleZGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleZ.obj").toExternalForm());
             
+            moveXGizmo.setDepthTest(DepthTest.DISABLE);
+            moveYGizmo.setDepthTest(DepthTest.DISABLE);
+            moveZGizmo.setDepthTest(DepthTest.DISABLE);
+            rotationXGizmo.setDepthTest(DepthTest.DISABLE);
+            rotationYGizmo.setDepthTest(DepthTest.DISABLE);
+            rotationZGizmo.setDepthTest(DepthTest.DISABLE);
+            scaleXGizmo.setDepthTest(DepthTest.DISABLE);
+            scaleYGizmo.setDepthTest(DepthTest.DISABLE);
+            scaleZGizmo.setDepthTest(DepthTest.DISABLE);
+
+            // Z回転以外は無効
+            rotationXGizmo.setVisible(false);
+            rotationYGizmo.setVisible(false);
+
             moveGizmo.getChildren().addAll(moveXGizmo, moveYGizmo, moveZGizmo);
             rotationGizmo.getChildren().addAll(rotationXGizmo, rotationYGizmo, rotationZGizmo);
             scaleGizmo.getChildren().addAll(scaleXGizmo, scaleYGizmo, scaleZGizmo);
@@ -78,46 +100,82 @@ public class GizmoModel extends Parent {
         moveGizmo.setVisible(false);
         rotationGizmo.setVisible(false);
         scaleGizmo.setVisible(false);
+
+        AnimationTimer animationTimer = new AnimationTimer() {
+            public void handle(long now) {
+                if (manipulator != null) {
+                    // カメラからの距離でギズモのスケールを補正
+                    var camera = CityGMLEditorApp.getCamera().getCameraPosition();
+                    var distance = Math.abs(Math.sqrt(Math.pow(camera.getX() - manipulator.getOrigin().getX(), 2) + Math.pow(camera.getY() - manipulator.getOrigin().getY(), 2) + Math.pow(camera.getZ() - manipulator.getOrigin().getZ(), 2)));
+                    var scale = distance * 0.0005;
+                    // モデル回転方向補正
+                    var rot1 = new Rotate(90.0d, Rotate.X_AXIS);
+                    var rot2 = new Rotate(-90.0d, Rotate.Y_AXIS);
+                    moveGizmo.getTransforms().clear();
+                    moveGizmo.getTransforms().addAll(rot1, rot2);
+                    moveGizmo.getTransforms().add(new Scale(scale, scale, scale));
+                    rotationGizmo.getTransforms().clear();
+                    rotationGizmo.getTransforms().addAll(rot1, rot2);
+                    rotationGizmo.getTransforms().add(new Scale(scale, scale, scale));
+                    scaleGizmo.getTransforms().clear();
+                    scaleGizmo.getTransforms().addAll(rot1, rot2);
+                    scaleGizmo.getTransforms().add(new Scale(scale, scale, scale));
+                }
+            }
+        };
+        animationTimer.start();
     }
     
+    /**
+     * ギズモの操作モードを返す
+     * @return
+     */
     public ControlMode getControlMode() {
         return controlMode;
     }
 
+    /**
+     * ギズモの操作モードを切り替え
+     * @param controlMode
+     */
     public void setControlMode(ControlMode controlMode) {
         this.controlMode = controlMode;
 
         //選択中ならギズモ切り替え
-        if (attachedBuilding != null) {
+        if (manipulator != null) {
             setVisibleGizmo();
         }
     }
     
-    public void attachBuilding(Node building) {
-        attachedBuilding = (BuildingUnit) building;
+    /**
+     * ギズモを操作対象にセット
+     * @param manipulator ギズモの操作対象
+     */
+    public void attachManipulator(TransformManipulator manipulator) {
+        this.manipulator = manipulator;
         
         // ギズモの座標変換を初期化
         getTransforms().clear();
         // 建物の座標変換情報からギズモの座標変換を作成
-        getTransforms().add(attachedBuilding.getTransformCache());
+        getTransforms().add(manipulator.getTransformCache());
         // ギズモの位置を建物のPivotに合わせて座標変換
-        getTransforms().add(new Translate(attachedBuilding.getOrigin().getX(), attachedBuilding.getOrigin().getY(), attachedBuilding.getOrigin().getZ()));
+        getTransforms().add(new Translate(manipulator.getOrigin().getX(), manipulator.getOrigin().getY(), manipulator.getOrigin().getZ()));
 
         setVisibleGizmo();
 
-        var pivot = attachedBuilding.getOrigin();
+        var pivot = manipulator.getOrigin();
         
         // 選択中ワイヤーフレームにも適用
         MeshView outline = CityGMLEditorApp.getFeatureSellection().getOutLine();
         // 建物の座標変換を初期化
         outline.getTransforms().clear();
         // 建物の座標変換情報から建物の座標変換を作成
-        outline.getTransforms().add(attachedBuilding.getTransformCache());
+        outline.getTransforms().add(manipulator.getTransformCache());
         // スケールを適用
-        outline.getTransforms().add(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        outline.getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
         
         // デバッグ用バウンディングボックス表示
-        // BoundingBox bb = (BoundingBox) building.getBoundsInParent();
+        // BoundingBox bb = (BoundingBox) attachedBuilding.getSolidView().getBoundsInParent();
         // if (debugBoundingBox != null) {
         //     getChildren().remove(debugBoundingBox);
         // }
@@ -128,10 +186,19 @@ public class GizmoModel extends Parent {
         // debugBoundingBox.setTranslateZ(bb.getDepth() / 2);
     }
     
+    /**
+     * 操作中ギズモを設定
+     * @param node
+     */
     public void setCurrentGizmo(Node node) {
         currentGizmo = node;
     }
 
+    /**
+     * スナップによるギズモ操作
+     * @param index
+     * @param value
+     */
     public void snapTransform(int index, double value) {
         double moveX = index == 0 ? value : 0;
         double moveY = index == 1 ? value : 0;
@@ -143,62 +210,75 @@ public class GizmoModel extends Parent {
         double scaleY = index == 7 ? value : 0;
         double scaleZ = index == 8 ? value : 0;
         
-        var pivot = attachedBuilding.getOrigin();
+        var pivot = manipulator.getOrigin();
 
-        attachedBuilding.setLocation(new Point3D(moveX, moveY, moveZ));
-        attachedBuilding.addTransformCache(new Translate(moveX, moveY, moveZ));
+        manipulator.setLocation(new Point3D(moveX, moveY, moveZ));
+        manipulator.addTransformCache(new Translate(moveX, moveY, moveZ));
         
-        attachedBuilding.setRotation(new Point3D(rotateX, rotateY, rotateZ));
+        manipulator.setRotation(new Point3D(rotateX, rotateY, rotateZ));
         Transform rotate = new Rotate();
         rotate = rotate.createConcatenation(new Rotate(rotateX, pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.X_AXIS));
         rotate = rotate.createConcatenation(new Rotate(rotateY, pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Y_AXIS));
         rotate = rotate.createConcatenation(new Rotate(rotateZ, pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS));
-        attachedBuilding.addTransformCache(rotate);
+        manipulator.addTransformCache(rotate);
 
-        attachedBuilding.setScale(new Point3D(attachedBuilding.getScale().getX() + scaleX, attachedBuilding.getScale().getY() + scaleY, attachedBuilding.getScale().getZ() + scaleZ));
+        manipulator.setScale(new Point3D(manipulator.getScale().getX() + scaleX, manipulator.getScale().getY() + scaleY, manipulator.getScale().getZ() + scaleZ));
 
         // 建物の座標変換を初期化
-        attachedBuilding.getTransforms().clear();
+        manipulator.getSolidView().getTransforms().clear();
         // 建物の座標変換情報から建物の座標変換を作成
-        attachedBuilding.getTransforms().add(attachedBuilding.getTransformCache());
+        manipulator.getSolidView().getTransforms().add(manipulator.getTransformCache());
         // スケールを適用
-        attachedBuilding.getTransforms().add(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
 
         // ギズモの座標変換を初期化
         getTransforms().clear();
         // 建物の座標変換情報からギズモの座標変換を作成
-        getTransforms().add(attachedBuilding.getTransformCache());
+        getTransforms().add(manipulator.getTransformCache());
         // ギズモの位置を建物のPivotに合わせて座標変換
-        getTransforms().add(new Translate(attachedBuilding.getOrigin().getX(), attachedBuilding.getOrigin().getY(), attachedBuilding.getOrigin().getZ()));
+        getTransforms().add(new Translate(manipulator.getOrigin().getX(), manipulator.getOrigin().getY(), manipulator.getOrigin().getZ()));
     }
 
+    /**
+     * マウス操作によるギズモ操作
+     * @param delta
+     */
     public void updateTransform(Point3D delta) {
         // System.out.println("delta:" + delta);
 
         // 建物の座標変換情報を操作値をもとに更新
-        Transform worldToLocalTransform = new Rotate(attachedBuilding.getRotation().getX(), Rotate.X_AXIS);
-        worldToLocalTransform = worldToLocalTransform.createConcatenation(new Rotate(attachedBuilding.getRotation().getY(), Rotate.Y_AXIS));
-        worldToLocalTransform = worldToLocalTransform.createConcatenation(new Rotate(attachedBuilding.getRotation().getZ(), Rotate.Z_AXIS));
+        Transform worldToLocalTransform = new Rotate(manipulator.getRotation().getX(), Rotate.X_AXIS);
+        worldToLocalTransform = worldToLocalTransform.createConcatenation(new Rotate(manipulator.getRotation().getY(), Rotate.Y_AXIS));
+        worldToLocalTransform = worldToLocalTransform.createConcatenation(new Rotate(manipulator.getRotation().getZ(), Rotate.Z_AXIS));
         
-        var pivot = attachedBuilding.getOrigin();
+        var pivot = manipulator.getOrigin();
         
         // 移動ギズモ
         if (isNodeInTree(currentGizmo, moveGizmo)) {
-            Point3D axisVector = new Point3D(0, 0, 0);
+            double transformFactorX = 0;
+            double transformFactorY = 0;
+            double transformFactorZ = 0;
             if (isNodeInTree(currentGizmo, moveXGizmo)) {
-                axisVector = worldToLocalTransform.transform(Rotate.X_AXIS).normalize();
+                var axisVector = worldToLocalTransform.transform(Rotate.X_AXIS).normalize();
+                var projectionMagnitude = delta.dotProduct(axisVector);
+                var projection = axisVector.multiply(projectionMagnitude);
+                transformFactorX = projection.getX();
             }
             if (isNodeInTree(currentGizmo, moveYGizmo)) {
-                axisVector = worldToLocalTransform.transform(Rotate.Y_AXIS).normalize();
+                var axisVector = worldToLocalTransform.transform(Rotate.Y_AXIS).normalize();
+                var projectionMagnitude = delta.dotProduct(axisVector);
+                var projection = axisVector.multiply(projectionMagnitude);
+                transformFactorY = projection.getY();
             }
             if (isNodeInTree(currentGizmo, moveZGizmo)) {
-                axisVector = worldToLocalTransform.transform(Rotate.Z_AXIS).normalize();
+                var axisVector = worldToLocalTransform.transform(Rotate.Z_AXIS).normalize();
+                var projectionMagnitude = delta.dotProduct(axisVector);
+                var projection = axisVector.multiply(projectionMagnitude);
+                transformFactorZ = projection.getZ();
             }
-            var projectionMagnitude = delta.dotProduct(axisVector);
-            var projection = axisVector.multiply(projectionMagnitude);
-            attachedBuilding.setLocation(new Point3D(attachedBuilding.getLocation().getX() + projection.getX(), attachedBuilding.getLocation().getY() + projection.getY(), attachedBuilding.getLocation().getZ() + projection.getZ()));
+            manipulator.setLocation(new Point3D(manipulator.getLocation().getX() + transformFactorX, manipulator.getLocation().getY() + transformFactorY, manipulator.getLocation().getZ() + transformFactorZ));
             
-            attachedBuilding.addTransformCache(new Translate(projection.getX(), projection.getY(), projection.getZ()));
+            manipulator.addTransformCache(new Translate(transformFactorX, transformFactorY, transformFactorZ));
         }
         // 回転ギズモ
         else if (isNodeInTree(currentGizmo, rotationGizmo)) {
@@ -226,13 +306,15 @@ public class GizmoModel extends Parent {
                 var axisVector = worldToLocalTransform.transform(Rotate.Z_AXIS).normalize();
                 var projectionMagnitude = delta.dotProduct(axisVector);
                 var projection = axisVector.multiply(projectionMagnitude);
+                // Z回転以外は無効
+                projection = new Point3D(0, 0, delta.getX());
                 rotateFactorZ = projection.getZ();
 
                 rotate = new Rotate(projection.getZ(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS);
             }
-            attachedBuilding.setRotation(new Point3D(attachedBuilding.getRotation().getX() + rotateFactorX, attachedBuilding.getRotation().getY() + rotateFactorY, attachedBuilding.getRotation().getZ() + rotateFactorZ));
+            manipulator.setRotation(new Point3D(manipulator.getRotation().getX() + rotateFactorX, manipulator.getRotation().getY() + rotateFactorY, manipulator.getRotation().getZ() + rotateFactorZ));
             
-            attachedBuilding.addTransformCache(rotate);
+            manipulator.addTransformCache(rotate);
         }
         // スケールギズモ
         else if (isNodeInTree(currentGizmo, scaleGizmo)) {
@@ -257,50 +339,61 @@ public class GizmoModel extends Parent {
                 var projection = axisVector.multiply(projectionMagnitude);
                 scalingFactorZ = projection.getZ() / 100.0;
             }
-            attachedBuilding.setScale(new Point3D(attachedBuilding.getScale().getX() + scalingFactorX, attachedBuilding.getScale().getY() + scalingFactorY, attachedBuilding.getScale().getZ() + scalingFactorZ));
+            manipulator.setScale(new Point3D(manipulator.getScale().getX() + scalingFactorX, manipulator.getScale().getY() + scalingFactorY, manipulator.getScale().getZ() + scalingFactorZ));
             // スケールは別途で毎回適用
             //attachedBuilding.addTransformCache(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
         }
 
         // 建物の座標変換を初期化
-        attachedBuilding.getTransforms().clear();
+        manipulator.getSolidView().getTransforms().clear();
         // 建物の座標変換情報から建物の座標変換を作成
-        attachedBuilding.getTransforms().add(attachedBuilding.getTransformCache());
+        manipulator.getSolidView().getTransforms().add(manipulator.getTransformCache());
         // スケールを適用
-        attachedBuilding.getTransforms().add(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
 
         // ギズモの座標変換を初期化
         getTransforms().clear();
         // 建物の座標変換情報からギズモの座標変換を作成
-        getTransforms().add(attachedBuilding.getTransformCache());
+        getTransforms().add(manipulator.getTransformCache());
         // ギズモの位置を建物のPivotに合わせて座標変換
-        getTransforms().add(new Translate(attachedBuilding.getOrigin().getX(), attachedBuilding.getOrigin().getY(), attachedBuilding.getOrigin().getZ()));
+        getTransforms().add(new Translate(manipulator.getOrigin().getX(), manipulator.getOrigin().getY(), manipulator.getOrigin().getZ()));
         
         // 選択中ワイヤーフレームにも適用
         MeshView outline = CityGMLEditorApp.getFeatureSellection().getOutLine();
         // 建物の座標変換を初期化
         outline.getTransforms().clear();
         // 建物の座標変換情報から建物の座標変換を作成
-        outline.getTransforms().add(attachedBuilding.getTransformCache());
+        outline.getTransforms().add(manipulator.getTransformCache());
         // スケールを適用
-        outline.getTransforms().add(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        outline.getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
 
     }
     
+    /**
+     * ギズモ操作を確定
+     */
     public void fixTransform() {
-        if (attachedBuilding == null)
+        if (manipulator == null)
             return;
 
         // GMLに書き戻す
-        attachedBuilding.refrectGML();
+        ((ILODSolidView) manipulator.getSolidView()).refrectGML();
     }
 
+    /**
+     * ギズモの表示状態を更新
+     */
     private void setVisibleGizmo() {
         moveGizmo.setVisible(this.controlMode == ControlMode.MOVE);
         rotationGizmo.setVisible(this.controlMode == ControlMode.ROTATION);
         scaleGizmo.setVisible(this.controlMode == ControlMode.SCALE);
     }
 
+    /**
+     * デバッグ用バウンディングボックス
+     * @param boundingBox
+     * @return
+     */
     private Box createBoundingBoxVisual(BoundingBox boundingBox) {
         double width = boundingBox.getWidth();
         double height = boundingBox.getHeight();
@@ -315,17 +408,28 @@ public class GizmoModel extends Parent {
         return boundingBoxVisual;
     }
 
+    /**
+     * ドラッグ操作中のギズモがあるか検索
+     * @param node
+     * @return
+     */
     public boolean isGizmoDragging(Node node) {
-        if(isNodeInTree(node, moveGizmo))
+        if (isNodeInTree(node, moveGizmo))
             return true;
-        if(isNodeInTree(node, rotationGizmo))
+        if (isNodeInTree(node, rotationGizmo))
             return true;
-        if(isNodeInTree(node, scaleGizmo))
+        if (isNodeInTree(node, scaleGizmo))
             return true;
 
         return false;
     }
 
+    /**
+     * ノードの子に特定のノードがあるか再帰検索
+     * @param findNode
+     * @param serchNode
+     * @return
+     */
     private boolean isNodeInTree(Node findNode, Node serchNode) {
         if (findNode == null || serchNode == null) {
             return false;
