@@ -19,28 +19,28 @@
          </toggleGroup>
          <graphic>
             <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-               <Image url="@icon_select.png"/>
+               <Image url="@../images/icon_select.png"/>
             </ImageView>
          </graphic>
       </ToggleButton>
       <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
          <graphic>
             <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-               <Image url="@icon_move.png"/>
+               <Image url="@../images/icon_move.png"/>
             </ImageView>
          </graphic>
       </ToggleButton>
       <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
          <graphic>
             <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-               <Image url="@icon_rotate.png"/>
+               <Image url="@../images/icon_rotate.png"/>
             </ImageView>
          </graphic>
       </ToggleButton>
       <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
          <graphic>
             <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-               <Image url="@icon_scale.png"/>
+               <Image url="@../images/icon_scale.png"/>
             </ImageView>
          </graphic>
       </ToggleButton>

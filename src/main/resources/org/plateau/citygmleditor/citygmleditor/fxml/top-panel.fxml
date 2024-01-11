@@ -16,20 +16,20 @@
                     <Rectangle2D />
                 </viewport>
                 <image>
-                    <Image url="@icon_import.png" />
+                    <Image url="@../images/icon_import.png" />
                 </image>
             </ImageView>
         </graphic>
     </Button>
     <!--書き出し-->
-    <Button contentDisplay="TOP" graphicTextGap="0.0" mnemonicParsing="false" onAction="#export" text="書き出し">
+    <Button contentDisplay="TOP" graphicTextGap="0.0" mnemonicParsing="false" onAction="#exportDataset" text="書き出し">
         <graphic>
             <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
                 <viewport>
                     <Rectangle2D />
                 </viewport>
                 <image>
-                    <Image url="@icon_export.png" />
+                    <Image url="@../images/icon_export.png" />
                 </image>
             </ImageView>
         </graphic>
@@ -42,7 +42,7 @@
                     <Rectangle2D />
                 </viewport>
                 <image>
-                    <Image url="@icon_check.png" />
+                    <Image url="@../images/icon_check.png" />
                 </image>
             </ImageView>
         </graphic>
@@ -55,7 +55,7 @@
                <Rectangle2D />
             </viewport>
             <image>
-               <Image url="@icon_make.png" />
+               <Image url="@../images/icon_make.png" />
             </image>
          </ImageView>
       </graphic>

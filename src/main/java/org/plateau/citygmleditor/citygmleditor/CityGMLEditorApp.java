@@ -42,6 +42,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.Group;
 
+import javafx.stage.Window;
 import org.plateau.citygmleditor.world.*;
 import org.plateau.citygmleditor.FeatureSelection;
 
@@ -49,7 +50,7 @@ import org.plateau.citygmleditor.FeatureSelection;
  * JavaFX 3D Viewer Application
  */
 public class CityGMLEditorApp extends Application {
-    public static final String FILE_URL_PROPERTY = "fileUrl";
+    public static final String GML_FILE_URL_PROPERTY = "fileUrl";
     private static Scene scene;
     private static Camera camera;
     private static AxisGizmo axisGizmo;
@@ -80,6 +81,10 @@ public class CityGMLEditorApp extends Application {
 
     public static Scene getScene() {
         return scene;
+    }
+
+    public static Window getWindow() {
+        return scene.getWindow();
     }
 
     public static AntiAliasing getAntiAliasing() {
@@ -124,7 +129,7 @@ public class CityGMLEditorApp extends Application {
         sceneContent.rebuildSubScene();
 
         scene = new Scene(
-                FXMLLoader.<Parent>load(Objects.requireNonNull(CityGMLEditorApp.class.getResource("main02.fxml"))),
+                FXMLLoader.<Parent>load(Objects.requireNonNull(CityGMLEditorApp.class.getResource("fxml/main.fxml"))),
                 1024, 600, true);
 
         stage.setScene(scene);

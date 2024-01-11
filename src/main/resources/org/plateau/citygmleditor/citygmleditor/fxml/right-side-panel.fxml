@@ -14,7 +14,7 @@
         <Tab>
             <graphic>
                 <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@icon_info.png"/>
+                    <Image url="@../images/icon_info.png"/>
                 </ImageView>
             </graphic>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -57,7 +57,7 @@
         <Tab>
             <graphic>
                 <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@icon_settings.png"/>
+                    <Image url="@../images/icon_settings.png"/>
                 </ImageView>
             </graphic>
             <fx:include source="view-settings.fxml" />
@@ -65,7 +65,7 @@
         <Tab>
             <graphic>
                 <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@icon_Light.png"/>
+                    <Image url="@../images/icon_Light.png"/>
                 </ImageView>
             </graphic>
             <fx:include source="light-settings.fxml" />
@@ -73,7 +73,7 @@
         <Tab>
             <graphic>
                 <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@icon_camera.png"/>
+                    <Image url="@../images/icon_camera.png"/>
                 </ImageView>
             </graphic>
             <fx:include source="camera-settings.fxml"/>

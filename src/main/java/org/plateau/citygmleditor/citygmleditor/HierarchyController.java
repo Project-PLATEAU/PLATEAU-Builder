@@ -104,7 +104,7 @@ public class HierarchyController implements Initializable {
         try {
             GltfExporter.export(newFile.toString(), solid);
         } catch (Exception ex) {
-            Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -134,7 +134,7 @@ public class HierarchyController implements Initializable {
         try {
             ObjExporter.export(newFile.toString(), solid);
         } catch (Exception ex) {
-            Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
