@@ -22,6 +22,9 @@ import java.util.List;
 
 
 public class L07LogicalConsistencyValidator implements IValidator {
+
+    public static final double VALID_DISTANCE_L07 = 0.01;
+
     static class BuildingInvalid {
         private String ID;
         private List<String> linearRings;
@@ -140,7 +143,7 @@ public class L07LogicalConsistencyValidator implements IValidator {
         }
         // don't need to check the endpoint
         for (int i = 0; i < pointSize - 1; i++) {
-            if (ThreeDUtil.distance(points.get(i), points.get(i + 1)) < 0.01) return false;
+            if (ThreeDUtil.distance(points.get(i), points.get(i + 1)) < VALID_DISTANCE_L07) return false;
         }
         return true;
     }
