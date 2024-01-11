@@ -9,6 +9,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import org.plateau.citygmleditor.modelstandard.Standard;
+import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.validation.*;
 import org.plateau.citygmleditor.world.World;
 import org.xml.sax.SAXException;
@@ -69,11 +70,14 @@ public class ValidationController implements Initializable {
         var errorCount = 0;
         var warningCount = 0;
         List<IValidator> validators = this.loadValidators();
+
+        List<String> errorMessages = new ArrayList<>();
         for (var validator : validators) {
             var messages = validator.validate(cityModelView);
 
             for (var message : messages) {
                 showMessage(message);
+                errorMessages.add(message.getMessage());
                 switch (message.getType()) {
                     case Error:
                         errorCount++;
@@ -89,6 +93,8 @@ public class ValidationController implements Initializable {
                 ValidationResultMessageType.Info,
                 String.format("品質検査が完了しました。（エラー数:%d, 警告数:%d）", errorCount, warningCount)
         ));
+
+        XmlUtil.writeErrorMessageInFile(errorMessages);
     }
 
     private List<IValidator> loadValidators() throws IOException {

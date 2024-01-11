@@ -10,14 +10,20 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import static org.plateau.citygmleditor.validation.AppConst.DATE_TIME_FORMAT;
+import static org.plateau.citygmleditor.validation.AppConst.PATH_FOLDER;
 
 
 public class XmlUtil {
@@ -151,5 +157,17 @@ public class XmlUtil {
       }
       recursiveFindAttributeContent(childNode, resultList, attribute);
     }
+  }
+
+  public static void writeErrorMessageInFile(List<String> messages) throws IOException {
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+    LocalDateTime now = LocalDateTime.now();
+    String filePath = String.format("%s/error%s.txt", PATH_FOLDER, dtf.format(now));
+
+    BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
+    for (String message : messages) {
+      bw.write(message + "\n");
+    }
+    bw.close();
   }
 }
