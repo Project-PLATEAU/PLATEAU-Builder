@@ -32,7 +32,7 @@ public class Tbldg02ThematicAccuaracyValidator implements IValidator {
             List<String> invalidLodGeometry = this.getLodGemetryInvalids(lodGeometry);
             if (!CollectionUtil.isEmpty(invalidLodGeometry)) {
                 Element eInstallation = (Element) installation;
-                String invalidInstallation = eInstallation.getAttribute(TagName.GML_ID) + invalidLodGeometry;
+                String invalidInstallation = "gml:id=" + eInstallation.getAttribute(TagName.GML_ID) + " [" + invalidLodGeometry + "]";
                 invalidInstallations.add(invalidInstallation);
             }
 
