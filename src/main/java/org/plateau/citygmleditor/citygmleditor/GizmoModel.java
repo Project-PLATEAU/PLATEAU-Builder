@@ -73,6 +73,7 @@ public class GizmoModel extends Parent {
             scaleYGizmo.setDepthTest(DepthTest.DISABLE);
             scaleZGizmo.setDepthTest(DepthTest.DISABLE);
 
+            // Z回転以外は無効
             rotationXGizmo.setVisible(false);
             rotationYGizmo.setVisible(false);
 
@@ -274,6 +275,8 @@ public class GizmoModel extends Parent {
                 var axisVector = worldToLocalTransform.transform(Rotate.Z_AXIS).normalize();
                 var projectionMagnitude = delta.dotProduct(axisVector);
                 var projection = axisVector.multiply(projectionMagnitude);
+                // Z回転以外は無効
+                projection = new Point3D(0, 0, delta.getX());
                 rotateFactorZ = projection.getZ();
 
                 rotate = new Rotate(projection.getZ(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS);
