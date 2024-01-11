@@ -55,6 +55,7 @@ public class GizmoModel extends Parent {
      * コンストラクタ
      */
     public GizmoModel() {
+        controlMode = ControlMode.SELECT;
         moveGizmo = new Group();
         rotationGizmo = new Group();
         scaleGizmo = new Group();
@@ -387,6 +388,9 @@ public class GizmoModel extends Parent {
         moveGizmo.setVisible(this.controlMode == ControlMode.MOVE);
         rotationGizmo.setVisible(this.controlMode == ControlMode.ROTATION);
         scaleGizmo.setVisible(this.controlMode == ControlMode.SCALE);
+
+        MeshView outline = CityGMLEditorApp.getFeatureSellection().getOutLine();
+        outline.setVisible(this.controlMode == ControlMode.SELECT);
     }
 
     /**
