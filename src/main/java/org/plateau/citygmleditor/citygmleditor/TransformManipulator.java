@@ -14,7 +14,11 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 
-public class BuildingUnit {
+/**
+ * ギズモによる座標・回転・スケールを管理するクラス
+ * 各LODSolidで保持することでギズモによる操作が可能
+ */
+public class TransformManipulator {
     private Node solid;
 
     private Point3D location;
@@ -25,7 +29,11 @@ public class BuildingUnit {
 
     private Transform transformCache;
 
-    public BuildingUnit(Node node) {
+    /**
+     * コンストラクタ
+     * @param node ギズモ操作対象ノード
+     */
+    public TransformManipulator(Node node) {
         solid = node;
 
         this.location = new Point3D(0, 0, 0);
@@ -35,51 +43,99 @@ public class BuildingUnit {
         transformCache = new Translate();
     }
 
+    /**
+     * ギズモ操作対象ノードを返す
+     * @return ギズモ操作対象ノード
+     */
     public Node getSolidView() {
         return solid;
     }
 
+    /**
+     * 座標情報を返す
+     * @return
+     */
     public Point3D getLocation() {
         return location;
     }
 
+    /**
+     * 座標情報を更新
+     * @param locate
+     */
     public void setLocation(Point3D locate) {
         this.location = locate;
     }
     
+    /**
+     * 回転情報を返す
+     * @return
+     */
     public Point3D getRotation() {
         return rotation;
     }
 
+    /**
+     * 回転情報を更新
+     * @param rotate
+     */
     public void setRotation(Point3D rotate) {
         this.rotation = rotate;
     }
     
+    /**
+     * スケール情報を返す
+     * @return
+     */
     public Point3D getScale() {
         return scale;
     }
 
+    /**
+     * スケール情報を更新
+     * @param scale
+     */
     public void setScale(Point3D scale) {
         this.scale = scale;
     }
 
+    /**
+     * 原点座標を更新
+     */
     public void updateOrigin() {
         BoundingBox bb = (BoundingBox) solid.getBoundsInParent();
         origin = new Point3D(bb.getCenterX(), bb.getCenterY(), bb.getMinZ());
     }
 
+    /**
+     * 原点座標を返す
+     * @return
+     */
     public Point3D getOrigin() {
         return origin;
     }
 
+    /**
+     * 座標変換を返す
+     * @return
+     */
     public Transform getTransformCache() {
         return transformCache;
     }
 
+    /**
+     * 座標変換を追加
+     * @param transformDelta 座標変換
+     */
     public void addTransformCache(Transform transformDelta) {
         transformCache = transformCache.createConcatenation(transformDelta);
     }
 
+    /**
+     * 頂点に対し現在の座標変換を適用
+     * @param coordinates
+     * @return
+     */
     public List<Double> unprojectTransforms(List<Double> coordinates) {
         List<Double> ret = new ArrayList<>();
 
@@ -108,6 +164,11 @@ public class BuildingUnit {
         return ret;
     }
     
+    /**
+     * 頂点バッファに対し現在の座標変換を適用
+     * @param vertices
+     * @return
+     */
     public List<Vec3f> unprojectVertexTransforms(List<Vec3f> vertices) {
         List<Vec3f> ret = new ArrayList<>();
 

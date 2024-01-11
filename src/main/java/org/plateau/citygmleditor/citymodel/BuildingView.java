@@ -2,7 +2,7 @@ package org.plateau.citygmleditor.citymodel;
 
 import javafx.scene.Parent;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
-import org.plateau.citygmleditor.citygmleditor.BuildingUnit;
+import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.citygml4j.model.gml.geometry.primitives.*;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
@@ -33,7 +33,7 @@ public class BuildingView extends Parent {
         }
         this.lod1Solid = solid;
         this.getChildren().add(solid);
-        solid.getBuildingUnit().updateOrigin();
+        solid.getTransformManipulator().updateOrigin();
     }
 
     public LOD1SolidView getLOD1Solid() {
@@ -49,7 +49,7 @@ public class BuildingView extends Parent {
         }
         this.lod2Solid = solid;
         this.getChildren().add(solid);
-        solid.getBuildingUnit().updateOrigin();
+        solid.getTransformManipulator().updateOrigin();
     }
 
     public LOD2SolidView getLOD2Solid() {

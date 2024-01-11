@@ -6,7 +6,7 @@ import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.citygml4j.model.gml.geometry.primitives.Solid;
 
 import javafx.scene.shape.MeshView;
-import org.plateau.citygmleditor.citygmleditor.BuildingUnit;
+import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 
@@ -15,7 +15,7 @@ public class LOD1SolidView extends MeshView implements ILODSolidView {
     private ArrayList<PolygonView> polygons;
     private VertexBuffer vertexBuffer = new VertexBuffer();
     private TexCoordBuffer texCoordBuffer = new TexCoordBuffer();
-    private BuildingUnit buildingUnit = new BuildingUnit(this);
+    private TransformManipulator transformManipulator = new TransformManipulator(this);
 
     public LOD1SolidView(Solid gmlObject, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
         this.gmlObject = gmlObject;
@@ -57,23 +57,23 @@ public class LOD1SolidView extends MeshView implements ILODSolidView {
     }
 
     @Override
-    public BuildingUnit getBuildingUnit() {
-        return buildingUnit;
+    public TransformManipulator getTransformManipulator() {
+        return transformManipulator;
     }
 
     @Override
     public void refrectGML() {
         for (var polygon : getPolygons()) {
             var coordinates = polygon.getExteriorRing().getOriginCoords();//.getOriginal().getPosList().toList3d();
-            polygon.getExteriorRing().getOriginal().getPosList().setValue(buildingUnit.unprojectTransforms(coordinates));
+            polygon.getExteriorRing().getOriginal().getPosList().setValue(transformManipulator.unprojectTransforms(coordinates));
 
             for (var interiorRing : polygon.getInteriorRings()) {
                 var coordinatesInteriorRing = interiorRing.getOriginCoords();//.getOriginal().getPosList().toList3d();
-                polygon.getExteriorRing().getOriginal().getPosList().setValue(buildingUnit.unprojectTransforms(coordinatesInteriorRing));
+                polygon.getExteriorRing().getOriginal().getPosList().setValue(transformManipulator.unprojectTransforms(coordinatesInteriorRing));
             }
         }
         var vertexBuffer = new VertexBuffer();
-        var vertices = buildingUnit.unprojectVertexTransforms(vertexBuffer.getVertices());
+        var vertices = transformManipulator.unprojectVertexTransforms(vertexBuffer.getVertices());
         for(var vertex : vertices){
             vertexBuffer.addVertex(vertex);
         }

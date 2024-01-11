@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 
 import javafx.scene.Parent;
-import org.plateau.citygmleditor.citygmleditor.BuildingUnit;
+import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 
@@ -44,7 +44,13 @@ public interface ILODSolidView {
      */
     public TexCoordBuffer getTexCoordBuffer();
 
-    public BuildingUnit getBuildingUnit();
+    /**
+     * 
+     */
+    public TransformManipulator getTransformManipulator();
 
+    /**
+     * GML、各頂点バッファへ情報を適用
+     */
     public void refrectGML();
 }

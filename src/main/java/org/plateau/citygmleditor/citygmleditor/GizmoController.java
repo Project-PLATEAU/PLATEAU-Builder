@@ -10,7 +10,6 @@ import javafx.scene.Node;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
-import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.world.SceneContent;
 import org.plateau.citygmleditor.world.World;
@@ -41,6 +40,9 @@ public class GizmoController implements Initializable {
     private Point3D vecIni, vecPos;
     private double distance;
 
+    /**
+     * 初期化
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         sceneContent.getSubScene().addEventHandler(MouseEvent.ANY, mouseEventHandler);
@@ -49,18 +51,34 @@ public class GizmoController implements Initializable {
         World.getRoot3D().getChildren().add(gizmoModel);
     }
     
+    /**
+     * フリーボタン選択時イベント
+     * @param actionEvent
+     */
     public void onSelect(ActionEvent actionEvent) {
         gizmoModel.setControlMode(GizmoModel.ControlMode.SELECT);
     }
     
+    /**
+     * 移動ボタン選択時イベント
+     * @param actionEvent
+     */
     public void onMove(ActionEvent actionEvent) {
         gizmoModel.setControlMode(GizmoModel.ControlMode.MOVE);
     }
     
+    /**
+     * 回転ボタン選択時イベント
+     * @param actionEvent
+     */
     public void onRotation(ActionEvent actionEvent) {
         gizmoModel.setControlMode(GizmoModel.ControlMode.ROTATION);
     }
     
+    /**
+     * スケールボタン選択時イベント
+     * @param actionEvent
+     */
     public void onScale(ActionEvent actionEvent) {
         gizmoModel.setControlMode(GizmoModel.ControlMode.SCALE);
     }
@@ -69,9 +87,9 @@ public class GizmoController implements Initializable {
         if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
             if (event.isPrimaryButtonDown()) {
                 var result = event.getPickResult();
-                var building = FindBuilding(result.getIntersectedNode());
+                var building = findLODSolidView(result.getIntersectedNode());
                 if (building != null) {
-                    gizmoModel.attachBuilding(((ILODSolidView)building).getBuildingUnit());
+                    gizmoModel.attachManipulator(((ILODSolidView)building).getTransformManipulator());
                 }
                 if (gizmoModel.isGizmoDragging(result.getIntersectedNode())) {
                     CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(true);
@@ -125,10 +143,15 @@ public class GizmoController implements Initializable {
         }
     };
     
-    public Point3D unprojectDirection(double sceneX,
-    double sceneY,
-    double sWidth,
-    double sHeight)
+    /**
+     * マウス座標を3D座標に逆投影
+     * @param sceneX
+     * @param sceneY
+     * @param sWidth
+     * @param sHeight
+     * @return
+     */
+    public Point3D unprojectDirection(double sceneX, double sceneY, double sWidth, double sHeight)
     {
         double tanHFov = Math.tan(Math.toRadians(CityGMLEditorApp.getCamera().getCamera().getFieldOfView()) * 0.5f);
         Point3D vMouse = new Point3D(tanHFov*(2*sceneX/sWidth-1), tanHFov*(2*sceneY/sWidth-sHeight/sWidth), 1);
@@ -137,6 +160,11 @@ public class GizmoController implements Initializable {
         return result.normalize();
     }
 
+    /**
+     * ローカル座標系からシーン座標系へ座標を変換
+     * @param pt
+     * @return
+     */
     public Point3D localToScene(Point3D pt) {
         Point3D res = CityGMLEditorApp.getCamera().getCamera().localToParentTransformProperty().get().transform(pt);
         if (CityGMLEditorApp.getCamera().getCamera().getParent() != null) {
@@ -145,20 +173,30 @@ public class GizmoController implements Initializable {
         return res;
     }
 
+    /**
+     * ローカル座標系からシーン座標系へ方向ベクトルを変換
+     * @param dir
+     * @return
+     */
     public Point3D localToSceneDirection(Point3D dir) {
         Point3D res = localToScene(dir);
         return res.subtract(localToScene(new Point3D(0, 0, 0)));
     }
 
-    private Node FindBuilding(Node node){
+    /**
+     * 子にギズモの操作対象があるか再帰的に検索
+     * @param node
+     * @return
+     */
+    private Node findLODSolidView(Node node){
         if(node == null)
             return null;
 
-        //Building型かチェック
+        // ILODSolidViewインターフェースを実装しているか
         if(node instanceof ILODSolidView)
             return node;
 
-        //再帰検索
-        return FindBuilding(node.getParent());
+        // 再帰検索
+        return findLODSolidView(node.getParent());
     }
 }
