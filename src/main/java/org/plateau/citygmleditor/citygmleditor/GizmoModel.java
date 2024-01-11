@@ -1,10 +1,11 @@
 package org.plateau.citygmleditor.citygmleditor;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import org.plateau.citygmleditor.importers.Importer3D;
+import javafx.animation.AnimationTimer;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
+import javafx.scene.DepthTest;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -62,6 +63,19 @@ public class GizmoModel extends Parent {
             scaleYGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleY.obj").toExternalForm());
             scaleZGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleZ.obj").toExternalForm());
             
+            moveXGizmo.setDepthTest(DepthTest.DISABLE);
+            moveYGizmo.setDepthTest(DepthTest.DISABLE);
+            moveZGizmo.setDepthTest(DepthTest.DISABLE);
+            rotationXGizmo.setDepthTest(DepthTest.DISABLE);
+            rotationYGizmo.setDepthTest(DepthTest.DISABLE);
+            rotationZGizmo.setDepthTest(DepthTest.DISABLE);
+            scaleXGizmo.setDepthTest(DepthTest.DISABLE);
+            scaleYGizmo.setDepthTest(DepthTest.DISABLE);
+            scaleZGizmo.setDepthTest(DepthTest.DISABLE);
+
+            rotationXGizmo.setVisible(false);
+            rotationYGizmo.setVisible(false);
+
             moveGizmo.getChildren().addAll(moveXGizmo, moveYGizmo, moveZGizmo);
             rotationGizmo.getChildren().addAll(rotationXGizmo, rotationYGizmo, rotationZGizmo);
             scaleGizmo.getChildren().addAll(scaleXGizmo, scaleYGizmo, scaleZGizmo);
@@ -79,6 +93,30 @@ public class GizmoModel extends Parent {
         moveGizmo.setVisible(false);
         rotationGizmo.setVisible(false);
         scaleGizmo.setVisible(false);
+
+        AnimationTimer animationTimer = new AnimationTimer() {
+            public void handle(long now) {
+                if (attachedBuilding != null) {
+                    // カメラからの距離でギズモのスケールを補正
+                    var camera = CityGMLEditorApp.getCamera().getCameraPosition();
+                    var distance = Math.abs(Math.sqrt(Math.pow(camera.getX() - attachedBuilding.getOrigin().getX(), 2) + Math.pow(camera.getY() - attachedBuilding.getOrigin().getY(), 2) + Math.pow(camera.getZ() - attachedBuilding.getOrigin().getZ(), 2)));
+                    var scale = distance * 0.0005;
+                    // モデル回転方向補正
+                    var rot1 = new Rotate(90.0d, Rotate.X_AXIS);
+                    var rot2 = new Rotate(-90.0d, Rotate.Y_AXIS);
+                    moveGizmo.getTransforms().clear();
+                    moveGizmo.getTransforms().addAll(rot1, rot2);
+                    moveGizmo.getTransforms().add(new Scale(scale, scale, scale));
+                    rotationGizmo.getTransforms().clear();
+                    rotationGizmo.getTransforms().addAll(rot1, rot2);
+                    rotationGizmo.getTransforms().add(new Scale(scale, scale, scale));
+                    scaleGizmo.getTransforms().clear();
+                    scaleGizmo.getTransforms().addAll(rot1, rot2);
+                    scaleGizmo.getTransforms().add(new Scale(scale, scale, scale));
+                }
+            }
+        };
+        animationTimer.start();
     }
     
     public ControlMode getControlMode() {
