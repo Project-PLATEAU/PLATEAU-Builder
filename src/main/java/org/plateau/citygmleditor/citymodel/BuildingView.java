@@ -2,11 +2,12 @@ package org.plateau.citygmleditor.citymodel;
 
 import javafx.scene.Parent;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.citygml4j.model.gml.geometry.primitives.*;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD3SolidView;
-
+import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class BuildingView extends Parent {
         }
         this.lod1Solid = solid;
         this.getChildren().add(solid);
+        solid.getTransformManipulator().updateOrigin();
     }
 
     public LOD1SolidView getLOD1Solid() {
@@ -47,6 +49,7 @@ public class BuildingView extends Parent {
         }
         this.lod2Solid = solid;
         this.getChildren().add(solid);
+        solid.getTransformManipulator().updateOrigin();
     }
 
     public LOD2SolidView getLOD2Solid() {
@@ -62,6 +65,7 @@ public class BuildingView extends Parent {
         }
         this.lod3Solid = solid;
         this.getChildren().add(solid);
+        // super.updateOrigin();
     }
 
     public LOD3SolidView getLOD3Solid() {
@@ -74,6 +78,7 @@ public class BuildingView extends Parent {
 
         this.buildingInstallationViews.add(buildingInstallationView);
         this.getChildren().add(buildingInstallationView);
+        // super.updateOrigin();
     }
 
     public Envelope getEnvelope() {

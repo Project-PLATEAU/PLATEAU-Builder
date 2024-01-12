@@ -78,6 +78,8 @@ public class Camera {
     private double mouseDeltaX;
     private double mouseDeltaY;
 
+    private boolean isHookingMousePrimaryButtonEvent;
+
     private Light light;
     private SceneContent sceneContent;
 
@@ -123,16 +125,16 @@ public class Camera {
                 cameraXform2.t.setX(cameraXform2.t.getX() + flip * mouseDeltaX * modifierFactor * modifier * 0.3); // -
                 cameraXform2.t.setY(cameraXform2.t.getY() + yFlip * mouseDeltaY * modifierFactor * modifier * 0.3); // -
             } else if (alt && event.isPrimaryButtonDown()) {
-                // When rotate mode is selected
-                if (getRotateMode() == true) {
-                    cameraXform.rx
-                            .setAngle(cameraXform.rx.getAngle() + flip * mouseDeltaY * modifierFactor * modifier * 2.0); // -
-                    cameraXform.rz.setAngle(
-                            cameraXform.rz.getAngle() + yFlip * mouseDeltaX * modifierFactor * modifier * 2.0); // -
-                    // When move mode is selected
-                } else if (getMoveMode() == true) {
-                    cameraXform2.t.setX(cameraXform2.t.getX() + flip * mouseDeltaX * modifierFactor * modifier * 0.3); // -
-                    cameraXform2.t.setY(cameraXform2.t.getY() + yFlip * mouseDeltaY * modifierFactor * modifier * 0.3); // -
+                if (!isHookingMousePrimaryButtonEvent) {
+                    // When rotate mode is selected
+                    if (getRotateMode() == true) {
+                        cameraXform.rx.setAngle(cameraXform.rx.getAngle() + flip * mouseDeltaY * modifierFactor * modifier * 2.0); // -
+                        cameraXform.rz.setAngle(cameraXform.rz.getAngle() + yFlip * mouseDeltaX * modifierFactor * modifier * 2.0); // -
+                        // When move mode is selected
+                    } else if (getMoveMode() == true) {
+                        cameraXform2.t.setX(cameraXform2.t.getX() + flip * mouseDeltaX * modifierFactor * modifier * 0.3); // -
+                        cameraXform2.t.setY(cameraXform2.t.getY() + yFlip * mouseDeltaY * modifierFactor * modifier * 0.3); // -
+                    }
                 }
             } else if (alt && event.isSecondaryButtonDown()) {
                 double z = cameraPosition.getZ();
@@ -335,6 +337,10 @@ public class Camera {
 
     public void setYUp(boolean yUp) {
         this.yUp.set(yUp);
+    }
+
+    public void setHookingMousePrimaryButtonEvent(boolean isHook) {
+        isHookingMousePrimaryButtonEvent = isHook;
     }
 
     public Camera() {
