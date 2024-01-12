@@ -17,7 +17,7 @@ import org.plateau.citygmleditor.world.World;
 /**
  * 
  */
-public class GizmoController implements Initializable {
+public class Controller implements Initializable {
     private SceneContent sceneContent = CityGMLEditorApp.getSceneContent();
 
     public RadioButton selectButton;

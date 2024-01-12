@@ -104,12 +104,6 @@ public class CityGMLEditorApp extends Application {
         sessionManager = SessionManager.createSessionManager("CityGMLEditor");
         sessionManager.loadSession();
 
-        List<String> args = getParameters().getRaw();
-        if (!args.isEmpty()) {
-            sessionManager.getProperties().setProperty(FILE_URL_PROPERTY,
-                    new File(args.get(0)).toURI().toURL().toString());
-        }
-
         World.setActiveInstance(new World(), new Group());
         autoScalingGroups = new AutoScalingGroup(2);
         light = new Light();

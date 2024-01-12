@@ -12,39 +12,7 @@
 <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity"
       xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.plateau.citygmleditor.citygmleditor.CenterPanelController">
-   <ToolBar maxWidth="1.7976931348623157E308" minWidth="200.0" prefHeight="40.0">
-      <ToggleButton fx:id="toggle" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" selected="true">
-         <toggleGroup>
-            <ToggleGroup fx:id="toggleGroup"/>
-         </toggleGroup>
-         <graphic>
-            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-               <Image url="@../images/icon_select.png"/>
-            </ImageView>
-         </graphic>
-      </ToggleButton>
-      <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
-         <graphic>
-            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-               <Image url="@../images/icon_move.png"/>
-            </ImageView>
-         </graphic>
-      </ToggleButton>
-      <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
-         <graphic>
-            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-               <Image url="@../images/icon_rotate.png"/>
-            </ImageView>
-         </graphic>
-      </ToggleButton>
-      <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
-         <graphic>
-            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-               <Image url="@../images/icon_scale.png"/>
-            </ImageView>
-         </graphic>
-      </ToggleButton>
-   </ToolBar>
+   <fx:include source="toolbar.fxml"/>
    <Pane fx:id="subSceneContainer" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
    </Pane>
 </VBox>
