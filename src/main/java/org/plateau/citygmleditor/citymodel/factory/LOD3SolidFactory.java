@@ -21,7 +21,7 @@ public class LOD3SolidFactory extends GeometryFactory {
         if (gmlObject.getLod3Solid() == null)
             return null;
 
-        var solid = new LOD3SolidView(gmlObject.getLod3Solid().getObject());
+        var solid = new LOD3SolidView(gmlObject.getLod3Solid().getObject(), vertexBuffer, texCoordBuffer);
 
         var boundaries = new ArrayList<BoundarySurfaceView>();
 

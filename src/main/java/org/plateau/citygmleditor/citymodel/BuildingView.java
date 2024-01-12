@@ -65,7 +65,7 @@ public class BuildingView extends Parent {
         }
         this.lod3Solid = solid;
         this.getChildren().add(solid);
-        // super.updateOrigin();
+        solid.getTransformManipulator().updateOrigin();
     }
 
     public LOD3SolidView getLOD3Solid() {
