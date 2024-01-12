@@ -119,7 +119,7 @@ public class GizmoController implements Initializable {
         if (mouseDragging) {
             var result = event.getPickResult();
             
-            double modifier = 1.0;
+            double modifier = 0.5;
 
             if (event.isControlDown()) {
                 modifier = 0.1;
@@ -137,6 +137,7 @@ public class GizmoController implements Initializable {
             
             vecPos = unprojectDirection(mousePosX, mousePosY, sceneContent.getSubScene().getWidth(),sceneContent.getSubScene().getHeight());
             Point3D delta = vecPos.subtract(vecIni).multiply(distance);
+            delta = new Point3D(delta.getX() * modifier, delta.getY() * modifier, delta.getZ() * modifier);
             gizmoModel.updateTransform(delta);
             vecIni=vecPos;
             distance=result.getIntersectedDistance();
@@ -165,10 +166,10 @@ public class GizmoController implements Initializable {
      * @param pt
      * @return
      */
-    public Point3D localToScene(Point3D pt) {
-        Point3D res = CityGMLEditorApp.getCamera().getCamera().localToParentTransformProperty().get().transform(pt);
-        if (CityGMLEditorApp.getCamera().getCamera().getParent() != null) {
-            res = CityGMLEditorApp.getCamera().getCamera().getParent().localToSceneTransformProperty().get().transform(res);
+    public Point3D localToScene(Node node, Point3D pt) {
+        Point3D res = node.localToParentTransformProperty().get().transform(pt);
+        if (node.getParent() != null) {
+            res = localToScene(node.getParent(), res);
         }
         return res;
     }
@@ -179,8 +180,8 @@ public class GizmoController implements Initializable {
      * @return
      */
     public Point3D localToSceneDirection(Point3D dir) {
-        Point3D res = localToScene(dir);
-        return res.subtract(localToScene(new Point3D(0, 0, 0)));
+        Point3D res = localToScene(CityGMLEditorApp.getCamera().getCamera(), dir);
+        return res.subtract(localToScene(CityGMLEditorApp.getCamera().getCamera(), Point3D.ZERO));
     }
 
     /**

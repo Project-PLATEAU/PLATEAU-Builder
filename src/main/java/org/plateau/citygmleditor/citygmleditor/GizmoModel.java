@@ -106,9 +106,15 @@ public class GizmoModel extends Parent {
             public void handle(long now) {
                 if (manipulator != null) {
                     // カメラからの距離でギズモのスケールを補正
-                    var camera = CityGMLEditorApp.getCamera().getCameraPosition();
-                    var distance = Math.abs(Math.sqrt(Math.pow(camera.getX() - manipulator.getOrigin().getX(), 2) + Math.pow(camera.getY() - manipulator.getOrigin().getY(), 2) + Math.pow(camera.getZ() - manipulator.getOrigin().getZ(), 2)));
-                    var scale = distance * 0.0005;
+                    var camera = localToScene(CityGMLEditorApp.getCamera().getCamera(), Point3D.ZERO);
+                    var distance = manipulator.getOrigin().distance(camera);
+                    var fov = CityGMLEditorApp.getCamera().getCamera().getFieldOfView();
+                    var aspect = CityGMLEditorApp.getSceneContent().getSubScene().getWidth() / CityGMLEditorApp.getSceneContent().getSubScene().getHeight();
+                    double fovRadians = Math.toRadians(fov);
+                    double halfFovTan = Math.tan(fovRadians / 2.0);
+                    var rate = aspect * halfFovTan * 2.0 / distance;
+                    var scale = (distance * 0.0005);
+
                     // モデル回転方向補正
                     var rot1 = new Rotate(90.0d, Rotate.X_AXIS);
                     var rot2 = new Rotate(-90.0d, Rotate.Y_AXIS);
@@ -125,6 +131,14 @@ public class GizmoModel extends Parent {
             }
         };
         animationTimer.start();
+    }
+    
+    public Point3D localToScene(Node node, Point3D pt) {
+        Point3D res = node.localToParentTransformProperty().get().transform(pt);
+        if (node.getParent() != null) {
+            res = localToScene(node.getParent(), res);
+        }
+        return res;
     }
     
     /**
