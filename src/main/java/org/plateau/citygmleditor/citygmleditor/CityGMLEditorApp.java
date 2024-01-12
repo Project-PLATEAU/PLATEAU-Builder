@@ -31,8 +31,6 @@
  */
 package org.plateau.citygmleditor.citygmleditor;
 
-import java.io.File;
-import java.util.List;
 import java.util.Objects;
 
 import javafx.application.Application;
@@ -50,7 +48,6 @@ import org.plateau.citygmleditor.FeatureSelection;
  * JavaFX 3D Viewer Application
  */
 public class CityGMLEditorApp extends Application {
-    public static final String GML_FILE_URL_PROPERTY = "fileUrl";
     private static Scene scene;
     private static Camera camera;
     private static AxisGizmo axisGizmo;
@@ -131,6 +128,7 @@ public class CityGMLEditorApp extends Application {
 
         selection.registerClickEvent(scene);
 
+        // アプリ終了時にセッションを保存
         stage.setOnCloseRequest(event -> sessionManager.saveSession());
     }
 

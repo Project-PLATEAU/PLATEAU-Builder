@@ -5,10 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
@@ -16,25 +14,17 @@ import org.citygml4j.xml.io.writer.CityGMLWriteException;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.exporters.TextureExporter;
-import org.plateau.citygmleditor.importers.gltf.GltfImporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
-import org.plateau.citygmleditor.world.SceneContent;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class TopPanelController {
     public void importGml(ActionEvent actionEvent) {
-        var file = FileChooserService.chooseFile("*.gml", CityGMLEditorApp.GML_FILE_URL_PROPERTY);
+        var file = FileChooserService.showOpenDialog("*.gml", SessionManager.GML_FILE_PATH_PROPERTY);
 
         if (file == null)
             return;
