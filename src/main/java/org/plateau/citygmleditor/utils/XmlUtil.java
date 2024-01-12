@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.utils;
 
+import java.io.InputStream;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -50,6 +51,32 @@ public class XmlUtil {
       Document doc = db.parse(file);
       doc.getDocumentElement().normalize();
       return doc.getElementsByTagName(tagName);
+
+    } catch (ParserConfigurationException | SAXException | IOException e) {
+      logger.severe("Error while parsing xml file");
+      throw e;
+    }
+  }
+
+
+  /**
+   * Get all node from xml file
+   *
+   * @param inputStream    inputStream of xml file
+   * @param tagName tag name
+   * @return list of node
+   * @throws ParserConfigurationException
+   * @throws IOException
+   * @throws SAXException
+   */
+  public static Document getXmlDocumentFrom(InputStream inputStream) throws ParserConfigurationException, IOException, SAXException {
+    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    try {
+      dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+      DocumentBuilder db = dbf.newDocumentBuilder();
+      Document doc = db.parse(inputStream);
+      doc.getDocumentElement().normalize();
+      return doc;
 
     } catch (ParserConfigurationException | SAXException | IOException e) {
       logger.severe("Error while parsing xml file");

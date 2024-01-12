@@ -63,7 +63,7 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
 
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
-        NodeList buildings = CityGmlUtil.getAllTagFromCityModel(cityModelView, TagName.BLDG_BUILDING);
+        NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
 
         for (int i = 0; i < buildings.getLength(); i++) {
             Element building = (Element) buildings.item(i);

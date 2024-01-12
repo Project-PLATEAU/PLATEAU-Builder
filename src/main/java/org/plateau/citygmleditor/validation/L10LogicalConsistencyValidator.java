@@ -42,8 +42,10 @@ public class L10LogicalConsistencyValidator implements IValidator {
     List<ValidationResultMessage> messages = new ArrayList<>();
     Map<Node, Set<Node>> buildingWithErrorPolygonsSurfacePaths = new HashMap<>();
 
-    var polygons = CityGmlUtil.getAllTagFromCityModel(cityModel, TagName.GML_POLYGON);
-    var surfacePaths = CityGmlUtil.getAllTagFromCityModel(cityModel, TagName.GML_SURFACE_PATCH);
+    var rootDocument = CityGmlUtil.getXmlDocumentFrom(cityModel);
+
+    var polygons = rootDocument.getElementsByTagName(TagName.GML_POLYGON);
+    var surfacePaths = rootDocument.getElementsByTagName(TagName.GML_SURFACE_PATCH);
 
     // Check if exterior and interior of each polygon is invalid
     for (int i = 0; i < polygons.getLength(); i++) {
