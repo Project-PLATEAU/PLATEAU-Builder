@@ -164,7 +164,7 @@ public class XmlUtil {
     LocalDateTime now = LocalDateTime.now();
     String filePath = String.format("%s/error%s.txt", PATH_FOLDER, dtf.format(now));
 
-    BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
+    BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, true));
     for (String message : messages) {
       bw.write(message + "\n");
     }

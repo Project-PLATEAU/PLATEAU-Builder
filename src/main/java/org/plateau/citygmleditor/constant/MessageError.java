@@ -1,7 +1,7 @@
 package org.plateau.citygmleditor.constant;
 
 public interface MessageError {
-    String ERR_L10_001 = "Building gml:id={0} and Polygon/_SurfacePatch gml:id={1} invalid";
+    String ERR_L10_001 = "L10: Building gml:id=\"{0}\" and {1} invalid";
 
     String ERR_L12_001 = "L12: Building have ({0}) is invalid";
     String ERR_L13_001 = "L13: Building gml:id=\"{0}\" and {1} invalid";
