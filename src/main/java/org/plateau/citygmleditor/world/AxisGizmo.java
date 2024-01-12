@@ -1,4 +1,4 @@
-package org.plateau.citygmleditor.citygmleditor;
+package org.plateau.citygmleditor.world;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -19,6 +19,8 @@ import javafx.scene.transform.Translate;
 import javafx.beans.property.ObjectProperty;
 import javafx.event.EventHandler;
 import javafx.util.Duration;
+import org.plateau.citygmleditor.citygmleditor.AutoScalingGroup;
+import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 
 public class AxisGizmo {
     private Box xAxis, yAxis, zAxis;
