@@ -14,6 +14,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -162,7 +164,12 @@ public class XmlUtil {
   public static void writeErrorMessageInFile(List<String> messages) throws IOException {
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
     LocalDateTime now = LocalDateTime.now();
-    String filePath = String.format("%s/error%s.txt", PATH_FOLDER, dtf.format(now));
+
+    if (!Files.exists(Path.of(PATH_FOLDER))) {
+      Files.createDirectory(Path.of(PATH_FOLDER));
+    }
+
+    String filePath = String.format("%serror%s.txt", PATH_FOLDER, dtf.format(now));
 
     BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
     for (String message : messages) {
