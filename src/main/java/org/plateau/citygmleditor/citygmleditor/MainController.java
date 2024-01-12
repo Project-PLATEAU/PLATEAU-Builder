@@ -112,7 +112,7 @@ import java.awt.image.BufferedImage;
 import org.plateau.citygmleditor.world.*;
 
 /**
- * Controller class for main fxml file.
+ * ToolbarController class for main fxml file.
  */
 public class MainController implements Initializable {
     public VBox centerPanel;
