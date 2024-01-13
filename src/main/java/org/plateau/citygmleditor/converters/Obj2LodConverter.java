@@ -47,7 +47,7 @@ import javafx.scene.shape.TriangleMesh;
 
 public class Obj2LodConverter {
 
-    private org.locationtech.jts.geom.GeometryFactory _geometryFactory = new org.locationtech.jts.geom.GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING_SINGLE));
+    private org.locationtech.jts.geom.GeometryFactory _geometryFactory = new org.locationtech.jts.geom.GeometryFactory();
 
     private CompositeSurface _compositeSurface = new CompositeSurface();
 
@@ -196,48 +196,59 @@ public class Obj2LodConverter {
         // 結合した結果がMultiPolygonの場合があるのでPolygonに分割する
         List<org.locationtech.jts.geom.Polygon> polygonList = splitJtsPolygon(geometry);
 
-        // 元のTriangleが、分割したPolygonに内包されるかどうかを判定
-        // 内包される場合は、そのTriangleModelのuserDataを保持する
-        for (var trianglePolygon : trianglePolygonList) {
-            var found = false;
-            for (var polygon : polygonList) {
-                if (polygon.contains(trianglePolygon) || polygon.equalsExact(trianglePolygon)) {
-                    if (polygon.getUserData() == null) {
-                        polygon.setUserData(new ArrayList<TriangleModel>());
-                    }
-                    List<TriangleModel> userDataList = (List<TriangleModel>)polygon.getUserData();
-                    userDataList.add((TriangleModel)trianglePolygon.getUserData());
-                    found = true;
-                    break;
+        if (polygonList.size() == 1) {
+            // ポリゴンが1つなら判定不要
+            var polygon = polygonList.get(0);
+            for (var trianglePolygon : trianglePolygonList) {
+                if (polygon.getUserData() == null) {
+                    polygon.setUserData(new ArrayList<TriangleModel>());
                 }
+                List<TriangleModel> userDataList = (List<TriangleModel>)polygon.getUserData();
+                userDataList.add((TriangleModel)trianglePolygon.getUserData());
             }
+        } else {
+            // 元のTriangleが、分割したPolygonに内包されるかどうかを判定
+            // 内包される場合は、そのTriangleModelのuserDataを保持する
+            for (var trianglePolygon : trianglePolygonList) {
+                var found = false;
+                for (var polygon : polygonList) {
+                    if (polygon.contains(trianglePolygon) || polygon.equalsExact(trianglePolygon)) {
+                        if (polygon.getUserData() == null) {
+                            polygon.setUserData(new ArrayList<TriangleModel>());
+                        }
+                        List<TriangleModel> userDataList = (List<TriangleModel>)polygon.getUserData();
+                        userDataList.add((TriangleModel)trianglePolygon.getUserData());
+                        found = true;
+                        break;
+                    }
+                }
 
-            // TODO:DEBUG
-            // check found
-            if (!found) {
-                System.out.println("not found");
-            }
-            if (!found) {
-                // System.out.println("Triangle");
-                // dumpInsertSql(trianglePolygon);
-                // System.out.println("Polygon");
-                // for (var polygon : polygonList) {
-                //     dumpInsertSql(polygon);
-                // }
-                // System.out.println("Base triangle");
-                // for (var i = 0; i < trianglePolygonList.size(); i++) {
-                //     var polygon = trianglePolygonList.get(i);
-                //     dumpInsertSql(polygon);
-                // }
-                // System.out.println();
-            }
-        }
-
-        // check userdata
-        for (var polygon : polygonList) {
-            if (polygon.getUserData() == null) {
-                System.out.println("userdata null");
-                System.out.println(polygon);
+                // TODO:DEBUG
+                // check found
+                if (!found) {
+                    System.out.println("not found");
+                }
+                if (!found) {
+                    System.out.println("Triangle");
+                    dumpInsertSql(trianglePolygon);
+                    System.out.println("Polygon");
+                    for (var polygon : polygonList) {
+                        dumpInsertSql(polygon);
+                    }
+                    System.out.println("Base triangle");
+                    for (var i = 0; i < trianglePolygonList.size(); i++) {
+                        var polygon = trianglePolygonList.get(i);
+                        dumpInsertSql(polygon);
+                    }
+                    var baseTriangle = triangleList.get(0);
+                    for (var triangleModel : triangleList) {
+                        var angle = baseTriangle.getNormal().angle(triangleModel.getNormal());
+                        var isSamePlane1 = baseTriangle.isSamePlane(triangleModel);
+                        var isSamePlane2 = triangleModel.isSamePlane(baseTriangle);
+                        System.out.println(String.format("angle:%f isSamePlane1:%b isSamePlane2:%b", angle, isSamePlane1, isSamePlane2));
+                    }
+                    System.out.println();
+                }
             }
         }
 
@@ -504,8 +515,8 @@ public class Obj2LodConverter {
             var d2 = getPlaneDistance(triangleModel.getVertexAsVector3f(1));
             var d3 = getPlaneDistance(triangleModel.getVertexAsVector3f(2));
 
-            // 単位がメートルのため、誤差を考慮して0.01m以下なら同一平面とみなす
-            return d1 <= 0.01 && d2 <= 0.01 && d3 <= 0.01;
+            // 単位がメートルのため、誤差を考慮して0.001m以下なら同一平面とみなす
+            return d1 <= 0.001 && d2 <= 0.001 && d3 <= 0.001 ;
         }
     }
 }
