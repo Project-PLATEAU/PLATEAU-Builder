@@ -125,7 +125,7 @@ public class Obj2LodConverter {
             for (var sameTriangleList : sameTrianglesList) {
                 jtsPolygonList.addAll(createPolygonList(sameTriangleList));
             }
-            System.out.println(jtsPolygonList.size());
+            System.out.println(String.format("Polygon count: %d", jtsPolygonList.size()));
 
             // gmlのPolygonに変換
             List<Polygon> polygonList = new ArrayList<>();
@@ -200,11 +200,7 @@ public class Obj2LodConverter {
             // ポリゴンが1つなら判定不要
             var polygon = polygonList.get(0);
             for (var trianglePolygon : trianglePolygonList) {
-                if (polygon.getUserData() == null) {
-                    polygon.setUserData(new ArrayList<TriangleModel>());
-                }
-                List<TriangleModel> userDataList = (List<TriangleModel>)polygon.getUserData();
-                userDataList.add((TriangleModel)trianglePolygon.getUserData());
+                AddUserData(polygon, trianglePolygon);
             }
         } else {
             // 元のTriangleが、分割したPolygonに内包されるかどうかを判定
@@ -213,13 +209,21 @@ public class Obj2LodConverter {
                 var found = false;
                 for (var polygon : polygonList) {
                     if (polygon.contains(trianglePolygon) || polygon.equalsExact(trianglePolygon)) {
-                        if (polygon.getUserData() == null) {
-                            polygon.setUserData(new ArrayList<TriangleModel>());
-                        }
-                        List<TriangleModel> userDataList = (List<TriangleModel>)polygon.getUserData();
-                        userDataList.add((TriangleModel)trianglePolygon.getUserData());
+                        AddUserData(polygon, trianglePolygon);
                         found = true;
                         break;
+                    }
+                }
+                if (!found) {
+                    // 内包判定に失敗したら距離で判定する
+                    for (var polygon : polygonList) {
+                        var distance = polygon.distance(trianglePolygon);
+                        //System.out.println(String.format("polygon distance:%f", distance));
+                        if (distance <= 0.001) {
+                            AddUserData(polygon, trianglePolygon);
+                            found = true;
+                            break;
+                        }
                     }
                 }
 
@@ -239,13 +243,6 @@ public class Obj2LodConverter {
                     for (var i = 0; i < trianglePolygonList.size(); i++) {
                         var polygon = trianglePolygonList.get(i);
                         dumpInsertSql(polygon);
-                    }
-                    var baseTriangle = triangleList.get(0);
-                    for (var triangleModel : triangleList) {
-                        var angle = baseTriangle.getNormal().angle(triangleModel.getNormal());
-                        var isSamePlane1 = baseTriangle.isSamePlane(triangleModel);
-                        var isSamePlane2 = triangleModel.isSamePlane(baseTriangle);
-                        System.out.println(String.format("angle:%f isSamePlane1:%b isSamePlane2:%b", angle, isSamePlane1, isSamePlane2));
                     }
                     System.out.println();
                 }
@@ -323,15 +320,36 @@ public class Obj2LodConverter {
                     if (found) break;
                     var vertex = triangleModel.getVertex(i);
                     if (coordinate.x == vertex.x && coordinate.y == vertex.y && coordinate.z == vertex.z) {
-                        found = true;
                         var uv = triangleModel.getUV(i);
                         textureCoordinatesList.add((double)uv.x);
                         textureCoordinatesList.add((double)uv.y);
+                        found = true;
                     }
                 }
             }
             if (!found) {
-                System.out.println("not found textureCoord");
+                System.out.println("not found textureCoord → search by distance");
+
+                // 同一頂点が見つからなかったら距離で判定する
+                var minDistance = Double.MAX_VALUE;
+                Point2f minDistanceUv = null;
+                for (var triangleModel : userDataList) {
+                    for (var i = 0; i < 3. ; i++) {
+                        var vertex = triangleModel.getVertex(i);
+                        var vertexCoord = new org.locationtech.jts.geom.Coordinate(vertex.x, vertex.y, vertex.z);
+                        var distance = vertexCoord.distance(coordinate);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            minDistanceUv = triangleModel.getUV(i);
+                        }
+                        minDistance = Math.min(minDistance, distance);
+                    }
+                }
+
+                // 最も距離が近い頂点を採用する
+                textureCoordinatesList.add((double)minDistanceUv.x);
+                textureCoordinatesList.add((double)minDistanceUv.y);
+                System.out.println(String.format("minDistance:%f", minDistance));
             }
         }
 
@@ -391,6 +409,14 @@ public class Obj2LodConverter {
         textureMap.put(materialName, parameterizedTexture);
 
         return parameterizedTexture;
+    }
+
+    private void AddUserData(org.locationtech.jts.geom.Polygon polygon, org.locationtech.jts.geom.Polygon trianglePolygon) {
+        if (polygon.getUserData() == null) {
+            polygon.setUserData(new ArrayList<TriangleModel>());
+        }
+        List<TriangleModel> userDataList = (List<TriangleModel>)polygon.getUserData();
+        userDataList.add((TriangleModel)trianglePolygon.getUserData());
     }
 
     private void dumpInsertSql(org.locationtech.jts.geom.Polygon polygon) {
