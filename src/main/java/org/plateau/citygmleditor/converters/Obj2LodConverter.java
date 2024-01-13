@@ -31,6 +31,7 @@ import org.citygml4j.model.gml.geometry.primitives.Interior;
 import org.citygml4j.model.gml.geometry.primitives.LinearRing;
 import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
@@ -46,7 +47,7 @@ import javafx.scene.shape.TriangleMesh;
 
 public class Obj2LodConverter {
 
-    private org.locationtech.jts.geom.GeometryFactory _geometryFactory = new org.locationtech.jts.geom.GeometryFactory();
+    private org.locationtech.jts.geom.GeometryFactory _geometryFactory = new org.locationtech.jts.geom.GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING_SINGLE));
 
     private CompositeSurface _compositeSurface = new CompositeSurface();
 
@@ -85,7 +86,12 @@ public class Obj2LodConverter {
             var coords = triangleMesh.getTexCoords();
             List<TriangleModel> triangleModels = new LinkedList<>();
             for (var i = 0; i < faces.size(); i += 6) {
-                triangleModels.add(new TriangleModel(faces, i, vertices, coords));
+                var triangleModel = new TriangleModel(faces, i, vertices, coords);
+
+                // 不正な三角形は除外する
+                if (triangleModel.isValid()) {
+                    triangleModels.add(triangleModel);
+                }
             }
 
             List<List<TriangleModel>> sameTrianglesList = new ArrayList<>();
@@ -96,14 +102,14 @@ public class Obj2LodConverter {
                 List<TriangleModel> sameNormalList = new ArrayList<>();
                 sameNormalList.add(baseTriangle);
 
-                var baseDot = baseTriangle.dot();
+                //var baseDot = baseTriangle.dot();
 
                 // 最初に見つかった三角形を基準として、法線ベクトルと平面が同じ三角形をグループ化
                 for (var i = 1; i < triangleModels.size(); i++) {
                     var triangleModel = triangleModels.get(i);
                     var angle = baseTriangle.getNormal().angle(triangleModel.getNormal());
                     if (angle != 0) continue;
-                    if (baseDot != triangleModel.dot()) continue;
+                    if (!baseTriangle.isSamePlane(triangleModel)) continue;
                     sameNormalList.add(triangleModel);
                 }
                 sameTrianglesList.add(sameNormalList);
@@ -129,7 +135,7 @@ public class Obj2LodConverter {
 
             // TODO:DEBUG
             for (var polygon : polygonList) {
-                dump(polygon);
+                //dump(polygon);
             }
 
             // gmlのParameterizedTextureを差し替える
@@ -209,13 +215,21 @@ public class Obj2LodConverter {
             // TODO:DEBUG
             // check found
             if (!found) {
-                System.out.println("Triangle");
-                dumpInsertSql(trianglePolygon);
-                System.out.println("Polygon");
-                for (var polygon : polygonList) {
-                    dumpInsertSql(polygon);
-                }
-                System.out.println();
+                System.out.println("not found");
+            }
+            if (!found) {
+                // System.out.println("Triangle");
+                // dumpInsertSql(trianglePolygon);
+                // System.out.println("Polygon");
+                // for (var polygon : polygonList) {
+                //     dumpInsertSql(polygon);
+                // }
+                // System.out.println("Base triangle");
+                // for (var i = 0; i < trianglePolygonList.size(); i++) {
+                //     var polygon = trianglePolygonList.get(i);
+                //     dumpInsertSql(polygon);
+                // }
+                // System.out.println();
             }
         }
 
@@ -304,6 +318,9 @@ public class Obj2LodConverter {
                         textureCoordinatesList.add((double)uv.y);
                     }
                 }
+            }
+            if (!found) {
+                System.out.println("not found textureCoord");
             }
         }
 
@@ -428,6 +445,7 @@ public class Obj2LodConverter {
         private Point3f[] _vertices = new Point3f[3];
         private Point2f[] _uvs = new Point2f[3];
         private Vector3f _normal = new Vector3f();
+        private float _dot;
 
         public TriangleModel(ObservableFaceArray faces, int startIndex, ObservableFloatArray vertices, ObservableFloatArray uvs) {
             for (var i = 0  ; i < 3; i++) {
@@ -443,6 +461,11 @@ public class Obj2LodConverter {
             second.sub(_vertices[2], _vertices[1]);
             _normal.cross(first, second);
             _normal.normalize();
+            _dot = getVertexAsVector3f(0).dot(getNormal());
+        }
+
+        public boolean isValid() {
+            return !_vertices[0].equals(_vertices[1]) && !_vertices[1].equals(_vertices[2]) && !_vertices[2].equals(_vertices[0]);
         }
 
         public Point3f[] getVertices() {
@@ -466,12 +489,23 @@ public class Obj2LodConverter {
             return new Vector3f(p.x, p.y, p.z);
         }
 
-        public float dot() {
-            return getVertexAsVector3f(0).dot(getNormal());
-        }
-
         public Point2f getUV(int index) {
             return _uvs[index];
+        }
+
+        public float getPlaneDistance(Vector3f a) {
+            Vector3f pa = new Vector3f();
+            pa.sub(a, getVertexAsVector3f(0));
+            return Math.abs(_normal.dot(pa));
+        }
+
+        public boolean isSamePlane(TriangleModel triangleModel) {
+            var d1 = getPlaneDistance(triangleModel.getVertexAsVector3f(0));
+            var d2 = getPlaneDistance(triangleModel.getVertexAsVector3f(1));
+            var d3 = getPlaneDistance(triangleModel.getVertexAsVector3f(2));
+
+            // 単位がメートルのため、誤差を考慮して0.01m以下なら同一平面とみなす
+            return d1 <= 0.01 && d2 <= 0.01 && d3 <= 0.01;
         }
     }
 }
