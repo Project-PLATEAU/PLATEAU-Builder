@@ -68,30 +68,61 @@
     -fx-tab-max-height: 42;
 }
 
-.table-view,
+
 .tree-table-view {
     /* Constants used throughout the tableview. */
-    -fx-table-header-border-color: -fx-box-border;
+    -fx-table-header-border-color: #ffffff;
     -fx-table-cell-border-color: derive(-fx-color,5%);
     -fx-background-color: #444444;
 }
 .tree-view, .tree-cell {
     -fx-background-color: #3A3A3A ;
-    -fx-text-fill: white ;
+    -fx-text-fill: black ;
 }
-/*
-.tool-bar {
-    -fx-background-color:#444444;
-    -fx-background-insets: 0 0 0 0, 1 0 1 0;
-    -fx-padding: 0.416667em 0.5em 0.416667em 0.5em;
-    -fx-spacing: 0.333em;
-    -fx-alignment: CENTER_LEFT;
-}
-*/
 
+.tree-table-row-cell {
+    -fx-background: #515151;
+    -fx-background-color: -fx-background;
+    -fx-padding: 0;
+    -fx-text-fill: -fx-text-background-color;
+    -fx-indent: 1em;
+}
+}
+.tree-table-cell {
+    /* tree-table-cell needs slightly different padding to make the text sit at
+    the right height for the arrow */
+    -fx-padding: 0.25em 0.166667em 0.083em 0.166667em; /* 3 2 1 2 , plus border adds 1px */
+    -fx-background-color: null;
+    -fx-border-color: #646464;
+    -fx-cell-size: 1.0em; /* 24 */
+    -fx-text-fill: -fx-text-background-color;
+}
+
+.table-view .column-header-background,
+.tree-table-view > .column-header-background {
+    -fx-background-color: -fx-inner-border, -fx-body-color;
+    -fx-background-insets: 0, 1;
+}
+.table-view .column-header,
+.tree-table-view .column-header,
+.table-view .filler,
+.tree-table-view .filler,
+.table-view > .column-header-background > .show-hide-columns-button,
+.tree-table-view > .column-header-background > .show-hide-columns-button,
+.table-view:constrained-resize .filler,
+.tree-table-view:constrained-resize .filler {
+    -fx-background-color: -fx-box-border, -fx-inner-border, -fx-body-color;
+    -fx-background-insets: 0, 0 1 1 0, 1 2 2 1;
+    -fx-font-weight: bold;
+    -fx-size: 2em;
+    -fx-text-fill: -fx-selection-bar-text;
+    -fx-padding: 0.166667em;
+}
 /*******************************************************************************
  * Custom ID Settings                                                          *
  ******************************************************************************/
+
+
 
 #rightSidePanel{
     -fx-border-color: #5c5c5c;
