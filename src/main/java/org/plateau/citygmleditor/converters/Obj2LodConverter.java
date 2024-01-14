@@ -20,6 +20,7 @@ import org.citygml4j.model.citygml.appearance.TexCoordList;
 import org.citygml4j.model.citygml.appearance.TextureAssociation;
 import org.citygml4j.model.citygml.appearance.TextureCoordinates;
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
+import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
 import org.citygml4j.model.citygml.building.GroundSurface;
 import org.citygml4j.model.citygml.building.OuterFloorSurface;
 import org.citygml4j.model.citygml.building.RoofSurface;
@@ -31,14 +32,18 @@ import org.citygml4j.model.gml.geometry.complexes.CompositeSurface;
 import org.citygml4j.model.gml.geometry.primitives.AbstractRingProperty;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSurface;
 import org.citygml4j.model.gml.geometry.primitives.Coord;
+import org.citygml4j.model.gml.geometry.primitives.DirectPositionList;
 import org.citygml4j.model.gml.geometry.primitives.Exterior;
 import org.citygml4j.model.gml.geometry.primitives.Interior;
 import org.citygml4j.model.gml.geometry.primitives.LinearRing;
 import org.citygml4j.model.gml.geometry.primitives.Polygon;
+import org.citygml4j.model.gml.geometry.primitives.Solid;
+import org.citygml4j.model.gml.geometry.primitives.SolidProperty;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
+import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.geometry.GeoReference;
 import org.plateau.citygmleditor.importers.obj.ObjImporter;
@@ -55,11 +60,14 @@ public class Obj2LodConverter {
 
     private CompositeSurface _compositeSurface = new CompositeSurface();
 
+    private CityModelView _cityModelView;
+
     private org.citygml4j.model.citygml.core.CityModel _cityModel;
 
     private GeoReference _geoReference;
 
     public Obj2LodConverter(CityModelView cityModelView) {
+        _cityModelView = cityModelView;
         _cityModel = (org.citygml4j.model.citygml.core.CityModel) cityModelView.getGmlObject();
         var envelope = (_cityModel).getBoundedBy().getEnvelope();
         var lowerCorner = envelope.getLowerCorner().toList3d();
@@ -169,9 +177,31 @@ public class Obj2LodConverter {
             }
 
             // For:DEBUG
-            dump(parameterizedTexture, _compositeSurface, _boundedBy);
+            //dump(parameterizedTexture, _compositeSurface, _boundedBy);
 
-            //cityModel.addCityObjectMember(new org.citygml4j.model.citygml.building.Building(createBuilding(polygon, parameterizedTexture)));
+            for (var orgCityObjectMember : cityModel.getCityObjectMember()) {
+                var cityObject = orgCityObjectMember.getCityObject();
+                if (cityObject instanceof org.citygml4j.model.citygml.building.Building) {
+                    org.citygml4j.model.citygml.building.Building building = (org.citygml4j.model.citygml.building.Building)cityObject;
+
+                    // TODO: 差し替えるbuildingの特定
+                    if (!building.getId().equals("bldg_f6dddfcb-dfbd-4a3f-b256-993935806dc7")) continue;
+
+                    // lod2Solid
+                    Solid solid = new Solid();
+                    solid.setExterior(new SurfaceProperty(_compositeSurface));
+                    SolidProperty solidProperty = new SolidProperty(solid);
+                    building.setLod2Solid(solidProperty);
+
+                    // boundedBy
+                    var boundedBySurface = building.getBoundedBySurface();
+                    boundedBySurface.clear();
+                    for (var boundarySurface : _boundedBy) {
+                        boundedBySurface.add(new BoundarySurfaceProperty(boundarySurface));
+                    }
+                    break;
+                }
+            }
 
             // gmlのParameterizedTextureを差し替える
             var replaced = false;
@@ -181,6 +211,8 @@ public class Obj2LodConverter {
                     if (replaced) break;
                     if (orgSurfaceDataMember.getSurfaceData() instanceof ParameterizedTexture) {
                         ParameterizedTexture orgParameterizedTexture = (ParameterizedTexture)orgSurfaceDataMember.getSurfaceData();
+
+                        // TODO: 差し替えるテクスチャの特定
                         if (orgParameterizedTexture.getImageURI().endsWith("hnap0665.jpg")) {
                             orgSurfaceDataMember.setSurfaceData(parameterizedTexture);
                             replaced = true;
@@ -188,6 +220,9 @@ public class Obj2LodConverter {
                     }
                 }
             }
+
+            // For:DEBUG
+            GmlExporter.export(Paths.get("E:\\Temp\\export\\gml\\test.gml").toString(), cityModel, _cityModelView.getSchemaHandler());
         }
 
         // Solid solid = new Solid();
@@ -413,19 +448,17 @@ public class Obj2LodConverter {
     }
 
     private LinearRing createLinearRing(org.locationtech.jts.geom.LinearRing jtsLinearRing) {
-        List<Coord> coordList = new ArrayList<>();
+        DirectPositionList directPositionList = new DirectPositionList();
         for (var i = 0; i < jtsLinearRing.getNumPoints(); i++) {
             var coordinate = jtsLinearRing.getCoordinateN(i);
             var geoCoordinate = _geoReference.unproject(new Vec3f((float)coordinate.x, (float)coordinate.y, (float)coordinate.z));
-            var coord = new Coord();
-            coord.setX(geoCoordinate.lat);
-            coord.setY(geoCoordinate.lon);
-            coord.setZ(geoCoordinate.alt);
-            coordList.add(coord);
+            directPositionList.addValue(geoCoordinate.lat);
+            directPositionList.addValue(geoCoordinate.lon);
+            directPositionList.addValue(geoCoordinate.alt);
         }
 
         LinearRing linearRing = new LinearRing();
-        linearRing.setCoord(coordList);
+        linearRing.setPosList(directPositionList);
         linearRing.setId(UUID.randomUUID().toString());
 
         return linearRing;
