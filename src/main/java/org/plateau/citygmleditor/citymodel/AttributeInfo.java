@@ -92,8 +92,7 @@ public class AttributeInfo {
     // <xs:element>に対する処理
     private void traverseElement(NodeList elementNodeList, String type, Element parentElement) {
         String elementType;
-        int count = elementNodeList.getLength();
-        for (int j = 0; j < count; j++) {
+        for (int j = 0; j < elementNodeList.getLength(); j++) {
             Node elementNode = elementNodeList.item(j);
             Element element = (Element) elementNode;
 
@@ -101,8 +100,11 @@ public class AttributeInfo {
                 if (element.getAttribute("name").equals(type)) {
                     elementType = element.getAttribute("type").substring(4);
                     NodeList complexTypeNodeList = document.getElementsByTagName("xs:complexType");
-                    System.out.println("Re-ComplextType: " + elementType);
-                    traverseComplexType(complexTypeNodeList, elementType, parentElement);
+                    if (element.getAttribute("name") != "") {
+                        Node importedNode = uroDocument.importNode(elementNode, false);
+                        parentElement.appendChild(importedNode);
+                        traverseComplexType(complexTypeNodeList, elementType, (Element) importedNode);
+                    }
                 }
             } else {
                 String ref = element.getAttribute("ref");
@@ -118,8 +120,8 @@ public class AttributeInfo {
                     NodeList newElementNodeList = document.getElementsByTagName("xs:element");
                     traverseElement(newElementNodeList, ref, parentElement);
                 }
-                Node importedNode = uroDocument.importNode(elementNode, false);
                 if (element.getAttribute("name") != "") {
+                    Node importedNode = uroDocument.importNode(elementNode, false);
                     parentElement.appendChild(importedNode);
                 }
             }
