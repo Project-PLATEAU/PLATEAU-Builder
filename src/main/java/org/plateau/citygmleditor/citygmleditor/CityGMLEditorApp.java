@@ -44,7 +44,7 @@ import javafx.stage.Window;
 import org.plateau.citygmleditor.control.CityModelViewMode;
 import org.plateau.citygmleditor.world.*;
 import org.plateau.citygmleditor.FeatureSelection;
-
+import org.plateau.citygmleditor.citymodel.*;
 /**
  * JavaFX 3D Viewer Application
  */
@@ -57,6 +57,7 @@ public class CityGMLEditorApp extends Application {
     private static AntiAliasing antiAliasing;
     private static AutoScalingGroup autoScalingGroups;
     private static CityModelViewMode cityModelViewMode;
+    private static AttributeInfo attributeInfo;
 
     private SessionManager sessionManager;
 
@@ -99,10 +100,18 @@ public class CityGMLEditorApp extends Application {
     }
     public static CityModelViewMode getCityModelViewMode() { return cityModelViewMode; }
 
+    public static AttributeInfo getAttributeInfo() {
+        return attributeInfo;
+    }
+    public static void settingAttributeInfo(String path){
+        attributeInfo.readUroSchemas(path);
+    }
+
     @Override
     public void start(Stage stage) throws Exception {
         sessionManager = SessionManager.createSessionManager("CityGMLEditor");
         sessionManager.loadSession();
+        attributeInfo=new AttributeInfo();
 
         World.setActiveInstance(new World(), new Group());
         autoScalingGroups = new AutoScalingGroup(2);
