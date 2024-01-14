@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.vecmath.Point2f;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3f;
 
 import org.citygml4j.builder.copy.DeepCopyBuilder;
 import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
@@ -23,6 +21,7 @@ import org.citygml4j.model.citygml.appearance.TextureAssociation;
 import org.citygml4j.model.citygml.appearance.TextureCoordinates;
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 import org.citygml4j.model.citygml.building.GroundSurface;
+import org.citygml4j.model.citygml.building.OuterFloorSurface;
 import org.citygml4j.model.citygml.building.RoofSurface;
 import org.citygml4j.model.citygml.building.WallSurface;
 import org.citygml4j.model.gml.basicTypes.Code;
@@ -37,7 +36,6 @@ import org.citygml4j.model.gml.geometry.primitives.Interior;
 import org.citygml4j.model.gml.geometry.primitives.LinearRing;
 import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
-import org.locationtech.jts.geom.PrecisionModel;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
@@ -46,10 +44,8 @@ import org.plateau.citygmleditor.geometry.GeoReference;
 import org.plateau.citygmleditor.importers.obj.ObjImporter;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 
-import javafx.collections.ObservableFloatArray;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.ObservableFaceArray;
 import javafx.scene.shape.TriangleMesh;
 
 public class Obj2LodConverter {
@@ -117,8 +113,28 @@ public class Obj2LodConverter {
                 }
             }
 
-            // 三角形のリストが空になるまでループ
             List<List<TriangleModel>> sameTrianglesList = new ArrayList<>();
+            {
+                List<TriangleModel> sameNormalList = new ArrayList<>();
+                for (var i = 1; i < triangleModels.size(); i++) {
+
+                    // 精度向上のためGroundSurfaceは特別扱いして先に判定する
+                    // 地面の基準となる三角形の平面との角度が0度で、平面が同じものをグループ化
+                    var triangleModel = triangleModels.get(i);
+                    double angle = Math.toDegrees(groundTriangle.getNormal().angle(triangleModel.getNormal()));
+                    if (angle == 0 && groundTriangle.isSamePlane(triangleModel))  {
+                        sameNormalList.add(triangleModel);
+                    }
+                }
+                sameTrianglesList.add(sameNormalList);
+
+                // 三角形のリストから削除
+                for (var sameTriangle : sameNormalList) {
+                    triangleModels.remove(sameTriangle);
+                }
+            }
+
+            // 三角形のリストが空になるまでループ
             while (triangleModels.size() > 0) {
                 var baseTriangle = triangleModels.get(0);
                 List<TriangleModel> sameNormalList = new ArrayList<>();
@@ -128,9 +144,9 @@ public class Obj2LodConverter {
                 for (var i = 1; i < triangleModels.size(); i++) {
                     var triangleModel = triangleModels.get(i);
                     var angle = baseTriangle.getNormal().angle(triangleModel.getNormal());
-                    if (angle != 0) continue;
-                    if (!baseTriangle.isSamePlane(triangleModel)) continue;
-                    sameNormalList.add(triangleModel);
+                    if (angle == 0 && baseTriangle.isSamePlane(triangleModel))  {
+                        sameNormalList.add(triangleModel);
+                    }
                 }
                 sameTrianglesList.add(sameNormalList);
 
@@ -418,15 +434,20 @@ public class Obj2LodConverter {
     private AbstractBoundarySurface createBoundarySurface(Polygon polygon, TriangleModel triangle, TriangleModel groundTriangle) {
         AbstractBoundarySurface boundarySurface = null;
 
-        double angle = Math.toDegrees(triangle.getNormal().angle(groundTriangle.getNormal()));
-        System.out.println(String.format("angle:%f", angle));
-
         // 90度を基準に±何度までを壁とするかの閾値
         double threshold = 80;
 
+        // 閾値を使ってSurfaceの種類を決定する
+        double angle = Math.toDegrees(groundTriangle.getNormal().angle(triangle.getNormal()));
         if (angle < 90 - threshold) {
-            boundarySurface = new GroundSurface();
-            boundarySurface.setId(String.format("gnd_%s", polygon.getId()));
+            var isSamePlane = groundTriangle.isSamePlane(triangle);
+            if (isSamePlane) {
+                boundarySurface = new GroundSurface();
+                boundarySurface.setId(String.format("gnd_%s", polygon.getId()));
+            } else {
+                boundarySurface = new OuterFloorSurface();
+                boundarySurface.setId(String.format("outerfloor_%s", polygon.getId()));
+            }
         } else if (angle >= 90 - threshold && angle <= 90 + threshold) {
             boundarySurface = new RoofSurface();
             boundarySurface.setId(String.format("roof_%s", polygon.getId()));
@@ -530,14 +551,6 @@ public class Obj2LodConverter {
         }
         System.out.println("</gml:posList>");
         System.out.println("\t\t\t\t\t\t\t</gml:LinearRing>");
-        // System.out.print(")");
-        // for (var i = 0; i < polygon.getNumInteriorRing(); i++) {
-        //     System.out.print(", (");
-        //     for (var c1 : polygon.getInteriorRingN(i).getCoordinates()) {
-        //         System.out.print(String.format("%f %f %f", c1.x, c1.y, c1.z));
-        //     }
-        //     System.out.print(")");
-        // }
         System.out.println("\t\t\t\t\t\t</gml:exterior>");
         System.out.println("\t\t\t\t\t</gml:Polygon>");
     }
