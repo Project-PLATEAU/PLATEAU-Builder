@@ -21,7 +21,13 @@ import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
 import org.citygml4j.model.citygml.appearance.TexCoordList;
 import org.citygml4j.model.citygml.appearance.TextureAssociation;
 import org.citygml4j.model.citygml.appearance.TextureCoordinates;
+import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
+import org.citygml4j.model.citygml.building.GroundSurface;
+import org.citygml4j.model.citygml.building.RoofSurface;
+import org.citygml4j.model.citygml.building.WallSurface;
 import org.citygml4j.model.gml.basicTypes.Code;
+import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
+import org.citygml4j.model.gml.geometry.aggregates.MultiSurfaceProperty;
 import org.citygml4j.model.gml.geometry.complexes.CompositeSurface;
 import org.citygml4j.model.gml.geometry.primitives.AbstractRingProperty;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSurface;
@@ -34,6 +40,7 @@ import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.converters.model.TriangleModel;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.geometry.GeoReference;
 import org.plateau.citygmleditor.importers.obj.ObjImporter;
@@ -46,8 +53,9 @@ import javafx.scene.shape.ObservableFaceArray;
 import javafx.scene.shape.TriangleMesh;
 
 public class Obj2LodConverter {
-
     private org.locationtech.jts.geom.GeometryFactory _geometryFactory = new org.locationtech.jts.geom.GeometryFactory();
+
+    private ArrayList<AbstractBoundarySurface> _boundedBy = new ArrayList<AbstractBoundarySurface>();
 
     private CompositeSurface _compositeSurface = new CompositeSurface();
 
@@ -85,24 +93,36 @@ public class Obj2LodConverter {
             var vertices = triangleMesh.getPoints();
             var coords = triangleMesh.getTexCoords();
             List<TriangleModel> triangleModels = new LinkedList<>();
+            var groundBaseTriangle = TriangleModel.CreateGroundTriangle();
+            TriangleModel groundTriangle = null;
             for (var i = 0; i < faces.size(); i += 6) {
                 var triangleModel = new TriangleModel(faces, i, vertices, coords);
 
                 // 不正な三角形は除外する
                 if (triangleModel.isValid()) {
                     triangleModels.add(triangleModel);
+
+                    // 同時に地面の基準になる三角形を特定する
+                    // 基準となる三角形の平面との角度が180±5度以下のもののうち、最もZ座標が小さいものを採用する(GroundSurfaceの法線は地面の方を向いている)
+                    double angle = Math.toDegrees(groundBaseTriangle.getNormal().angle(triangleModel.getNormal()));
+                    if (angle >= 175 && angle <= 185) {
+                        if (groundTriangle == null) {
+                            groundTriangle = triangleModel;
+                        } else {
+                            if (triangleModel.getMinZ() < groundTriangle.getMinZ()) {
+                                groundTriangle = triangleModel;
+                            }
+                        }
+                    }
                 }
             }
 
-            List<List<TriangleModel>> sameTrianglesList = new ArrayList<>();
-
             // 三角形のリストが空になるまでループ
+            List<List<TriangleModel>> sameTrianglesList = new ArrayList<>();
             while (triangleModels.size() > 0) {
                 var baseTriangle = triangleModels.get(0);
                 List<TriangleModel> sameNormalList = new ArrayList<>();
                 sameNormalList.add(baseTriangle);
-
-                //var baseDot = baseTriangle.dot();
 
                 // 最初に見つかった三角形を基準として、法線ベクトルと平面が同じ三角形をグループ化
                 for (var i = 1; i < triangleModels.size(); i++) {
@@ -128,15 +148,14 @@ public class Obj2LodConverter {
             System.out.println(String.format("Polygon count: %d", jtsPolygonList.size()));
 
             // gmlのPolygonに変換
-            List<Polygon> polygonList = new ArrayList<>();
             for (var jtsPolygon : jtsPolygonList) {
-                toGmlPolygonList(jtsPolygon, polygonList, parameterizedTexture);
+                toGmlPolygonList(jtsPolygon, groundTriangle, parameterizedTexture);
             }
 
-            // TODO:DEBUG
-            for (var polygon : polygonList) {
-                //dump(polygon);
+            for (AbstractBoundarySurface boundarySurface : _boundedBy) {
+                dump(boundarySurface);
             }
+            //cityModel.addCityObjectMember(new org.citygml4j.model.citygml.building.Building(createBuilding(polygon, parameterizedTexture)));
 
             // gmlのParameterizedTextureを差し替える
             var replaced = false;
@@ -273,19 +292,19 @@ public class Obj2LodConverter {
         return polygonList;
     }
 
-    private void toGmlPolygonList(org.locationtech.jts.geom.Geometry jtsGeometry, List<Polygon> polygonList, ParameterizedTexture parameterizedTexture) {
+    private void toGmlPolygonList(org.locationtech.jts.geom.Geometry jtsGeometry, TriangleModel groundTriangle, ParameterizedTexture parameterizedTexture) {
         if (jtsGeometry.getGeometryType().equals(org.locationtech.jts.geom.Geometry.TYPENAME_POLYGON)) {
-            polygonList.add(createPolygon((org.locationtech.jts.geom.Polygon)jtsGeometry, parameterizedTexture));
+            createPolygon((org.locationtech.jts.geom.Polygon)jtsGeometry, groundTriangle, parameterizedTexture);
         } else if (jtsGeometry.getGeometryType().equals(org.locationtech.jts.geom.Geometry.TYPENAME_MULTIPOLYGON)) {
             for (var i = 0; i < jtsGeometry.getNumGeometries(); i++) {
-                toGmlPolygonList(jtsGeometry.getGeometryN(i), polygonList, parameterizedTexture);
+                toGmlPolygonList(jtsGeometry.getGeometryN(i), groundTriangle, parameterizedTexture);
             }
         } else {
             System.out.println(String.format("Error toGmlPolygonList: GeometryType:%s", jtsGeometry.getGeometryType()));
         }
     }
 
-    private Polygon createPolygon(org.locationtech.jts.geom.Polygon jtsPolygon, ParameterizedTexture parameterizedTexture) {
+    private Polygon createPolygon(org.locationtech.jts.geom.Polygon jtsPolygon, TriangleModel groundTriangle, ParameterizedTexture parameterizedTexture) {
         Polygon polygon = new Polygon();
         polygon.setId(UUID.randomUUID().toString());
         var jtsExteriorRing = jtsPolygon.getExteriorRing();
@@ -301,16 +320,16 @@ public class Obj2LodConverter {
         }
 
         _compositeSurface.addSurfaceMember(new SurfaceProperty(String.format("#%s", polygon.getId())));
-        List<AbstractSurface> surfaces = new ArrayList<AbstractSurface>();
-        surfaces.add(polygon);
-        // boundedBy.add(new BoundarySurface(createBoundarySurface(surfaces)));
 
-        // 保持しておいたTriangleModelからテクスチャの頂点を特定する
+        // 保持しておいたTriangleModelを取得する
         List<TriangleModel> userDataList = (List<TriangleModel>)jtsPolygon.getUserData();
         if (userDataList == null) {
-            System.out.println("serDataList == null ここには入ってほしくない");
-            return polygon;
+            throw new IllegalArgumentException("userDataList == null");
         }
+
+        _boundedBy.add(createBoundarySurface(polygon, userDataList.get(0), groundTriangle));
+
+        // テクスチャの頂点を特定する
         List<Double> textureCoordinatesList = new ArrayList<Double>();
         for (var coordinate : jtsExteriorRing.getCoordinates()) {
             var found = false;
@@ -396,6 +415,35 @@ public class Obj2LodConverter {
         return linearRing;
     }
 
+    private AbstractBoundarySurface createBoundarySurface(Polygon polygon, TriangleModel triangle, TriangleModel groundTriangle) {
+        AbstractBoundarySurface boundarySurface = null;
+
+        double angle = Math.toDegrees(triangle.getNormal().angle(groundTriangle.getNormal()));
+        System.out.println(String.format("angle:%f", angle));
+
+        // 90度を基準に±何度までを壁とするかの閾値
+        double threshold = 80;
+
+        if (angle < 90 - threshold) {
+            boundarySurface = new GroundSurface();
+            boundarySurface.setId(String.format("gnd_%s", polygon.getId()));
+        } else if (angle >= 90 - threshold && angle <= 90 + threshold) {
+            boundarySurface = new RoofSurface();
+            boundarySurface.setId(String.format("roof_%s", polygon.getId()));
+        } else if (angle > 90 + threshold) {
+            boundarySurface = new WallSurface();
+            boundarySurface.setId(String.format("wall_%s", polygon.getId()));
+        } else {
+            throw new IllegalArgumentException("angle is invalid");
+        }
+
+        List<AbstractSurface> surfaces = new ArrayList<AbstractSurface>();
+        surfaces.add(polygon);
+        boundarySurface.setLod2MultiSurface(new MultiSurfaceProperty(new MultiSurface(surfaces)));
+
+        return boundarySurface;
+    }
+
     private ParameterizedTexture createOrGetParameterizedTexture(String materialName, Material material, Map<String, ParameterizedTexture> textureMap) throws IOException, URISyntaxException {
         if (textureMap.containsKey(materialName)) return textureMap.get(materialName);
         if (!(material instanceof PhongMaterial)) return null;
@@ -447,12 +495,30 @@ public class Obj2LodConverter {
         System.out.println(")', 2451));");
     }
 
+    private void dump(AbstractBoundarySurface boundarySurface) {
+        System.out.println("<bldg:boundedBy>");
+        System.out.println(String.format("\t<bldg:%s gml:id=\"%s\">", boundarySurface.getClass().getSimpleName(), boundarySurface.getId()));
+        System.out.println("\t\t<bldg:lod2MultiSurface>");
+        System.out.println("\t\t\t<gml:MultiSurface>");
+        var surfaceMembers = boundarySurface.getLod2MultiSurface().getMultiSurface().getSurfaceMember();
+        for (SurfaceProperty surfaceMember : surfaceMembers) {
+            System.out.println("\t\t\t\t<gml:surfaceMember>");
+            var polygon = (Polygon)surfaceMember.getSurface();
+            dump(polygon);
+            System.out.println("\t\t\t\t</gml:surfaceMember>");
+        }
+        System.out.println("\t\t\t</gml:surfaceMember>");
+        System.out.println("\t\t</bldg:lod2MultiSurface>");
+        System.out.println(String.format("\t</bldg:%s>", boundarySurface.getClass().getSimpleName()));
+        System.out.println("</bldg:boundedBy>");
+    }
+
     private void dump(Polygon polygon) {
-        System.out.println(String.format("<gml:Polygon gml:id=\"%s\">", polygon.getId()));
-        System.out.println("\t<gml:exterior>");
+        System.out.println(String.format("\t\t\t\t\t<gml:Polygon gml:id=\"%s\">", polygon.getId()));
+        System.out.println("\t\t\t\t\t\t<gml:exterior>");
         var exterior = (LinearRing)polygon.getExterior().getRing();
-        System.out.println(String.format("\t\t<gml:LinearRing gml:id=\"%s\">", exterior.getId()));
-        System.out.print("\t\t\t<gml:posList>");
+        System.out.println(String.format("\t\t\t\t\t\t\t<gml:LinearRing gml:id=\"%s\">", exterior.getId()));
+        System.out.print("\t\t\t\t\t\t\t\t<gml:posList>");
         var first = true;
         for (var c : exterior.getCoord()) {
             if (first) {
@@ -463,7 +529,7 @@ public class Obj2LodConverter {
             System.out.print(String.format("%f %f %f", c.getX(), c.getY(), c.getZ()));
         }
         System.out.println("</gml:posList>");
-        System.out.println("\t\t</gml:LinearRing>");
+        System.out.println("\t\t\t\t\t\t\t</gml:LinearRing>");
         // System.out.print(")");
         // for (var i = 0; i < polygon.getNumInteriorRing(); i++) {
         //     System.out.print(", (");
@@ -472,77 +538,7 @@ public class Obj2LodConverter {
         //     }
         //     System.out.print(")");
         // }
-        System.out.println("\t</gml:exterior>");
-        System.out.println("</gml:Polygon>");
-    }
-
-    private class TriangleModel {
-        private int[] _vertexIndices = new int[3];
-        private int[] _uvIndices = new int[3];
-        private Point3f[] _vertices = new Point3f[3];
-        private Point2f[] _uvs = new Point2f[3];
-        private Vector3f _normal = new Vector3f();
-        private float _dot;
-
-        public TriangleModel(ObservableFaceArray faces, int startIndex, ObservableFloatArray vertices, ObservableFloatArray uvs) {
-            for (var i = 0  ; i < 3; i++) {
-                _vertexIndices[i] = faces.get(startIndex + i * 2);
-                _uvIndices[i] = faces.get(startIndex + i * 2 + 1);
-                _vertices[i] = new Point3f(vertices.get(_vertexIndices[i] * 3), vertices.get(_vertexIndices[i] * 3 + 1), vertices.get(_vertexIndices[i] * 3 + 2));
-                _uvs[i] = new Point2f(uvs.get(_uvIndices[i] * 2), 1 - uvs.get(_uvIndices[i] * 2 + 1));
-            }
-
-            Vector3f first = new Vector3f();
-            first.sub(_vertices[2], _vertices[0]);
-            Vector3f second = new Vector3f();
-            second.sub(_vertices[2], _vertices[1]);
-            _normal.cross(first, second);
-            _normal.normalize();
-            _dot = getVertexAsVector3f(0).dot(getNormal());
-        }
-
-        public boolean isValid() {
-            return !_vertices[0].equals(_vertices[1]) && !_vertices[1].equals(_vertices[2]) && !_vertices[2].equals(_vertices[0]);
-        }
-
-        public Point3f[] getVertices() {
-            return _vertices;
-        }
-
-        public Point2f[] getUVs() {
-            return _uvs;
-        }
-
-        public Vector3f getNormal() {
-            return _normal;
-        }
-
-        public Point3f getVertex(int index) {
-            return _vertices[index];
-        }
-
-        public Vector3f getVertexAsVector3f(int index) {
-            var p = _vertices[index];
-            return new Vector3f(p.x, p.y, p.z);
-        }
-
-        public Point2f getUV(int index) {
-            return _uvs[index];
-        }
-
-        public float getPlaneDistance(Vector3f a) {
-            Vector3f pa = new Vector3f();
-            pa.sub(a, getVertexAsVector3f(0));
-            return Math.abs(_normal.dot(pa));
-        }
-
-        public boolean isSamePlane(TriangleModel triangleModel) {
-            var d1 = getPlaneDistance(triangleModel.getVertexAsVector3f(0));
-            var d2 = getPlaneDistance(triangleModel.getVertexAsVector3f(1));
-            var d3 = getPlaneDistance(triangleModel.getVertexAsVector3f(2));
-
-            // 単位がメートルのため、誤差を考慮して0.001m以下なら同一平面とみなす
-            return d1 <= 0.001 && d2 <= 0.001 && d3 <= 0.001 ;
-        }
+        System.out.println("\t\t\t\t\t\t</gml:exterior>");
+        System.out.println("\t\t\t\t\t</gml:Polygon>");
     }
 }
