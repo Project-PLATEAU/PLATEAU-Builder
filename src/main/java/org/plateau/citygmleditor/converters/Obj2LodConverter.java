@@ -221,7 +221,7 @@ public class Obj2LodConverter {
             }
 
             // For:DEBUG
-            GmlExporter.export(Paths.get("E:\\Temp\\export\\gml\\test.gml").toString(), cityModel, _cityModelView.getSchemaHandler());
+            GmlExporter.export(Paths.get("E:\\Temp\\export\\gml\\udx\\bldg\\53392633_bldg_6697_2_op.gml").toString(), cityModel, _cityModelView.getSchemaHandler());
         }
 
         // Solid solid = new Solid();
@@ -481,11 +481,11 @@ public class Obj2LodConverter {
                 boundarySurface.setId(String.format("outerfloor_%s", polygon.getId()));
             }
         } else if (angle >= 90 - threshold && angle <= 90 + threshold) {
-            boundarySurface = new RoofSurface();
-            boundarySurface.setId(String.format("roof_%s", polygon.getId()));
-        } else if (angle > 90 + threshold) {
             boundarySurface = new WallSurface();
             boundarySurface.setId(String.format("wall_%s", polygon.getId()));
+        } else if (angle > 90 + threshold) {
+            boundarySurface = new RoofSurface();
+            boundarySurface.setId(String.format("roof_%s", polygon.getId()));
         } else {
             throw new IllegalArgumentException("angle is invalid");
         }
