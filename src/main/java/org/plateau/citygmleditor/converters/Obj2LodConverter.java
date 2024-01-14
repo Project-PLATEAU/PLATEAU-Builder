@@ -168,9 +168,9 @@ public class Obj2LodConverter {
                 toGmlPolygonList(jtsPolygon, groundTriangle, parameterizedTexture);
             }
 
-            for (AbstractBoundarySurface boundarySurface : _boundedBy) {
-                dump(boundarySurface);
-            }
+            // For:DEBUG
+            dump(parameterizedTexture, _compositeSurface, _boundedBy);
+
             //cityModel.addCityObjectMember(new org.citygml4j.model.citygml.building.Building(createBuilding(polygon, parameterizedTexture)));
 
             // gmlのParameterizedTextureを差し替える
@@ -514,6 +514,57 @@ public class Obj2LodConverter {
             System.out.print(")");
         }
         System.out.println(")', 2451));");
+    }
+
+    private void dump(ParameterizedTexture parameterizedTexture, CompositeSurface compositeSurface, ArrayList<AbstractBoundarySurface> boundedBy) {
+        dump(parameterizedTexture);
+        dump(compositeSurface);
+        for (AbstractBoundarySurface boundarySurface : boundedBy) {
+            dump(boundarySurface);
+        }
+    }
+
+    private void dump (ParameterizedTexture parameterizedTexture) {
+        System.out.println("<app:surfaceDataMember>");
+        System.out.println("\t<app:ParameterizedTexture>");
+        System.out.println(String.format("\t\t<app:imageURI>%s</app:imageURI>", parameterizedTexture.getImageURI()));
+        System.out.println(String.format("\t\t<app:mimeType>%s</app:mimeType>", parameterizedTexture.getMimeType().getValue()));
+        for (TextureAssociation textureAssociation : parameterizedTexture.getTarget()) {
+            System.out.println(String.format("\t\t<app:target uri:href=\"%s\"/>", textureAssociation.getUri()));
+            var texCoordList = (TexCoordList)textureAssociation.getTextureParameterization();
+            System.out.println("\t\t\t<app:TexCoordList>");
+            for (var textureCoordinates : texCoordList.getTextureCoordinates()) {
+                System.out.print(String.format("\t\t\t\t\t<app:textureCoordinates ring=\"%s\"/>", textureCoordinates.getRing()));
+                var first = true;
+                for (var c : textureCoordinates.getValue()) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        System.out.print(" ");
+                    }
+                    System.out.print(String.format("%f", c));
+                }
+                System.out.println("</app:textureCoordinates>");
+            }
+            System.out.println("\t\t\t</app:TexCoordList>");
+            System.out.println("\t\t</app:target>");
+        }
+        System.out.println("\t</app:ParameterizedTexture>");
+        System.out.println("</app:surfaceDataMember>");
+    }
+
+    private void dump(CompositeSurface compositeSurface) {
+        System.out.println("<bldg:lod2Solid>");
+        System.out.println("\t<bldg:Solid>");
+        System.out.println("\t\t<bldg:exterior>");
+        System.out.println("\t\t\t<bldg:CompositeSurface>");
+        for (SurfaceProperty surfaceProperty : compositeSurface.getSurfaceMember()) {
+            System.out.println(String.format("\t\t\t\t<gml:surfaceMember xlink:href=\"%s\"/>", surfaceProperty.getHref()));
+        }
+        System.out.println("\t\t\t</bldg:CompositeSurface>");
+        System.out.println("\t\t</bldg:exterior>");
+        System.out.println("\t</bldg:Solid>");
+        System.out.println("</bldg:lod2Solid>");
     }
 
     private void dump(AbstractBoundarySurface boundarySurface) {
