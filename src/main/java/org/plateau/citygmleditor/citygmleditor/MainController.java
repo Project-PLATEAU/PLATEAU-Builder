@@ -63,6 +63,7 @@ import org.plateau.citygmleditor.exporters.TextureExporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
 import org.plateau.citygmleditor.world.World;
 import org.plateau.citygmleditor.utils.*;
+import org.plateau.citygmleditor.citymodel.*;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -136,6 +137,7 @@ public class MainController implements Initializable {
     private SessionManager sessionManager = SessionManager.getSessionManager();
     private String sourceRootDirPath;
     private String[] importGmlPathComponents;
+    private AttributeInfo attributeInfo;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -233,6 +235,9 @@ public class MainController implements Initializable {
         importGmlPathComponents = fileUrl.split("\\\\");
         sourceRootDirPath = new File(new File(new File(loadedURL).getParent()).getParent()).getParent();
         sessionManager.getProperties().setProperty(CityGMLEditorApp.FILE_URL_PROPERTY, fileUrl);
+        // C:\13100_tokyo23-ku_2022_citygml_1_3_op
+        String uroSchemasPath = sourceRootDirPath + "\\schemas\\iur\\uro\\2.0\\urbanObject.xsd";
+        CityGMLEditorApp.settingAttributeInfo(uroSchemasPath);
         try {
             var root = GmlImporter.loadGml(fileUrl);
             sceneContent.setContent(root);
