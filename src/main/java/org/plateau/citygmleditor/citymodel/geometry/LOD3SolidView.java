@@ -45,9 +45,18 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
         var map = new HashMap<SurfaceDataView, ArrayList<PolygonView>>();
 
         for (var boundary : boundaries) {
-            for (var polygon : boundary.getPolygons()) {
-                map.computeIfAbsent(polygon.getSurfaceData(), k -> new ArrayList<>());
-                map.get(polygon.getSurfaceData()).add(polygon);
+            if (boundary.getPolygons() != null)
+            {
+                for (var polygon : boundary.getPolygons()) {
+                    map.computeIfAbsent(polygon.getSurfaceData(), k -> new ArrayList<>());
+                    map.get(polygon.getSurfaceData()).add(polygon);
+                }   
+            }
+            if (boundary.getOpeningPolygons() != null) {
+                for (var polygon : boundary.getOpeningPolygons()) {
+                    map.computeIfAbsent(polygon.getSurfaceData(), k -> new ArrayList<>());
+                    map.get(polygon.getSurfaceData()).add(polygon);
+                }
             }
         }
 
