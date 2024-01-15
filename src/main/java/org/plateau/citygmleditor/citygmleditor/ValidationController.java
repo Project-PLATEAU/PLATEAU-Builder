@@ -105,6 +105,9 @@ public class ValidationController implements Initializable {
         for (Standard standard : standards) {
             if (!standard.isEnabled()) continue;
             switch (standard.getId()) {
+                case GMLID:
+                    result.add(new GMLIDCompletenessValidator());
+                    break;
                 case C04:
                     result.add(new C04CompletenessValidator());
                     break;

@@ -1,5 +1,10 @@
 [
   {
+    "id": "GMLID",
+    "title": "gml:idの完全性",
+    "enabled": true
+  },
+  {
     "id": "C04",
     "title": "gml:idの完全性",
     "enabled": true
