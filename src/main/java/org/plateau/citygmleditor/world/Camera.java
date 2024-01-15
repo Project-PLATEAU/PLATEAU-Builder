@@ -237,7 +237,7 @@ public class Camera {
         }
     };
 
-    private SimpleBooleanProperty yUp = new SimpleBooleanProperty(false) {
+    private SimpleBooleanProperty yUp = new SimpleBooleanProperty(true) {
         @Override
         protected void invalidated() {
             if (get()) {

@@ -29,24 +29,102 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-.split-pane {
-    -fx-background-color: null;
-    -fx-background-insets: 0, 0;
-    -fx-padding: 0;
+
+/*******************************************************************************
+ * Theme Setting                                                               *
+ ******************************************************************************/
+.root {
+-fx-base: #444444;
+-fx-accent: #5F8AC1;
+-fx-default-button: #5F8AC1;
+-fx-focus-color: #5F8AC1;
+-fx-faint-focus-color: #039ED322;
+-fx-background-color: #444444;
+
 }
-#statusBar > .container {
-    -fx-alignment: center;
+.button{
+    -fx-font-size: 10px;
+}
+
+/*Tab*/
+.tab .tab-label {
+ 	-fx-alignment: CENTER;
+	-fx-text-fill: white;
+
+}
+.tab-header-area .tab-header-background {
+    -fx-background-color: #3A3A3A;
+}
+.tab-pane .tab {
+	-fx-background-color: #3A3A3A;
+}
+.tab-pane .tab:selected {
+	-fx-background-color: #444444;
+}
+.tab-pane {
+    -fx-tab-min-width: 42;
+    -fx-tab-max-width: 42;
+    -fx-tab-min-height: 42;
+    -fx-tab-max-height: 42;
+}
+
+.table-view,
+.tree-table-view {
+    /* Constants used throughout the tableview. */
+    -fx-table-header-border-color: -fx-box-border;
+    -fx-table-cell-border-color: derive(-fx-color,5%);
+    -fx-background-color: #444444;
+}
+.tree-view, .tree-cell {
+    -fx-background-color: #3A3A3A ;
+    -fx-text-fill: white ;
+}
+/*
+.tool-bar {
+    -fx-background-color:#444444;
+    -fx-background-insets: 0 0 0 0, 1 0 1 0;
+    -fx-padding: 0.416667em 0.5em 0.416667em 0.5em;
+    -fx-spacing: 0.333em;
+    -fx-alignment: CENTER_LEFT;
+}
+*/
+
+/*******************************************************************************
+ * Custom ID Settings                                                          *
+ ******************************************************************************/
+
+#rightSidePanel{
+    -fx-border-color: #5c5c5c;
+    -fx-border-width: 0 0 0 1;
+    -fx-border-style: solid;
+}
+#leftSidePanel{
+    -fx-border-color: #5c5c5c;
+    -fx-border-width: 0 1 0 0;
+    -fx-border-style: solid;
+}
+#statusBar{
+    -fx-border-color: #5c5c5c;
+    -fx-border-width: 1 0 0 0  ;
+    -fx-border-style: solid;
+}
+#objectListArea{
+-fx-background-color: #3A3A3A;
+}
+#tabContentsArea{
+-fx-background-color: #515151;
 }
 #statusBar .text {
     -fx-font-size: 11px;
     -fx-font-weight: bold;
-    -fx-fill: #1d3866;
-    -fx-effect: dropshadow(one-pass-box, white, 0, 1, 0, 1);
+    -fx-fill: #ffffff;
+
 }
 #zoomBar {
     -fx-background-insets: 0, 1;
     -fx-background-radius: 10, 10;
     -fx-padding: 2 0 2 0;
+
 }
 #zoomBar > .increment-button > .increment-arrow {
     -fx-padding: 4;
@@ -72,8 +150,8 @@
     -fx-shape: "M6.623,6.144L6.62,8.168L2.372,2.501L6.62-3.167L6.623-1.14l-2.8,3.641L6.623,6.";
     -fx-scale-shape: false;
     -fx-padding: 4px;
-    -fx-background-color: -fx-mark-highlight-color, derive(-fx-base, -45%);
-    -fx-effect: dropshadow(two-pass-box, -fx-shadow-highlight-color, 1, 0, 0, 1.4);
+    -fx-background-color: -fx-mark-highlight-color,derive(-fx-base,-45%);
+    -fx-effect: dropshadow(two-pass-box , -fx-shadow-highlight-color, 1, 0.0 , 0, 1.4);
 }
 .four-way > .center {
     -fx-scale-shape: false;
@@ -87,7 +165,7 @@
 }
 .four-way > .right {
     -fx-rotate: 180;
-    -fx-effect: dropshadow(two-pass-box, -fx-shadow-highlight-color, 1, 0, 0, -1.4);
+    -fx-effect: dropshadow(two-pass-box , -fx-shadow-highlight-color, 1, 0.0 , 0, -1.4);
 }
 #eyeNav > .center {
     -fx-shape: "M121.5,1093.484c-3.866,0-7,2.025-7,4.523s3.134,4.523,7,4.523s7-2.025,7-4.523S125.366,1093.484,121.5,1093.484z M121.5,1101.531c-3.252,0-6-1.613-6-3.523s2.748-3.523,6-3.523s6,1.613,6,3.523S124.752,1101.531,121.5,1101.531z M121.5,1094.833c-1.749,0-3.167,1.418-3.167,3.167s1.418,3.167,3.167,3.167s3.167-1.418,3.167-3.167S123.249,1094.833,121.5,1094.833z M120.595,1097.548c-0.25,0-0.453-0.202-0.453-0.453c0-0.25,0.203-0.452,0.453-0.452s0.452,0.202,0.452,0.452C121.047,1097.346,120.845,1097.548,120.595,1097.548z";
@@ -100,6 +178,7 @@
 .four-way > .left:pressed,
 .four-way > .right:pressed {
     -fx-effect: dropshadow(gaussian, -fx-accent, 15, 0.7, 0, 0);
+
 }
 .settings-header {
     -fx-font-weight: bold;
@@ -127,23 +206,45 @@
 }
 .settings .check-box > .box {
     -fx-padding: 5px 5px 5px 7px;
-    -fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-inner-border, -fx-body-color, linear-gradient(to bottom, derive(-fx-outer-border, -20%), -fx-outer-border), linear-gradient(to bottom, derive(-fx-color, -22%) 0%, derive(-fx-color, -13%) 20%, derive(-fx-color, -11%) 50%);
+    -fx-background-color:
+        -fx-shadow-highlight-color,
+        -fx-outer-border,
+        -fx-inner-border,
+        -fx-body-color,
+        linear-gradient(to bottom, derive(-fx-outer-border, -20%), -fx-outer-border),
+        linear-gradient(to bottom, derive(-fx-color, -22%) 0%, derive(-fx-color, -13%) 20%, derive(-fx-color, -11%) 50%);
     -fx-background-insets: 0 0 -1 0, 0, 1, 2, 0 0 0 30, 1 1 1 31;
     -fx-background-radius: 3px, 3px, 2px, 1px, 0 2px 2px 0, 0 1 1 0;
 }
 .settings .check-box:selected > .box {
-    -fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-inner-border, -fx-body-color, linear-gradient(to bottom, derive(-fx-outer-border, -20%), -fx-outer-border), linear-gradient(to bottom, derive(-fx-default-button, -12%) 0%, derive(-fx-default-button, -3%) 20%, derive(-fx-default-button, -1%) 50%);
+    -fx-background-color:
+        -fx-shadow-highlight-color,
+        -fx-outer-border,
+        -fx-inner-border,
+        -fx-body-color,
+        linear-gradient(to bottom, derive(-fx-outer-border, -20%), -fx-outer-border),
+        linear-gradient(to bottom, derive(-fx-default-button, -12%) 0%, derive(-fx-default-button, -3%) 20%, derive(-fx-default-button, -1%) 50%);
 
     -fx-background-insets: 0 0 -1 0, 0, 1, 2, 0 32 0 0, 1 33 1 1;
     -fx-background-radius: 3px, 3px, 2px, 1px, 2px 0 0 2px, 1 0 0 1;
 }
 .settings .check-box:focused > .box {
-    -fx-background-color: -fx-focus-color, -fx-inner-border, -fx-body-color, linear-gradient(to bottom, derive(-fx-outer-border, -20%), -fx-outer-border), linear-gradient(to bottom, derive(-fx-color, -22%) 0%, derive(-fx-color, -13%) 20%, derive(-fx-color, -11%) 50%);
+    -fx-background-color:
+        -fx-focus-color,
+        -fx-inner-border,
+        -fx-body-color,
+        linear-gradient(to bottom, derive(-fx-outer-border, -20%), -fx-outer-border),
+        linear-gradient(to bottom, derive(-fx-color, -22%) 0%, derive(-fx-color, -13%) 20%, derive(-fx-color, -11%) 50%);
     -fx-background-insets: -0.2, 1, 2, 1 1 1 30, 1 1 1 31;
     -fx-background-radius: 3px, 2px, 1px, 0 2px 2px 0, 0 1 1 0;
 }
 .settings .check-box:focused:selected > .box {
-    -fx-background-color: -fx-focus-color, -fx-inner-border, -fx-body-color, linear-gradient(to bottom, derive(-fx-outer-border, -20%), -fx-outer-border), linear-gradient(to bottom, derive(-fx-default-button, -12%) 0%, derive(-fx-default-button, -3%) 20%, derive(-fx-default-button, -1%) 50%);
+    -fx-background-color:
+        -fx-focus-color,
+        -fx-inner-border,
+        -fx-body-color,
+        linear-gradient(to bottom, derive(-fx-outer-border, -20%), -fx-outer-border),
+        linear-gradient(to bottom, derive(-fx-default-button, -12%) 0%, derive(-fx-default-button, -3%) 20%, derive(-fx-default-button, -1%) 50%);
     -fx-background-insets: -0.2, 1, 2, 1 32 1 1, 1 33 1 1;
     -fx-background-radius: 3px, 2px, 1px, 2px 0 0 2px, 1 0 0 1;
 }
@@ -151,7 +252,7 @@
     -fx-content-display: graphic-only;
 }
 #playControls > * > Pane {
-    -fx-background-color: white, #666;
+    -fx-background-color: white,#666;
     -fx-background-insets: 1 0 -1 0, 0;
 }
 #playControls > #startBtn > Pane {
@@ -160,10 +261,10 @@
 #playControls > #rwBtn > Pane {
     -fx-shape: "M64.866,531.999l-8.818,7.965l8.818,7.964v-6.796l7.301,6.796v-15.929l-7.301,6.797V531.999z";
 }
-#playControls > #playBtn:selected > Pane {
+#playControls > #playBtn:selected  > Pane {
     -fx-shape: "M20.716,531.999c-0.665,0-1.204,0.542-1.204,1.212v13.328c0,0.671,0.539,1.213,1.204,1.213h2.188c0.665,0,1.203-0.542,1.203-1.213v-13.328c0-0.67-0.538-1.212-1.203-1.212H20.716zM10.87,531.999c-0.665,0-1.204,0.542-1.204,1.212v13.328c0,0.671,0.539,1.213,1.204,1.213h2.188c0.665,0,1.203-0.542,1.203-1.213v-13.328c0-0.67-0.539-1.212-1.203-1.212H10.87z";
 }
-#playControls > #playBtn > Pane {
+#playControls > #playBtn> Pane {
     -fx-shape: "M0,531.999l8.667,8L0,548V531.999z";
 }
 #playControls > #ffBtn > Pane {
@@ -181,8 +282,8 @@
     -fx-padding: 6 6 4 6;
 }
 .timeline-display .background {
-    -fx-background-color: white, #b8c3a6;
-    -fx-background-insets: 1 0 -1 0, 0;
+    -fx-background-color: white,#b8c3a6;
+    -fx-background-insets: 1 0 -1 0,0;
     -fx-background-radius: 6, 6;
     -fx-effect: innershadow(gaussian, #52574abb, 5, 0, 0, 2);
 }
@@ -194,8 +295,4 @@
 }
 .timeline-display .progress {
     -fx-background-color: #52574a;
-}
-/*モード選択用トグルボタンの選択状態の色制御*/
-.mode-toggle-button:selected {
-    -fx-background-color: rgba(204, 0, 51, 0.75);
 }
