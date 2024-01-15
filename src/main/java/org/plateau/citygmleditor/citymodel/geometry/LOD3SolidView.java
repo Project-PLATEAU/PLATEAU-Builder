@@ -83,7 +83,12 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
         var polygons = new ArrayList<PolygonView>();
 
         for (var boundary : boundaries) {
-            polygons.addAll(boundary.getPolygons());
+            if (boundary.getPolygons() != null) {
+                polygons.addAll(boundary.getPolygons());
+            }
+            if (boundary.getOpeningPolygons() != null) {
+                polygons.addAll(boundary.getOpeningPolygons());
+            }
         }
 
         return polygons;
