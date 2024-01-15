@@ -8,9 +8,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.*;
 
-public class AttributeInfo {
+public class UroAttributeInfo {
     NodeList nodeListElement;
-    private Document uroDocument;
+    Document uroDocument;
+    Node uroNode;
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     DocumentBuilder builder;
     Document document;
@@ -50,6 +51,7 @@ public class AttributeInfo {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        uroNode = uroDocument.getDocumentElement();
         // printNode(uroDocument.getDocumentElement(), 0);
     }
 
@@ -143,5 +145,9 @@ public class AttributeInfo {
                 printNode(childNodes.item(i), depth + 1);
             }
         }
+    }
+
+    public Document getUroAttributeDocument() {
+        return uroDocument;
     }
 }

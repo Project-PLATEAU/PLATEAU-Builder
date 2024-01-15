@@ -33,6 +33,8 @@ package org.plateau.citygmleditor.citygmleditor;
 
 import java.util.Objects;
 
+import javax.swing.text.Document;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -45,6 +47,8 @@ import org.plateau.citygmleditor.control.CityModelViewMode;
 import org.plateau.citygmleditor.world.*;
 import org.plateau.citygmleditor.FeatureSelection;
 import org.plateau.citygmleditor.citymodel.*;
+import org.w3c.dom.*;
+
 /**
  * JavaFX 3D Viewer Application
  */
@@ -58,6 +62,7 @@ public class CityGMLEditorApp extends Application {
     private static AutoScalingGroup autoScalingGroups;
     private static CityModelViewMode cityModelViewMode;
     private static AttributeInfo attributeInfo;
+    private static UroAttributeInfo uroAttributeInfo;
 
     private SessionManager sessionManager;
 
@@ -100,18 +105,20 @@ public class CityGMLEditorApp extends Application {
     }
     public static CityModelViewMode getCityModelViewMode() { return cityModelViewMode; }
 
-    public static AttributeInfo getAttributeInfo() {
-        return attributeInfo;
+    public static org.w3c.dom.Document getUroAttributeDocument() {
+        return uroAttributeInfo.getUroAttributeDocument();
     }
-    public static void settingAttributeInfo(String path){
-        attributeInfo.readUroSchemas(path);
+
+    public static void settingUroAttributeInfo(String path) {
+        uroAttributeInfo.readUroSchemas(path);
+        System.out.println("Done");
     }
 
     @Override
     public void start(Stage stage) throws Exception {
         sessionManager = SessionManager.createSessionManager("CityGMLEditor");
         sessionManager.loadSession();
-        attributeInfo=new AttributeInfo();
+        uroAttributeInfo = new UroAttributeInfo();
 
         World.setActiveInstance(new World(), new Group());
         autoScalingGroups = new AutoScalingGroup(2);
