@@ -137,7 +137,7 @@ public class MainController implements Initializable {
     private SessionManager sessionManager = SessionManager.getSessionManager();
     private String sourceRootDirPath;
     private String[] importGmlPathComponents;
-    private AttributeInfo attributeInfo;
+    private UroAttributeInfo uroAttributeInfo;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
