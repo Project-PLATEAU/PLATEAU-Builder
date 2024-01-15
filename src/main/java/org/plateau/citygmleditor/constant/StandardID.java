@@ -22,5 +22,6 @@ public interface StandardID {
     String L_BLDG_03 = "L-bldg-03";
     String T03 = "T-03";
     String T_BLDG_02 = "L-bldg-02";
+    String GMLID = "GMLID";
 
 }
