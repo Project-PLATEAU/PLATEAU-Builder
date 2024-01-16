@@ -17,7 +17,6 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
     private VertexBuffer vertexBuffer = new VertexBuffer();
     private TexCoordBuffer texCoordBuffer = new TexCoordBuffer();
     private TransformManipulator transformManipulator = new TransformManipulator(this);
-    private HashMap<String, Group> group;
 
     public LOD3SolidView(AbstractSolid gmlObject, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
         this.gmlObject = gmlObject;
@@ -65,17 +64,6 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
 
     public void addMeshView(MeshView meshView) {
         getChildren().add(meshView);
-    }
-
-    public void addMeshView(String id, MeshView meshView) {
-        if (group == null)
-            group = new HashMap<String, Group>();
-        group.computeIfAbsent(id, k -> new Group());
-        if (group.get(id).getChildren().isEmpty()) {
-            getChildren().add(group.get(id));
-            group.get(id).setId(id);
-        }
-        group.get(id).getChildren().add(meshView);
     }
 
     @Override
