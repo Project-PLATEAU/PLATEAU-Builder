@@ -39,14 +39,15 @@ import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.citygml4j.model.gml.geometry.primitives.Solid;
 import org.citygml4j.model.gml.geometry.primitives.SolidProperty;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
+import org.locationtech.jts.algorithm.Orientation;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
 import org.plateau.citygmleditor.exporters.GmlExporter;
-import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.geometry.GeoReference;
 import org.plateau.citygmleditor.importers.obj.ObjImporter;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
+import org.plateau.citygmleditor.world.World;
 
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
@@ -68,13 +69,7 @@ public class Obj2LodConverter {
     public Obj2LodConverter(CityModelView cityModelView) {
         _cityModelView = cityModelView;
         _cityModel = (org.citygml4j.model.citygml.core.CityModel) cityModelView.getGmlObject();
-        var envelope = (_cityModel).getBoundedBy().getEnvelope();
-        var lowerCorner = envelope.getLowerCorner().toList3d();
-        var min = new GeoCoordinate(lowerCorner);
-        var upperCorner = envelope.getUpperCorner().toList3d();
-        var max = new GeoCoordinate(upperCorner);
-        var center = min.add(max).divide(2);
-        _geoReference = new GeoReference(center);
+        _geoReference = World.getActiveInstance().getGeoReference();
     }
 
     public ILODSolidView convert(String fileUrl) throws Exception {
@@ -234,6 +229,8 @@ public class Obj2LodConverter {
     }
 
     private List<org.locationtech.jts.geom.Polygon> createPolygonList(List<TriangleModel> triangleList) {
+        var isInitCCW = false;
+        boolean isTriangleCCW = false;
         List<org.locationtech.jts.geom.Polygon> trianglePolygonList = new LinkedList<>();
         for (var triangleModel : triangleList) {
             var p1 = triangleModel.getVertex(0);
@@ -251,6 +248,11 @@ public class Obj2LodConverter {
             var polygon = _geometryFactory.createPolygon(linearRing, null);
             polygon.setUserData(triangleModel);
             trianglePolygonList.add(polygon);
+            if (!isInitCCW) {
+                // 初回はCCW判定を行う
+                isTriangleCCW = Orientation.isCCW(linearRing.getCoordinateSequence());
+                isInitCCW = true;
+            }
         }
 
         org.locationtech.jts.geom.Geometry geometry = null;
@@ -263,7 +265,11 @@ public class Obj2LodConverter {
         }
 
         // 結合した結果がMultiPolygonの場合があるのでPolygonに分割する
-        List<org.locationtech.jts.geom.Polygon> polygonList = splitJtsPolygon(geometry);
+        List<org.locationtech.jts.geom.Polygon> polygonList = new ArrayList<>();
+        for (var polygon : splitJtsPolygon(geometry)) {
+            // ポリゴンの法線が変わっている可能性があるため三角形の法線に合わせる
+            polygonList.add(matchPolygonFace(isTriangleCCW, polygon));
+        }
 
         if (polygonList.size() == 1) {
             // ポリゴンが1つなら判定不要
@@ -288,7 +294,7 @@ public class Obj2LodConverter {
                     for (var polygon : polygonList) {
                         var distance = polygon.distance(trianglePolygon);
                         //System.out.println(String.format("polygon distance:%f", distance));
-                        if (distance <= 0.001) {
+                        if (distance <= 0.003) {
                             AddUserData(polygon, trianglePolygon);
                             found = true;
                             break;
@@ -340,6 +346,28 @@ public class Obj2LodConverter {
         }
 
         return polygonList;
+    }
+
+    private org.locationtech.jts.geom.Polygon matchPolygonFace(boolean isTriangleCCW, org.locationtech.jts.geom.Polygon polygon) {
+        polygon.normalize();
+        var isPolygonCCW = Orientation.isCCW(polygon.getExteriorRing().getCoordinateSequence());
+        var matchPolygon = isPolygonCCW != isTriangleCCW ? polygon.reverse() : polygon;
+        if (isPolygonCCW != isTriangleCCW) {
+            if (matchPolygon.getNumInteriorRing() > 0) {
+                List<org.locationtech.jts.geom.LinearRing> interiorRingList = new ArrayList<>();
+                for (var i = 0; i < matchPolygon.getNumInteriorRing(); i++) {
+                    var linearRing = matchPolygon.getInteriorRingN(i);
+                    if (Orientation.isCCW(linearRing.getCoordinateSequence()) == isPolygonCCW) {
+                        interiorRingList.add(linearRing);
+                    } else {
+                        interiorRingList.add(linearRing.reverse());
+                    }
+                }
+                matchPolygon = _geometryFactory.createPolygon(matchPolygon.getExteriorRing(), interiorRingList.toArray(new org.locationtech.jts.geom.LinearRing[0]));
+            }
+        }
+
+        return matchPolygon;
     }
 
     private void toGmlPolygonList(org.locationtech.jts.geom.Geometry jtsGeometry, TriangleModel groundTriangle, ParameterizedTexture parameterizedTexture) {
