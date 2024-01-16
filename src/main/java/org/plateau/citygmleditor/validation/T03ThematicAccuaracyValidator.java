@@ -31,7 +31,7 @@ public class T03ThematicAccuaracyValidator implements IValidator {
         Document doc = db.parse(gmlFile);
 
         // get all object have reference
-        Set<String> allXHref = this.getAllAttribute(doc, "xlink:href");
+        Set<String> allXHref = this.getAllAttribute(doc, TagName.X_HREF);
         // get all attribute gml:id
         Set<String> allGmlID = this.getAllAttribute(doc, TagName.GML_ID);
         List<String> xHrefInvalid = new ArrayList<>();

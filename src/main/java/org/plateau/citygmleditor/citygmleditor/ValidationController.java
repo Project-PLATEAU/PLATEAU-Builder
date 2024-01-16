@@ -99,13 +99,14 @@ public class ValidationController implements Initializable {
 
     private List<IValidator> loadValidators() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        List<Standard> standards = mapper.readValue(new File(AppConst.VALIDATION_CONFIG_PATH), new TypeReference<>() {});
+        List<Standard> standards = mapper.readValue(new File(AppConst.VALIDATION_CONFIG_PATH), new TypeReference<>() {
+        });
         List<IValidator> result = new ArrayList<>();
 
         for (Standard standard : standards) {
             if (!standard.isEnabled()) continue;
             switch (standard.getId()) {
-                case GMLID:
+                case C01:
                     result.add(new GMLIDCompletenessValidator());
                     break;
                 case C04:
@@ -149,6 +150,9 @@ public class ValidationController implements Initializable {
                     break;
                 case T_BLDG_02:
                     result.add(new Tbldg02ThematicAccuaracyValidator());
+                    break;
+                case L14:
+                    result.add(new L14LogicalAccuaracyValidator());
                     break;
             }
         }

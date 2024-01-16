@@ -13,4 +13,5 @@ public interface MessageError {
     String ERR_BLDG03_001 = "BLDG 03: Window tag does not exist inside boundedBy";
     String ERR_BLDG03_002 = "BLDG 03: Door tag does not exist inside boundedBy";
     String ERR_T_Bldg_02_001 = "T-bldg-02: Building have ({0}) is invalid";
+    String ERR_L14_001 = "L14: Building have ({0}) is invalid";
 }
