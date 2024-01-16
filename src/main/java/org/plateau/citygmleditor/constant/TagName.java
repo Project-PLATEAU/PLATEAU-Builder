@@ -22,5 +22,5 @@ public interface TagName {
     String GML_COMPOSITE_SURFACE = "gml:CompositeSurface";
     String X_HREF = "xlink:href";
     String BLDG_BUILDING_INSTALLATION = "bldg:BuildingInstallation";
-
+    String GML_SOLID = "gml:Solid";
 }

@@ -1,6 +1,6 @@
 [
   {
-    "id": "GMLID",
+    "id": "C01",
     "title": "gml:idの完全性",
     "enabled": true
   },
@@ -112,6 +112,11 @@
   {
     "id": "T-bldg-02",
     "title": "主題正確度・分類の正しさ(bldg:BuildingInstallationの幾何オブジェクトの型の分類の正しさ)",
+    "enabled": true
+  },
+  {
+    "id": "L14",
+    "title": "位相一貫性",
     "enabled": true
   }
 ]

@@ -27,6 +27,7 @@ module CityGMLEditor {
     requires commons.math3;
     requires proj4j;
     requires com.fasterxml.jackson.databind;
+    requires org.apache.commons.io;
 
     provides Importer with
             ObjOrPolyObjImporter;
