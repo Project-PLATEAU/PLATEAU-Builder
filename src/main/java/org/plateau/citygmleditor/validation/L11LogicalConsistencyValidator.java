@@ -4,10 +4,7 @@ import javafx.geometry.Point3D;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
-import org.plateau.citygmleditor.utils.CityGmlUtil;
-import org.plateau.citygmleditor.utils.CollectionUtil;
-import org.plateau.citygmleditor.utils.ThreeDUtil;
-import org.plateau.citygmleditor.utils.XmlUtil;
+import org.plateau.citygmleditor.utils.*;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.w3c.dom.Element;
@@ -162,7 +159,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
         if (points.size() <= 3) return true;
 
         // resolve plane equator by 3 points
-        double[] planeEquation = this.findPlaneEquation(points.get(0), points.get(1), points.get(2));
+        double[] planeEquation = SolveEquationUtil.findPlaneEquation(points.get(0), points.get(1), points.get(2));
 
         if (planeEquation[0] == 0.0 && planeEquation[1] == 0.0 && planeEquation[2] == 0.0) {
             logger.severe("Plane is not exist");
@@ -204,40 +201,5 @@ public class L11LogicalConsistencyValidator implements IValidator {
         double t = -(a * point.getX() + b * point.getY() + c * point.getZ() + d) / (a * a + b * b + c * c);
 
         return new Point3D(a * t + point.getX(), b * t + point.getY(), c * t + point.getZ());
-    }
-
-    /**
-     * The equation of the plane is 'Ax + By + Cz + D = 0'
-     * Get Coefficients of the equation (A,B,C,D)
-     */
-    private double[] findPlaneEquation(Point3D point1, Point3D point2, Point3D point3) {
-        Point3D vector12 = point2.subtract(point1);
-        Point3D vector23 = point3.subtract(point2);
-
-        double[] planeEquation = new double[4];
-        Vec3f normalVector = createNormal(vector12, vector23);
-        normalVector.normalize();
-        // Coefficient A
-        planeEquation[0] = normalVector.x;
-        // Coefficient B
-        planeEquation[1] = normalVector.y;
-        // Coefficient C
-        planeEquation[2] = normalVector.z;
-        // Coefficient D
-        planeEquation[3] = -(normalVector.x * point1.getX() + normalVector.y * point1.getY() + normalVector.z * point1.getZ());
-
-        return planeEquation;
-    }
-
-    private Vec3f createNormal(Point3D vector12, Point3D vector23) {
-        double xNormalVector = this.calculateDeterminant(vector12.getY(), vector12.getZ(), vector23.getY(), vector23.getZ());
-        double yNormalVector = this.calculateDeterminant(vector12.getZ(), vector12.getX(), vector23.getZ(), vector23.getX());
-        double zNormalVector = this.calculateDeterminant(vector12.getX(), vector12.getY(), vector23.getX(), vector23.getY());
-
-        return new Vec3f((float) xNormalVector, (float) yNormalVector, (float) zNormalVector);
-    }
-
-    private double calculateDeterminant(double a1, double a2, double b1, double b2) {
-        return a1 * b2 - a2 * b1;
     }
 }
