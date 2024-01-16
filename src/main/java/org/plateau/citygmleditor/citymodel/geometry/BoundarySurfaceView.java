@@ -7,6 +7,7 @@ import java.util.ArrayList;
 public class BoundarySurfaceView {
     private AbstractBoundarySurface gmlObject;
     private ArrayList<PolygonView> polygons;
+    private ArrayList<PolygonView> openingPolygons;
 
     public BoundarySurfaceView(AbstractBoundarySurface gmlObject) {
         this.gmlObject = gmlObject;
@@ -18,6 +19,14 @@ public class BoundarySurfaceView {
 
     public void setPolygons(ArrayList<PolygonView> polygons) {
         this.polygons = polygons;
+    }
+
+    public ArrayList<PolygonView> getOpeningPolygons() {
+        return openingPolygons;
+    }
+
+    public void setOpeningPolygons(ArrayList<PolygonView> polygons) {
+        this.openingPolygons = polygons;
     }
 
     /**
