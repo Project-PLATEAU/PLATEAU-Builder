@@ -82,8 +82,8 @@ public class TriangleModel {
         var d2 = getPlaneDistance(triangleModel.getVertexAsVector3f(1));
         var d3 = getPlaneDistance(triangleModel.getVertexAsVector3f(2));
 
-        // 単位がメートルのため、誤差を考慮して0.001m以下なら同一平面とみなす
-        return d1 <= 0.001 && d2 <= 0.001 && d3 <= 0.001 ;
+        // 単位がメートルのため、誤差を考慮して0.003m以下なら同一平面とみなす
+        return d1 <= 0.003 && d2 <= 0.003 && d3 <= 0.003 ;
     }
 
     public float getMinZ() {
