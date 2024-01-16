@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javafx.geometry.Point3D;
 import javax.xml.parsers.ParserConfigurationException;
@@ -111,11 +114,13 @@ public class L10LogicalConsistencyValidator implements IValidator {
   }
 
   protected Point3D getNormalVector(List<Point3D> ringPoints) {
+    // Remove duplicate points
+    LinkedHashSet<Point3D> points = new LinkedHashSet<>(ringPoints);
 
     var ringVertexBuffer = new VertexBuffer();
 
     // The contour points are converted to coordinates in the world and registered. The end point is deleted because the start point and end point overlap.
-    for (var point : ringPoints) {
+    for (var point : points) {
       var geoCoordinate = new GeoCoordinate(point.getX(), point.getY(), point.getZ());
       var position = World.getActiveInstance().getGeoReference().project(geoCoordinate);
       ringVertexBuffer.addVertex(position);
