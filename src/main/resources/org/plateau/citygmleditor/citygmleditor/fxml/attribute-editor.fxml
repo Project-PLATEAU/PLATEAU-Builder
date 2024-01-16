@@ -7,7 +7,7 @@
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.text.Font?>
 
-<TitledPane fx:id="titledPane" alignment="CENTER" animated="false" collapsible="false" contentDisplay="RIGHT" graphicTextGap="5.0" maxWidth="1.7976931348623157E308" minHeight="200.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="300.0" prefWidth="600.0" text="属性情報" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.AttributeEditorController">
+<TitledPane fx:id="titledPane" animated="false" collapsible="false" contentDisplay="RIGHT" graphicTextGap="5.0" maxWidth="1.7976931348623157E308" minHeight="200.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="300.0" prefWidth="200.0" text="属性情報" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.AttributeEditorController">
     <TreeTableView fx:id="attributeTreeTable" editable="true" showRoot="false">
         <columns>
             <TreeTableColumn fx:id="keyColumn" editable="false" prefWidth="200.0" sortable="false" text="キー" />
