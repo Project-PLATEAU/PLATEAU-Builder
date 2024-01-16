@@ -1,16 +1,16 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
+import org.plateau.citygmleditor.citymodel.GMLObjectView;
 
 import java.util.ArrayList;
 
-public class BoundarySurfaceView {
-    private AbstractBoundarySurface gmlObject;
+public class BoundarySurfaceView extends GMLObjectView<AbstractBoundarySurface> {
     private ArrayList<PolygonView> polygons;
     private ArrayList<PolygonView> openingPolygons;
 
-    public BoundarySurfaceView(AbstractBoundarySurface gmlObject) {
-        this.gmlObject = gmlObject;
+    public BoundarySurfaceView(AbstractBoundarySurface original) {
+        super(original);
     }
 
     public ArrayList<PolygonView> getPolygons() {
@@ -34,6 +34,6 @@ public class BoundarySurfaceView {
      * @return the id
      */
     public String getId() {
-        return gmlObject.getId();
+        return getOriginal().getId();
     }
 }

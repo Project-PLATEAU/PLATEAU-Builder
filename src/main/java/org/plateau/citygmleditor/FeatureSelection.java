@@ -2,11 +2,12 @@ package org.plateau.citygmleditor;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.DepthTest;
+import javafx.scene.Node;
+import javafx.scene.image.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.DrawMode;
-import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
+import javafx.scene.shape.*;
+import org.plateau.citygmleditor.control.SurfacePolygonSection;
 import org.plateau.citygmleditor.world.World;
 
 import org.plateau.citygmleditor.citymodel.BuildingView;
@@ -14,11 +15,29 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
-import javafx.scene.shape.MeshView;
 
 public class FeatureSelection {
-    private ObjectProperty<BuildingView> active = new SimpleObjectProperty<>();
-    private MeshView outLine;
+    private final ObjectProperty<BuildingView> active = new SimpleObjectProperty<>();
+    private final MeshView outLine = new MeshView();
+
+    private ObjectProperty<SurfacePolygonSection> activeSection = new SimpleObjectProperty<>();
+
+    public FeatureSelection() {
+        var material = new PhongMaterial();
+        material.setDiffuseColor(new Color(1, 1, 0, 0.3));
+        WritableImage image = new WritableImage(1, 1);
+        PixelWriter writer = image.getPixelWriter();
+        writer.setColor(0, 0, Color.web("#ff330033"));
+
+        material.setSelfIlluminationMap(image);
+        outLine.setMaterial(material);
+        outLine.setDrawMode(DrawMode.FILL);
+        outLine.setOpacity(0.3);
+        outLine.setViewOrder(-1);
+
+        var node = (Group) World.getRoot3D();
+        node.getChildren().add(outLine);
+    }
 
     public BuildingView getActive() {
         return active.get();
@@ -28,42 +47,36 @@ public class FeatureSelection {
         return active;
     }
 
+    public ObjectProperty<SurfacePolygonSection> getSurfacePolygonSectionProperty() {
+        return activeSection;
+    }
+
     public void registerClickEvent(Scene scene) {
-        outLine = new MeshView();
-
-        var material = new PhongMaterial();
-        material.setDiffuseColor(Color.ORANGE);
-        outLine.setMaterial(material);
-        // outLine.setCullFace(CullFace.BACK);
-        outLine.setDrawMode(DrawMode.LINE);
-        outLine.setDepthTest(DepthTest.DISABLE);
-
-        var node = (Group) World.getRoot3D();
-        node.getChildren().add(outLine);
-
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
             PickResult pickResult = event.getPickResult();
             var newSelectedMesh = pickResult.getIntersectedNode();
-
-            var feature = newSelectedMesh;
-            while (feature != null && !(feature instanceof BuildingView)) {
-                feature = feature.getParent();
-            }
+            var feature = getBuilding(newSelectedMesh);
 
             if (feature == null)
                 return;
 
-            if (newSelectedMesh instanceof MeshView) {
-                var meshView = (MeshView) newSelectedMesh;
+            outLine.setMesh(feature.getLOD1Solid().getMesh());
 
-                outLine.setMesh(meshView.getMesh());
-            }
+            active.set(feature);
 
-            this.active.set((BuildingView) feature);
+            activeSection.set(feature.getLOD2Solid().getSurfaceTypeView().getSection(pickResult));
+            feature.getLOD2Solid().getSurfaceTypeView().updateSelectionOutLine(activeSection.get().polygon, outLine);
         });
     }
 
     public MeshView getOutLine() {
         return outLine;
+    }
+
+    private BuildingView getBuilding(Node node) {
+        while (node != null && !(node instanceof BuildingView)) {
+            node = node.getParent();
+        }
+        return (BuildingView)node;
     }
 }
