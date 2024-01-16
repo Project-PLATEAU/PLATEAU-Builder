@@ -1,11 +1,15 @@
 package org.plateau.citygmleditor.citymodel;
 
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.geometry.primitives.*;
+import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD3SolidView;
+import org.plateau.citygmleditor.control.BuildingSurfaceTypeView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +20,32 @@ public class BuildingView extends Parent {
     private LOD1SolidView lod1Solid;
     private LOD2SolidView lod2Solid;
     private LOD3SolidView lod3Solid;
+
     private List<BuildingInstallationView> buildingInstallationViews = new ArrayList<>();
 
     public BuildingView(AbstractBuilding gmlObject) {
         this.gmlObject = gmlObject;
+
+        CityGMLEditorApp.getCityModelViewMode().lodProperty().addListener((observable, oldValue, newValue) -> {
+            toggleLODView((int)newValue);
+        });
     }
 
     public AbstractBuilding getGMLObject() {
         return this.gmlObject;
+    }
+
+    public void toggleLODView(int lod) {
+        var solids = new ILODSolidView[] {
+                lod1Solid, lod2Solid, lod3Solid
+        };
+        for (int i = 1; i <= 3; ++i) {
+            var solid = solids[i - 1];
+            if (solid == null)
+                continue;
+
+            ((Node)solid).setVisible(lod == i);
+        }
     }
 
     public void setLOD1Solid(LOD1SolidView solid) {

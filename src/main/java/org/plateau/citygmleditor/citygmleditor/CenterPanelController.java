@@ -33,7 +33,8 @@ public class CenterPanelController implements Initializable {
         subScene.widthProperty().bind(subSceneContainer.widthProperty());
 
         // 既にあれば上書き、無ければ追加
-        if (subSceneContainer.getChildren().size() == 1) {
+        if (!subSceneContainer.getChildren().isEmpty()
+                && subSceneContainer.getChildren().get(0) instanceof SubScene) {
             subSceneContainer.getChildren().set(0, subScene);
         } else {
             subSceneContainer.getChildren().add(0, subScene);

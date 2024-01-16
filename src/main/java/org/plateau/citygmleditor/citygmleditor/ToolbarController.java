@@ -2,12 +2,12 @@ package org.plateau.citygmleditor.citygmleditor;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point3D;
 import javafx.scene.Node;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
@@ -37,6 +37,8 @@ public class ToolbarController implements Initializable {
 
         gizmoModel = new GizmoModel();
         World.getRoot3D().getChildren().add(gizmoModel);
+
+        initializeLODToggle();
     }
     
     /**
@@ -183,5 +185,46 @@ public class ToolbarController implements Initializable {
 
         // 再帰検索
         return findLODSolidView(node.getParent());
+    }
+
+    /** サーフェス表示切り替え **/
+
+    public ToggleButton surfaceViewToggle;
+
+    public void onToggleSurfaceView() {
+        CityGMLEditorApp.getCityModelViewMode().toggleSurfaceViewMode(surfaceViewToggle.isSelected());
+    }
+
+    /** LOD表示切り替え **/
+    public ToggleGroup lodToggleGroup;
+
+    private void initializeLODToggle() {
+        var cityModelViewMode = CityGMLEditorApp.getCityModelViewMode();
+        selectLODToggle(cityModelViewMode.getLOD());
+
+        CityGMLEditorApp.getCityModelViewMode().lodProperty().addListener((observable, oldValue, newValue) -> {
+            selectLODToggle((int)newValue);
+        });
+
+        lodToggleGroup.selectedToggleProperty().addListener((observable, oldToggle, newToggle) -> {
+            // 全てのトグルがオフになる状態は回避する
+            if (newToggle == null) {
+                oldToggle.setSelected(true);
+                return;
+            }
+
+            int lod = Integer.parseInt(newToggle.getUserData().toString());
+            CityGMLEditorApp.getCityModelViewMode().lodProperty().setValue(lod);
+        });
+    }
+
+    private void selectLODToggle(int lod) {
+        for (var toggle : lodToggleGroup.getToggles()) {
+            int toggleLOD = Integer.parseInt(toggle.getUserData().toString());
+            if (toggleLOD == (int)lod) {
+                lodToggleGroup.selectToggle(toggle);
+                return;
+            }
+        }
     }
 }

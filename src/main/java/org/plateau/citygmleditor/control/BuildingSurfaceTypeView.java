@@ -1,75 +1,65 @@
 package org.plateau.citygmleditor.control;
 
-import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.PickResult;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
 import org.citygml4j.model.citygml.CityGMLClass;
+import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.plateau.citygmleditor.citymodel.geometry.BoundarySurfaceView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
 import org.plateau.citygmleditor.utils3d.geom.Vec2f;
 import org.plateau.citygmleditor.utils3d.polygonmesh.FaceBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
-import org.plateau.citygmleditor.world.World;
 
 import java.util.*;
 
 public class BuildingSurfaceTypeView extends MeshView {
-    private class FaceBufferSection {
-        public int start;
-        public int end;
-        public PolygonView polygon;
+    private AbstractBuilding targetBuilding;
 
-        public FaceBufferSection(int start, int end, PolygonView polygon) {
-            this.start = start;
-            this.end = end;
-            this.polygon = polygon;
-        }
-    }
-
-    private final List<FaceBufferSection> faceBufferSections = new ArrayList<>();
+    private final List<SurfacePolygonSection> faceBufferSections = new ArrayList<>();
     private final Map<CityGMLClass, Color> colorMap = buildingSurfaceColors();
 
-    public static BuildingSurfaceTypeView createBuildingSurfaceTypeView() {
-        var newInstance = new BuildingSurfaceTypeView();
-
-        var node = (Group) World.getRoot3D();
-        node.getChildren().add(newInstance);
-
-        return newInstance;
-    }
+    private final SelectionOutline selectionOutline = new SelectionOutline();
+    private final FaceBuffer faceBuffer = new FaceBuffer();
 
     public BuildingSurfaceTypeView() {
         var material = new PhongMaterial();
         material.setSelfIlluminationMap(createBuildingTypeColorImage());
         setMaterial(material);
+//        setDepthTest(DepthTest.DISABLE);
+        setViewOrder(-1);
     }
 
-    public void setTarget(LOD2SolidView lod2Solid) {
+    private void updateVisual(LOD2SolidView lod2Solid) {
         faceBufferSections.clear();
 
         var mesh = new TriangleMesh();
         mesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
-        mesh.getPoints().addAll(lod2Solid.getVertexBuffer().getBufferAsArray());
-        mesh.getTexCoords().addAll(createTexCoords().getBufferAsArray());
 
-        var faceBuffer = new FaceBuffer();
+        var vertexBuffer = lod2Solid.getVertexBuffer();
+        mesh.getPoints().addAll(vertexBuffer.getBufferAsArray());
+
+        var texCoordBuffer = createTexCoords();
+        mesh.getTexCoords().addAll(texCoordBuffer.getBufferAsArray());
+
         var faceIndexOffset = 0;
         for (var boundarySurface : lod2Solid.getBoundaries()) {
             var texCoordIndex = getIndex(boundarySurface);
             for (var polygon : boundarySurface.getPolygons()) {
-                var faceStartIndex = faceIndexOffset;
-                var faceEndIndex = faceIndexOffset + polygon.getFaceBuffer().getFaceCount() - 1;
-                faceIndexOffset = faceEndIndex + 1;
-                faceBufferSections.add(new FaceBufferSection(faceStartIndex, faceEndIndex, polygon));
+                var pointStartIndex = faceIndexOffset;
+                var pointEndIndex = faceIndexOffset + polygon.getFaceBuffer().getPointCount() - 1;
+                faceIndexOffset = pointEndIndex + 1;
+                faceBufferSections.add(new SurfacePolygonSection(pointStartIndex, pointEndIndex, polygon));
 
-                var polygonFaceBuffer = polygon.getFaceBuffer();
+                var polygonFaceBuffer = new FaceBuffer();
+                polygonFaceBuffer.addFaces(polygon.getFaceBuffer().getBuffer());
                 for (int i = 0; i < polygonFaceBuffer.getPointCount(); ++i) {
                     polygonFaceBuffer.setTexCoordIndex(i, texCoordIndex);
                 }
@@ -78,65 +68,75 @@ public class BuildingSurfaceTypeView extends MeshView {
         }
         mesh.getFaces().addAll(faceBuffer.getBufferAsArray());
 
-        var surfaceNormals = new float[faceBuffer.getPointCount() * 3];
-        Arrays.fill(surfaceNormals, 0);
-        mesh.getNormals().addAll(surfaceNormals);
+        var normals = new float[faceBuffer.getPointCount() * 3];
+        Arrays.fill(normals, 0);
+        mesh.getNormals().addAll(normals);
 
-        var surfaceSmooth = new int[faceBuffer.getFaceCount()];
-        Arrays.fill(surfaceSmooth, 1);
-        mesh.getFaceSmoothingGroups().addAll(surfaceSmooth);
+        var smooths = new int[faceBuffer.getFaceCount()];
+        Arrays.fill(smooths, 1);
+        mesh.getFaceSmoothingGroups().addAll(smooths);
 
         setMesh(mesh);
+    }
 
+    public void setTarget(LOD2SolidView lod2SolidView) {
+        updateVisual(lod2SolidView);
+    }
+
+//    public void registerClickEvent(Scene scene) {
+//        scene.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+//            PickResult pickResult = event.getPickResult();
+//            updateSelectionOutline(pickResult);
+//        });
+//    }
+
+    public void updateSurfaceType(SurfacePolygonSection section, CityGMLClass clazz) {
+        var mesh = (TriangleMesh)getMesh();
+        for (int i = section.start; i <= section.end; ++i) {
+            faceBuffer.setTexCoordIndex(i, getIndex(clazz));
+        }
+        mesh.getFaces().setAll(faceBuffer.getBufferAsArray());
+    }
+
+    public CityGMLClass getSurfaceType(SurfacePolygonSection section) {
+        var index = faceBuffer.getTexCoordIndex(section.start);
+        return getClazz(index);
+    }
+
+    public SurfacePolygonSection getSection(PickResult pickResult) {
         // 選択されたPolygonを取得
-//        var selectedFace = pickResult.getIntersectedFace();
-//        PolygonView selectedPolygon = null;
-//        for (var entry : lod2Solid.getSurfaceDataPolygonsMap().entrySet()) {
-//            // 選択されたMeshViewのMaterialと合致するkey(SurfaceData)を探す
-//            var material = entry.getKey() == null
-//                    ? World.getActiveInstance().getDefaultMaterial()
-//                    : entry.getKey().getMaterial();
-//            if (selectedMesh.getMaterial() != material)
-//                continue;
-//
-//            for (var polygon : entry.getValue()) {
-//                selectedFace -= polygon.getFaceBuffer().getFaceCount();
-//                if (selectedFace < 0) {
-//                    selectedPolygon = polygon;
-//                    break;
-//                }
-//            }
-//            if (selectedFace < 0)
-//                break;
-//        }
-//
-//        if (selectedPolygon != null) {
-//            var vertexBuffer = new VertexBuffer();
-//            var faceBuffer = new FaceBuffer();
-//            PolygonMeshUtils.removeUnusedVertices(
-//                    lod2Solid.getVertexBuffer(),
-//                    selectedPolygon.getFaceBuffer(),
-//                    vertexBuffer, faceBuffer
-//            );
-//            var mesh = new TriangleMesh();
-//            mesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
-//            mesh.getPoints().addAll(vertexBuffer.getBufferAsArray());
-//
-//            // TODO: 圧縮
-//            mesh.getTexCoords().addAll(lod2Solid.getTexCoordBuffer().getBufferAsArray());
-//
-//            mesh.getFaces().addAll(faceBuffer.getBufferAsArray());
-//
-//            var normals = new float[faceBuffer.getPointCount() * 3];
-//            Arrays.fill(normals, 0);
-//            mesh.getNormals().addAll(normals);
-//
-//            var smooth = new int[faceBuffer.getFaceCount()];
-//            Arrays.fill(smooth, 1);
-//            mesh.getFaceSmoothingGroups().addAll(smooth);
-//
-//            outLine.setMesh(mesh);
-//        }
+        var selectedFace = pickResult.getIntersectedFace() * 3;
+        for (var section : faceBufferSections) {
+            if (selectedFace >= section.start && selectedFace <= section.end) {
+                return section;
+            }
+        }
+
+        return null;
+    }
+
+    public void updateSelectionOutLine(PolygonView selectedPolygon, MeshView outLine) {
+        if (selectedPolygon != null) {
+            var selfMesh = (TriangleMesh)getMesh();
+            var mesh = new TriangleMesh();
+            mesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
+            mesh.getPoints().addAll(selfMesh.getPoints());
+            mesh.getTexCoords().addAll(selfMesh.getTexCoords());
+
+            var faceBuffer = new FaceBuffer();
+            faceBuffer.addFaces(selectedPolygon.getFaceBuffer().getBuffer());
+            for (int i = 0; i < faceBuffer.getPointCount(); ++i) {
+                faceBuffer.setTexCoordIndex(i, 0);
+            }
+            mesh.getFaces().addAll(faceBuffer.getBufferAsArray());
+            mesh.getNormals().addAll(selfMesh.getNormals());
+
+            var smooths = new int[faceBuffer.getFaceCount()];
+            Arrays.fill(smooths, 1);
+            mesh.getFaceSmoothingGroups().addAll(smooths);
+
+            outLine.setMesh(mesh);
+        }
     }
 
     private TexCoordBuffer createTexCoords() {
@@ -149,13 +149,28 @@ public class BuildingSurfaceTypeView extends MeshView {
     }
 
     private int getIndex(BoundarySurfaceView boundarySurfaceView) {
+        var boundaryClazz = boundarySurfaceView.getOriginal().getCityGMLClass();
+        return getIndex(boundaryClazz);
+    }
+
+    private int getIndex(CityGMLClass clazz) {
         int index = 0;
-        for (var clazz : colorMap.keySet()) {
-            if (boundarySurfaceView.getOriginal().getCityGMLClass() == clazz)
+        for (var key : colorMap.keySet()) {
+            if (key == clazz)
                 return index;
             index++;
         }
         return 0;
+    }
+
+    private CityGMLClass getClazz(int texCoordIndex) {
+        int index = 0;
+        for (var key : colorMap.keySet()) {
+            if (index == texCoordIndex)
+                return key;
+            index++;
+        }
+        return null;
     }
 
     private Image createBuildingTypeColorImage() {
@@ -170,7 +185,7 @@ public class BuildingSurfaceTypeView extends MeshView {
         return image;
     }
 
-    private static Map<CityGMLClass, Color> buildingSurfaceColors() {
+    public static Map<CityGMLClass, Color> buildingSurfaceColors() {
         var map = new HashMap<CityGMLClass, Color>();
         map.put(CityGMLClass.BUILDING_WALL_SURFACE, Color.web("#dcdcdc"));
         map.put(CityGMLClass.BUILDING_ROOF_SURFACE, Color.web("#00008b"));
