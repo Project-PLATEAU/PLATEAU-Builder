@@ -108,7 +108,7 @@ public class C04CompletenessValidator implements IValidator {
     private List<UROBuildingAtrribute> getUroBuildingIDDuplicate(Element building) {
         NodeList uroBuildingAttr = building.getElementsByTagName(TagName.URO_BUILDING_ID_ATTRIBUTE);
         length = uroBuildingAttr.getLength();
-        if (length == 0) return List.of();
+        if (length == 0) return new ArrayList<>();
 
         List<UROBuildingAtrribute> duplicateID = new ArrayList<>();
         List<UROBuildingAtrribute> uroByNodelist = this.createUROBuildingAtrribute(uroBuildingAttr);

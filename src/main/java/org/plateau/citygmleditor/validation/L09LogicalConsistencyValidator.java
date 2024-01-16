@@ -3,6 +3,7 @@ package org.plateau.citygmleditor.validation;
 import javafx.geometry.Point3D;
 import org.locationtech.jts.geom.LineSegment;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.CollectionUtil;
@@ -16,6 +17,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -33,8 +35,16 @@ public class L09LogicalConsistencyValidator implements IValidator {
 
     for (int i = 0; i < linearRingNodes.getLength(); i++) {
       Node linearRingNode = linearRingNodes.item(i);
-      checkPointsNonDuplicatedAndClosed(linearRingNode, buildingWithErrorLinearRing);
-      checkPointsIntersect(linearRingNode, buildingWithErrorLinearRing);
+      try {
+        checkPointsNonDuplicatedAndClosed(linearRingNode, buildingWithErrorLinearRing);
+        checkPointsIntersect(linearRingNode, buildingWithErrorLinearRing);
+      } catch (InvalidPosStringException e) {
+        Node parentNode = XmlUtil.findNearestParentByAttribute(linearRingNodes.item(i), TagName.GML_ID);
+        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                MessageFormat.format(MessageError.ERR_L09_001,
+                        parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
+                        linearRingNodes.item(i).getFirstChild().getNodeValue())));
+      }
     }
 
     buildingWithErrorLinearRing.forEach((buildingNode, linearRingNodesWithError) -> {
@@ -131,7 +141,7 @@ public class L09LogicalConsistencyValidator implements IValidator {
       }
       return point3DS;
     }
-    return List.of();
+    return new ArrayList<>();
   }
 
   private List<LineSegment> getLineSegments(Node linearRingNode) {

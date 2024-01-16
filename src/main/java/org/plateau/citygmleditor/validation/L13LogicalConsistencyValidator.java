@@ -1,14 +1,5 @@
 package org.plateau.citygmleditor.validation;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javafx.geometry.Point3D;
 import javax.xml.parsers.ParserConfigurationException;
 import org.locationtech.jts.geom.Coordinate;
@@ -31,6 +22,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 
 public class L13LogicalConsistencyValidator implements IValidator {
 
@@ -47,7 +45,7 @@ public class L13LogicalConsistencyValidator implements IValidator {
 
     // Check if exterior and interior of each polygon is invalid
     for (int i = 0; i < polygons.getLength(); i++) {
-      validateExteriorAndInteriors(polygons.item(i), buildingWithErrorPolygonsSurfacePaths);
+      validateExteriorAndInteriors(polygons.item(i), buildingWithErrorPolygonsSurfacePaths, messages);
     }
 
     buildingWithErrorPolygonsSurfacePaths.forEach((buildingNode, errorPolygonSurfacePath) -> {
@@ -65,7 +63,8 @@ public class L13LogicalConsistencyValidator implements IValidator {
     return messages;
   }
 
-  private void validateExteriorAndInteriors(Node polygon, Map<Node, Set<Node>> buildingWithErrorLinearRing) {
+  private void validateExteriorAndInteriors(Node polygon, Map<Node, Set<Node>> buildingWithErrorLinearRing,
+                                            List<ValidationResultMessage> messages) {
 
     Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(polygon, TagName.BLDG_BUILDING, TagName.GML_ID);
 
@@ -73,8 +72,8 @@ public class L13LogicalConsistencyValidator implements IValidator {
     List<Polygon> interiors;
 
     try {
-      exterior = getExterior(polygon);
-      interiors = getInteriors(polygon);
+      exterior = getExterior(polygon, messages);
+      interiors = getInteriors(polygon, messages);
     } catch (InvalidGmlStructureException | InvalidPosStringException e) {
       logger.severe(e.getMessage());
       CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygon);
@@ -124,7 +123,7 @@ public class L13LogicalConsistencyValidator implements IValidator {
   }
 
 
-  public Polygon getExterior(Node polygon) {
+  public Polygon getExterior(Node polygon, List<ValidationResultMessage> messages) {
     var exteriorList = new ArrayList<Node>();
 
     XmlUtil.recursiveFindNodeByTagName(polygon, exteriorList, TagName.GML_EXTERIOR);
@@ -136,17 +135,17 @@ public class L13LogicalConsistencyValidator implements IValidator {
 
     var exterior = exteriorList.get(0);
 
-    return linearRingToPolygon(exterior.getFirstChild().getNextSibling());
+    return linearRingToPolygon(exterior.getFirstChild().getNextSibling(), messages);
   }
 
-  public List<Polygon> getInteriors(Node polygon) {
+  public List<Polygon> getInteriors(Node polygon, List<ValidationResultMessage> messages) {
 
     var interiorList = new ArrayList<Node>();
 
     XmlUtil.recursiveFindNodeByTagName(polygon, interiorList, TagName.GML_INTERIOR);
 
     return interiorList.stream()
-        .map(p-> linearRingToPolygon(p.getFirstChild().getNextSibling()))
+        .map(p-> linearRingToPolygon(p.getFirstChild().getNextSibling(), messages))
         .collect(Collectors.toList());
   }
 
@@ -155,9 +154,9 @@ public class L13LogicalConsistencyValidator implements IValidator {
    * @param linearRingNode LinearRing node
    * @return Polygon which created by LinearRing
    */
-  private Polygon linearRingToPolygon(Node linearRingNode) {
+  private Polygon linearRingToPolygon(Node linearRingNode, List<ValidationResultMessage> messages) {
 
-    var points = get3dPoints(linearRingNode).stream()
+    var points = get3dPoints(linearRingNode, messages).stream()
         .map(point -> new Coordinate(point.getX(), point.getY(), point.getZ()))
         .toArray(Coordinate[]::new);
 
@@ -169,7 +168,7 @@ public class L13LogicalConsistencyValidator implements IValidator {
    * @param linearRingNode LinearRing node
    * @return list of 3d points
    */
-  private List<Point3D> get3dPoints(Node linearRingNode) {
+  private List<Point3D> get3dPoints(Node linearRingNode, List<ValidationResultMessage> messages) {
     Element linearRingElement = (Element) linearRingNode;
     // There are 2 cases: posList and pos of LinearRing
     NodeList posListNodes = linearRingElement.getElementsByTagName(TagName.GML_POSLIST);
@@ -177,16 +176,34 @@ public class L13LogicalConsistencyValidator implements IValidator {
 
     if (posListNodes.getLength() > 0) {
       String[] posString = posListNodes.item(0).getTextContent().split(" ");
-      return ThreeDUtil.createListPoint(posString);
+      try {
+        return ThreeDUtil.createListPoint(posString);
+      } catch (InvalidPosStringException e) {
+        Node parentNode = XmlUtil.findNearestParentByAttribute(linearRingNode, TagName.GML_ID);
+        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                MessageFormat.format(MessageError.ERR_L13_002,
+                        parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
+                        linearRingNode.getFirstChild().getNodeValue())));
+        return new ArrayList<>();
+      }
     } else if (posNodes.getLength() > 0) {
       List<Point3D> point3DS = new ArrayList<>();
       for (int i = 0; i < posNodes.getLength(); i++) {
         Node posNode = posNodes.item(i);
         String[] posString = posNode.getTextContent().split(" ");
-        point3DS.addAll(ThreeDUtil.createListPoint(posString));
+        try {
+          point3DS.addAll(ThreeDUtil.createListPoint(posString));
+        } catch (InvalidPosStringException e) {
+          Node parentNode = XmlUtil.findNearestParentByAttribute(posNode, TagName.GML_ID);
+          messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                  MessageFormat.format(MessageError.ERR_L13_002,
+                          parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
+                          posNode.getFirstChild().getNodeValue())));
+          return new ArrayList<>();
+        }
       }
       return point3DS;
     }
-    return List.of();
+    return new ArrayList<>();
   }
 }

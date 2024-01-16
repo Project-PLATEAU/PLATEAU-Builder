@@ -78,6 +78,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
 
     @Override
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
+        List<ValidationResultMessage> messages = new ArrayList<>();
         // get buildings from gml file
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
@@ -87,7 +88,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
             Element building = (Element) tagBuilding;
             String buildingID = building.getAttribute(TagName.GML_ID);
             List<Node> tagLODs = XmlUtil.getTagsByRegex(LOD1, tagBuilding);
-            List<LODInvalid> lodInvalids = this.getInvalidLOD(tagLODs, L11);
+            List<LODInvalid> lodInvalids = this.getInvalidLOD(tagLODs, L11, messages);
 
             if (CollectionUtil.isEmpty(lodInvalids)) continue;
             BuildingInvalid buildingInvalid = new BuildingInvalid();
@@ -96,20 +97,19 @@ public class L11LogicalConsistencyValidator implements IValidator {
             buildingInvalids.add(buildingInvalid);
         }
 
-        if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
-        List<ValidationResultMessage> messages = new ArrayList<>();
+        if (CollectionUtil.isEmpty(buildingInvalids)) return new ArrayList<>();
         for (BuildingInvalid invalid : buildingInvalids) {
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid.toString()));
         }
         return messages;
     }
 
-    public List<LODInvalid> getInvalidLOD(List<Node> tagLOD, String standard) {
+    public List<LODInvalid> getInvalidLOD(List<Node> tagLOD, String standard, List<ValidationResultMessage> messages) {
         List<LODInvalid> result = new ArrayList<>();
         for (Node lodNode : tagLOD) {
             Element lod = (Element) lodNode;
             NodeList tagPolygons = lod.getElementsByTagName(TagName.GML_POLYGON);
-            List<String> polygonInvalids = this.getListPolygonInvalid(tagPolygons, standard);
+            List<String> polygonInvalids = this.getListPolygonInvalid(tagPolygons, standard, messages);
 
             if (CollectionUtil.isEmpty(polygonInvalids)) continue;
             LODInvalid lodInvalid = new LODInvalid();
@@ -122,7 +122,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
         return result;
     }
 
-    private List<String> getListPolygonInvalid(NodeList tagPolygons, String standard) {
+    private List<String> getListPolygonInvalid(NodeList tagPolygons, String standard, List<ValidationResultMessage> messages) {
         List<String> polygonIdInvalids = new ArrayList<>();
 
         for (int i = 0; i < tagPolygons.getLength(); i++) {
@@ -130,7 +130,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
             String polygonID = polygon.getAttribute(TagName.GML_ID);
             NodeList tagPosList = polygon.getElementsByTagName(TagName.GML_POSLIST);
 
-            List<String> invalidPoslist = this.getListCoordinateInvalid(tagPosList, standard);
+            List<String> invalidPoslist = this.getListCoordinateInvalid(tagPosList, standard, messages);
             if (invalidPoslist.isEmpty()) continue;
             polygonIdInvalids.add(polygonID.isBlank() ? String.valueOf(invalidPoslist) : polygonID);
         }
@@ -138,7 +138,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
         return polygonIdInvalids;
     }
 
-    private List<String> getListCoordinateInvalid(NodeList tagPoslists, String standard) {
+    private List<String> getListCoordinateInvalid(NodeList tagPoslists, String standard, List<ValidationResultMessage> messages) {
         List<String> invalid = new ArrayList<>();
 
         for (int i = 0; i < tagPoslists.getLength(); i++) {
@@ -152,6 +152,11 @@ public class L11LogicalConsistencyValidator implements IValidator {
                 if (this.arePointsInAPlane(point3Ds, standard)) continue;
                 invalid.add(Arrays.toString(posString));
             } catch (InvalidPosStringException e) {
+                Node parentNode = XmlUtil.findNearestParentByAttribute(posList, TagName.GML_ID);
+                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                        MessageFormat.format(MessageError.ERR_L11_003,
+                                parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
+                                posList.getFirstChild().getNodeValue())));
                 invalid.add(Arrays.toString(posString));
             }
         }
