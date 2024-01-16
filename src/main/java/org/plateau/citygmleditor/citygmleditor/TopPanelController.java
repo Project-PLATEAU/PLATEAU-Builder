@@ -15,6 +15,7 @@ import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.exporters.TextureExporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
+import org.plateau.citygmleditor.world.World;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,6 +33,10 @@ public class TopPanelController {
         try {
             Node root = GmlImporter.loadGml(file.toString());
             CityGMLEditorApp.getSceneContent().setContent(root);
+
+            var datasetPath = Paths.get(World.getActiveInstance().getCityModel().getGmlPath()).getParent().getParent().getParent();
+            String uroSchemasPath = datasetPath + "\\schemas\\iur\\uro\\2.0\\urbanObject.xsd";
+            CityGMLEditorApp.settingUroAttributeInfo(uroSchemasPath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

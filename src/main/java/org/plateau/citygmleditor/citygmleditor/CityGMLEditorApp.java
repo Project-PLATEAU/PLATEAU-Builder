@@ -61,7 +61,6 @@ public class CityGMLEditorApp extends Application {
     private static AntiAliasing antiAliasing;
     private static AutoScalingGroup autoScalingGroups;
     private static CityModelViewMode cityModelViewMode;
-    private static AttributeInfo attributeInfo;
     private static UroAttributeInfo uroAttributeInfo;
 
     private SessionManager sessionManager;

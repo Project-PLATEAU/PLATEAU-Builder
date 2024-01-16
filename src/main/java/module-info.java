@@ -25,6 +25,7 @@ module CityGMLEditor {
     requires commons.math3;
     requires org.locationtech.jts;
     requires proj4j;
+    requires xercesImpl;
 
     provides Importer with
             ObjOrPolyObjImporter;
