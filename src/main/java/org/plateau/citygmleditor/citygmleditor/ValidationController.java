@@ -145,6 +145,9 @@ public class ValidationController implements Initializable {
                 case T03:
                     result.add(new T03ThematicAccuaracyValidator());
                     break;
+                case L_BLDG_02:
+                    result.add(new Lbldg02LogicalConsistencyValidator());
+                    break;
                 case L_BLDG_03:
                     result.add(new Lbldg03LogicalAccuaracyValidator());
                     break;

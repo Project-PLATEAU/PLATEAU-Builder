@@ -23,4 +23,5 @@ public interface TagName {
     String X_HREF = "xlink:href";
     String BLDG_BUILDING_INSTALLATION = "bldg:BuildingInstallation";
     String GML_SOLID = "gml:Solid";
+    String BLGD_BUILDING_PART = "bldg:BuildingPart";
 }

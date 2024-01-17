@@ -72,26 +72,27 @@ public class L14LogicalAccuaracyValidator implements IValidator {
 
             int count = 0;
             for (int j = i + 1; j < totalPolygon; j++) {
-                Element polygon2 = (Element) polygons.item(i);
+                Element polygon2 = (Element) polygons.item(j);
                 Element exterior2 = (Element) polygon2.getElementsByTagName(TagName.GML_EXTERIOR).item(0);
                 Element posList2 = (Element) exterior2.getElementsByTagName(TagName.GML_POSLIST).item(0);
                 String[] posString2 = posList2.getTextContent().trim().split(" ");
 
-                Map<String, String> intersect = PythonUtil.checkIntersecWithPyCmd(AppConst.PATH_PYTHON, posString1, posString2);
-                if (!intersect.get("ERROR").isBlank()) {
+                Map<String, String> runCmdResult = PythonUtil.checkIntersecWithPyCmd(AppConst.PATH_PYTHON, posString1, posString2);
+                if (!runCmdResult.get("ERROR").isBlank()) {
                     logger.severe("Error when running python file");
                     this.setValueInvalidPolygon(polygon1, posString1, result);
                 }
-                String output = intersect.get("OUTPUT").trim();
+                String output = runCmdResult.get("OUTPUT").trim();
                 if (Objects.equals(output, "touch")) continue;
                 if (Objects.equals(output, "intersect")) {
                     this.setValueInvalidPolygon(polygon1, posString1, result);
                     continue outterLoop;
-                } else if (Objects.equals(output, "do not intersect")) {
+                }
+                if (Objects.equals(output, "do not intersect")) {
                     count++;
                 }
             }
-            if (count == totalPolygon) {
+            if (count == totalPolygon - 1) {
                 this.setValueInvalidPolygon(polygon1, posString1, result);
             }
         }
