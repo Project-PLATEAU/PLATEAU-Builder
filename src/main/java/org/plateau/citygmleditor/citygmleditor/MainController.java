@@ -50,6 +50,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
@@ -83,6 +84,7 @@ import javafx.scene.shape.Box;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.util.Duration;
 import org.plateau.citygmleditor.importers.Importer3D;
 import org.plateau.citygmleditor.importers.gltf.GltfImporter;
@@ -110,12 +112,14 @@ import java.nio.file.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import org.plateau.citygmleditor.world.*;
+import org.plateau.citygmleditor.citygmleditor.CoordinateDialogController;
 
 /**
  * ToolbarController class for main fxml file.
  */
 public class MainController implements Initializable {
     public VBox centerPanel;
+    private File droppedFile;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -151,17 +155,28 @@ public class MainController implements Initializable {
                     if (supportedFile.getAbsolutePath().indexOf('%') != -1) {
                         supportedFile = new File(URLDecoder.decode(supportedFile.getAbsolutePath()));
                     }
-                    try {
-                        Node root = GmlImporter.loadGml(supportedFile.toString());
-                        CityGMLEditorApp.getSceneContent().setContent(root);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                    droppedFile = supportedFile;
+                    Platform.runLater(() -> processDroppedFiles());
                 }
                 success = true;
             }
             event.setDropCompleted(success);
             event.consume();
         });
+    }
+
+    private void processDroppedFiles() {
+        try {
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/coordinate-dialog.fxml"));
+            stage.setScene(new Scene(loader.load()));
+            var controller = (CoordinateDialogController) loader.getController();
+            controller.setFile(droppedFile);
+            controller.setRoot(stage);
+            stage.showAndWait();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

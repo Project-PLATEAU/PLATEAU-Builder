@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
@@ -30,9 +31,15 @@ public class TopPanelController {
             return;
 
         try {
-            Node root = GmlImporter.loadGml(file.toString());
-            CityGMLEditorApp.getSceneContent().setContent(root);
-        } catch (Exception e) {
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/coordinate-dialog.fxml"));
+            stage.setScene(new Scene(loader.load()));
+            var controller = (CoordinateDialogController) loader.getController();
+            controller.setFile(file);
+            controller.setRoot(stage);
+            stage.showAndWait();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
