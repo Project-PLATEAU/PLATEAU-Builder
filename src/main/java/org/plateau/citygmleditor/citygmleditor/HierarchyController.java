@@ -9,6 +9,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.stage.FileChooser;
+
+import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
@@ -101,8 +103,9 @@ public class HierarchyController implements Initializable {
             return;
 
         ILODSolidView solid = (ILODSolidView)item;
+        BuildingView building = (BuildingView)solid.getParent();
         try {
-            GltfExporter.export(newFile.toString(), solid);
+            new GltfExporter().export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -131,8 +134,9 @@ public class HierarchyController implements Initializable {
             return;
 
         ILODSolidView solid = (ILODSolidView)item;
+        BuildingView building = (BuildingView)solid.getParent();
         try {
-            ObjExporter.export(newFile.toString(), solid);
+            new ObjExporter().export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
         }
