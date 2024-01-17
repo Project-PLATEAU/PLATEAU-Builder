@@ -41,6 +41,7 @@ import javafx.stage.Stage;
 import javafx.scene.Group;
 
 import javafx.stage.Window;
+import org.plateau.citygmleditor.control.CityModelViewMode;
 import org.plateau.citygmleditor.world.*;
 import org.plateau.citygmleditor.FeatureSelection;
 
@@ -55,6 +56,7 @@ public class CityGMLEditorApp extends Application {
     private static SceneContent sceneContent;
     private static AntiAliasing antiAliasing;
     private static AutoScalingGroup autoScalingGroups;
+    private static CityModelViewMode cityModelViewMode;
 
     private SessionManager sessionManager;
 
@@ -95,6 +97,7 @@ public class CityGMLEditorApp extends Application {
     public static FeatureSelection getFeatureSellection() {
         return selection;
     }
+    public static CityModelViewMode getCityModelViewMode() { return cityModelViewMode; }
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -118,6 +121,8 @@ public class CityGMLEditorApp extends Application {
         World.getRoot3D().getChildren().add(autoScalingGroups);
 
         sceneContent.rebuildSubScene();
+
+        cityModelViewMode = new CityModelViewMode();
 
         scene = new Scene(
                 FXMLLoader.<Parent>load(Objects.requireNonNull(CityGMLEditorApp.class.getResource("fxml/main.fxml"))),

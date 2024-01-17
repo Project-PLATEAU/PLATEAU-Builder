@@ -1,9 +1,9 @@
 package org.plateau.citygmleditor.utils3d.polygonmesh;
 
+import org.plateau.citygmleditor.utils3d.geom.Vec2f;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * ポリゴンメッシュを扱う汎用関数を提供します。
@@ -126,4 +126,34 @@ public class PolygonMeshUtils {
         return normals;
     }
 
+    /**
+     * ポリゴンメッシュから未使用の頂点を削除します。
+     * 対応する頂点を新しいバッファにコピーし、面のインデックスもそれに応じて更新されます。
+     *
+     * @param vertexBuffer 入力頂点バッファ．
+     * @param faceBuffer 入力顔バッファ．
+     * @param outVertexBuffer 出力頂点バッファ．既存の頂点はクリアされません．
+     * @param outFaceBuffer 出力顔バッファ．既存の面はクリアされません。
+     */
+    public static void removeUnusedVertices(
+            VertexBuffer vertexBuffer, FaceBuffer faceBuffer,
+            VertexBuffer outVertexBuffer, FaceBuffer outFaceBuffer) {
+        var indexRemap = new HashMap<Integer, Integer>();
+
+        int destIndex = 0;
+        for (int i = 0; i < faceBuffer.getPointCount(); ++i) {
+            int index = faceBuffer.getVertexIndex(i);
+
+            if (!indexRemap.containsKey(index)) {
+                var srcVertex = vertexBuffer.getVertex(index);
+                outVertexBuffer.addVertex(srcVertex);
+
+                indexRemap.put(index, destIndex++);
+            }
+
+            outFaceBuffer.getBuffer().add(indexRemap.get(index));
+            outFaceBuffer.getBuffer().add(i);
+            outFaceBuffer.getBuffer().add(i);
+        }
+    }
 }
