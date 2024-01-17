@@ -2,6 +2,7 @@ package org.plateau.citygmleditor.validation;
 
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
+import org.plateau.citygmleditor.constant.Relationship;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.CollectionUtil;
@@ -20,11 +21,6 @@ import java.util.Objects;
 
 
 public class Lbldg02LogicalConsistencyValidator implements IValidator {
-    private final String NOT_INTERSECT = "1";
-    private final String TOUCH = "2";
-    private final String INTERSECT = "3";
-    private final String FLAT_INTERSECT = "4";
-
     static class BuildingInvalid {
         private String ID;
         private List<BuildingPart> buildingPart;
@@ -162,9 +158,9 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
             Map<String, String> runCmdResult = PythonUtil.checkIntersecWithPyCmd(AppConst.PATH_PYTHON, posString1, posString2);
             if (!runCmdResult.get("ERROR").isBlank()) return false;
             String output = runCmdResult.get("OUTPUT").trim();
-            if (Objects.equals(output, INTERSECT)) return false;
-            if (Objects.equals(output, TOUCH) || Objects.equals(output, FLAT_INTERSECT)) continue;
-            if (Objects.equals(output, NOT_INTERSECT)) {
+            if (Objects.equals(output, Relationship.INTERSECT)) return false;
+            if (Objects.equals(output, Relationship.TOUCH) || Objects.equals(output, Relationship.FLAT_INTERSECT)) continue;
+            if (Objects.equals(output, Relationship.NOT_INTERSECT)) {
                 count++;
             }
         }

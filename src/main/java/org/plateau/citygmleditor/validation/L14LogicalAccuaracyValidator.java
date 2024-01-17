@@ -2,6 +2,7 @@ package org.plateau.citygmleditor.validation;
 
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
+import org.plateau.citygmleditor.constant.Relationship;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.PythonUtil;
@@ -83,12 +84,12 @@ public class L14LogicalAccuaracyValidator implements IValidator {
                     this.setValueInvalidPolygon(polygon1, posString1, result);
                 }
                 String output = runCmdResult.get("OUTPUT").trim();
-                if (Objects.equals(output, "touch")) continue;
-                if (Objects.equals(output, "intersect")) {
+                if (Objects.equals(output, Relationship.TOUCH)) continue;
+                if (Objects.equals(output, Relationship.INTERSECT)) {
                     this.setValueInvalidPolygon(polygon1, posString1, result);
                     continue outterLoop;
                 }
-                if (Objects.equals(output, "do not intersect")) {
+                if (Objects.equals(output, Relationship.NOT_INTERSECT)) {
                     count++;
                 }
             }
