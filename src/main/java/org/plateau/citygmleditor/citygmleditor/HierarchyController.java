@@ -1,26 +1,33 @@
 package org.plateau.citygmleditor.citygmleditor;
 
-import javafx.beans.binding.ObjectBinding;
-import javafx.event.ActionEvent;
-import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.CheckBoxTreeTableCell;
-import javafx.scene.input.KeyCode;
-import javafx.stage.FileChooser;
-
-import org.plateau.citygmleditor.citymodel.BuildingView;
-import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
-import org.plateau.citygmleditor.exporters.GltfExporter;
-import org.plateau.citygmleditor.exporters.ObjExporter;
-import org.plateau.citygmleditor.world.*;
-
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.plateau.citygmleditor.citymodel.BuildingView;
+import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.converters.Obj2LodConverter;
+import org.plateau.citygmleditor.exporters.GltfExporter;
+import org.plateau.citygmleditor.exporters.ObjExporter;
+import org.plateau.citygmleditor.world.SceneContent;
+
+import javafx.beans.binding.ObjectBinding;
+import javafx.event.ActionEvent;
+import javafx.fxml.Initializable;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
+import javafx.scene.control.cell.CheckBoxTreeTableCell;
+import javafx.scene.input.KeyCode;
+import javafx.stage.FileChooser;
 
 public class HierarchyController implements Initializable {
     private final SceneContent sceneContent = CityGMLEditorApp.getSceneContent();
@@ -31,6 +38,7 @@ public class HierarchyController implements Initializable {
     public ContextMenu hierarchyContextMenu;
     public MenuItem exportGltfMenu;
     public MenuItem exportObjMenu;
+    public MenuItem importObjMenu;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -56,6 +64,7 @@ public class HierarchyController implements Initializable {
                     var item = selectedItem.valueProperty().get();
                     exportGltfMenu.setDisable(!(item instanceof ILODSolidView));
                     exportObjMenu.setDisable(!(item instanceof ILODSolidView));
+                    importObjMenu.setDisable(!(item instanceof ILODSolidView));
                 }
             }
             if (t.getClickCount() == 2) {
@@ -84,7 +93,7 @@ public class HierarchyController implements Initializable {
      * Export the selected solid to gLTF
      * @param actionEvent the event
      */
-    public void ExportGltf(ActionEvent actionEvent) {
+    public void exportGltf(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("gLTF", "*.gltf", "*.glb")
@@ -115,7 +124,7 @@ public class HierarchyController implements Initializable {
      * Export the selected solid to OBJ
      * @param actionEvent the event
      */
-    public void ExportObj(ActionEvent actionEvent) {
+    public void exportObj(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("OBJ", "*.obj")
@@ -139,6 +148,36 @@ public class HierarchyController implements Initializable {
             new ObjExporter().export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void importObj(ActionEvent actionEvent) {
+        var file = FileChooserService.showOpenDialog("*.obj", SessionManager.OBJ_FILE_PATH_PROPERTY);
+
+        if (file == null)
+            return;
+
+        var content = (Group)sceneContent.getContent();
+        var cityModelNode = content.getChildren().get(0);
+        if (cityModelNode == null)
+            return;
+
+        var cityModel = (CityModelView)cityModelNode;
+        TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
+        if (selectedItem == null)
+            return;
+
+        var item = selectedItem.valueProperty().get();
+        if (!(item instanceof ILODSolidView))
+            return;
+
+        ILODSolidView solid = (ILODSolidView)item;
+        BuildingView building = (BuildingView)solid.getParent();
+        try {
+            new Obj2LodConverter(cityModel).convert(file.toString());
+            //CityGMLEditorApp.getSceneContent().setContent(root);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
