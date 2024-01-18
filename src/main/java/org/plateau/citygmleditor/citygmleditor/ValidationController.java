@@ -106,56 +106,59 @@ public class ValidationController implements Initializable {
         for (Standard standard : standards) {
             if (!standard.isEnabled()) continue;
             switch (standard.getId()) {
-                case C01:
-                    result.add(new GMLIDCompletenessValidator());
-                    break;
-                case C04:
-                    result.add(new C04CompletenessValidator());
-                    break;
-                case L05:
-                    result.add(new L05LogicalConsistencyValidator());
-                    break;
-                case L06:
-                    result.add(new L06LogicalConsistencyValidator());
-                    break;
-                case L07:
-                    result.add(new L07LogicalConsistencyValidator());
-                    break;
-                case L08:
-                    result.add(new L08LogicalConsistencyValidator());
-                    break;
-                case L09:
-                    result.add(new L09LogicalConsistencyValidator());
-                    break;
-                case L10:
-                    result.add(new L10LogicalConsistencyValidator());
-                    break;
-                case L11:
-                    result.add(new L11LogicalConsistencyValidator());
-                    break;
-                case L12:
-                    result.add(new L12LogicalConsistencyValidator());
-                    break;
-                case L13:
-                    result.add(new L13LogicalConsistencyValidator());
-                    break;
-                case L18:
-                    result.add(new L18LogicalConsistencyValidator());
-                    break;
-                case T03:
-                    result.add(new T03ThematicAccuaracyValidator());
-                    break;
-                case L_BLDG_02:
-                    result.add(new Lbldg02LogicalConsistencyValidator());
-                    break;
-                case L_BLDG_03:
-                    result.add(new Lbldg03LogicalAccuaracyValidator());
-                    break;
-                case T_BLDG_02:
-                    result.add(new Tbldg02ThematicAccuaracyValidator());
-                    break;
-                case L14:
-                    result.add(new L14LogicalAccuaracyValidator());
+//                case C01:
+//                    result.add(new GMLIDCompletenessValidator());
+//                    break;
+//                case C04:
+//                    result.add(new C04CompletenessValidator());
+//                    break;
+//                case L05:
+//                    result.add(new L05LogicalConsistencyValidator());
+//                    break;
+//                case L06:
+//                    result.add(new L06LogicalConsistencyValidator());
+//                    break;
+//                case L07:
+//                    result.add(new L07LogicalConsistencyValidator());
+//                    break;
+//                case L08:
+//                    result.add(new L08LogicalConsistencyValidator());
+//                    break;
+//                case L09:
+//                    result.add(new L09LogicalConsistencyValidator());
+//                    break;
+//                case L10:
+//                    result.add(new L10LogicalConsistencyValidator());
+//                    break;
+//                case L11:
+//                    result.add(new L11LogicalConsistencyValidator());
+//                    break;
+//                case L12:
+//                    result.add(new L12LogicalConsistencyValidator());
+//                    break;
+//                case L13:
+//                    result.add(new L13LogicalConsistencyValidator());
+//                    break;
+//                case L18:
+//                    result.add(new L18LogicalConsistencyValidator());
+//                    break;
+//                case T03:
+//                    result.add(new T03ThematicAccuaracyValidator());
+//                    break;
+//                case L_BLDG_02:
+//                    result.add(new Lbldg02LogicalConsistencyValidator());
+//                    break;
+//                case L_BLDG_03:
+//                    result.add(new Lbldg03LogicalAccuaracyValidator());
+//                    break;
+//                case T_BLDG_02:
+//                    result.add(new Tbldg02ThematicAccuaracyValidator());
+//                    break;
+//                case L14:
+//                    result.add(new L14LogicalAccuaracyValidator());
+//                    break;
+                case L_BLDG_01:
+                    result.add(new Lbldg01LogicalAccuaracyValidator());
                     break;
             }
         }
