@@ -112,6 +112,9 @@ public class ValidationController implements Initializable {
                 case C04:
                     result.add(new C04CompletenessValidator());
                     break;
+                case L04:
+                    result.add(new L04LogicalConsistencyValidator());
+                    break;
                 case L05:
                     result.add(new L05LogicalConsistencyValidator());
                     break;

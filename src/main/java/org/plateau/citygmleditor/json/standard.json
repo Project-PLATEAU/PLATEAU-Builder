@@ -15,6 +15,11 @@
     "enabled": true
   },
   {
+    "id": "L04",
+    "title": "定義域一貫性",
+    "enabled": true
+  },
+  {
     "id": "L05",
     "title": "定義域一貫性",
     "enabled": true
