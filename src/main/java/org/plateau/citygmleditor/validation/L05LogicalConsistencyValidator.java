@@ -2,9 +2,12 @@ package org.plateau.citygmleditor.validation;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.StringReader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.constant.MessageError;
 
 import static org.plateau.citygmleditor.constant.TagName.srsNameURI;
 
@@ -21,7 +24,7 @@ public class L05LogicalConsistencyValidator implements IValidator{
             }
 
             if (!uri.equals(srsNameURI)) {
-                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "L05: Url error!" + uri));
+                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageFormat.format(MessageError.ERR_L05_001, uri)));
             }
 
             return messages;

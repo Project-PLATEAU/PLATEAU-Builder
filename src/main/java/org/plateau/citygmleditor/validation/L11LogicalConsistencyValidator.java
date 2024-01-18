@@ -5,7 +5,6 @@ import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.*;
-import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -68,7 +67,12 @@ public class L11LogicalConsistencyValidator implements IValidator {
         }
 
         public String toString() {
-            return "buildingID = " + buildingID + " \n" + lodInvalids + "]";
+            String messageError = MessageFormat.format(MessageError.ERR_L11_002, buildingID);
+            for (LODInvalid lodInvalid : lodInvalids) {
+                messageError = messageError +
+                MessageFormat.format(MessageError.ERR_L11_002_1, lodInvalid.polygon);
+            }
+            return  messageError;
         }
     }
 
@@ -95,8 +99,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
         for (BuildingInvalid invalid : buildingInvalids) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                    MessageFormat.format(MessageError.ERR_L11_001, invalid)));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid.toString()));
         }
         return messages;
     }

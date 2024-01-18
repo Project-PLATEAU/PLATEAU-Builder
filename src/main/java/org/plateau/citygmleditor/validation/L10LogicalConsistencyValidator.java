@@ -58,13 +58,15 @@ public class L10LogicalConsistencyValidator implements IValidator {
     buildingWithErrorPolygonsSurfacePaths.forEach((buildingNode, errorPolygonSurfacePath) -> {
       String buildingGmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
 
-      var nodeErrorDetail = errorPolygonSurfacePath.stream()
-          .map(node -> {
-            var gmlId = node.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
-            return String.format("%s gml:id=\"%s\"", node.getNodeName(), gmlId);
-          }).collect(Collectors.joining(", "));
+      Set<Node> polygonErrors = buildingWithErrorPolygonsSurfacePaths.get(buildingNode);
 
-      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageFormat.format(MessageError.ERR_L10_001, buildingGmlId, nodeErrorDetail)));
+      String polygonErrorStr = "";
+      for (Node polygon : polygonErrors) {
+        polygonErrorStr = polygonErrorStr + MessageFormat.format(MessageError.ERR_L10_002_1, polygon.getAttributes().getNamedItem(TagName.GML_ID).getTextContent());
+      }
+
+      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+              MessageFormat.format(MessageError.ERR_L10_002, buildingGmlId, polygonErrorStr)));
     });
 
     return messages;

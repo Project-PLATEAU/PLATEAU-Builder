@@ -55,9 +55,10 @@ public class L07LogicalConsistencyValidator implements IValidator {
         }
 
         public String toString() {
-            String linearRingStr = this.linearRings == null ? "" : " LinearRing= " + this.linearRings;
-            String linearStringStr = this.lineStrings == null ? "" : " LineString= " + this.lineStrings;
-            return "bldg:Building gml:id=" + this.ID + "\n" + linearRingStr + "\n" + linearStringStr;
+            String linearStringStr = this.lineStrings == null ? "" : "<gml:LineString gml:id=\"" + this.lineStrings + "\">";
+            String linearRingStr = this.linearRings == null ? "" : "<gml:LinearRing gml:id=\"" + this.linearRings + "\">";
+            return "地物\"" + this.ID + "\":\n" +
+                    "近接閾値（0.01m）未満の頂点が連続するインスタンスが存在します\n" + linearStringStr + "\n" + linearRingStr;
         }
     }
 
