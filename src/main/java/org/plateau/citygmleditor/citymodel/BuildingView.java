@@ -49,6 +49,15 @@ public class BuildingView extends Parent {
         }
     }
 
+    public ILODSolidView getSolid(int lod) {
+        switch (lod) {
+            case 1: return lod1Solid;
+            case 2: return lod2Solid;
+            case 3: return lod3Solid;
+            default: return null;
+        }
+    }
+
     public void setLOD1Solid(LOD1SolidView solid) {
         if (this.lod1Solid == null) {
             this.getChildren().remove(this.lod1Solid);

@@ -1,4 +1,4 @@
-package org.plateau.citygmleditor;
+package org.plateau.citygmleditor.fxml;
 
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;

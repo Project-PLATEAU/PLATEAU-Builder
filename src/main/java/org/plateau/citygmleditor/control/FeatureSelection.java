@@ -1,4 +1,4 @@
-package org.plateau.citygmleditor;
+package org.plateau.citygmleditor.control;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -7,6 +7,7 @@ import javafx.scene.image.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
+import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.control.SurfacePolygonSection;
 import org.plateau.citygmleditor.world.World;
 
@@ -20,7 +21,7 @@ public class FeatureSelection {
     private final ObjectProperty<BuildingView> active = new SimpleObjectProperty<>();
     private final MeshView outLine = new MeshView();
 
-    private ObjectProperty<SurfacePolygonSection> activeSection = new SimpleObjectProperty<>();
+    private final ObjectProperty<SurfacePolygonSection> activeSection = new SimpleObjectProperty<>();
 
     public FeatureSelection() {
         var material = new PhongMaterial();
@@ -37,6 +38,11 @@ public class FeatureSelection {
 
         var node = (Group) World.getRoot3D();
         node.getChildren().add(outLine);
+
+        // モード切替時に選択をリセット
+        var viewMode = CityGMLEditorApp.getCityModelViewMode();
+        viewMode.isSurfaceViewModeProperty().addListener((observable) -> refresh());
+        viewMode.lodProperty().addListener((observable) -> refresh());
     }
 
     public BuildingView getActive() {
@@ -53,6 +59,8 @@ public class FeatureSelection {
 
     public void registerClickEvent(Scene scene) {
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+            clear();
+
             PickResult pickResult = event.getPickResult();
             var newSelectedMesh = pickResult.getIntersectedNode();
             var feature = getBuilding(newSelectedMesh);
@@ -60,13 +68,43 @@ public class FeatureSelection {
             if (feature == null)
                 return;
 
-            outLine.setMesh(feature.getLOD1Solid().getMesh());
+            var viewMode = CityGMLEditorApp.getCityModelViewMode();
+            if (viewMode.isSurfaceViewModeProperty().get()) {
+                activeSection.set(feature.getLOD2Solid().getSurfaceTypeView().getSection(pickResult));
+                feature.getLOD2Solid().getSurfaceTypeView().updateSelectionOutLine(activeSection.get().polygon, outLine);
+                return;
+            }
 
+            var solid = feature.getSolid(viewMode.getLOD());
+            if (solid == null)
+                return;
+
+            outLine.setMesh(solid.getMeshView().getMesh());
             active.set(feature);
-
-            activeSection.set(feature.getLOD2Solid().getSurfaceTypeView().getSection(pickResult));
-            feature.getLOD2Solid().getSurfaceTypeView().updateSelectionOutLine(activeSection.get().polygon, outLine);
         });
+    }
+
+    public void clear() {
+        active.set(null);
+        activeSection.set(null);
+        outLine.setMesh(null);
+    }
+
+    public void refresh() {
+        if (active.get() == null)
+            return;
+        
+        var viewMode = CityGMLEditorApp.getCityModelViewMode();
+        if (viewMode.isSurfaceViewModeProperty().get()) {
+            active.get().getLOD2Solid().getSurfaceTypeView().updateSelectionOutLine(activeSection.get().polygon, outLine);
+            return;
+        }
+
+        var solid = active.get().getSolid(viewMode.getLOD());
+        if (solid == null)
+            return;
+
+        outLine.setMesh(solid.getMeshView().getMesh());
     }
 
     public MeshView getOutLine() {

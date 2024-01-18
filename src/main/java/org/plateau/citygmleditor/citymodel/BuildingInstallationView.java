@@ -66,6 +66,11 @@ public class BuildingInstallationView extends MeshView implements ILODSolidView 
     }
 
     @Override
+    public MeshView getMeshView() {
+        return null;
+    }
+
+    @Override
     public void refrectGML() {
         for (var polygon : getPolygons()) {
             var coordinates = polygon.getExteriorRing().getOriginCoords();// .getOriginal().getPosList().toList3d();

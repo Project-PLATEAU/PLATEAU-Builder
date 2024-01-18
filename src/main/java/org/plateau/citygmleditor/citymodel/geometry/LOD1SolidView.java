@@ -62,6 +62,11 @@ public class LOD1SolidView extends MeshView implements ILODSolidView {
     }
 
     @Override
+    public MeshView getMeshView() {
+        return this;
+    }
+
+    @Override
     public void refrectGML() {
         for (var polygon : getPolygons()) {
             var coordinates = polygon.getExteriorRing().getOriginCoords();//.getOriginal().getPosList().toList3d();
