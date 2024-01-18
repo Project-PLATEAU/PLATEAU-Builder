@@ -14,6 +14,7 @@ import javafx.scene.shape.MeshView;
 import org.plateau.citygmleditor.control.BuildingSurfaceTypeView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
+import org.plateau.citygmleditor.world.World;
 
 public class LOD2SolidView extends Parent implements ILODSolidView {
     private AbstractSolid gmlObject;
@@ -143,5 +144,36 @@ public class LOD2SolidView extends Parent implements ILODSolidView {
                 vertexBuffer.addVertex(vertex);
             }
             setVertexBuffer(vertexBuffer);
+    }
+
+    public List<String> getTextures() {
+        var cityModelView = World.getActiveInstance().getCityModel();
+        var ret = new ArrayList<String>();
+        for (var boundary : boundaries) {
+            if (boundary.getPolygons() != null) {
+                for (var polygon : boundary.getPolygons()) {
+                    if(polygon.getSurfaceData() == null)
+                        continue;
+                    var parameterizedTexture = (org.citygml4j.model.citygml.appearance.ParameterizedTexture)polygon.getSurfaceData().getOriginal();
+                    var imageRelativePath = java.nio.file.Paths.get(parameterizedTexture.getImageURI());
+                    var imageAbsolutePath = java.nio.file.Paths.get(cityModelView.getGmlPath()).getParent().resolve(imageRelativePath);
+                    if(!ret.contains(imageAbsolutePath.toString()))
+                        ret.add(imageAbsolutePath.toString());
+                }
+            }
+            if (boundary.getOpeningPolygons() != null) {
+                for (var polygon : boundary.getOpeningPolygons()) {
+                    if (polygon.getSurfaceData() == null)
+                        continue;
+                    var parameterizedTexture = (org.citygml4j.model.citygml.appearance.ParameterizedTexture)polygon.getSurfaceData().getOriginal();
+                    var imageRelativePath = java.nio.file.Paths.get(parameterizedTexture.getImageURI());
+                    var imageAbsolutePath = java.nio.file.Paths.get(cityModelView.getGmlPath()).getParent().resolve(imageRelativePath);
+                    if(!ret.contains(imageAbsolutePath.toString()))
+                        ret.add(imageAbsolutePath.toString());
+                }
+            }
+        }
+
+        return ret;
     }
 }

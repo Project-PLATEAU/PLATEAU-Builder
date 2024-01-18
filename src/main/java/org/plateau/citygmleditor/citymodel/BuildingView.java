@@ -105,4 +105,15 @@ public class BuildingView extends Parent {
     public Envelope getEnvelope() {
         return this.gmlObject.getBoundedBy().getEnvelope();
     }
+
+    public List<String> getTextures() {
+        var paths = new ArrayList<String>();
+        if (lod2Solid != null) {
+            paths.addAll(lod2Solid.getTextures());
+        }
+        if (lod3Solid != null) {
+            paths.addAll(lod3Solid.getTextures());
+        }
+        return paths;
+    }
 }
