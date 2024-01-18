@@ -19,11 +19,11 @@
             <Insets left="5.0" />
         </VBox.margin>
     </Text>
-     <TreeTableView fx:id="hierarchyTreeTable" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="200.0" showRoot="false">
+     <TreeTableView fx:id="hierarchyTreeTable" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" showRoot="false">
          <columns>
-             <TreeTableColumn fx:id="nodeColumn" editable="false" prefWidth="200.0" sortable="false" text="LOD" />
-             <TreeTableColumn fx:id="idColumn" editable="false" prefWidth="0.0" text="Id" />
-             <TreeTableColumn fx:id="visibilityColumn" text="Visibility" />
+             <TreeTableColumn fx:id="nodeColumn" prefWidth="150.0" sortable="false" />
+             <TreeTableColumn fx:id="idColumn" editable="false" prefWidth="100.0" />
+             <TreeTableColumn fx:id="visibilityColumn" editable="false" prefWidth="60.0" resizable="false" />
          </columns>
      </TreeTableView>
 </VBox>

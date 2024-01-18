@@ -98,10 +98,12 @@
     -fx-text-fill: -fx-text-background-color;
 }
 
-.table-view .column-header-background,
+
 .tree-table-view > .column-header-background {
     -fx-background-color: -fx-inner-border, -fx-body-color;
     -fx-background-insets: 0, 1;
+     visibility: hidden;
+ -fx-padding: -1em;
 }
 .table-view .column-header,
 .tree-table-view .column-header,
