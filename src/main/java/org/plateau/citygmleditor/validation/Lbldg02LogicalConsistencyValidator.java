@@ -75,9 +75,11 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
 
             // get invalid building part tags
             NodeList tagBuildingParts = building.getElementsByTagName(TagName.BLGD_BUILDING_PART);
+            List<BuildingPart> buildingPartInvalid = this.getBuildingPartInvalid(tagBuildingParts);
+            if (buildingPartInvalid.isEmpty()) continue;
+
             BuildingInvalid buildingInvalid = new BuildingInvalid();
             buildingInvalid.setID(buildingID);
-            List<BuildingPart> buildingPartInvalid = this.getBuildingPartInvalid(tagBuildingParts);
             buildingInvalid.setBuidlingPart(buildingPartInvalid);
             buildingInvalids.add(buildingInvalid);
         }
