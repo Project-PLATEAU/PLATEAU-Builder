@@ -43,7 +43,7 @@ import javafx.scene.Group;
 import javafx.stage.Window;
 import org.plateau.citygmleditor.control.CityModelViewMode;
 import org.plateau.citygmleditor.world.*;
-import org.plateau.citygmleditor.FeatureSelection;
+import org.plateau.citygmleditor.control.FeatureSelection;
 
 /**
  * JavaFX 3D Viewer Application
@@ -115,7 +115,6 @@ public class CityGMLEditorApp extends Application {
         camera.setSceneContent();
 
         axisGizmo = new AxisGizmo();
-        selection = new FeatureSelection();
 
         World.getRoot3D().getChildren().add(camera.getCameraXform());
         World.getRoot3D().getChildren().add(autoScalingGroups);
@@ -124,14 +123,17 @@ public class CityGMLEditorApp extends Application {
 
         cityModelViewMode = new CityModelViewMode();
 
+        selection = new FeatureSelection();
+
+        // UI, Controller初期化
         scene = new Scene(
                 FXMLLoader.<Parent>load(Objects.requireNonNull(CityGMLEditorApp.class.getResource("fxml/main.fxml"))),
                 1024, 600, true);
 
+        selection.registerClickEvent(scene);
+
         stage.setScene(scene);
         stage.show();
-
-        selection.registerClickEvent(scene);
 
         // アプリ終了時にセッションを保存
         stage.setOnCloseRequest(event -> sessionManager.saveSession());

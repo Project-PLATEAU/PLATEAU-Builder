@@ -1,7 +1,13 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import javafx.scene.shape.Mesh;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.VertexFormat;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 
 import javafx.scene.Parent;
@@ -38,6 +44,33 @@ public interface ILODSolidView {
      * @return 頂点バッファ
      */
     public VertexBuffer getVertexBuffer();
+
+    /**
+     * MeshViewを取得します。
+     * @return メッシュビュー
+     */
+    public MeshView getMeshView();
+
+    default public Mesh getTotalMesh() {
+        if (getMeshView() == null)
+            return null;
+        var mesh = (TriangleMesh)getMeshView().getMesh();
+        var outMesh = new TriangleMesh();
+        outMesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
+        outMesh.getNormals().addAll(mesh.getNormals());
+        outMesh.getPoints().addAll(mesh.getPoints());
+        outMesh.getTexCoords().addAll(mesh.getTexCoords());
+
+        for (var polygon : getPolygons()) {
+            outMesh.getFaces().addAll(polygon.getFaceBuffer().getBufferAsArray());
+        }
+
+        var smooths = new int[outMesh.getFaces().size() / 9];
+        Arrays.fill(smooths, 1);
+        outMesh.getFaceSmoothingGroups().addAll(smooths);
+
+        return outMesh;
+    }
 
     /**
      * テクスチャ座標バッファを取得します。

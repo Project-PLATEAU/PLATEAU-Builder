@@ -1,14 +1,19 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
 import javafx.scene.Parent;
+import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.VertexFormat;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.citymodel.SurfaceDataView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class LOD3SolidView extends Parent implements ILODSolidView {
     private AbstractSolid gmlObject;
@@ -16,6 +21,7 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
     private VertexBuffer vertexBuffer = new VertexBuffer();
     private TexCoordBuffer texCoordBuffer = new TexCoordBuffer();
     private TransformManipulator transformManipulator = new TransformManipulator(this);
+    private final List<MeshView> meshViews = new ArrayList<>();
 
     public LOD3SolidView(AbstractSolid gmlObject, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
         this.gmlObject = gmlObject;
@@ -63,6 +69,7 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
 
     public void addMeshView(MeshView meshView) {
         getChildren().add(meshView);
+        meshViews.add(meshView);
     }
 
     @Override
@@ -84,6 +91,11 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
     @Override
     public VertexBuffer getVertexBuffer() {
         return this.vertexBuffer;
+    }
+
+    @Override
+    public MeshView getMeshView() {
+        return meshViews.isEmpty() ? null : meshViews.get(0);
     }
 
     public void setVertexBuffer(VertexBuffer vertexBuffer) {
