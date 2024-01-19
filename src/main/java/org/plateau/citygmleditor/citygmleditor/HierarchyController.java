@@ -8,7 +8,9 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
+import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
@@ -47,8 +49,28 @@ public class HierarchyController implements Initializable {
                 }
             }
         });
+
+        CityGMLEditorApp.getFeatureSellection().getActiveFeatureProperty().addListener(observable -> {
+            BuildingView activeFeature = CityGMLEditorApp.getFeatureSellection().getActive();
+            if (activeFeature == null)
+                return;
+
+            TreeItem<Node> activeItem = findTreeItem(activeFeature);
+            if (activeItem != null && activeItem != hierarchyTreeTable.getFocusModel().getFocusedItem()) {
+                hierarchyTreeTable.getSelectionModel().select(activeItem);
+                hierarchyTreeTable.scrollTo(hierarchyTreeTable.getRow(activeItem));
+            }
+        });
+
+        hierarchyTreeTable.getFocusModel().focusedCellProperty().addListener((obs, oldVal, newVal) -> {
+            TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
+            if (selectedItem != null && selectedItem.valueProperty().get() instanceof BuildingView) {
+                CityGMLEditorApp.getFeatureSellection().select((BuildingView) selectedItem.valueProperty().get());
+            }
+        });
+
         hierarchyTreeTable.setOnMouseClicked(t -> {
-            if (t.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
+            if (t.getButton() == MouseButton.SECONDARY) {
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
                 if (selectedItem != null) {
                     var item = selectedItem.valueProperty().get();
@@ -56,12 +78,12 @@ public class HierarchyController implements Initializable {
                     exportObjMenu.setDisable(!(item instanceof ILODSolidView));
                 }
             }
-            if (t.getClickCount() == 2) {
+            if (t.getButton() == MouseButton.PRIMARY && t.getClickCount() == 2) {
                 // TODO: フォーカス
-
                 t.consume();
             }
         });
+
         hierarchyTreeTable.setOnKeyPressed(t -> {
             if (t.getCode() == KeyCode.SPACE) {
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
@@ -72,10 +94,29 @@ public class HierarchyController implements Initializable {
                 t.consume();
             }
         });
+
         nodeColumn.setCellValueFactory(p -> p.getValue().valueProperty().asString());
         idColumn.setCellValueFactory(p -> p.getValue().getValue().idProperty());
         visibilityColumn.setCellValueFactory(p -> p.getValue().getValue().visibleProperty());
         visibilityColumn.setCellFactory(CheckBoxTreeTableCell.forTreeTableColumn(visibilityColumn));
+    }
+
+    private TreeItem<Node> findTreeItem(BuildingView activeFeature) {
+        return findTreeItemRecursive(hierarchyTreeTable.getRoot(), activeFeature);
+    }
+
+    private TreeItem<Node> findTreeItemRecursive(TreeItem<Node> currentItem, BuildingView activeFeature) {
+        Node currentFeature = currentItem.getValue();
+        if (currentFeature instanceof BuildingView && currentFeature.equals(activeFeature)) {
+            return currentItem;
+        }
+        for (TreeItem<Node> child : currentItem.getChildren()) {
+            TreeItem<Node> found = findTreeItemRecursive(child, activeFeature);
+            if (found != null) {
+                return found;
+            }
+        }
+        return null;
     }
 
     /**

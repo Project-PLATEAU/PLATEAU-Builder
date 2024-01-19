@@ -75,14 +75,26 @@ public class FeatureSelection {
 
             active.set(feature);
 
-            if (viewMode.isSurfaceViewModeProperty().get()) {
+            if (viewMode.isSurfaceViewModeProperty().get() && feature.getLOD2Solid() != null) {
                 activeSection.set(feature.getLOD2Solid().getSurfaceTypeView().getSection(pickResult));
-                feature.getLOD2Solid().getSurfaceTypeView().updateSelectionOutLine(activeSection.get().polygon, outLine);
-            } else {
-                outLine.setMesh(solid.getTotalMesh());
             }
 
+            refreshOutLine();
         });
+    }
+
+    public void select(BuildingView feature) {
+        clear();
+
+        var viewMode = CityGMLEditorApp.getCityModelViewMode();
+
+        var solid = feature.getSolid(viewMode.getLOD());
+        if (solid == null)
+            return;
+
+        active.set(feature);
+
+        refreshOutLine();
     }
 
     public void clear() {

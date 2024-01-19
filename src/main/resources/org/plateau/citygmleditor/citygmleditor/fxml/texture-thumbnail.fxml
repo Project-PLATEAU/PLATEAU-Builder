@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 
-<TitledPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" animated="false" text="テクスチャ" fx:id="titledPane"
-            fx:controller="org.plateau.citygmleditor.citygmleditor.TextureThumbnailController"
-            prefHeight="600.0" prefWidth="600.0">
+<TitledPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            animated="false" text="テクスチャ" fx:id="titledPane" minHeight="150.0"
+            fx:controller="org.plateau.citygmleditor.citygmleditor.TextureThumbnailController">
     <VBox>
-        <TilePane fx:id="tilePane" hgap="10" vgap="10" prefColumns="3" style="-fx-padding: 10;">
+        <TilePane fx:id="tilePane" hgap="10" vgap="10" minHeight="150.0"
+                  prefColumns="3" style="-fx-padding: 10;">
             <!-- Placeholder images -->
         </TilePane>
     </VBox>
