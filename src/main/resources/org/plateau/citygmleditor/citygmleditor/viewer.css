@@ -86,7 +86,7 @@
     -fx-text-fill: -fx-text-background-color;
     -fx-indent: 1em;
 }
-}
+
 .tree-table-cell {
     /* tree-table-cell needs slightly different padding to make the text sit at
     the right height for the arrow */
@@ -101,6 +101,9 @@
     -fx-background-insets: 0, 1;
      visibility: hidden;
  -fx-padding: -1em;
+}
+.tree-table-view .tree-table-row-cell:focused {
+    -fx-background-color: lightblue; /* フォーカスされた行の背景色 */
 }
 .table-view .column-header,
 .tree-table-view .column-header,
