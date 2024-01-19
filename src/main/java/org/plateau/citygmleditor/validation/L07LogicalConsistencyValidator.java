@@ -19,10 +19,11 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 public class L07LogicalConsistencyValidator implements IValidator {
-
+    public static Logger logger = Logger.getLogger(L07LogicalConsistencyValidator.class.getName());
     public static final double VALID_DISTANCE_L07 = 0.01;
 
     static class BuildingInvalid {
@@ -140,11 +141,16 @@ public class L07LogicalConsistencyValidator implements IValidator {
         int pointSize = points.size();
         // polygon have less than 2 points is invalid
         if (pointSize < 2) {
+            logger.severe(String.format("L07 Poslist have less than 2 points (%s)", points));
             return false;
         }
         // don't need to check the endpoint
         for (int i = 0; i < pointSize - 1; i++) {
-            if (ThreeDUtil.distance(points.get(i), points.get(i + 1)) < VALID_DISTANCE_L07) return false;
+            double distance = ThreeDUtil.distance(points.get(i), points.get(i + 1));
+            if (distance < VALID_DISTANCE_L07) {
+                logger.severe(String.format("L07 Distance between (%s and %s) = %s", points.get(i), points.get(i + 1), distance));
+                return false;
+            }
         }
         return true;
     }

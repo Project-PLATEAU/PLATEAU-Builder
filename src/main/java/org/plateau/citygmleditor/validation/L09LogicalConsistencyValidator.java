@@ -83,8 +83,10 @@ public class L09LogicalConsistencyValidator implements IValidator {
           }
 
           if (!isValid) {
+            logger.severe(String.format("L09 Line have (%s and %s) is not countinuous", first, second));
             // Update error list of building
             CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, linearRingNode);
+
           }
         }
       }
@@ -99,11 +101,16 @@ public class L09LogicalConsistencyValidator implements IValidator {
       List<Point3D> points = get3dPoints(linearRingNode);
 
       boolean isClosed = points.get(0).equals(points.get(points.size() - 1));
+      if (!isClosed) {
+        logger.severe(String.format("L09 polygon have is don't close startpoint (%s) and endpoint (%s)", points.get(0), points.get(points.size() - 1)));
+      }
 
       // Only first and last point are duplicated
       // Check if there is any other duplicated point
       boolean isDuplicated = new HashSet<>(points).size() != points.size() - 1;
-
+      if (isDuplicated){
+        logger.severe(String.format("L09 polygon have duplicate point (%s)", points));
+      }
       if (!isClosed || isDuplicated) {
         CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, linearRingNode);
       }
