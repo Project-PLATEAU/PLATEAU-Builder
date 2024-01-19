@@ -4,12 +4,14 @@ import javafx.scene.Parent;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.VertexFormat;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.citymodel.SurfaceDataView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -91,6 +93,11 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
         return this.vertexBuffer;
     }
 
+    @Override
+    public MeshView getMeshView() {
+        return meshViews.isEmpty() ? null : meshViews.get(0);
+    }
+
     public void setVertexBuffer(VertexBuffer vertexBuffer) {
         this.vertexBuffer = vertexBuffer;
     }
@@ -108,24 +115,6 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
     @Override
     public TransformManipulator getTransformManipulator() {
         return transformManipulator;
-    }
-
-    @Override
-    public Mesh getTotalMesh() {
-        if (meshViews.isEmpty())
-            return null;
-        var mesh = (TriangleMesh)meshViews.get(0).getMesh();
-        var outMesh = new TriangleMesh();
-
-        outMesh.getNormals().addAll(mesh.getNormals());
-        outMesh.getPoints().addAll(mesh.getPoints());
-        outMesh.getTexCoords().addAll(mesh.getTexCoords());
-
-        for (var polygon : getPolygons()) {
-            outMesh.getFaces().addAll(polygon.getFaceBuffer().getBufferAsArray());
-        }
-
-        return outMesh;
     }
 
     @Override

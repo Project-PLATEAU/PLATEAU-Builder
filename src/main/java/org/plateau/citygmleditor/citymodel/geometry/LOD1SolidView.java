@@ -63,6 +63,11 @@ public class LOD1SolidView extends MeshView implements ILODSolidView {
     }
 
     @Override
+    public MeshView getMeshView() {
+        return this;
+    }
+
+    @Override
     public Mesh getTotalMesh() {
         return getMesh();
     }

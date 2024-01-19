@@ -16,8 +16,9 @@ public class CityObjectMemberFactory extends CityGMLFactory {
         building.setId(gmlObject.getId());
 
         var lod1SolidFactory = new LOD1SolidFactory(getTarget());
-        var lod1Solid = lod1SolidFactory.createLOD1Solid((Solid) gmlObject.getLod1Solid().getObject());
-        building.setLOD1Solid(lod1Solid);
+        var lod1Solid = lod1SolidFactory.createLOD1Solid(gmlObject);
+        if (lod1Solid != null)
+            building.setLOD1Solid(lod1Solid);
 
         var lod2SolidFactory = new LOD2SolidFactory(getTarget());
         var lod2Solid = lod2SolidFactory.createLOD2Solid(gmlObject);

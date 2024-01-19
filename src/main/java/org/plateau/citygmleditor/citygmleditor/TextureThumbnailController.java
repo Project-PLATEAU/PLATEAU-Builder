@@ -22,6 +22,10 @@ public class TextureThumbnailController implements Initializable {
         var activeFeatureProperty = CityGMLEditorApp.getFeatureSellection().getActiveFeatureProperty();
         activeFeatureProperty.addListener((observable, oldValue, newValue) -> {
             clearImage();
+
+            if (newValue == null)
+                return;
+
             for (var image : newValue.getTexturePaths()) {
                 addImage(image);
             }

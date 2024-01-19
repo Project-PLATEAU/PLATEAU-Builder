@@ -114,25 +114,8 @@ public class LOD2SolidView extends Parent implements ILODSolidView {
     }
 
     @Override
-    public Mesh getTotalMesh() {
-        if (meshViews.isEmpty())
-            return null;
-        var mesh = (TriangleMesh)meshViews.get(0).getMesh();
-        var outMesh = new TriangleMesh();
-        outMesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
-        outMesh.getNormals().addAll(mesh.getNormals());
-        outMesh.getPoints().addAll(mesh.getPoints());
-        outMesh.getTexCoords().addAll(mesh.getTexCoords());
-
-        for (var polygon : getPolygons()) {
-            outMesh.getFaces().addAll(polygon.getFaceBuffer().getBufferAsArray());
-        }
-
-        var smooths = new int[outMesh.getFaces().size() / 9];
-        Arrays.fill(smooths, 1);
-        outMesh.getFaceSmoothingGroups().addAll(smooths);
-
-        return outMesh;
+    public MeshView getMeshView() {
+        return meshViews.isEmpty() ? null : meshViews.get(0);
     }
 
     @Override

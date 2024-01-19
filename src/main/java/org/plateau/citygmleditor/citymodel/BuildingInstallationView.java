@@ -68,8 +68,8 @@ public class BuildingInstallationView extends MeshView implements ILODSolidView 
     }
 
     @Override
-    public Mesh getTotalMesh() {
-        return null;
+    public MeshView getMeshView() {
+        return this;
     }
 
     @Override
