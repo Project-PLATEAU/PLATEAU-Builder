@@ -1,6 +1,5 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
-import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.shape.MeshView;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;

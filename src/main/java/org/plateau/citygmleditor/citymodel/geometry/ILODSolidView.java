@@ -1,13 +1,14 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
 import java.util.ArrayList;
-
+import java.util.List;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 
 import javafx.scene.Parent;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
+import org.plateau.citygmleditor.world.World;
 
 /**
  * LODSolidのインターフェースを表します。
@@ -53,4 +54,24 @@ public interface ILODSolidView {
      * GML、各頂点バッファへ情報を適用
      */
     public void refrectGML();
+
+    /**
+     * 使用しているテクスチャパス
+     * @return
+     */
+    default public List<String> getTexturePaths() {
+        var cityModelView = World.getActiveInstance().getCityModel();
+        var ret = new ArrayList<String>();
+        for (var polygon : getPolygons()) {
+            if (polygon.getSurfaceData() == null)
+                continue;
+            var parameterizedTexture = (org.citygml4j.model.citygml.appearance.ParameterizedTexture) polygon.getSurfaceData().getOriginal();
+            var imageRelativePath = java.nio.file.Paths.get(parameterizedTexture.getImageURI());
+            var imageAbsolutePath = java.nio.file.Paths.get(cityModelView.getGmlPath()).getParent().resolve(imageRelativePath);
+            if (!ret.contains(imageAbsolutePath.toString()))
+                ret.add(imageAbsolutePath.toString());
+        }
+        return ret;
+    }
+
 }
