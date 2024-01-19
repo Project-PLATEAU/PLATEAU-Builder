@@ -3,7 +3,9 @@ package org.plateau.citygmleditor.citymodel.geometry;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 
 import javafx.scene.Parent;
@@ -41,7 +43,7 @@ public interface ILODSolidView {
      */
     public VertexBuffer getVertexBuffer();
 
-    public MeshView getMeshView();
+    public Mesh getTotalMesh();
 
     /**
      * テクスチャ座標バッファを取得します。

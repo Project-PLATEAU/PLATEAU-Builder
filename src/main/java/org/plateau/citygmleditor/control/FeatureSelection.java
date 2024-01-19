@@ -8,7 +8,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
 import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
-import org.plateau.citygmleditor.control.SurfacePolygonSection;
 import org.plateau.citygmleditor.world.World;
 
 import org.plateau.citygmleditor.citymodel.BuildingView;
@@ -41,8 +40,8 @@ public class FeatureSelection {
 
         // モード切替時に選択をリセット
         var viewMode = CityGMLEditorApp.getCityModelViewMode();
-        viewMode.isSurfaceViewModeProperty().addListener((observable) -> refresh());
-        viewMode.lodProperty().addListener((observable) -> refresh());
+        viewMode.isSurfaceViewModeProperty().addListener((observable) -> refreshOutLine());
+        viewMode.lodProperty().addListener((observable) -> refreshOutLine());
     }
 
     public BuildingView getActive() {
@@ -59,8 +58,6 @@ public class FeatureSelection {
 
     public void registerClickEvent(Scene scene) {
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-            clear();
-
             PickResult pickResult = event.getPickResult();
             var newSelectedMesh = pickResult.getIntersectedNode();
             var feature = getBuilding(newSelectedMesh);
@@ -68,19 +65,23 @@ public class FeatureSelection {
             if (feature == null)
                 return;
 
+            clear();
+
             var viewMode = CityGMLEditorApp.getCityModelViewMode();
-            if (viewMode.isSurfaceViewModeProperty().get()) {
-                activeSection.set(feature.getLOD2Solid().getSurfaceTypeView().getSection(pickResult));
-                feature.getLOD2Solid().getSurfaceTypeView().updateSelectionOutLine(activeSection.get().polygon, outLine);
-                return;
-            }
 
             var solid = feature.getSolid(viewMode.getLOD());
             if (solid == null)
                 return;
 
-            outLine.setMesh(solid.getMeshView().getMesh());
             active.set(feature);
+
+            if (viewMode.isSurfaceViewModeProperty().get()) {
+                activeSection.set(feature.getLOD2Solid().getSurfaceTypeView().getSection(pickResult));
+                feature.getLOD2Solid().getSurfaceTypeView().updateSelectionOutLine(activeSection.get().polygon, outLine);
+            } else {
+                outLine.setMesh(solid.getTotalMesh());
+            }
+
         });
     }
 
@@ -90,13 +91,20 @@ public class FeatureSelection {
         outLine.setMesh(null);
     }
 
-    public void refresh() {
+    public void refreshOutLine() {
+        outLine.setMesh(null);
+
         if (active.get() == null)
             return;
         
         var viewMode = CityGMLEditorApp.getCityModelViewMode();
         if (viewMode.isSurfaceViewModeProperty().get()) {
-            active.get().getLOD2Solid().getSurfaceTypeView().updateSelectionOutLine(activeSection.get().polygon, outLine);
+            var solid = active.get().getLOD2Solid();
+
+            if (solid == null || solid.getSurfaceTypeView() == null || activeSection.get() == null)
+                return;
+
+            solid.getSurfaceTypeView().updateSelectionOutLine(activeSection.get().polygon, outLine);
             return;
         }
 
@@ -104,7 +112,7 @@ public class FeatureSelection {
         if (solid == null)
             return;
 
-        outLine.setMesh(solid.getMeshView().getMesh());
+        outLine.setMesh(solid.getTotalMesh());
     }
 
     public MeshView getOutLine() {

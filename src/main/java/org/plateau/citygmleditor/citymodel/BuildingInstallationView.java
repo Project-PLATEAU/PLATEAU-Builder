@@ -1,6 +1,8 @@
 package org.plateau.citygmleditor.citymodel;
 
 import java.util.ArrayList;
+
+import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import org.citygml4j.model.citygml.building.BuildingInstallation;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
@@ -66,7 +68,7 @@ public class BuildingInstallationView extends MeshView implements ILODSolidView 
     }
 
     @Override
-    public MeshView getMeshView() {
+    public Mesh getTotalMesh() {
         return null;
     }
 

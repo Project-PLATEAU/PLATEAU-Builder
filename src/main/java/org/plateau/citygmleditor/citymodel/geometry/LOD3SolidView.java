@@ -1,7 +1,9 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
 import javafx.scene.Parent;
+import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.citymodel.SurfaceDataView;
@@ -109,8 +111,21 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
     }
 
     @Override
-    public MeshView getMeshView() {
-        return meshViews.isEmpty() ? null : meshViews.get(0);
+    public Mesh getTotalMesh() {
+        if (meshViews.isEmpty())
+            return null;
+        var mesh = (TriangleMesh)meshViews.get(0).getMesh();
+        var outMesh = new TriangleMesh();
+
+        outMesh.getNormals().addAll(mesh.getNormals());
+        outMesh.getPoints().addAll(mesh.getPoints());
+        outMesh.getTexCoords().addAll(mesh.getTexCoords());
+
+        for (var polygon : getPolygons()) {
+            outMesh.getFaces().addAll(polygon.getFaceBuffer().getBufferAsArray());
+        }
+
+        return outMesh;
     }
 
     @Override
