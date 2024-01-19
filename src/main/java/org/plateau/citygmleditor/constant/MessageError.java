@@ -7,6 +7,7 @@ public interface MessageError {
     String ERR_L13_001 = "L13: Building gml:id=\"{0}\" and {1} invalid";
     String ERR_L11_001 = "L11: Building have ({0}) is invalid";
     String ERR_L07_001 = "L07: Building have ({0}) is invalid";
+    String ERR_L04_001 = "L04: Building have ({0}) is invalid";
     String ERR_LBLDG_02_001 = "L bldg 02: Building have ({0}) is invalid";
     String ERR_C04_001 = "C04: Building have ({0}) is invalid";
     String ERR_L18_001 = "L18: Building have ({0}) is invalid";

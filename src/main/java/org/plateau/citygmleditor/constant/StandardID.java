@@ -3,6 +3,7 @@ package org.plateau.citygmleditor.constant;
 public interface StandardID {
     String C04 = "C04";
     String C_BLDG_01 = "C-bldg-01";
+    String L04 = "L04";
     String L05 = "L05";
     String L06 = "L06";
     String L07 = "L07";

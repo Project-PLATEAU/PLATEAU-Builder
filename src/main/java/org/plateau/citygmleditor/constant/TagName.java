@@ -24,4 +24,6 @@ public interface TagName {
     String BLDG_BUILDING_INSTALLATION = "bldg:BuildingInstallation";
     String GML_SOLID = "gml:Solid";
     String BLGD_BUILDING_PART = "bldg:BuildingPart";
+    String ATTRIBUTE_CODE_SPACE = "codeSpace";
+    String GML_NAME = "gml:name";
 }
