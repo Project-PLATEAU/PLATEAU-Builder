@@ -1,6 +1,8 @@
 package org.plateau.citygmleditor.citygmleditor;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.plateau.citygmleditor.importers.Importer3D;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.BoundingBox;
@@ -9,9 +11,12 @@ import javafx.scene.DepthTest;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
+import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
@@ -50,7 +55,7 @@ public class GizmoModel extends Parent {
     private Node currentGizmo;
 
     // private Box debugBoundingBox;
-    
+
     /**
      * コンストラクタ
      */
@@ -60,16 +65,72 @@ public class GizmoModel extends Parent {
         rotationGizmo = new Group();
         scaleGizmo = new Group();
         try{
-            moveXGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveX.obj").toExternalForm());
-            moveYGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveY.obj").toExternalForm());
-            moveZGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveZ.obj").toExternalForm());
-            rotationXGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateX.obj").toExternalForm());
-            rotationYGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateY.obj").toExternalForm());
-            rotationZGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateZ.obj").toExternalForm());
-            scaleXGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleX.obj").toExternalForm());
-            scaleYGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleY.obj").toExternalForm());
-            scaleZGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleZ.obj").toExternalForm());
+            moveXGizmo = new Cylinder(20,240);
+            moveYGizmo = new Cylinder(20, 240);
+            moveZGizmo = new Cylinder(20, 240);
+            rotationXGizmo = new Cylinder(260, 20);
+            rotationYGizmo = new Cylinder(260, 20);
+            rotationZGizmo = new Cylinder(260, 20);
+            scaleXGizmo = new Cylinder(20, 240);
+            scaleYGizmo = new Cylinder(20, 240);
+            scaleZGizmo = new Cylinder(20, 240);
             
+            var moveXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveX.obj").toExternalForm());
+            var moveYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveY.obj").toExternalForm());
+            var moveZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveZ.obj").toExternalForm());
+            var rotationXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateX.obj").toExternalForm());
+            var rotationYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateY.obj").toExternalForm());
+            var rotationZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateZ.obj").toExternalForm());
+            var scaleXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleX.obj").toExternalForm());
+            var scaleYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleY.obj").toExternalForm());
+            var scaleZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleZ.obj").toExternalForm());
+            
+            setMaterialColor(moveXGizmoView);
+            setMaterialColor(moveYGizmoView);
+            setMaterialColor(moveZGizmoView);
+            setMaterialColor(rotationXGizmoView);
+            setMaterialColor(rotationYGizmoView);
+            setMaterialColor(rotationZGizmoView);
+            setMaterialColor(scaleXGizmoView);
+            setMaterialColor(scaleYGizmoView);
+            setMaterialColor(scaleZGizmoView);
+
+            PhongMaterial transparentMaterial = new PhongMaterial();
+            transparentMaterial.setDiffuseColor(Color.rgb(0, 0, 0, 0)); // ディフューズカラー（基本色）
+            transparentMaterial.setSpecularColor(Color.rgb(0, 0, 0, 0)); // スペキュラカラー（光の反射）
+            transparentMaterial.setSpecularPower(0);
+
+            ((Cylinder) moveXGizmo).setMaterial(transparentMaterial);
+            ((Cylinder) moveYGizmo).setMaterial(transparentMaterial);
+            ((Cylinder) moveZGizmo).setMaterial(transparentMaterial);
+            ((Cylinder) rotationXGizmo).setMaterial(transparentMaterial);
+            ((Cylinder) rotationYGizmo).setMaterial(transparentMaterial);
+            ((Cylinder) rotationZGizmo).setMaterial(transparentMaterial);
+            ((Cylinder) scaleXGizmo).setMaterial(transparentMaterial);
+            ((Cylinder) scaleYGizmo).setMaterial(transparentMaterial);
+            ((Cylinder) scaleZGizmo).setMaterial(transparentMaterial);
+
+            moveXGizmo.setRotationAxis(Rotate.X_AXIS);
+            moveXGizmo.setRotate(90);
+            moveXGizmo.setTranslateZ(-120);
+            moveZGizmo.setTranslateY(120);
+            moveYGizmo.setRotationAxis(Rotate.Z_AXIS);
+            moveYGizmo.setRotate(90);
+            moveYGizmo.setTranslateX(-120);
+
+            rotationXGizmo.setRotationAxis(Rotate.X_AXIS);
+            rotationXGizmo.setRotate(90);
+            rotationYGizmo.setRotationAxis(Rotate.Z_AXIS);
+            rotationYGizmo.setRotate(90);
+
+            scaleXGizmo.setRotationAxis(Rotate.X_AXIS);
+            scaleXGizmo.setRotate(90);
+            scaleXGizmo.setTranslateZ(-120);
+            scaleZGizmo.setTranslateY(120);
+            scaleYGizmo.setRotationAxis(Rotate.Z_AXIS);
+            scaleYGizmo.setRotate(90);
+            scaleYGizmo.setTranslateX(-120);
+
             moveXGizmo.setDepthTest(DepthTest.DISABLE);
             moveYGizmo.setDepthTest(DepthTest.DISABLE);
             moveZGizmo.setDepthTest(DepthTest.DISABLE);
@@ -80,14 +141,31 @@ public class GizmoModel extends Parent {
             scaleYGizmo.setDepthTest(DepthTest.DISABLE);
             scaleZGizmo.setDepthTest(DepthTest.DISABLE);
 
+            moveXGizmoView.setDepthTest(DepthTest.DISABLE);
+            moveYGizmoView.setDepthTest(DepthTest.DISABLE);
+            moveZGizmoView.setDepthTest(DepthTest.DISABLE);
+            rotationXGizmoView.setDepthTest(DepthTest.DISABLE);
+            rotationYGizmoView.setDepthTest(DepthTest.DISABLE);
+            rotationZGizmoView.setDepthTest(DepthTest.DISABLE);
+            scaleXGizmoView.setDepthTest(DepthTest.DISABLE);
+            scaleYGizmoView.setDepthTest(DepthTest.DISABLE);
+            scaleZGizmoView.setDepthTest(DepthTest.DISABLE);
+
             // Z回転以外は無効
             rotationXGizmo.setVisible(false);
             rotationYGizmo.setVisible(false);
+
+            rotationXGizmoView.setVisible(false);
+            rotationYGizmoView.setVisible(false);
 
             moveGizmo.getChildren().addAll(moveXGizmo, moveYGizmo, moveZGizmo);
             rotationGizmo.getChildren().addAll(rotationXGizmo, rotationYGizmo, rotationZGizmo);
             scaleGizmo.getChildren().addAll(scaleXGizmo, scaleYGizmo, scaleZGizmo);
             
+            moveGizmo.getChildren().addAll(moveXGizmoView, moveYGizmoView, moveZGizmoView);
+            rotationGizmo.getChildren().addAll(rotationXGizmoView, rotationYGizmoView, rotationZGizmoView);
+            scaleGizmo.getChildren().addAll(scaleXGizmoView, scaleYGizmoView, scaleZGizmoView);
+
             // モデル回転方向補正
             var rot1 = new Rotate(90.0d, Rotate.X_AXIS);
             var rot2 = new Rotate(-90.0d, Rotate.Y_AXIS);
@@ -133,6 +211,30 @@ public class GizmoModel extends Parent {
         animationTimer.start();
     }
     
+    private List<MeshView> findMeshViews(Node node) {
+        List<MeshView> meshViews = new ArrayList<>();
+        if (node instanceof MeshView) {
+            meshViews.add((MeshView) node);
+        } else if (node instanceof Group) {
+            Group group = (Group) node;
+            for (Node child : group.getChildren()) {
+                meshViews.addAll(findMeshViews(child));
+            }
+        }
+        return meshViews;
+    }
+
+    private void setMaterialColor(Node node) {
+        for (var meshView : findMeshViews(node)) {
+            PhongMaterial material = (PhongMaterial)meshView.getMaterial();
+            var color = material.getDiffuseColor();
+            WritableImage image = new WritableImage(1, 1);
+            PixelWriter writer = image.getPixelWriter();
+            writer.setColor(0, 0, new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getOpacity()));
+            material.setSelfIlluminationMap(image);
+        }
+    }
+
     public Point3D localToScene(Node node, Point3D pt) {
         Point3D res = node.localToParentTransformProperty().get().transform(pt);
         if (node.getParent() != null) {
