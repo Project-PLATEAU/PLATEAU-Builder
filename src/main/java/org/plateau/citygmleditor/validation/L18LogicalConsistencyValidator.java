@@ -26,8 +26,11 @@ public class L18LogicalConsistencyValidator implements IValidator {
 
     static class BuildingInvalid {
         private String buildingID;
-
         private String compositeSurface;
+        private String lineString;
+        public void setLineString(String lineString) {
+            this.lineString = lineString;
+        }
 
         public String getBuildingID() {
             return buildingID;
@@ -42,7 +45,12 @@ public class L18LogicalConsistencyValidator implements IValidator {
         }
 
         public String toString() {
-            return "buildingID = " + buildingID + " \n" + "compositeSurface = " + compositeSurface + "]";
+            String strBuilding = "buildingID = " + buildingID + " \n";
+            if (lineString == null || lineString.isBlank()) {
+                return strBuilding + "lineString = " + lineString + "]";
+            } else {
+                return strBuilding + "compositeSurface = " + compositeSurface + "]";
+            }
         }
     }
 
@@ -59,11 +67,14 @@ public class L18LogicalConsistencyValidator implements IValidator {
             String buildingID = building.getAttribute(TagName.GML_ID);
             NodeList compositeSurfaces = building.getElementsByTagName(TagName.GML_COMPOSITE_SURFACE);
 
-            List<String> invalidSurface = this.getInvalidSurface(compositeSurfaces);
-            if (invalidSurface.isEmpty()) continue;
+            List<String> poslistError = new ArrayList<>();
+            List<String> invalidSurface = this.getInvalidSurface(compositeSurfaces, poslistError);
+
+            if (invalidSurface.isEmpty() && poslistError.isEmpty()) continue;
             BuildingInvalid invalid = new BuildingInvalid();
             invalid.setBuildingID(buildingID);
             invalid.setCompositeSurface(String.valueOf(invalidSurface));
+            invalid.setLineString(poslistError.toString());
             buildingInvalids.add(invalid);
         }
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
@@ -74,13 +85,13 @@ public class L18LogicalConsistencyValidator implements IValidator {
         return messages;
     }
 
-    private List<String> getInvalidSurface(NodeList compositeSurfaces) throws IOException {
+    private List<String> getInvalidSurface(NodeList compositeSurfaces, List<String> poslistError) throws IOException {
         List<String> result = new ArrayList<>();
         for (int i = 0; i < compositeSurfaces.getLength(); i++) {
             Element surface = (Element) compositeSurfaces.item(0);
             NodeList polygons = surface.getElementsByTagName(TagName.GML_POLYGON);
 
-            boolean isPolygonValid = this.isPolygonValid(polygons);
+            boolean isPolygonValid = this.checkPolygonValid(polygons, poslistError);
             if (isPolygonValid) continue;
             String surfaceID = surface.getAttribute(TagName.GML_ID);
             if (!surfaceID.isEmpty()) {
@@ -107,7 +118,7 @@ public class L18LogicalConsistencyValidator implements IValidator {
      * @param polygons list polygon input
      *                 return true if faces of surface touch at least 1 a other face and not intersect others faces
      */
-    private boolean isPolygonValid(NodeList polygons) throws IOException {
+    private boolean checkPolygonValid(NodeList polygons, List<String> poslistError) throws IOException {
         int totalPolygon = polygons.getLength();
         for (int i = 0; i < totalPolygon; i++) {
             Element polygon1 = (Element) polygons.item(i);
@@ -126,7 +137,13 @@ public class L18LogicalConsistencyValidator implements IValidator {
                 String[] posString2 = posList2.getTextContent().trim().split(" ");
 
                 Map<String, String> runCmdResult = PythonUtil.checkIntersecWithPyCmd(AppConst.PATH_PYTHON, posString1, posString2);
-                if (!runCmdResult.get("ERROR").isBlank()) {
+                if (runCmdResult.get("ERROR_PARAM_1") != null) {
+                    poslistError.add(runCmdResult.get("ERROR_PARAM_1"));
+                }
+                if (runCmdResult.get("ERROR_PARAM_2") != null) {
+                    poslistError.add(runCmdResult.get("ERROR_PARAM_2"));
+                }
+                if (runCmdResult.get("ERROR") != null && !runCmdResult.get("ERROR").isBlank()) {
                     logger.severe("Error when running python file");
                     return false;
                 }
