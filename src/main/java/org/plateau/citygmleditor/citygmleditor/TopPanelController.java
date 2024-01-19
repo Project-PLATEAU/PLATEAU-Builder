@@ -123,7 +123,7 @@ public class TopPanelController {
     public void openValidationWindow(ActionEvent event) throws IOException {
         Stage newWindow = new Stage();
         newWindow.setTitle("品質検査");
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("validation.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/validation.fxml"));
         newWindow.setScene(new Scene(loader.load()));
         newWindow.showAndWait();
     }
