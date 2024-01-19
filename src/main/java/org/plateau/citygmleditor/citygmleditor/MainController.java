@@ -50,6 +50,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
@@ -110,12 +111,14 @@ import java.nio.file.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import org.plateau.citygmleditor.world.*;
+import org.plateau.citygmleditor.citygmleditor.CoordinateDialogController;
 
 /**
  * ToolbarController class for main fxml file.
  */
 public class MainController implements Initializable {
     public VBox centerPanel;
+    private File droppedFile;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -151,12 +154,8 @@ public class MainController implements Initializable {
                     if (supportedFile.getAbsolutePath().indexOf('%') != -1) {
                         supportedFile = new File(URLDecoder.decode(supportedFile.getAbsolutePath()));
                     }
-                    try {
-                        Node root = GmlImporter.loadGml(supportedFile.toString());
-                        CityGMLEditorApp.getSceneContent().setContent(root);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                    droppedFile = supportedFile;
+                    Platform.runLater(() -> CoordinateDialogController.createCoorinateDialog(droppedFile));
                 }
                 success = true;
             }

@@ -29,12 +29,7 @@ public class TopPanelController {
         if (file == null)
             return;
 
-        try {
-            Node root = GmlImporter.loadGml(file.toString());
-            CityGMLEditorApp.getSceneContent().setContent(root);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        CoordinateDialogController.createCoorinateDialog(file);
     }
 
     public void exportDataset(ActionEvent event) {
