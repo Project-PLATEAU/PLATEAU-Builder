@@ -1,168 +1,102 @@
 package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
-import org.locationtech.jts.geom.LineSegment;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
+import org.plateau.citygmleditor.utils.CollectionUtil;
+import org.plateau.citygmleditor.utils.SolveEquationUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
-import org.plateau.citygmleditor.utils.XmlUtil;
-import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
+import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class L08LogicalConsistencyValidator implements IValidator {
+    public static Logger logger = Logger.getLogger(L08LogicalConsistencyValidator.class.getName());
 
-  private static final int CONTINUOUS_ERROR_CODE = 1;
-  private static final int INTERSECTION_ERROR_CODE = 2;
-  private static final int TOUCH_ERROR_CODE = 3;
+    public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
+        List<String> invalidBuildings = new ArrayList<>();
 
-  public static Logger logger = Logger.getLogger(L08LogicalConsistencyValidator.class.getName());
+        NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
+        for (int i = 0; i < buildings.getLength(); i++) {
+            Element building = (Element) buildings.item(i);
+            String buildingID = building.getAttribute(TagName.GML_ID);
+            // get invalid lineString tags
+            NodeList lineStrings = building.getElementsByTagName(TagName.GML_LINESTRING);
+            List<String> invalidLineString = this.getInvalidTag(lineStrings);
+            if (invalidLineString.isEmpty()) continue;
+            String invalidBuilding = "gml:id=" + buildingID + "lineString=" + invalidLineString;
+            invalidBuildings.add(invalidBuilding);
+        }
 
-  public List<ValidationResultMessage> validate(CityModelView cityModelView)
-      throws ParserConfigurationException, IOException, SAXException {
-    List<ValidationResultMessage> messages = new ArrayList<>();
-
-    NodeList lineStringNodes = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.GML_LINESTRING);
-    Map<Node, Set<ErrorLineString>> buildingWithErrorLineString = new HashMap<>();
-
-    for (int i = 0; i < lineStringNodes.getLength(); i++) {
-      try {
-        checkPointsIntersect(lineStringNodes.item(i), buildingWithErrorLineString);
-      } catch (InvalidPosStringException e) {
-        Node gmlId = XmlUtil.findNearestParentByAttribute(lineStringNodes.item(i), TagName.GML_ID);
-        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                MessageFormat.format(MessageError.ERR_L08_002,
-                        gmlId.getAttributes().getNamedItem("gml:id").getTextContent(),
-                        lineStringNodes.item(i).getFirstChild().getNodeValue())));
-      }
+        if (CollectionUtil.isEmpty(invalidBuildings)) return new ArrayList<>();
+        List<ValidationResultMessage> messages = new ArrayList<>();
+        for (String invalid : invalidBuildings) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageFormat.format(MessageError.ERR_L08_001, invalid)));
+        }
+        return messages;
     }
 
-    buildingWithErrorLineString.forEach((buildingNode, lineStringNodesWithError) -> {
-      String gmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
-      String msg = MessageFormat.format(MessageError.ERR_L08_001, gmlId);
-      for (ErrorLineString errorLineString : lineStringNodesWithError) {
-        if (errorLineString.getErrorCode() == INTERSECTION_ERROR_CODE) {
-          msg = msg + String.format("<gml:LineString gml:id=\"%s\">が自己交差しています。\n",
-                          errorLineString.getLineStringError().getAttributes().getNamedItem(TagName.GML_ID).getTextContent());
-        } else if (errorLineString.getErrorCode() == TOUCH_ERROR_CODE) {
-          msg = msg + String.format("<gml:LineString gml:id=\"%s\">が自己接触しています。\n",
-                  errorLineString.getLineStringError().getAttributes().getNamedItem(TagName.GML_ID).getTextContent());
-        } else if (errorLineString.getErrorCode() == CONTINUOUS_ERROR_CODE) {
-          msg = msg + "\n" + errorLineString.getLineStringError().getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
-        }
-      }
+    private List<String> getInvalidTag(NodeList lineStrings) {
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < lineStrings.getLength(); i++) {
+            Element lineString = (Element) lineStrings.item(0);
+            Element posList = (Element) lineString.getElementsByTagName(TagName.GML_POSLIST).item(0);
+            String[] posString = posList.getTextContent().trim().split(" ");
 
-//      String.format("L08: Building which gml:id=\"%s\" has %s <gml:LineString> invalid", gmlId, lineStringNodesWithError.size());
-      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, msg));
-    });
+            if (posString.length % 3 != 0) result.add(Arrays.toString(posString));
 
-    return messages;
-  }
-
-  private void checkPointsIntersect(Node lineStringNode, Map<Node, Set<ErrorLineString>> buildingWithErrorLineString) {
-    Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(lineStringNode, TagName.BLDG_BUILDING, TagName.GML_ID);
-
-    List<LineSegment> lineSegments = getLineSegments(lineStringNode);
-
-    // If there is only 1 line segment, there is no intersection
-    if (lineSegments.size() >= 2) {
-      // Convolution combination 2 of ine segments
-      for (int j = 0; j < lineSegments.size() - 1; j++) {
-        LineSegment first = lineSegments.get(j);
-        for (int k = j + 1; k < lineSegments.size(); k++) {
-          LineSegment second = lineSegments.get(k);
-          // Check if 2 line segments are intersected
-          // if j == k-1, 2 line segments are continuous
-          boolean isContinuous = j == k-1;
-          // Line first and last are also continuous
-          boolean isReverseContinuous = j == 0 && k == lineSegments.size() - 1;
-
-          int validCode = 0;
-
-          if (isContinuous) {
-            validCode = ThreeDUtil.isLinesContinuous(first, second) ? CONTINUOUS_ERROR_CODE : validCode;
-          } else if (isReverseContinuous) {
-            validCode = ThreeDUtil.isLinesContinuous(second, first) ? CONTINUOUS_ERROR_CODE : validCode;
-          } else {
-            // 2 line segments should not have no intersection
-            validCode = first.intersection(second) == null ? INTERSECTION_ERROR_CODE : validCode;
-            if (checkTouchLineSegments(first, second)) {
-              validCode = first.intersection(second) == null ? TOUCH_ERROR_CODE : validCode;
+            List<Point3D> point3DS = ThreeDUtil.createListPoint(posString);
+            // check line intersect or touch others
+            for (int j = 2; j < point3DS.size(); j++) {
+                Point3D currentPoint = point3DS.get(j);
+                boolean isPolistValid = this.checkPointIntersecOrTouch(j, currentPoint, point3DS);
+                if (isPolistValid) continue;
+                result.add(Arrays.toString(posString));
             }
-          }
 
-          // If 2 line segments are not continuous and intersected
-          if (validCode > 0) {
-            // Update error list of building
-            ErrorLineString errorLineString = new ErrorLineString();
-            Set<ErrorLineString> errorList = buildingWithErrorLineString.getOrDefault(buildingNode, new HashSet<>());
-            errorLineString.setLineStringError(lineStringNode);
-            errorLineString.setErrorCode(validCode);
-            errorList.add(errorLineString);
-            buildingWithErrorLineString.put(buildingNode, errorList);
-          }
+
         }
-      }
-    }
-  }
-
-  private boolean checkTouchLineSegments(LineSegment first, LineSegment second) {
-    double vectorSecondP0 = (second.p0.x - first.p0.x)*(first.p1.x - first.p0.x) +
-            (second.p0.y - first.p0.y)*(first.p1.y - first.p0.y) +
-            (second.p0.z - first.p0.z)*(first.p1.z - first.p0.z);
-
-    double vectorSecondP1 = (second.p1.x - first.p0.x)*(first.p1.x - first.p0.x) +
-            (second.p1.y - first.p0.y)*(first.p1.y - first.p0.y) +
-            (second.p1.z - first.p0.z)*(first.p1.z - first.p0.z);
-
-    if (vectorSecondP0 == 0 || vectorSecondP1 == 0) {
-      return true;
+        return result;
     }
 
-    return false;
-  }
+    private boolean checkPointIntersecOrTouch(int index, Point3D currentPoint, List<Point3D> pointsInput) {
+        for (int i = 0; i < index; i++) {
+            Point3D startPoint = pointsInput.get(i);
+            Point3D endPoint = pointsInput.get(i + 1);
+            Point3D intersection = this.findIntersection(currentPoint, startPoint, endPoint);
 
-  private List<LineSegment> getLineSegments(Node lineStringNode) {
+            boolean intersect = intersection == null || (startPoint.distance(intersection) + intersection.distance(endPoint)) == startPoint.distance(endPoint);
+            if (intersect) return false;
+        }
+        return true;
+    }
 
-    Element lineStringElement = (Element) lineStringNode;
-    String[] posString = lineStringElement.getElementsByTagName(TagName.GML_POSLIST).item(0).getTextContent().split(" ");
-    // Convert string to 3d points
-    List<Point3D> points = ThreeDUtil.createListPoint(posString);;
-    // Convert 3d points to line segments
-    return ThreeDUtil.getLineSegments(points);
-  }
-}
+    private Point3D findIntersection(Point3D currentPoint, Point3D startPoint, Point3D endPoint) {
+        // unit of d1
+        Vec3f unit1 = SolveEquationUtil.createUnit(startPoint, endPoint);
+        // unit of d2
+        Vec3f unit2 = SolveEquationUtil.createUnit(endPoint, currentPoint);
 
+        // find M1 in d1 (endpoint) M2 in d2 (currentPoint)
+        float m1m2x = (float) (currentPoint.getX() - endPoint.getX());
+        float m1m2y = (float) (currentPoint.getY() - endPoint.getY());
 
-class ErrorLineString {
-  public ErrorLineString() {}
+        // find parameter of line equation (t)
+        double t1 = (SolveEquationUtil.calculateDeterminant(unit2.y, unit2.x, m1m2y, m1m2x)) / (SolveEquationUtil.calculateDeterminant(unit1.x, unit2.x, unit1.y, unit2.y));
+        double t2 = (-m1m2x + unit1.x * t1) / unit2.x;
 
-  private Node LineStringError;
-  private int errorCode;
-
-  public void setErrorCode(int errorCode) {
-    this.errorCode = errorCode;
-  }
-
-  public int getErrorCode() {
-    return this.errorCode;
-  }
-
-  public void setLineStringError (Node lineStringError) {
-    this.LineStringError = lineStringError;
-  }
-
-  public Node getLineStringError() {
-    return this.LineStringError;
-  }
+        if ((endPoint.getZ() + unit1.z * t1) != (currentPoint.getZ() + unit2.z * t2)) return null;
+        return new Point3D(endPoint.getX() + unit1.x * t1, endPoint.getY() + unit1.y * t1, endPoint.getZ() + unit1.z * t1);
+    }
 }

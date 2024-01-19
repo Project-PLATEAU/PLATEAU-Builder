@@ -50,6 +50,22 @@ public class SolveEquationUtil {
     return planeEquation;
   }
 
+  /**
+   * create uint
+   *
+   * @param startPoint
+   * @param endPoint
+   */
+  public static Vec3f createUnit(Point3D startPoint, Point3D endPoint) {
+    float unitX = (float) (endPoint.getX() - startPoint.getX());
+    float unitY = (float) (endPoint.getY() - startPoint.getY());
+    float unitZ = (float) (endPoint.getZ() - startPoint.getZ());
+    Vec3f unit = new Vec3f(unitX, unitY, unitZ);
+    unit.normalize();
+    return unit;
+  }
+
+
   public static Vec3f createNormal(Point3D vector12, Point3D vector23) {
     double xNormalVector = calculateDeterminant(vector12.getY(), vector12.getZ(), vector23.getY(), vector23.getZ());
     double yNormalVector = calculateDeterminant(vector12.getZ(), vector12.getX(), vector23.getZ(), vector23.getX());
@@ -58,7 +74,7 @@ public class SolveEquationUtil {
     return new Vec3f((float) xNormalVector, (float) yNormalVector, (float) zNormalVector);
   }
 
-  private static double calculateDeterminant(double a1, double a2, double b1, double b2) {
+  public static double calculateDeterminant(double a1, double a2, double b1, double b2) {
     return a1 * b2 - a2 * b1;
   }
 }
