@@ -1,65 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefWidth="258.0"
-            fx:controller="org.plateau.citygmleditor.citygmleditor.ViewSettingsController">
-    <VBox layoutY="-13.0" spacing="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-          AnchorPane.topAnchor="0.0">
+<AnchorPane maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefWidth="258.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.ViewSettingsController">
+    <VBox layoutY="-13.0" spacing="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <padding>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
         </padding>
         <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="表示">
             <font>
-                <Font size="16.0"/>
+                <Font size="16.0" />
             </font>
         </Text>
             <TitledPane animated="false" text="設定">
-                <VBox maxWidth="1.7976931348623157E308" spacing="10.0">
+                <VBox fx:id="tabContentsArea" maxWidth="1.7976931348623157E308" spacing="10.0">
                     <padding>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                     </padding>
-                    <HBox alignment="CENTER_LEFT"
-                          maxHeight="1.7976931348623157E308" prefWidth="200.0">
+                    <HBox alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308" prefWidth="200.0">
                         <padding>
-                            <Insets left="100.0"/>
+                            <Insets left="100.0" />
                         </padding>
-                        <CheckBox fx:id="showAxisCheckBox"
-                                  mnemonicParsing="false" text="軸の表示"/>
+                        <CheckBox fx:id="showAxisCheckBox" mnemonicParsing="false" text="軸の表示" />
                     </HBox>
                     <HBox maxHeight="1.7976931348623157E308" prefWidth="200.0">
                         <VBox.margin>
-                            <Insets/>
+                            <Insets />
                         </VBox.margin>
                         <padding>
-                            <Insets left="100.0"/>
+                            <Insets left="100.0" />
                         </padding>
-                        <CheckBox fx:id="yUpCheckBox"
-                                  mnemonicParsing="false" text="YUP" selected="true"/>
+                        <CheckBox fx:id="yUpCheckBox" mnemonicParsing="false" selected="true" text="YUP" />
                     </HBox>
-                    <HBox layoutX="20.0" layoutY="80.0"
-                          maxHeight="1.7976931348623157E308" prefWidth="200.0">
+                    <HBox layoutX="20.0" layoutY="80.0" maxHeight="1.7976931348623157E308" prefWidth="200.0">
                         <padding>
-                            <Insets left="100.0"/>
+                            <Insets left="100.0" />
                         </padding>
-                        <CheckBox fx:id="msaaCheckBox"
-                                  mnemonicParsing="false"
-                                  text="MSAAアンチエリアシング"/>
+                        <CheckBox fx:id="msaaCheckBox" mnemonicParsing="false" text="MSAAアンチエリアシング" />
                     </HBox>
-                    <HBox alignment="CENTER_LEFT" layoutX="20.0" layoutY="108.0"
-                          maxHeight="1.7976931348623157E308" minHeight="30.0"
-                          prefHeight="0.0" spacing="5.0">
-                        <ColorPicker fx:id="backgroundColorPicker"
-                                     prefWidth="120.0"/>
-                        <Text fill="WHITE" strokeType="OUTSIDE"
-                              strokeWidth="0.0" text="背景色"/>
+                    <HBox alignment="CENTER_LEFT" layoutX="20.0" layoutY="108.0" maxHeight="1.7976931348623157E308" minHeight="30.0" prefHeight="0.0" spacing="5.0">
+                        <ColorPicker fx:id="backgroundColorPicker" prefWidth="120.0" />
+                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="背景色" />
                     </HBox>
                 </VBox>
             </TitledPane>

@@ -1,36 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?scenebuilder-stylesheet viewer.css?>
-
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
-<VBox fx:id="rightSidePanel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+
+<VBox fx:id="rightSidePanel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
     <TabPane prefHeight="798.0" prefWidth="278.0" tabClosingPolicy="UNAVAILABLE">
         <Tab>
             <graphic>
                 <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../images/icon_info.png"/>
+                    <Image url="@../images/icon_info.png" />
                 </ImageView>
             </graphic>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                     </padding>
                     <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物情報">
                         <font>
-                            <Font size="16.0"/>
+                            <Font size="16.0" />
                         </font>
                     </Text>
+               <VBox prefWidth="100.0" spacing="5.0">
+                  <children>
+                     <HBox prefWidth="200.0">
+                        <children>
+                           <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物ID">
+                              <HBox.margin>
+                                 <Insets right="50.0" />
+                              </HBox.margin>
+                           </Text>
+                           <Text fill="WHITE" layoutX="10.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="gml:id" />
+                        </children>
+                        <VBox.margin>
+                           <Insets />
+                        </VBox.margin>
+                     </HBox>
+                     <HBox maxWidth="1.7976931348623157E308" prefWidth="200.0">
+                        <children>
+                           <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物型">
+                              <HBox.margin>
+                                 <Insets right="50.0" />
+                              </HBox.margin>
+                           </Text>
+                           <Text fill="WHITE" layoutX="10.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="地物型(Building)" />
+                        </children>
+                        <padding>
+                           <Insets bottom="5.0" />
+                        </padding>
+                     </HBox>
+                  </children>
+                  <padding>
+                     <Insets left="5.0" right="5.0" top="5.0" />
+                  </padding>
+               </VBox>
+                      <fx:include minHeight="200.0" prefWidth="200.0" source="attribute-editor.fxml" />
                     <Accordion>
                         <panes>
-                            <fx:include source="attribute-editor.fxml" />
                             <fx:include source="texture-thumbnail.fxml" />
                         </panes>
                     </Accordion>
@@ -40,7 +76,7 @@
         <Tab>
             <graphic>
                 <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../images/icon_settings.png"/>
+                    <Image url="@../images/icon_settings.png" />
                 </ImageView>
             </graphic>
             <fx:include source="view-settings.fxml" />
@@ -48,7 +84,7 @@
         <Tab>
             <graphic>
                 <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../images/icon_Light.png"/>
+                    <Image url="@../images/icon_Light.png" />
                 </ImageView>
             </graphic>
             <fx:include source="light-settings.fxml" />
@@ -56,10 +92,10 @@
         <Tab>
             <graphic>
                 <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../images/icon_camera.png"/>
+                    <Image url="@../images/icon_camera.png" />
                 </ImageView>
             </graphic>
-            <fx:include source="camera-settings.fxml"/>
+            <fx:include source="camera-settings.fxml" />
         </Tab>
     </TabPane>
 </VBox>

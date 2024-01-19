@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
 
-<TitledPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            animated="false" text="属性情報"
-            fx:id="titledPane"
-            fx:controller="org.plateau.citygmleditor.citygmleditor.AttributeEditorController"
-            prefHeight="600.0" prefWidth="600.0">
-    <TreeTableView fx:id="attributeTreeTable" editable="true" prefHeight="600.0" prefWidth="200.0" minHeight="400">
+<TitledPane fx:id="titledPane" animated="false" collapsible="false" prefWidth="200.0" text="属性情報" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.AttributeEditorController">
+    <TreeTableView fx:id="attributeTreeTable" editable="true" maxWidth="1.7976931348623157E308" minHeight="300.0" prefWidth="200.0">
         <columns>
             <TreeTableColumn fx:id="keyColumn" editable="false" prefWidth="200.0" sortable="false" text="キー" />
             <TreeTableColumn fx:id="valueColumn" prefWidth="75.0" text="値" />
         </columns>
     </TreeTableView>
+   <graphic>
+      <Button mnemonicParsing="false" text="+" />
+   </graphic>
 </TitledPane>
