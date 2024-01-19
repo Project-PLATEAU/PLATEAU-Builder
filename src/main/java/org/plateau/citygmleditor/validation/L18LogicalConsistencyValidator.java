@@ -1,14 +1,13 @@
 package org.plateau.citygmleditor.validation;
 
-import javafx.geometry.Point3D;
-import org.locationtech.jts.geom.Geometry;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
+import org.plateau.citygmleditor.constant.Relationship;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CollectionUtil;
+import org.plateau.citygmleditor.utils.PythonUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
-import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.plateau.citygmleditor.world.World;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -19,9 +18,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class L18LogicalConsistencyValidator implements IValidator {
@@ -38,10 +35,6 @@ public class L18LogicalConsistencyValidator implements IValidator {
 
         public void setBuildingID(String buildingID) {
             this.buildingID = buildingID;
-        }
-
-        public String getCompositeSurface() {
-            return compositeSurface;
         }
 
         public void setCompositeSurface(String compositeSurface) {
@@ -66,21 +59,12 @@ public class L18LogicalConsistencyValidator implements IValidator {
             String buildingID = building.getAttribute(TagName.GML_ID);
             NodeList compositeSurfaces = building.getElementsByTagName(TagName.GML_COMPOSITE_SURFACE);
 
-            //Check each compositeSurfaces one by one
-            for (int j = 0; j < compositeSurfaces.getLength(); j++) {
-                Element compositeSurface = (Element) compositeSurfaces.item(j);
-                List<String> compositeInvalids = this.getListInvalidCompositeSurface(compositeSurface);
-                if (compositeInvalids.isEmpty()) continue;
-                BuildingInvalid invalid = new BuildingInvalid();
-                invalid.setBuildingID(buildingID);
-                String compositeID = compositeSurface.getAttribute(TagName.GML_ID);
-                if (compositeID.isBlank()) {
-                    invalid.setCompositeSurface("gml:id=[]" + compositeInvalids);
-                } else {
-                    invalid.setCompositeSurface("gml:id=" + compositeID + compositeInvalids);
-                }
-                buildingInvalids.add(invalid);
-            }
+            List<String> invalidSurface = this.getInvalidSurface(compositeSurfaces);
+            if (invalidSurface.isEmpty()) continue;
+            BuildingInvalid invalid = new BuildingInvalid();
+            invalid.setBuildingID(buildingID);
+            invalid.setCompositeSurface(String.valueOf(invalidSurface));
+            buildingInvalids.add(invalid);
         }
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
@@ -90,66 +74,73 @@ public class L18LogicalConsistencyValidator implements IValidator {
         return messages;
     }
 
-    /**
-     * Create Geometry by compositeSurface
-     *
-     * @return List Geomey by poslis in compositeSurface
-     */
-    private List<Geometry> createPolygon(Element compositeSurface) {
-        List<Geometry> polygons = new ArrayList<>();
-        NodeList posList = compositeSurface.getElementsByTagName(TagName.GML_POSLIST);
-        for (int i = 0; i < posList.getLength(); i++) {
-            Element posElement = (Element) posList.item(i);
-            String[] posString = posElement.getTextContent().trim().split(" ");
+    private List<String> getInvalidSurface(NodeList compositeSurfaces) throws IOException {
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < compositeSurfaces.getLength(); i++) {
+            Element surface = (Element) compositeSurfaces.item(0);
+            NodeList polygons = surface.getElementsByTagName(TagName.GML_POLYGON);
 
-            // split posList into points
-            try {
-                List<Point3D> point3Ds = ThreeDUtil.createListPoint(posString);
-                Geometry polygon = ThreeDUtil.createPolygon(point3Ds);
-                polygons.add(polygon);
-            } catch (InvalidPosStringException e) {
-                logger.severe("Error when convert point to geometry");
-                throw new RuntimeException("Invalid String");
+            boolean isPolygonValid = this.isPolygonValid(polygons);
+            if (isPolygonValid) continue;
+            String surfaceID = surface.getAttribute(TagName.GML_ID);
+            if (!surfaceID.isEmpty()) {
+                result.add("gml:id=" + surfaceID);
+            } else {
+                List<String> allPoslist = new ArrayList<>();
+                for (int j = 0; j < polygons.getLength(); j++) {
+                    Element polygon = (Element) polygons.item(i);
+                    Element exterior = (Element) polygon.getElementsByTagName(TagName.GML_EXTERIOR).item(0);
+                    Element posList = (Element) exterior.getElementsByTagName(TagName.GML_POSLIST).item(0);
+                    String[] posString = posList.getTextContent().trim().split(" ");
+                    allPoslist.add(Arrays.toString(posString));
+                }
+                result.add("gml:id=[]" + allPoslist);
             }
         }
-        return polygons;
+
+        return result;
     }
 
     /**
-     * Check each pair of planes in compositeSurface
+     * check faces of surface intersect itself
      *
-     * @param compositeSurface Element
-     * @return list invalid planes in compositeSurface
+     * @param polygons list polygon input
+     *                 return true if faces of surface touch at least 1 a other face and not intersect others faces
      */
-    private List<String> getListInvalidCompositeSurface(Element compositeSurface) {
-        List<Geometry> geometries = this.createPolygon(compositeSurface);
-        List<String> invalidComposite = new ArrayList<>();
-        for (int i = 0; i < geometries.size(); i++) {
-            Geometry geo1 = geometries.get(i);
-            boolean isTouches = this.checkTouches(geo1, geometries, i);
-            boolean isIntersect = this.checkIntersect(geo1, geometries, i);
-            // if 2 polygons are touches and aren't intersect => valid, others case is invalid
-            if (isTouches && !isIntersect) continue;
-            String geoString = Arrays.toString(geo1.getCoordinates());
-            invalidComposite.add(geoString);
-        }
+    private boolean isPolygonValid(NodeList polygons) throws IOException {
+        int totalPolygon = polygons.getLength();
+        for (int i = 0; i < totalPolygon; i++) {
+            Element polygon1 = (Element) polygons.item(i);
+            Element exterior1 = (Element) polygon1.getElementsByTagName(TagName.GML_EXTERIOR).item(0);
+            Element posList1 = (Element) exterior1.getElementsByTagName(TagName.GML_POSLIST).item(0);
+            String[] posString1 = posList1.getTextContent().trim().split(" ");
+            if (posString1.length % 3 != 0) {
+                return false;
+            }
 
-        return invalidComposite;
-    }
+            int count = 0;
+            for (int j = i + 1; j < totalPolygon; j++) {
+                Element polygon2 = (Element) polygons.item(j);
+                Element exterior2 = (Element) polygon2.getElementsByTagName(TagName.GML_EXTERIOR).item(0);
+                Element posList2 = (Element) exterior2.getElementsByTagName(TagName.GML_POSLIST).item(0);
+                String[] posString2 = posList2.getTextContent().trim().split(" ");
 
-    private boolean checkTouches(Geometry geo1, List<Geometry> listFace, int index) {
-        for (int i = index + 1; i < listFace.size() - 1; i++) {
-            Geometry geo2 = listFace.get(i);
-            if (geo1.touches(geo2)) return true;
-        }
-        return false;
-    }
+                Map<String, String> runCmdResult = PythonUtil.checkIntersecWithPyCmd(AppConst.PATH_PYTHON, posString1, posString2);
+                if (!runCmdResult.get("ERROR").isBlank()) {
+                    logger.severe("Error when running python file");
+                    return false;
+                }
+                String output = runCmdResult.get("OUTPUT").trim();
+                if (Objects.equals(output, Relationship.INTERSECT)) return false;
+                if (Objects.equals(output, Relationship.TOUCH)) continue;
 
-    private boolean checkIntersect(Geometry geo1, List<Geometry> listFace, int index) {
-        for (int i = index + 1; i < listFace.size() - 1; i++) {
-            Geometry geo2 = listFace.get(i);
-            if (!geo1.touches(geo2) && geo1.intersects(geo2)) return true;
+                if (Objects.equals(output, Relationship.NOT_INTERSECT)) {
+                    count++;
+                }
+            }
+
+            if (count == totalPolygon - 1) return false;
         }
-        return false;
+        return true;
     }
 }
