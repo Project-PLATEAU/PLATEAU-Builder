@@ -23,7 +23,8 @@ public class Tbldg02ThematicAccuaracyValidator implements IValidator {
 
     @Override
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
-        NodeList buildingInstallations = CityGmlUtil.getAllTagFromCityModel(cityModelView, TagName.BLDG_BUILDING_INSTALLATION);
+        NodeList buildingInstallations = CityGmlUtil.getXmlDocumentFrom(cityModelView)
+            .getElementsByTagName(TagName.BLDG_BUILDING_INSTALLATION);
         List<String> invalidInstallations = new ArrayList<>();
         for (int i = 0; i < buildingInstallations.getLength(); i++) {
             Node installation = buildingInstallations.item(i);

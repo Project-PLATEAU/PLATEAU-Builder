@@ -79,7 +79,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
     @Override
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
         // get buildings from gml file
-        NodeList buildings = CityGmlUtil.getAllTagFromCityModel(cityModelView, TagName.BLDG_BUILDING);
+        NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
 
         for (int i = 0; i < buildings.getLength(); i++) {

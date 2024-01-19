@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 import javafx.geometry.Point3D;
 import javax.xml.parsers.ParserConfigurationException;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateSequence;
-import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.MultiPolygon;
@@ -22,18 +20,12 @@ import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
-import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
-import org.plateau.citygmleditor.utils3d.polygonmesh.FaceBuffer;
-import org.plateau.citygmleditor.utils3d.polygonmesh.PolygonMeshUtils;
-import org.plateau.citygmleditor.utils3d.polygonmesh.Tessellator;
-import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import org.plateau.citygmleditor.validation.exception.InvalidGmlStructureException;
 import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
-import org.plateau.citygmleditor.world.World;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -51,7 +43,7 @@ public class L13LogicalConsistencyValidator implements IValidator {
     List<ValidationResultMessage> messages = new ArrayList<>();
     Map<Node, Set<Node>> buildingWithErrorPolygonsSurfacePaths = new HashMap<>();
 
-    var polygons = CityGmlUtil.getAllTagFromCityModel(cityModel, TagName.GML_POLYGON);
+    var polygons = CityGmlUtil.getXmlDocumentFrom(cityModel).getElementsByTagName(TagName.GML_POLYGON);
 
     // Check if exterior and interior of each polygon is invalid
     for (int i = 0; i < polygons.getLength(); i++) {

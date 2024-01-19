@@ -28,7 +28,7 @@ public class L09LogicalConsistencyValidator implements IValidator {
       throws ParserConfigurationException, IOException, SAXException {
     List<ValidationResultMessage> messages = new ArrayList<>();
 
-    NodeList linearRingNodes = CityGmlUtil.getAllTagFromCityModel(cityModelView, TagName.GML_LINEARRING);
+    NodeList linearRingNodes = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.GML_LINEARRING);
     Map<Node, Set<Node>> buildingWithErrorLinearRing = new HashMap<>();
 
     for (int i = 0; i < linearRingNodes.getLength(); i++) {

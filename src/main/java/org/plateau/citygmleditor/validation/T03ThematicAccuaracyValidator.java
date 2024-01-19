@@ -24,11 +24,10 @@ public class T03ThematicAccuaracyValidator implements IValidator {
     @Override
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
         // get buildings from gml file
-        File gmlFile = CityGmlUtil.createFileFromCityModel(cityModelView);
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.parse(gmlFile);
+        Document doc = CityGmlUtil.getXmlDocumentFrom(cityModelView);
 
         // get all object have reference
         Set<String> allXHref = this.getAllAttribute(doc, TagName.X_HREF);

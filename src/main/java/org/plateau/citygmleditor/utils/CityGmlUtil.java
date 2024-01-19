@@ -1,12 +1,13 @@
 package org.plateau.citygmleditor.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
-import org.citygml4j.model.citygml.core.CityModel;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.exporters.GmlExporter;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,31 +24,21 @@ public class CityGmlUtil {
     public static String HOME_PATH = System.getProperty("user.home");
 
     /**
-     * Get all node from xml file
+     * Get xml document from city model
      *
-     * @param tagName tag name
-     * @return list of node
-     * @throws ParserConfigurationException
-     * @throws IOException
-     * @throws SAXException
+     * @param cityModelView city model
      */
-    public static NodeList getAllTagFromCityModel(CityModelView cityModelView, String tagName) throws ParserConfigurationException, IOException, SAXException {
-        File gmlFile = createFileFromCityModel(cityModelView);
-        try {
-            return XmlUtil.getAllTagFromXmlFile(gmlFile, tagName);
-        } finally {
-            deleteFile(gmlFile);
-        }
-    }
+    public static Document getXmlDocumentFrom(CityModelView cityModelView)
+        throws ParserConfigurationException, IOException, SAXException {
 
-    public static File createFileFromCityModel(CityModelView cityModel) {
-        try {
-            String path = HOME_PATH + "/Temp/" + UUID.randomUUID() + ".gml";
-            GmlExporter.export(path, cityModel.getGmlObject(), cityModel.getSchemaHandler());
-            return new File(path);
-        } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
-            throw new RuntimeException(e);
-        }
+      try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); outputStream) {
+        GmlExporter.export(outputStream, cityModelView.getGmlObject(),
+            cityModelView.getSchemaHandler());
+        return XmlUtil.getXmlDocumentFrom(new ByteArrayInputStream(outputStream.toByteArray()));
+      } catch (ADEException | CityGMLBuilderException | CityGMLWriteException e) {
+        logger.severe("Error while exporting city model");
+        throw new RuntimeException(e);
+      }
     }
 
     public static void deleteFile(File file) {
