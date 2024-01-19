@@ -130,7 +130,7 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
         setVertexBuffer(vertexBuffer);
     }
     
-    public List<String> getTextures() {
+    public List<String> getTexturePaths() {
         var cityModelView = World.getActiveInstance().getCityModel();
         var ret = new ArrayList<String>();
         for (var boundary : boundaries) {

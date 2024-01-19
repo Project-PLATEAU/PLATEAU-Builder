@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.citymodel;
 
+import java.util.List;
 import java.util.ArrayList;
 import javafx.scene.shape.MeshView;
 import org.citygml4j.model.citygml.building.BuildingInstallation;
@@ -10,6 +11,7 @@ import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
+import org.plateau.citygmleditor.world.World;
 
 public class BuildingInstallationView extends MeshView implements ILODSolidView {
     private BuildingInstallation gmlObject;
@@ -84,5 +86,20 @@ public class BuildingInstallationView extends MeshView implements ILODSolidView 
             vertexBuffer.addVertex(vertex);
         }
         setVertexBuffer(vertexBuffer);
+    }
+    
+    public List<String> getTexturePaths() {
+        var cityModelView = World.getActiveInstance().getCityModel();
+        var ret = new ArrayList<String>();
+        for (var polygon : getPolygons()) {
+            if (polygon.getSurfaceData() == null)
+                continue;
+            var parameterizedTexture = (org.citygml4j.model.citygml.appearance.ParameterizedTexture)polygon.getSurfaceData().getOriginal();
+            var imageRelativePath = java.nio.file.Paths.get(parameterizedTexture.getImageURI());
+            var imageAbsolutePath = java.nio.file.Paths.get(cityModelView.getGmlPath()).getParent().resolve(imageRelativePath);
+            if(!ret.contains(imageAbsolutePath.toString()))
+                ret.add(imageAbsolutePath.toString());
+        }
+        return ret;
     }
 }
