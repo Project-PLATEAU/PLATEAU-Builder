@@ -91,11 +91,10 @@ public class L07LogicalConsistencyValidator implements IValidator {
             buildingInvalids.add(buildingInvalid);
         }
 
-        if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
+        if (CollectionUtil.isEmpty(buildingInvalids)) return new ArrayList<>();
         List<ValidationResultMessage> messages = new ArrayList<>();
         for (BuildingInvalid invalid : buildingInvalids) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                    MessageFormat.format(MessageError.ERR_L07_001, invalid)));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid.toString()));
         }
         return messages;
     }

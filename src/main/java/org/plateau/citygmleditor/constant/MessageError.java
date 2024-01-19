@@ -29,4 +29,11 @@ public interface MessageError {
     String ERR_L11_002 = "地物\"({0})\":";
     String ERR_L11_002_1 = "\n<gml:Polygon gml:id=\"({1})\">に同一平面上にない座標値が存在します。";
 
+    String ERR_L06_002 = "L06: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
+    String ERR_L08_002 = "L08: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
+    String ERR_L09_001 = "L09: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
+    String ERR_L10_003 = "L10: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
+    String ERR_L11_003 = "L11: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
+    String ERR_L13_002 = "L13: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
+    String ERR_L18_002 = "L18: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
 }

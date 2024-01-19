@@ -7,6 +7,7 @@ import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
+import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.plateau.citygmleditor.world.World;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -17,11 +18,13 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * 幾何オブジェクトインスタンスの座標値に含まれる、緯度、経度、標高が、その幾何オブジェクトインスタンスを含む都市モデル（core:CityModel）の空間範囲に含まれていることを検査します。
  **/
 public class L06LogicalConsistencyValidator implements IValidator {
+    public static Logger logger = Logger.getLogger(ThreeDUtil.class.getName());
 
     /**
      * The function checks L06 validate
@@ -51,23 +54,32 @@ public class L06LogicalConsistencyValidator implements IValidator {
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);
             List<String> values = new ArrayList<>(Arrays.asList(node.getFirstChild().getNodeValue().split(" ")));
-            List<Point3D> point3Ds = ThreeDUtil.createListPoint(values.toArray(new String[0]));
 
-            Node nodeParentBuilding = XmlUtil.findNearestParentByAttribute(node, TagName.GML_ID);
-            String id = nodeParentBuilding.getAttributes().getNamedItem("gml:id").getTextContent();
+            try {
+                List<Point3D> point3Ds = ThreeDUtil.createListPoint(values.toArray(new String[0]));
 
-            // Check the point within spatial extent of the model city
-            for (Point3D point3D : point3Ds) {
-                if (lowerPoint.getX() > point3D.getX() || point3D.getX() > upperPoint.getX()
-                        || lowerPoint.getY() > point3D.getY() || point3D.getY() > upperPoint.getY()
-                        || lowerPoint.getZ() > point3D.getZ() || point3D.getZ() > upperPoint.getZ()) {
-                    if (errorMap.containsKey(id)) {
-                        errorMap.replace(id, String.format("%s\n%s %s %s", errorMap.get(id), point3D.getX(), point3D.getY(), point3D.getZ()));
-                    } else {
-                        errorMap.put(id, String.format(
-                                MessageFormat.format(MessageError.ERR_L06_001, id) + "\n%s %s %s", point3D.getX(), point3D.getY(), point3D.getZ()));
+                Node nodeParentBuilding = XmlUtil.findNearestParentByAttribute(node, TagName.GML_ID);
+                String id = nodeParentBuilding.getAttributes().getNamedItem("gml:id").getTextContent();
+
+                // Check the point within spatial extent of the model city
+                for (Point3D point3D : point3Ds) {
+                    if (lowerPoint.getX() > point3D.getX() || point3D.getX() > upperPoint.getX()
+                            || lowerPoint.getY() > point3D.getY() || point3D.getY() > upperPoint.getY()
+                            || lowerPoint.getZ() > point3D.getZ() || point3D.getZ() > upperPoint.getZ()) {
+                        if (errorMap.containsKey(id)) {
+                            errorMap.replace(id, String.format("%s\n%s %s %s", errorMap.get(id), point3D.getX(), point3D.getY(), point3D.getZ()));
+                        } else {
+                            errorMap.put(id, MessageFormat.format(MessageError.ERR_L06_001, id)
+                                    + String.format("\n%s, %s, %s", point3D.getX(), point3D.getY(), point3D.getZ()));
+                        }
                     }
                 }
+            } catch (InvalidPosStringException e) {
+                Node parentNode = XmlUtil.findNearestParentByAttribute(node, TagName.GML_ID);
+                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                        MessageFormat.format(MessageError.ERR_L06_001,
+                                parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
+                                node.getFirstChild().getNodeValue())));
             }
         }
         for (Map.Entry<String, String> k : errorMap.entrySet()) {

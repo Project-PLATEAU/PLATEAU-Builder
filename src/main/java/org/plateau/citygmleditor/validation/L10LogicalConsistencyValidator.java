@@ -1,18 +1,7 @@
 package org.plateau.citygmleditor.validation;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 import javafx.geometry.Point3D;
-import javax.xml.parsers.ParserConfigurationException;
+import org.apache.commons.lang3.ObjectUtils;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
@@ -32,6 +21,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
 
 public class L10LogicalConsistencyValidator implements IValidator {
 
@@ -49,12 +44,12 @@ public class L10LogicalConsistencyValidator implements IValidator {
 
     // Check if exterior and interior of each polygon is invalid
     for (int i = 0; i < polygons.getLength(); i++) {
-      validateExteriorAndInteriors(polygons.item(i), buildingWithErrorPolygonsSurfacePaths);
+      validateExteriorAndInteriors(polygons.item(i), buildingWithErrorPolygonsSurfacePaths, messages);
     }
 
     // Check if exterior and interior of each surfacePath is invalid
     for (int i = 0; i < surfacePaths.getLength(); i++) {
-      validateExteriorAndInteriors(surfacePaths.item(i), buildingWithErrorPolygonsSurfacePaths);
+      validateExteriorAndInteriors(surfacePaths.item(i), buildingWithErrorPolygonsSurfacePaths, messages);
     }
 
     buildingWithErrorPolygonsSurfacePaths.forEach((buildingNode, errorPolygonSurfacePath) -> {
@@ -74,7 +69,8 @@ public class L10LogicalConsistencyValidator implements IValidator {
     return messages;
   }
 
-  private void validateExteriorAndInteriors(Node polygonOrSurfacePath, Map<Node, Set<Node>> buildingWithErrorLinearRing) {
+  private void validateExteriorAndInteriors(Node polygonOrSurfacePath, Map<Node, Set<Node>> buildingWithErrorLinearRing,
+                                            List<ValidationResultMessage> messages) {
 
     Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(polygonOrSurfacePath, TagName.BLDG_BUILDING,
         TagName.GML_ID);
@@ -91,9 +87,9 @@ public class L10LogicalConsistencyValidator implements IValidator {
     List<List<Point3D>> interiorListPoints;
 
     try {
-      exteriorPoints = get3dPoints(exteriorList.get(0).getFirstChild().getNextSibling());
+      exteriorPoints = get3dPoints(exteriorList.get(0).getFirstChild().getNextSibling(), messages);
       interiorListPoints = interiorList.stream()
-          .map(node -> get3dPoints(node.getFirstChild().getNextSibling()))
+          .map(node -> get3dPoints(node.getFirstChild().getNextSibling(), messages))
           .collect(Collectors.toList());
     } catch (InvalidPosStringException e) {
       CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygonOrSurfacePath);
@@ -109,7 +105,7 @@ public class L10LogicalConsistencyValidator implements IValidator {
       // If angle between exterior normal and interior normal is 180, it means interior and exterior is reverse direction
       // In this case, it is valid, otherwise, it is invalid
       // 座標列の向きが不正なインスタンスをエラーとする。外周は反時計回り、内周は時計回りが正しい。
-      if (exteriorNormal.angle(interiorNormal) != 180) {
+      if (!ObjectUtils.isEmpty(exteriorNormal) && exteriorNormal.angle(interiorNormal) != 180) {
         // Update error list of building and exit function
         CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygonOrSurfacePath);
         return;
@@ -138,11 +134,14 @@ public class L10LogicalConsistencyValidator implements IValidator {
     // Calculate normals
     var normals = PolygonMeshUtils.calculateNormal(meshVertexBuffer, meshFaceBuffer);
 
+    if (ObjectUtils.isEmpty(normals)) {
+      return null;
+    }
     // Print normal(normals should be almost the same)
     return new Point3D(normals[0], normals[1], normals[2]).normalize();
   }
 
-  private List<Point3D> get3dPoints(Node linearRingNode) {
+  private List<Point3D> get3dPoints(Node linearRingNode, List<ValidationResultMessage> messages) {
     Element linearRingElement = (Element) linearRingNode;
     // There are 2 cases: posList and pos of LinearRing
     NodeList posListNodes = linearRingElement.getElementsByTagName(TagName.GML_POSLIST);
@@ -150,16 +149,34 @@ public class L10LogicalConsistencyValidator implements IValidator {
 
     if (posListNodes.getLength() > 0) {
       String[] posString = posListNodes.item(0).getTextContent().split(" ");
-      return ThreeDUtil.createListPoint(posString);
+      try {
+        return ThreeDUtil.createListPoint(posString);
+      } catch (InvalidPosStringException e) {
+        Node parentNode = XmlUtil.findNearestParentByAttribute(linearRingNode, TagName.GML_ID);
+        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                MessageFormat.format(MessageError.ERR_L10_001,
+                        parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
+                        linearRingElement.getFirstChild().getNodeValue())));
+        return new ArrayList<>();
+      }
     } else if (posNodes.getLength() > 0) {
       List<Point3D> point3DS = new ArrayList<>();
       for (int i = 0; i < posNodes.getLength(); i++) {
         Node posNode = posNodes.item(i);
         String[] posString = posNode.getTextContent().split(" ");
-        point3DS.addAll(ThreeDUtil.createListPoint(posString));
+        try {
+          point3DS.addAll(ThreeDUtil.createListPoint(posString));
+        } catch (InvalidPosStringException e) {
+          Node parentNode = XmlUtil.findNearestParentByAttribute(linearRingNode, TagName.GML_ID);
+          messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                  MessageFormat.format(MessageError.ERR_L10_003,
+                          parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
+                          linearRingElement.getFirstChild().getNodeValue())));
+          return new ArrayList<>();
+        }
       }
       return point3DS;
     }
-    return List.of();
+    return new ArrayList<>();
   }
 }

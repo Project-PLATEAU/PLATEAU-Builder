@@ -8,6 +8,7 @@ import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
+import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -21,6 +22,10 @@ import java.util.logging.Logger;
 
 public class L08LogicalConsistencyValidator implements IValidator {
 
+  private static final int CONTINUOUS_ERROR_CODE = 1;
+  private static final int INTERSECTION_ERROR_CODE = 2;
+  private static final int TOUCH_ERROR_CODE = 3;
+
   public static Logger logger = Logger.getLogger(L08LogicalConsistencyValidator.class.getName());
 
   public List<ValidationResultMessage> validate(CityModelView cityModelView)
@@ -31,19 +36,29 @@ public class L08LogicalConsistencyValidator implements IValidator {
     Map<Node, Set<ErrorLineString>> buildingWithErrorLineString = new HashMap<>();
 
     for (int i = 0; i < lineStringNodes.getLength(); i++) {
-      checkPointsIntersect(lineStringNodes.item(i), buildingWithErrorLineString);
+      try {
+        checkPointsIntersect(lineStringNodes.item(i), buildingWithErrorLineString);
+      } catch (InvalidPosStringException e) {
+        Node gmlId = XmlUtil.findNearestParentByAttribute(lineStringNodes.item(i), TagName.GML_ID);
+        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                MessageFormat.format(MessageError.ERR_L08_002,
+                        gmlId.getAttributes().getNamedItem("gml:id").getTextContent(),
+                        lineStringNodes.item(i).getFirstChild().getNodeValue())));
+      }
     }
 
     buildingWithErrorLineString.forEach((buildingNode, lineStringNodesWithError) -> {
       String gmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
       String msg = MessageFormat.format(MessageError.ERR_L08_001, gmlId);
       for (ErrorLineString errorLineString : lineStringNodesWithError) {
-        if (errorLineString.getErrorCode() == 2) {
+        if (errorLineString.getErrorCode() == INTERSECTION_ERROR_CODE) {
           msg = msg + String.format("<gml:LineString gml:id=\"%s\">が自己交差しています。\n",
                           errorLineString.getLineStringError().getAttributes().getNamedItem(TagName.GML_ID).getTextContent());
-        } else if (errorLineString.getErrorCode() == 3) {
+        } else if (errorLineString.getErrorCode() == TOUCH_ERROR_CODE) {
           msg = msg + String.format("<gml:LineString gml:id=\"%s\">が自己接触しています。\n",
                   errorLineString.getLineStringError().getAttributes().getNamedItem(TagName.GML_ID).getTextContent());
+        } else if (errorLineString.getErrorCode() == CONTINUOUS_ERROR_CODE) {
+          msg = msg + "\n" + errorLineString.getLineStringError().getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
         }
       }
 
@@ -75,14 +90,14 @@ public class L08LogicalConsistencyValidator implements IValidator {
           int validCode = 0;
 
           if (isContinuous) {
-            validCode = ThreeDUtil.isLinesContinuous(first, second) ? 1 : validCode;
+            validCode = ThreeDUtil.isLinesContinuous(first, second) ? CONTINUOUS_ERROR_CODE : validCode;
           } else if (isReverseContinuous) {
-            validCode = ThreeDUtil.isLinesContinuous(second, first) ? 1: validCode;
+            validCode = ThreeDUtil.isLinesContinuous(second, first) ? CONTINUOUS_ERROR_CODE : validCode;
           } else {
             // 2 line segments should not have no intersection
-            validCode = first.intersection(second) == null ? 2 : validCode;
+            validCode = first.intersection(second) == null ? INTERSECTION_ERROR_CODE : validCode;
             if (checkTouchLineSegments(first, second)) {
-              validCode = first.intersection(second) == null ? 2 : validCode;
+              validCode = first.intersection(second) == null ? TOUCH_ERROR_CODE : validCode;
             }
           }
 
