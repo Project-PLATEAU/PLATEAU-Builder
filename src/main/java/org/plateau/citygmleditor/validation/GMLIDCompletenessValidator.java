@@ -1,6 +1,7 @@
 package org.plateau.citygmleditor.validation;
 
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.world.World;
@@ -15,6 +16,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,17 +42,25 @@ public class GMLIDCompletenessValidator implements IValidator {
         if (allID.contains("")) {
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "Exists GmlId null\\n"));
         }
+
         Map<String, Integer> elementCountMap = new HashMap<>();
         // Count the number of occurrences of each element
         for (String gmlID : allID) {
             elementCountMap.put(gmlID, elementCountMap.getOrDefault(gmlID, 0) + 1);
         }
+
+        String messageError = MessageError.ERR_C01_001_1;
         for (Map.Entry<String, Integer> entry : elementCountMap.entrySet()) {
             String gmlID = entry.getKey();
             if (entry.getValue() > 1) {
-                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format("%sは重複して使用されています。\n", gmlID)));
+                messageError = messageError + MessageFormat.format(MessageError.ERR_C01_001_2, gmlID);
             }
         }
+
+        if (!messageError.equals(MessageError.ERR_C01_001_1)) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, messageError));
+        }
+
         return messages;
     }
 }

@@ -66,11 +66,11 @@ public class L11LogicalConsistencyValidator implements IValidator {
             this.lodInvalids = lodInvalids;
         }
 
-        public String toString() {
-            String messageError = MessageFormat.format(MessageError.ERR_L11_002, buildingID);
+        public String toString(String err1, String err2) {
+            String messageError = MessageFormat.format(err1, buildingID);
             for (LODInvalid lodInvalid : lodInvalids) {
                 messageError = messageError +
-                MessageFormat.format(MessageError.ERR_L11_002_1, lodInvalid.polygon);
+                MessageFormat.format(err2, lodInvalid.polygon);
             }
             return  messageError;
         }
@@ -99,7 +99,8 @@ public class L11LogicalConsistencyValidator implements IValidator {
 
         if (CollectionUtil.isEmpty(buildingInvalids)) return new ArrayList<>();
         for (BuildingInvalid invalid : buildingInvalids) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid.toString()));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                    invalid.toString(MessageError.ERR_L11_002, MessageError.ERR_L11_002_1)));
         }
         return messages;
     }

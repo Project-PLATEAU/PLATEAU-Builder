@@ -39,9 +39,13 @@ public class Tbldg02ThematicAccuaracyValidator implements IValidator {
 
         }
         List<ValidationResultMessage> messages = new ArrayList<>();
+        String errorMessage = MessageError.ERR_T_Bldg_02_002_1;
         for (String invalid : invalidInstallations) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                    MessageFormat.format(MessageError.ERR_T_Bldg_02_001, invalid)));
+            errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_T_Bldg_02_002_2, invalid);
+        }
+
+        if (!errorMessage.equals(MessageError.ERR_T_Bldg_02_002_1)) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage));
         }
         return messages;
     }

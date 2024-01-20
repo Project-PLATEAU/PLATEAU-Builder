@@ -23,7 +23,7 @@ public class C04CompletenessValidator implements IValidator {
 
     static class BuildingInvalid {
         private String ID;
-        private List<String> uroBuildingID;
+        private List<String> uroBuildingIDs;
 
         public String getID() {
             return ID;
@@ -34,15 +34,19 @@ public class C04CompletenessValidator implements IValidator {
         }
 
         public List<String> getUroBuildingID() {
-            return uroBuildingID;
+            return uroBuildingIDs;
         }
 
         public void setUroBuildingID(List<String> uroBuildingID) {
-            this.uroBuildingID = uroBuildingID;
+            this.uroBuildingIDs = uroBuildingID;
         }
 
         public String toString() {
-            return "BuildingID: " + ID + " (uroBuildingID: " + uroBuildingID.toString() + ")";
+            String errorMessage = MessageFormat.format(MessageError.ERR_C04_BLDG_1_001, ID);
+            for (String uroBuildingId : uroBuildingIDs) {
+                errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_C04_BLDG_1_002, uroBuildingId);
+            }
+            return errorMessage;
         }
     }
 
@@ -99,8 +103,7 @@ public class C04CompletenessValidator implements IValidator {
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
         for (BuildingInvalid invalid : buildingInvalids) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                    MessageFormat.format(MessageError.ERR_C04_001, invalid)));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid.toString()));
         }
         return messages;
     }

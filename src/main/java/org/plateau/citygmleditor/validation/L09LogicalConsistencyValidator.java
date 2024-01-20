@@ -50,9 +50,14 @@ public class L09LogicalConsistencyValidator implements IValidator {
     }
 
     buildingWithErrorLinearRing.forEach((buildingNode, linearRingNodesWithError) -> {
+
       String gmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
-      var msg = String.format("L09: Building which gml:id=\"%s\" has %s <gml:LinearRing> invalid", gmlId, linearRingNodesWithError.size());
-      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, msg));
+      String errorMessage = MessageFormat.format(MessageError.ERR_L09_002_1, gmlId);
+      for (Node linearRing : linearRingNodesWithError) {
+        errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_L09_002_2, linearRing.getFirstChild().getNodeValue());
+      }
+
+      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage));
     });
 
     return messages;
