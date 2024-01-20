@@ -37,10 +37,15 @@ public class L04LogicalConsistencyValidator implements IValidator {
         }
 
         List<ValidationResultMessage> messages = new ArrayList<>();
+        String errorMessage = MessageError.ERR_L04_002_1;
         for (String invalid : invalidBuildings) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                    MessageFormat.format(MessageError.ERR_L04_001, invalid)));
+            errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_L04_002_2, invalid);
         }
+
+        if (!errorMessage.equals(MessageError.ERR_L04_002_1)) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage));
+        }
+
         return messages;
     }
 

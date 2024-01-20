@@ -12,7 +12,6 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -40,7 +39,15 @@ public class T03ThematicAccuaracyValidator implements IValidator {
             }
         }
         List<ValidationResultMessage> messages = new ArrayList<>();
-        xHrefInvalid.forEach(x -> messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageFormat.format(MessageError.ERR_T03_001, x))));
+        String errorMessage = MessageError.ERR_T03_002_1;
+        for (String href : xHrefInvalid) {
+            errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_T03_002_2, href);
+        }
+
+        if (!errorMessage.equals(MessageError.ERR_T03_002_1)) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage));
+        }
+
         return messages;
     }
 

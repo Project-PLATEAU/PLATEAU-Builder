@@ -26,14 +26,14 @@ public class Lbldg03LogicalAccuaracyValidator implements IValidator {
 
         for (int i = 0; i < windowNodeList.getLength(); i++) {
             if (Objects.isNull(XmlUtil.findNearestParentByName(windowNodeList.item(i), TagName.BLDG_BOUNDARY_SURFACE))) {
-                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageError.ERR_BLDG03_001));
+                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageError.ERR_LBLDG_03_001_2));
             }
         }
 
         NodeList doorNodeList = XmlUtil.getAllTagFromXmlFile(input, TagName.BLDG_DOOR);
         for (int i = 0; i < doorNodeList.getLength(); i++) {
             if (Objects.isNull(XmlUtil.findNearestParentByName(doorNodeList.item(i), TagName.BLDG_BOUNDARY_SURFACE))) {
-                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageError.ERR_BLDG03_002));
+                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageError.ERR_LBLDG_03_001_3));
             }
         }
 

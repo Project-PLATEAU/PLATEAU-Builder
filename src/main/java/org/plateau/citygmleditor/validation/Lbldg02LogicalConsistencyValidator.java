@@ -22,18 +22,22 @@ import java.util.List;
 public class Lbldg02LogicalConsistencyValidator implements IValidator {
     static class BuildingInvalid {
         private String ID;
-        private List<BuildingPart> buildingPart;
+        private List<BuildingPart> buildingParts;
 
         public void setID(String ID) {
             this.ID = ID;
         }
 
         public void setBuidlingPart(List<BuildingPart> buidlingPart) {
-            this.buildingPart = buidlingPart;
+            this.buildingParts = buidlingPart;
         }
 
         public String toString() {
-            return "bldg:Building gml:id=" + this.ID + "bldg:BuildingPart =" + this.buildingPart;
+            String messageError = MessageFormat.format(MessageError.ERR_L_BLDG_02_002_1, ID);
+            for (BuildingPart buildingPart : buildingParts) {
+                messageError = messageError + MessageFormat.format(MessageError.ERR_LBLDG_02_002_2, buildingPart.ID);
+            }
+            return messageError;
         }
     }
 
@@ -82,7 +86,7 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
         for (BuildingInvalid invalid : buildingInvalids) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageFormat.format(MessageError.ERR_LBLDG_02_001, invalid)));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid.toString()));
         }
         return messages;
     }

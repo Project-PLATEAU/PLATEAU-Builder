@@ -48,7 +48,8 @@ public class L12LogicalConsistencyValidator implements IValidator {
         if (CollectionUtil.isEmpty(buildingInvalids)) return new ArrayList<>();
         for (L11LogicalConsistencyValidator.BuildingInvalid invalid : buildingInvalids) {
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                    MessageFormat.format(MessageError.ERR_L12_001, invalid)));
+                    MessageFormat.format(MessageError.ERR_L12_001,
+                            invalid.toString(MessageError.ERR_L12_002_1, MessageError.ERR_L12_002_2))));
         }
         return messages;
     }
