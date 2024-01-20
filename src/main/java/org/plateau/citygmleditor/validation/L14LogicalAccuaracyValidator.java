@@ -2,10 +2,11 @@ package org.plateau.citygmleditor.validation;
 
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
-import org.plateau.citygmleditor.constant.Relationship;
+import org.plateau.citygmleditor.constant.PolygonRelationship;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.PythonUtil;
+import org.plateau.citygmleditor.validation.exception.GeometryPyException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -14,7 +15,9 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class L14LogicalAccuaracyValidator implements IValidator {
@@ -22,7 +25,6 @@ public class L14LogicalAccuaracyValidator implements IValidator {
 
     @Override
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
-
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
         List<String> buildingError = new ArrayList<>();
 
@@ -60,6 +62,7 @@ public class L14LogicalAccuaracyValidator implements IValidator {
     private List<String> getInvalidPolygon(NodeList polygons) throws IOException {
         List<String> result = new ArrayList<>();
         int totalPolygon = polygons.getLength();
+
         outterLoop:
         for (int i = 0; i < totalPolygon; i++) {
             Element polygon1 = (Element) polygons.item(i);
@@ -67,10 +70,10 @@ public class L14LogicalAccuaracyValidator implements IValidator {
             Element posList1 = (Element) exterior1.getElementsByTagName(TagName.GML_POSLIST).item(0);
             String[] posString1 = posList1.getTextContent().trim().split(" ");
 
+            // check valid coornidate of polygon
             if (posString1.length % 3 != 0) {
-                this.setValueInvalidPolygon(polygon1, posString1, result);
+                this.setPolygonError(polygon1, posString1, result);
             }
-
             int count = 0;
             for (int j = i + 1; j < totalPolygon; j++) {
                 Element polygon2 = (Element) polygons.item(j);
@@ -78,29 +81,34 @@ public class L14LogicalAccuaracyValidator implements IValidator {
                 Element posList2 = (Element) exterior2.getElementsByTagName(TagName.GML_POSLIST).item(0);
                 String[] posString2 = posList2.getTextContent().trim().split(" ");
 
-                Map<String, String> runCmdResult = PythonUtil.checkIntersecWithPyCmd(AppConst.PATH_PYTHON, posString1, posString2);
-                if (!runCmdResult.get("ERROR").isBlank()) {
-                    logger.severe("Error when running python file");
-                    this.setValueInvalidPolygon(polygon1, posString1, result);
-                }
-                String output = runCmdResult.get("OUTPUT").trim();
-                if (Objects.equals(output, Relationship.TOUCH)) continue;
-                if (Objects.equals(output, Relationship.INTERSECT)) {
-                    this.setValueInvalidPolygon(polygon1, posString1, result);
-                    continue outterLoop;
-                }
-                if (Objects.equals(output, Relationship.NOT_INTERSECT)) {
-                    count++;
+                try {
+                    PolygonRelationship relationship = PythonUtil.checkPolygonRelationship(AppConst.PATH_PYTHON, posString1, posString2);
+                    // if 2 polygon intersect invalid
+                    if (relationship == PolygonRelationship.INTERSECT_3D || relationship == PolygonRelationship.FLAT_INTERSECT) {
+                        this.setPolygonError(polygon1, posString1, result);
+                        continue outterLoop;
+                    }
+                    // 2 polygon touch valid compare other polygon of the solid
+                    if (relationship == PolygonRelationship.TOUCH) {
+                        continue;
+                    }
+                    // count the polygon not intersect to the others of solid
+                    if (relationship == PolygonRelationship.NOT_INTERSECT) {
+                        count++;
+                    }
+                } catch (GeometryPyException geometryPyException) {
+                    this.setPolygonError(polygon1, posString1, result);
                 }
             }
             if (count == totalPolygon - 1) {
-                this.setValueInvalidPolygon(polygon1, posString1, result);
+                this.setPolygonError(polygon1, posString1, result);
             }
         }
+
         return result;
     }
 
-    private void setValueInvalidPolygon(Element polygon, String[] posList, List<String> invalidPolygon) {
+    private void setPolygonError(Element polygon, String[] posList, List<String> invalidPolygon) {
         if (polygon.getAttribute(TagName.GML_ID).isBlank()) {
             invalidPolygon.add("Polygon=" + Arrays.toString(posList));
         } else {
