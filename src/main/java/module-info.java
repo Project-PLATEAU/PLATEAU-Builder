@@ -17,14 +17,17 @@ module CityGMLEditor {
     requires transitive java.xml.bind;
     requires transitive com.sun.xml.xsom;
     requires j3d.core.utils;
-	requires jgltf.model;
+    requires org.apache.commons.lang3;
+    requires org.locationtech.jts;
+    requires jgltf.model;
     requires jgltf.model.builder;
     requires jgltf.impl.v1;
     requires jgltf.impl.v2;
     requires com.fasterxml.jackson.core;
     requires commons.math3;
-    requires org.locationtech.jts;
     requires proj4j;
+    requires com.fasterxml.jackson.databind;
+    requires org.apache.commons.io;
 
     provides Importer with
             ObjOrPolyObjImporter;
@@ -32,6 +35,7 @@ module CityGMLEditor {
     exports org.plateau.citygmleditor.importers;
     exports org.plateau.citygmleditor.importers.obj;
 
+    exports org.plateau.citygmleditor.modelstandard;
     exports org.plateau.citygmleditor.citygmleditor;
     opens org.plateau.citygmleditor.citygmleditor to javafx.fxml, javafx.graphics;
     exports org.plateau.citygmleditor.geometry;

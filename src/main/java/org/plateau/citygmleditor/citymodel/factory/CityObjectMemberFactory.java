@@ -5,6 +5,7 @@ import org.citygml4j.model.gml.geometry.primitives.Solid;
 import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 
 public class CityObjectMemberFactory extends CityGMLFactory {
     protected CityObjectMemberFactory(CityModelView target) {
