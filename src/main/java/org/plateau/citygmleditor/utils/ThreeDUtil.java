@@ -1,8 +1,13 @@
 package org.plateau.citygmleditor.utils;
 
 import javafx.geometry.Point3D;
+import org.apache.commons.math3.geometry.euclidean.threed.Line;
+import org.apache.commons.math3.geometry.euclidean.threed.Segment;
+import org.apache.commons.math3.geometry.euclidean.threed.SubLine;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
+import org.plateau.citygmleditor.constant.SegmentRelationship;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
@@ -136,5 +141,62 @@ public class ThreeDUtil {
         CoordinateSequence coordinateSequence = new CoordinateArraySequence(coordinates);
         LinearRing linearRing = new LinearRing(coordinateSequence, new GeometryFactory());
         return new GeometryFactory().createPolygon(linearRing);
+    }
+
+    private static final double TOLERANCE = 1e-10;
+
+    public static SegmentRelationship checkSegmentsRelationship(Vector3D segment1Start, Vector3D segment1End,
+        Vector3D segment2Start, Vector3D segment2End) {
+
+        Line line1 = new Line(segment1Start, segment1End, TOLERANCE);
+
+        SubLine segment1 = new SubLine(segment1Start, segment1End, TOLERANCE);
+        SubLine segment2 = new SubLine(segment2Start, segment2End, TOLERANCE);
+
+        if (line1.contains(segment2Start) && line1.contains(segment2End)) {
+            if (isPointInLineSegment(segment2Start, segment1, false)
+                || isPointInLineSegment(segment2End, segment1, false)) {
+                // If end points of segment2 are in segment1 (without end points of segment1)
+                // segment2 is overlap segment1
+                return SegmentRelationship.OVERLAP;
+            } else if (isPointInLineSegment(segment2Start, segment1, true)
+                || isPointInLineSegment(segment2End, segment1, true)) {
+                // end points of segment2 is one of end points of segment1
+                // (and end points of segment2 is not any other point of segment1)
+                return SegmentRelationship.TOUCH;
+            }
+            return SegmentRelationship.NONE;
+        }
+
+        // Get intersection point of 2 line segments without end points
+        if (segment1.intersection(segment2, false) != null) {
+            return SegmentRelationship.INTERSECT;
+        }
+
+        // Get intersection point of 2 line segments including end points
+        if (segment1.intersection(segment2, true) != null) {
+            return SegmentRelationship.TOUCH;
+        }
+
+        return SegmentRelationship.NONE;
+    }
+
+    private static boolean isPointInLineSegment(Vector3D point, SubLine subLine, boolean includeEndPoints) {
+        Segment segment = subLine.getSegments().get(0);
+        double length = segment.getStart().distance(segment.getEnd());
+
+        var pointToStart = point.distance(segment.getStart());
+        var pointToEnd = point.distance(segment.getEnd());
+
+        if (!includeEndPoints) {
+            // If not include end points, the distance from point to start or end should not be near to 0
+            if (pointToStart <= (0 + TOLERANCE) || pointToEnd <= (0 + TOLERANCE)) {
+                return false;
+            }
+        }
+
+        var sumDistance = pointToStart + pointToEnd;
+
+        return (length - TOLERANCE) <= sumDistance && sumDistance <= (length + TOLERANCE);
     }
 }
