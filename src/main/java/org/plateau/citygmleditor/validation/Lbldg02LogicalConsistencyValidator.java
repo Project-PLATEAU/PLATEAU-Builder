@@ -2,11 +2,12 @@ package org.plateau.citygmleditor.validation;
 
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
-import org.plateau.citygmleditor.constant.Relationship;
+import org.plateau.citygmleditor.constant.PolygonRelationship;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.PythonUtil;
+import org.plateau.citygmleditor.validation.exception.GeometryPyException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -16,8 +17,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 
 public class Lbldg02LogicalConsistencyValidator implements IValidator {
@@ -148,7 +147,6 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
         Element posList1 = (Element) exterior1.getElementsByTagName(TagName.GML_POSLIST).item(0);
         String[] posString1 = posList1.getTextContent().trim().split(" ");
 
-        int count = 0;
         NodeList polygonSolids = solid.getElementsByTagName(TagName.GML_POLYGON);
         int totalPolygonOfSolid = polygonSolids.getLength();
         for (int i = 0; i < totalPolygonOfSolid; i++) {
@@ -157,15 +155,18 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
             Element posList2 = (Element) exterior2.getElementsByTagName(TagName.GML_POSLIST).item(0);
             String[] posString2 = posList2.getTextContent().trim().split(" ");
 
-            Map<String, String> runCmdResult = PythonUtil.checkIntersecWithPyCmd(AppConst.PATH_PYTHON, posString1, posString2);
-            if (!runCmdResult.get("ERROR").isBlank()) return false;
-            String output = runCmdResult.get("OUTPUT").trim();
-            if (Objects.equals(output, Relationship.INTERSECT)) return false;
-            if (Objects.equals(output, Relationship.TOUCH) || Objects.equals(output, Relationship.FLAT_INTERSECT)) continue;
-            if (Objects.equals(output, Relationship.NOT_INTERSECT)) {
-                count++;
+            try {
+                PolygonRelationship relationship = PythonUtil.checkPolygonRelationship(AppConst.PATH_PYTHON, posString1, posString2);
+                // polyyon intersect in 3D 1 face of solid is invalid
+                if (relationship == PolygonRelationship.INTERSECT_3D) return false;
+                // polygon touch or intersect in flat of 1 face of solid is valid
+                if (relationship == PolygonRelationship.TOUCH || relationship == PolygonRelationship.FLAT_INTERSECT) {
+                    return true;
+                }
+            } catch (GeometryPyException geometryPyException) {
+                return false;
             }
         }
-        return count == totalPolygonOfSolid;
+        return false;
     }
 }

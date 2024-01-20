@@ -34,7 +34,7 @@ def main():
             print("3")
             return
     elif "point" in type_intersect:
-        print("touch")
+        print("2")
         return
     else:
         # flat and intersect

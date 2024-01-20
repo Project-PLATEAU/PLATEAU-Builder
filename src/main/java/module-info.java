@@ -34,7 +34,8 @@ module CityGMLEditor {
 
     exports org.plateau.citygmleditor.importers;
     exports org.plateau.citygmleditor.importers.obj;
-
+    exports org.plateau.citygmleditor.constant;
+    opens org.plateau.citygmleditor.constant;
     exports org.plateau.citygmleditor.modelstandard;
     exports org.plateau.citygmleditor.citygmleditor;
     opens org.plateau.citygmleditor.citygmleditor to javafx.fxml, javafx.graphics;
