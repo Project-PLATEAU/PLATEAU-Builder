@@ -1,50 +1,95 @@
 package org.plateau.citygmleditor.citymodel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import javafx.scene.Group;
-import javafx.scene.Parent;
+
+import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import org.citygml4j.model.citygml.building.BuildingInstallation;
+import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
+import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.citymodel.geometry.GeometryView;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
+import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
+import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 
-public class BuildingInstallationView extends Parent {
+public class BuildingInstallationView extends MeshView implements ILODSolidView {
     private BuildingInstallation gmlObject;
-    private Group lod3ParentGroup;
-    private HashMap<String, Group> lod3Group;
-    private GeometryView lod3Geometry;
+    private GeometryView geometryView;
+    private VertexBuffer vertexBuffer = new VertexBuffer();
+    private TexCoordBuffer texCoordBuffer = new TexCoordBuffer();
+    private TransformManipulator transformManipulator = new TransformManipulator(this);
 
-    public BuildingInstallationView(BuildingInstallation gmlObject) {
+    public BuildingInstallationView(BuildingInstallation gmlObject, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
         this.gmlObject = gmlObject;
+        this.vertexBuffer = vertexBuffer;
+        this.texCoordBuffer = texCoordBuffer;
     }
 
     public BuildingInstallation getGMLObject() {
         return this.gmlObject;
     }
 
-    public void setLod3Geometry(GeometryView geometry) {
-        this.lod3Geometry = geometry;
+    public void setGeometryView(GeometryView geometry) {
+        this.geometryView = geometry;
     }
 
-    GeometryView getLod3Geometry() {
-        return this.lod3Geometry;
+    GeometryView getGeometryView() {
+        return this.geometryView;
     }
     
-    public void addLod3MeshView(String id, MeshView meshView) {
-        if (lod3Group == null)
-            lod3Group = new HashMap<String, Group>();
-        lod3Group.computeIfAbsent(id, k -> new Group());
-        if (lod3Group.get(id).getChildren().isEmpty()) {
-            getChildren().add(lod3Group.get(id));
-            lod3Group.get(id).setId(id);
+    @Override
+    public AbstractSolid getAbstractSolid() {
+        return null;
+    }
 
-            if (lod3ParentGroup == null) {
-                lod3ParentGroup = new Group();
-                lod3ParentGroup.setId("LOD3");
-                getChildren().add(lod3ParentGroup);
+    @Override
+    public ArrayList<PolygonView> getPolygons() {
+        return geometryView.getPolygons();
+    }
+
+    @Override
+    public VertexBuffer getVertexBuffer() {
+        return vertexBuffer;
+    }
+
+    public void setVertexBuffer(VertexBuffer vertexBuffer) {
+        this.vertexBuffer = vertexBuffer;
+    }
+
+    @Override
+    public TexCoordBuffer getTexCoordBuffer() {
+        return texCoordBuffer;
+    }
+
+    @Override
+    public TransformManipulator getTransformManipulator() {
+        return transformManipulator;
+    }
+
+    @Override
+    public MeshView getMeshView() {
+        return this;
+    }
+
+    @Override
+    public void refrectGML() {
+        for (var polygon : getPolygons()) {
+            var coordinates = polygon.getExteriorRing().getOriginCoords();// .getOriginal().getPosList().toList3d();
+            polygon.getExteriorRing().getOriginal().getPosList()
+                    .setValue(transformManipulator.unprojectTransforms(coordinates));
+
+            for (var interiorRing : polygon.getInteriorRings()) {
+                var coordinatesInteriorRing = interiorRing.getOriginCoords();// .getOriginal().getPosList().toList3d();
+                polygon.getExteriorRing().getOriginal().getPosList().setValue(
+                        transformManipulator.unprojectTransforms(coordinatesInteriorRing));
             }
-            lod3ParentGroup.getChildren().add(lod3Group.get(id));
         }
-        lod3Group.get(id).getChildren().add(meshView);
+        var vertexBuffer = new VertexBuffer();
+        var vertices = transformManipulator.unprojectVertexTransforms(getVertexBuffer().getVertices());
+        for (var vertex : vertices) {
+            vertexBuffer.addVertex(vertex);
+        }
+        setVertexBuffer(vertexBuffer);
     }
 }

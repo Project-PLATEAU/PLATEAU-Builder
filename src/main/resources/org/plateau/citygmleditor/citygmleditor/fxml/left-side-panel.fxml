@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="leftSidePanel"
+            minHeight="450.0" minWidth="250.0" prefWidth="300.0">
+   <fx:include source="hierarchy.fxml" />
+</AnchorPane>

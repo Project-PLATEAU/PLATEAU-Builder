@@ -2,6 +2,7 @@ package org.plateau.citygmleditor.citymodel.factory;
 
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.geometry.primitives.Solid;
+import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
@@ -16,12 +17,9 @@ public class CityObjectMemberFactory extends CityGMLFactory {
         building.setId(gmlObject.getId());
 
         var lod1SolidFactory = new LOD1SolidFactory(getTarget());
-        LOD1SolidView lod1Solid = null;
-        if (gmlObject.getLod1Solid() != null && gmlObject.getLod1Solid().getObject() != null) {
-            lod1Solid = lod1SolidFactory.createLOD1Solid((Solid) gmlObject.getLod1Solid().getObject());
+        var lod1Solid = lod1SolidFactory.createLOD1Solid(gmlObject);
+        if (lod1Solid != null)
             building.setLOD1Solid(lod1Solid);
-        }
-
 
         var lod2SolidFactory = new LOD2SolidFactory(getTarget());
         var lod2Solid = lod2SolidFactory.createLOD2Solid(gmlObject);
@@ -50,6 +48,8 @@ public class CityObjectMemberFactory extends CityGMLFactory {
                 building.addBuildingInstallationView(buildingInstallationView);
             }
         }
+
+        building.toggleLODView(CityGMLEditorApp.getCityModelViewMode().getLOD());
 
         return building;
     }

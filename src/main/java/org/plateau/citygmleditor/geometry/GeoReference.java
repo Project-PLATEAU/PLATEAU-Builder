@@ -9,14 +9,14 @@ public class GeoReference {
     private final CoordinateTransform unprojectTransform;
     private final Vec3d origin;
 
-    public GeoReference(GeoCoordinate origin) {
+    public GeoReference(GeoCoordinate origin, String epsgCode) {
         // CRSの定義
         CRSFactory crsFactory = new CRSFactory();
         // GMLでのSRCはEPSG:4326（緯度経度座標、高さは扱わないためEPSG:6697とほぼ同義）
         CoordinateReferenceSystem wgs84 = crsFactory.createFromName("EPSG:4326");
         // TODO: 座標系選択
         // 投影後のSRCはEPSG:2451（平面直角座標9系）
-        CoordinateReferenceSystem jpr = crsFactory.createFromName("EPSG:2451");
+        CoordinateReferenceSystem jpr = crsFactory.createFromName(epsgCode);
 
         // 座標変換のセットアップ
         CoordinateTransformFactory ctFactory = new CoordinateTransformFactory();

@@ -49,7 +49,14 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.paint.Color;
 
+/**
+ * 永続化される情報を管理します。
+ */
 public class SessionManager {
+    /**
+     * インポートされたGMLファイルのパス
+     */
+    public static final String GML_FILE_PATH_PROPERTY = "gmlFilePath";
 
     public final String SESSION_PROPERTIES_FILENAME;
     private static final boolean ENABLE_SAVE_SESSION = true;

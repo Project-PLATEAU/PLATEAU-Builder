@@ -1,12 +1,20 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import javafx.scene.shape.Mesh;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.VertexFormat;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 
 import javafx.scene.Parent;
+import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
+import org.plateau.citygmleditor.world.World;
 
 /**
  * LODSolidのインターフェースを表します。
@@ -38,8 +46,65 @@ public interface ILODSolidView {
     public VertexBuffer getVertexBuffer();
 
     /**
+     * MeshViewを取得します。
+     * @return メッシュビュー
+     */
+    public MeshView getMeshView();
+
+    default public Mesh getTotalMesh() {
+        if (getMeshView() == null)
+            return null;
+        var mesh = (TriangleMesh)getMeshView().getMesh();
+        var outMesh = new TriangleMesh();
+        outMesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
+        outMesh.getNormals().addAll(mesh.getNormals());
+        outMesh.getPoints().addAll(mesh.getPoints());
+        outMesh.getTexCoords().addAll(mesh.getTexCoords());
+
+        for (var polygon : getPolygons()) {
+            outMesh.getFaces().addAll(polygon.getFaceBuffer().getBufferAsArray());
+        }
+
+        var smooths = new int[outMesh.getFaces().size() / 9];
+        Arrays.fill(smooths, 1);
+        outMesh.getFaceSmoothingGroups().addAll(smooths);
+
+        return outMesh;
+    }
+
+    /**
      * テクスチャ座標バッファを取得します。
      * @return テクスチャ座標バッファ
      */
     public TexCoordBuffer getTexCoordBuffer();
+
+    /**
+     * 
+     */
+    public TransformManipulator getTransformManipulator();
+
+    /**
+     * GML、各頂点バッファへ情報を適用
+     */
+    public void refrectGML();
+
+    /**
+     * 使用しているテクスチャパス
+     * @return
+     */
+    default public List<String> getTexturePaths() {
+        var cityModelView = World.getActiveInstance().getCityModel();
+        var ret = new ArrayList<String>();
+        for (var polygon : getPolygons()) {
+            if (polygon.getSurfaceData() == null)
+                continue;
+            var parameterizedTexture = (org.citygml4j.model.citygml.appearance.ParameterizedTexture) polygon.getSurfaceData().getOriginal();
+            var imageRelativePath = java.nio.file.Paths.get(parameterizedTexture.getImageURI());
+            var imageAbsolutePath = java.nio.file.Paths.get(cityModelView.getGmlPath()).getParent().resolve(imageRelativePath);
+            if (!ret.contains(imageAbsolutePath.toString()))
+                ret.add(imageAbsolutePath.toString());
+        }
+        return ret;
+    }
+
 }

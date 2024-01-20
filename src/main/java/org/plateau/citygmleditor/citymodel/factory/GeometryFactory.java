@@ -31,9 +31,7 @@ public class GeometryFactory extends CityGMLFactory {
         if (gmlObject.getLod3Geometry() == null)
             return null;
 
-        var geometries = new ArrayList<GeometryView>();
-
-        var buildingInstallationView = new BuildingInstallationView(gmlObject);
+        var buildingInstallationView = new BuildingInstallationView(gmlObject, vertexBuffer, texCoordBuffer);
 
         var geometry = new GeometryView(gmlObject.getLod3Geometry().getGeometry());
         var multiSurface = (MultiSurface) gmlObject.getLod3Geometry().getGeometry();
@@ -44,19 +42,10 @@ public class GeometryFactory extends CityGMLFactory {
                 continue;
             var polygonObject = createPolygon(polygon);
             polygons.add(polygonObject);
-
-            // ノードの最小単位＝ポリゴン
-            var material = polygonObject.getSurfaceData() != null ? polygonObject.getSurfaceData().getMaterial() : null;
-            var polygonMesh = new ArrayList<PolygonView>(List.of(polygonObject));
-            var meshView = new MeshView();
-            meshView.setMesh(createTriangleMesh(polygonMesh));
-            meshView.setMaterial(material != null ? material : World.getActiveInstance().getDefaultMaterial());
-            meshView.setId(surfaceMember.getGeometry().getId());
-            buildingInstallationView.addLod3MeshView(gmlObject.getId(), meshView);
         }
         geometry.setPolygons(polygons);
-
-        buildingInstallationView.setLod3Geometry(geometry);
+        buildingInstallationView.setMesh(createTriangleMesh(polygons));
+        buildingInstallationView.setGeometryView(geometry);
         return buildingInstallationView;
     }
 

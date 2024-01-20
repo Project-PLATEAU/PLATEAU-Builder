@@ -23,7 +23,7 @@ import java.io.IOException;
 
 public class GmlImporter {
 
-    public static Node loadGml(String fileUrl) throws Exception {
+    public static Node loadGml(String fileUrl, String epsgCode) throws Exception {
         // get extension
         final int dot = fileUrl.lastIndexOf('.');
         if (dot <= 0) {
@@ -57,7 +57,7 @@ public class GmlImporter {
             var upperCorner = envelope.getUpperCorner().toList3d();
             var max = new GeoCoordinate(upperCorner);
             var center = min.add(max).divide(2);
-            world.setGeoReference(new GeoReference(center));
+            world.setGeoReference(new GeoReference(center, epsgCode));
 
             var cityModelFactory = new CityModelFactory();
             var cityModel = cityModelFactory.createCityModel((CityModel) citygml, fileUrl, in.getSchemaHandler());

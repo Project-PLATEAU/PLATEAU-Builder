@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17.0.2-ea"
+            xmlns:fx="http://javafx.com/fxml/1"
+            prefHeight="700.0" prefWidth="600.0"
+            fx:controller="org.plateau.citygmleditor.citygmleditor.ValidationController">
+    <Button layoutX="20.0" layoutY="35.0" mnemonicParsing="false" onAction="#execute" text="実行"/>
+    <ScrollPane prefHeight="600.0" prefWidth="500.0"
+                AnchorPane.topAnchor="60.0" AnchorPane.bottomAnchor="10.0"
+                AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
+        <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
+                <VBox fx:id="resultTextContainer" prefHeight="600.0" prefWidth="500.0"/>
+            </AnchorPane>
+        </content>
+    </ScrollPane>
+</AnchorPane>

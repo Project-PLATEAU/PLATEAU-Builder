@@ -1,13 +1,18 @@
 package org.plateau.citygmleditor.citymodel;
 
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.geometry.primitives.*;
+import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD3SolidView;
-
+import org.plateau.citygmleditor.control.BuildingSurfaceTypeView;
+import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class BuildingView extends Parent {
@@ -16,14 +21,41 @@ public class BuildingView extends Parent {
     private LOD1SolidView lod1Solid;
     private LOD2SolidView lod2Solid;
     private LOD3SolidView lod3Solid;
+
     private List<BuildingInstallationView> buildingInstallationViews = new ArrayList<>();
 
     public BuildingView(AbstractBuilding gmlObject) {
         this.gmlObject = gmlObject;
+
+        CityGMLEditorApp.getCityModelViewMode().lodProperty().addListener((observable, oldValue, newValue) -> {
+            toggleLODView((int)newValue);
+        });
     }
 
     public AbstractBuilding getGMLObject() {
         return this.gmlObject;
+    }
+
+    public void toggleLODView(int lod) {
+        var solids = new ILODSolidView[] {
+                lod1Solid, lod2Solid, lod3Solid
+        };
+        for (int i = 1; i <= 3; ++i) {
+            var solid = solids[i - 1];
+            if (solid == null)
+                continue;
+
+            ((Node)solid).setVisible(lod == i);
+        }
+    }
+
+    public ILODSolidView getSolid(int lod) {
+        switch (lod) {
+            case 1: return lod1Solid;
+            case 2: return lod2Solid;
+            case 3: return lod3Solid;
+            default: return null;
+        }
     }
 
     public void setLOD1Solid(LOD1SolidView solid) {
@@ -32,6 +64,7 @@ public class BuildingView extends Parent {
         }
         this.lod1Solid = solid;
         this.getChildren().add(solid);
+        solid.getTransformManipulator().updateOrigin();
     }
 
     public LOD1SolidView getLOD1Solid() {
@@ -47,6 +80,7 @@ public class BuildingView extends Parent {
         }
         this.lod2Solid = solid;
         this.getChildren().add(solid);
+        solid.getTransformManipulator().updateOrigin();
     }
 
     public LOD2SolidView getLOD2Solid() {
@@ -62,6 +96,7 @@ public class BuildingView extends Parent {
         }
         this.lod3Solid = solid;
         this.getChildren().add(solid);
+        solid.getTransformManipulator().updateOrigin();
     }
 
     public LOD3SolidView getLOD3Solid() {
@@ -74,9 +109,24 @@ public class BuildingView extends Parent {
 
         this.buildingInstallationViews.add(buildingInstallationView);
         this.getChildren().add(buildingInstallationView);
+        buildingInstallationView.getTransformManipulator().updateOrigin();
     }
 
     public Envelope getEnvelope() {
         return this.gmlObject.getBoundedBy().getEnvelope();
+    }
+
+    public List<String> getTexturePaths() {
+        var paths = new HashSet<String>();
+        if (lod2Solid != null) {
+            paths.addAll(lod2Solid.getTexturePaths());
+        }
+        if (lod3Solid != null) {
+            paths.addAll(lod3Solid.getTexturePaths());
+        }
+        for (var buildingInstallationView : buildingInstallationViews) {
+            paths.addAll(buildingInstallationView.getTexturePaths());
+        }
+        return new ArrayList<String>(paths);
     }
 }
