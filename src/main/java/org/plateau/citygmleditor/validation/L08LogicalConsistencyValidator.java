@@ -50,17 +50,19 @@ public class L08LogicalConsistencyValidator implements IValidator {
     }
 
     buildingWithErrorLineString.forEach((buildingNode, lineStringNodesWithError) -> {
-      String gmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
-      String msg = MessageFormat.format(MessageError.ERR_L08_001, gmlId);
+      String buildingGmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
+      String msg = MessageFormat.format(MessageError.ERR_L08_001, buildingGmlId);
       for (ErrorLineString errorLineString : lineStringNodesWithError) {
+        Node gmlIdItem = errorLineString.getLineStringError().getAttributes().getNamedItem(TagName.GML_ID);
+
+        String gmlId = gmlIdItem == null ? "" : gmlIdItem.getTextContent();
+
         if (errorLineString.getErrorCode() == INTERSECTION_ERROR_CODE) {
-          msg = msg + String.format("<gml:LineString gml:id=\"%s\">が自己交差しています。\n",
-                          errorLineString.getLineStringError().getAttributes().getNamedItem(TagName.GML_ID).getTextContent());
+          msg = msg + String.format("<gml:LineString gml:id=\"%s\">が自己交差しています。\n", gmlId);
         } else if (errorLineString.getErrorCode() == TOUCH_ERROR_CODE) {
-          msg = msg + String.format("<gml:LineString gml:id=\"%s\">が自己接触しています。\n",
-                  errorLineString.getLineStringError().getAttributes().getNamedItem(TagName.GML_ID).getTextContent());
+          msg = msg + String.format("<gml:LineString gml:id=\"%s\">が自己接触しています。\n", gmlId);
         } else if (errorLineString.getErrorCode() == CONTINUOUS_ERROR_CODE) {
-          msg = msg + "\n" + errorLineString.getLineStringError().getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
+          msg = msg + "\n" + gmlId;
         }
       }
 
@@ -86,8 +88,8 @@ public class L08LogicalConsistencyValidator implements IValidator {
           // Check if 2 line segments are intersected
           // if j == k-1, 2 line segments are continuous
           boolean isContinuous = j == k-1;
-          // Line first and last are also continuous
-          boolean isReverseContinuous = j == 0 && k == lineSegments.size() - 1;
+          // Line last and first are also continuous (if last point equals first point)
+          boolean isReverseContinuous = second.p1.equals(first.p0) && (j == 0 && k == lineSegments.size() - 1);
 
           int validCode = 0;
 
