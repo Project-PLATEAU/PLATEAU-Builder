@@ -1,9 +1,11 @@
 package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.locationtech.jts.geom.LineSegment;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
+import org.plateau.citygmleditor.constant.SegmentRelationship;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
@@ -90,19 +92,29 @@ public class L08LogicalConsistencyValidator implements IValidator {
           int validCode = 0;
 
           if (isContinuous) {
-            validCode = ThreeDUtil.isLinesContinuous(first, second) ? CONTINUOUS_ERROR_CODE : validCode;
+            if (!first.p1.equals(second.p0)) {
+              validCode = CONTINUOUS_ERROR_CODE;
+            }
           } else if (isReverseContinuous) {
-            validCode = ThreeDUtil.isLinesContinuous(second, first) ? CONTINUOUS_ERROR_CODE : validCode;
+            if (!second.p1.equals(first.p0)) {
+              validCode = CONTINUOUS_ERROR_CODE;
+            }
           } else {
             // 2 line segments should not have no intersection
-            validCode = first.intersection(second) == null ? INTERSECTION_ERROR_CODE : validCode;
-            if (checkTouchLineSegments(first, second)) {
-              validCode = first.intersection(second) == null ? TOUCH_ERROR_CODE : validCode;
+            var relationship = ThreeDUtil.checkSegmentsRelationship(
+                new Vector3D(first.p0.x, first.p0.y, first.p0.z), new Vector3D(first.p1.x, first.p1.y, first.p1.z),
+                new Vector3D(second.p0.x, second.p0.y, second.p0.z), new Vector3D(second.p1.x, second.p1.y, second.p1.z)
+            );
+            if (relationship == SegmentRelationship.INTERSECT || relationship == SegmentRelationship.OVERLAP) {
+              validCode = INTERSECTION_ERROR_CODE;
+            } else if (relationship == SegmentRelationship.TOUCH) {
+              validCode = TOUCH_ERROR_CODE;
             }
           }
 
           // If 2 line segments are not continuous and intersected
           if (validCode > 0) {
+            logger.severe(String.format("L08 Line have (%s and %s) is not valid", first, second));
             // Update error list of building
             ErrorLineString errorLineString = new ErrorLineString();
             Set<ErrorLineString> errorList = buildingWithErrorLineString.getOrDefault(buildingNode, new HashSet<>());

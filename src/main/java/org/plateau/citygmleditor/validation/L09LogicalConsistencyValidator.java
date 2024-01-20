@@ -1,9 +1,11 @@
 package org.plateau.citygmleditor.validation;
 
 import javafx.geometry.Point3D;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.locationtech.jts.geom.LineSegment;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
+import org.plateau.citygmleditor.constant.SegmentRelationship;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.CollectionUtil;
@@ -80,23 +82,25 @@ public class L09LogicalConsistencyValidator implements IValidator {
           boolean isContinuous = j == k-1;
           // Line first and last are also continuous
           boolean isReverseContinuous = j == 0 && k == lineSegments.size() - 1;
-
           boolean isValid;
-
           if (isContinuous) {
-            isValid = ThreeDUtil.isLinesContinuous(first, second);
+            // End point of first line segment is start point of second line segment
+            isValid = first.p1.equals(second.p0);
           } else if (isReverseContinuous) {
-            isValid = ThreeDUtil.isLinesContinuous(second, first);
+            // End point of second line segment is start point of first line segment
+            isValid = second.p1.equals(first.p0);
           } else {
-            // 2 line segments should not have no intersection
-            isValid = first.intersection(second) == null;
+            var relationship = ThreeDUtil.checkSegmentsRelationship(
+                new Vector3D(first.p0.x, first.p0.y, first.p0.z), new Vector3D(first.p1.x, first.p1.y, first.p1.z),
+                new Vector3D(second.p0.x, second.p0.y, second.p0.z), new Vector3D(second.p1.x, second.p1.y, second.p1.z)
+            );
+            isValid = relationship == SegmentRelationship.NONE;
           }
 
           if (!isValid) {
-            logger.severe(String.format("L09 Line have (%s and %s) is not countinuous", first, second));
+            logger.severe(String.format("L09 Line have (%s and %s) is not valid", first, second));
             // Update error list of building
             CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, linearRingNode);
-
           }
         }
       }
