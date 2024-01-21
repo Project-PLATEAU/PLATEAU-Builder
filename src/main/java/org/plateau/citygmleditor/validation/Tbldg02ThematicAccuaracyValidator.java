@@ -24,7 +24,7 @@ public class Tbldg02ThematicAccuaracyValidator implements IValidator {
     @Override
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
         NodeList buildingInstallations = CityGmlUtil.getXmlDocumentFrom(cityModelView)
-            .getElementsByTagName(TagName.BLDG_BUILDING_INSTALLATION);
+                .getElementsByTagName(TagName.BLDG_BUILDING_INSTALLATION);
         List<String> invalidInstallations = new ArrayList<>();
         for (int i = 0; i < buildingInstallations.getLength(); i++) {
             Node installation = buildingInstallations.item(i);
@@ -39,27 +39,39 @@ public class Tbldg02ThematicAccuaracyValidator implements IValidator {
 
         }
         List<ValidationResultMessage> messages = new ArrayList<>();
-        String errorMessage = MessageError.ERR_T_Bldg_02_002_1;
+        StringBuilder errorMessage = new StringBuilder(MessageError.ERR_T_Bldg_02_002_1);
         for (String invalid : invalidInstallations) {
-            errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_T_Bldg_02_002_2, invalid);
+            errorMessage.append(MessageFormat.format(MessageError.ERR_T_Bldg_02_002_2, invalid));
         }
 
-        if (!errorMessage.equals(MessageError.ERR_T_Bldg_02_002_1)) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage));
+        if (!errorMessage.toString().equals(MessageError.ERR_T_Bldg_02_002_1)) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage.toString()));
         }
         return messages;
     }
 
     private List<String> getLodGemetryInvalids(List<Node> tags) {
         List<String> result = new ArrayList<>();
-        for (Node tag : tags) {
-            List<Node> excludedTags = XmlUtil.getTagsByRegex(NOT_GML_MULTISURFACE_GML_SOLID, tag);
-            if (!CollectionUtil.isEmpty(excludedTags)) {
-                Element element = (Element) tag;
+        for (Node geometry : tags) {
+            boolean isGeometryValid = this.isTagValid(geometry);
+            if (!isGeometryValid) {
+                Element element = (Element) geometry;
                 String lodGeometry = element.getTagName() + " " + element.getAttribute(TagName.GML_ID);
                 result.add(lodGeometry);
             }
         }
         return result;
+    }
+
+    private boolean isTagValid(Node geometry) {
+        NodeList childrenTag = geometry.getChildNodes();
+        for (int i = 0; i < childrenTag.getLength(); i++) {
+            Node child = childrenTag.item(i);
+            // Check to see if the child tag contains any tags other than gml:MultiSurface and gml:solid
+            if (child.getNodeType() == Node.ELEMENT_NODE && child.getNodeName().matches(NOT_GML_MULTISURFACE_GML_SOLID)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -63,7 +63,6 @@ public class XmlUtil {
    * Get all node from xml file
    *
    * @param inputStream    inputStream of xml file
-   * @param tagName tag name
    * @return list of node
    * @throws ParserConfigurationException
    * @throws IOException
