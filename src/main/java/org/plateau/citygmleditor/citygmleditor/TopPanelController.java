@@ -34,8 +34,10 @@ public class TopPanelController {
             Node root = GmlImporter.loadGml(file.toString());
             CityGMLEditorApp.getSceneContent().setContent(root);
 
-            var datasetPath = Paths.get(World.getActiveInstance().getCityModel().getGmlPath()).getParent().getParent().getParent();
+            var datasetPath = Paths.get(World.getActiveInstance().getCityModel().getGmlPath()).getParent().getParent()
+                    .getParent();
             String uroSchemasPath = datasetPath + "\\schemas\\iur\\uro\\2.0\\urbanObject.xsd";
+            CityGMLEditorApp.setDatasetPath(datasetPath.toString());
             CityGMLEditorApp.settingUroAttributeInfo(uroSchemasPath);
         } catch (Exception e) {
             throw new RuntimeException(e);

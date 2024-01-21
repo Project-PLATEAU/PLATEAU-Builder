@@ -62,6 +62,7 @@ public class CityGMLEditorApp extends Application {
     private static AutoScalingGroup autoScalingGroups;
     private static CityModelViewMode cityModelViewMode;
     private static UroAttributeInfo uroAttributeInfo;
+    private static String datasetPath;
 
     private SessionManager sessionManager;
 
@@ -102,7 +103,10 @@ public class CityGMLEditorApp extends Application {
     public static FeatureSelection getFeatureSellection() {
         return selection;
     }
-    public static CityModelViewMode getCityModelViewMode() { return cityModelViewMode; }
+
+    public static CityModelViewMode getCityModelViewMode() {
+        return cityModelViewMode;
+    }
 
     public static org.w3c.dom.Document getUroAttributeDocument() {
         return uroAttributeInfo.getUroAttributeDocument();
@@ -110,7 +114,14 @@ public class CityGMLEditorApp extends Application {
 
     public static void settingUroAttributeInfo(String path) {
         uroAttributeInfo.readUroSchemas(path);
-        System.out.println("Done");
+    }
+
+    public static void setDatasetPath(String path) {
+        datasetPath = path;
+    }
+
+    public static String getDatasetPath() {
+        return datasetPath;
     }
 
     @Override

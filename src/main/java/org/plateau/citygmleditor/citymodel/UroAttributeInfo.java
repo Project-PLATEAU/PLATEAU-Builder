@@ -24,12 +24,14 @@ public class UroAttributeInfo {
             parser.parse(path);
             // ドキュメントオブジェクトを取得
             document = parser.getDocument();
-
             // 新しいXMLドキュメントを作成
             builder = factory.newDocumentBuilder();
             uroDocument = builder.newDocument();
+            Element documentRootElement = document.getDocumentElement();
+            String xmlnsUro = documentRootElement.getAttribute("xmlns:uro");
             // 新しいElementを作成
             Element rootElement = uroDocument.createElement("uro");
+            rootElement.setAttribute("xmlns:uro", xmlnsUro);
             // ElementをDocumentのルートとして追加
             uroDocument.appendChild(rootElement);
             // complexTypeタグを取得
@@ -38,9 +40,10 @@ public class UroAttributeInfo {
             for (int i = 0; i < nodeListElement.getLength(); i++) {
                 Node node = nodeListElement.item(i);
                 Node parentNode = node.getParentNode();
-                if (((Element) parentNode).getTagName() == "xs:schema") {
+                Element element = (Element) node;
+
+                if (((Element) parentNode).getTagName() == "xs:schema" && element.getAttribute("abstract") != "true") {
                     // 最上位の属性をノードとして格納
-                    Element element = (Element) node;
                     Node importedNode = uroDocument.importNode(element, false);
                     rootElement.appendChild(importedNode);
                     NodeList complexTypeNodeList = document.getElementsByTagName("xs:complexType");
@@ -128,6 +131,7 @@ public class UroAttributeInfo {
                 }
             }
         }
+
     }
 
     // ノードを表示するメソッド
@@ -137,7 +141,8 @@ public class UroAttributeInfo {
             String indent = new String(new char[depth * 2]).replace("\0", " ");
             Element element = (Element) node;
             // ノードの情報を表示
-            System.out.println(indent + "Node Name: " + element.getAttribute("name"));
+            System.out.println(indent + "Tag Name: " + element.getTagName() + "   Node Name: "
+                    + element.getAttribute("name") + "   Parent TagName: " + element.getParentNode());
 
             // 子ノードがあれば、それぞれに対してこのメソッドを再帰的に呼び出す
             NodeList childNodes = node.getChildNodes();
@@ -147,6 +152,12 @@ public class UroAttributeInfo {
         }
     }
 
+    /**
+     * getUroAttributeDocument
+     * パースしたuroの要素リストを返す
+     * 
+     * @return パースしたuroの要素リスト
+     */
     public Document getUroAttributeDocument() {
         return uroDocument;
     }
