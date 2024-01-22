@@ -8,7 +8,6 @@ import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.SegmentRelationship;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
-import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
@@ -26,6 +25,13 @@ import java.util.logging.Logger;
 
 public class L09LogicalConsistencyValidator implements IValidator {
 
+  private final static int NO_ERROR = 0;
+  private final static int SELF_INTERSECT_ERROR = 1;
+  private final static int SELF_CONTACT_ERROR = 2;
+  private final static int CLOSE_ERROR = 3;
+  private final static int DUPLICATE_ERROR = 4;
+  private final static int CATCH_EXCEPTION = 5;
+
   public static Logger logger = Logger.getLogger(L09LogicalConsistencyValidator.class.getName());
 
   public List<ValidationResultMessage> validate(CityModelView cityModelView)
@@ -33,7 +39,7 @@ public class L09LogicalConsistencyValidator implements IValidator {
     List<ValidationResultMessage> messages = new ArrayList<>();
 
     NodeList linearRingNodes = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.GML_LINEARRING);
-    Map<Node, Set<Node>> buildingWithErrorLinearRing = new HashMap<>();
+    Map<Node, Set<LinearRingError>> buildingWithErrorLinearRing = new HashMap<>();
 
     for (int i = 0; i < linearRingNodes.getLength(); i++) {
       Node linearRingNode = linearRingNodes.item(i);
@@ -44,7 +50,7 @@ public class L09LogicalConsistencyValidator implements IValidator {
         Node parentNode = XmlUtil.findNearestParentByAttribute(linearRingNodes.item(i), TagName.GML_ID);
         messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
                 MessageFormat.format(MessageError.ERR_L09_001,
-                        parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
+                        parentNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent(),
                         linearRingNodes.item(i).getFirstChild().getNodeValue())));
       }
     }
@@ -53,10 +59,10 @@ public class L09LogicalConsistencyValidator implements IValidator {
 
       String gmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
       String errorMessage = MessageFormat.format(MessageError.ERR_L09_002_1, gmlId);
-      for (Node linearRing : linearRingNodesWithError) {
-        Node linearRingNode = linearRing.getAttributes().getNamedItem(TagName.GML_ID);
+      for (LinearRingError linearRing : linearRingNodesWithError) {
+        Node linearRingNode = linearRing.getLinearRing().getAttributes().getNamedItem(TagName.GML_ID);
         String linearRingId = linearRingNode != null ? linearRingNode.getTextContent() : "";
-        errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_L09_002_2, linearRingId);
+        errorMessage = errorMessage + setErrorMessage(linearRing.getErrorCode(), linearRingId);
       }
 
       messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage));
@@ -65,7 +71,7 @@ public class L09LogicalConsistencyValidator implements IValidator {
     return messages;
   }
 
-  private void checkPointsIntersect(Node linearRingNode, Map<Node, Set<Node>> buildingWithErrorLinearRing) {
+  private void checkPointsIntersect(Node linearRingNode, Map<Node, Set<LinearRingError>> buildingWithErrorLinearRing) {
     Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(linearRingNode, TagName.BLDG_BUILDING, TagName.GML_ID);
     List<LineSegment> lineSegments;
 
@@ -73,7 +79,9 @@ public class L09LogicalConsistencyValidator implements IValidator {
       lineSegments = getLineSegments(linearRingNode);
     } catch (InvalidPosStringException e) {
       // If there is any error when parsing posString, update error list of building
-      CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, linearRingNode);
+      Set<LinearRingError> linearRingErrors = new HashSet<>();
+      linearRingErrors.add(new LinearRingError(CATCH_EXCEPTION, linearRingNode));
+      buildingWithErrorLinearRing.put(buildingNode, linearRingErrors);
       return;
     }
 
@@ -89,32 +97,34 @@ public class L09LogicalConsistencyValidator implements IValidator {
           boolean isContinuous = j == k-1;
           // Line first and last are also continuous
           boolean isReverseContinuous = j == 0 && k == lineSegments.size() - 1;
-          boolean isValid;
+          int errorCode = NO_ERROR;
           if (isContinuous) {
             // End point of first line segment is start point of second line segment
-            isValid = first.p1.equals(second.p0);
+            errorCode = first.p1.equals(second.p0) ? SELF_CONTACT_ERROR : errorCode;
           } else if (isReverseContinuous) {
             // End point of second line segment is start point of first line segment
-            isValid = second.p1.equals(first.p0);
+            errorCode = second.p1.equals(first.p0) ? SELF_CONTACT_ERROR : errorCode;
           } else {
             var relationship = ThreeDUtil.checkSegmentsRelationship(
                 new Vector3D(first.p0.x, first.p0.y, first.p0.z), new Vector3D(first.p1.x, first.p1.y, first.p1.z),
                 new Vector3D(second.p0.x, second.p0.y, second.p0.z), new Vector3D(second.p1.x, second.p1.y, second.p1.z)
             );
-            isValid = relationship == SegmentRelationship.NONE;
+            errorCode = relationship == SegmentRelationship.NONE ? SELF_INTERSECT_ERROR : errorCode;
           }
 
-          if (!isValid) {
+          if (errorCode != NO_ERROR) {
             logger.severe(String.format("L09 Line have (%s and %s) is not valid", first, second));
             // Update error list of building
-            CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, linearRingNode);
+            Set<LinearRingError> linearRingErrors = new HashSet<>();
+            linearRingErrors.add(new LinearRingError(errorCode, linearRingNode));
+            buildingWithErrorLinearRing.put(buildingNode, linearRingErrors);
           }
         }
       }
     }
   }
 
-  private void checkPointsNonDuplicatedAndClosed(Node linearRingNode, Map<Node, Set<Node>> buildingWithErrorLinearRing) {
+  private void checkPointsNonDuplicatedAndClosed(Node linearRingNode, Map<Node, Set<LinearRingError>> buildingWithErrorLinearRing) {
     Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(linearRingNode, TagName.BLDG_BUILDING, TagName.GML_ID);
 
     try {
@@ -122,7 +132,9 @@ public class L09LogicalConsistencyValidator implements IValidator {
       List<Point3D> points = get3dPoints(linearRingNode);
 
       boolean isClosed = points.get(0).equals(points.get(points.size() - 1));
+      int errorCode = NO_ERROR;
       if (!isClosed) {
+        errorCode = CLOSE_ERROR;
         logger.severe(String.format("L09 polygon have is don't close startpoint (%s) and endpoint (%s)", points.get(0), points.get(points.size() - 1)));
       }
 
@@ -130,14 +142,19 @@ public class L09LogicalConsistencyValidator implements IValidator {
       // Check if there is any other duplicated point
       boolean isDuplicated = new HashSet<>(points).size() != points.size() - 1;
       if (isDuplicated){
+        errorCode = DUPLICATE_ERROR;
         logger.severe(String.format("L09 polygon have duplicate point (%s)", points));
       }
       if (!isClosed || isDuplicated) {
-        CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, linearRingNode);
+        Set<LinearRingError> linearRingErrors = new HashSet<>();
+        linearRingErrors.add(new LinearRingError(errorCode, linearRingNode));
+        buildingWithErrorLinearRing.put(buildingNode, linearRingErrors);
       }
     } catch (InvalidPosStringException e) {
       // If there is any error when parsing posString, update error list of building
-      CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, linearRingNode);
+      Set<LinearRingError> linearRingErrors = new HashSet<>();
+      linearRingErrors.add(new LinearRingError(CATCH_EXCEPTION, linearRingNode));
+      buildingWithErrorLinearRing.put(buildingNode, linearRingErrors);
     }
   }
 
@@ -165,5 +182,49 @@ public class L09LogicalConsistencyValidator implements IValidator {
   private List<LineSegment> getLineSegments(Node linearRingNode) {
     // Convert 3d points to line segments
     return ThreeDUtil.getLineSegments(get3dPoints(linearRingNode));
+  }
+
+  private String setErrorMessage(int errorCode, String linearRingId) {
+    switch (errorCode) {
+      case SELF_INTERSECT_ERROR:
+        return MessageFormat.format(MessageError.ERR_L09_002_2, linearRingId);
+      case SELF_CONTACT_ERROR:
+        return MessageFormat.format(MessageError.ERR_L09_002_3, linearRingId);
+      case CLOSE_ERROR:
+        return MessageFormat.format(MessageError.ERR_L09_002_4, linearRingId);
+      case DUPLICATE_ERROR:
+        return MessageFormat.format(MessageError.ERR_L09_002_5, linearRingId);
+      case CATCH_EXCEPTION:
+        return "";
+    }
+    return "";
+  }
+}
+
+class LinearRingError {
+  private int errorCode;
+  private Node linearRing;
+
+  public LinearRingError() {}
+
+  public LinearRingError(int errorCode, Node linearRing) {
+    this.errorCode = errorCode;
+    this.linearRing = linearRing;
+  }
+
+  public void setErrorCode (int errorCode) {
+    this.errorCode = errorCode;
+  }
+
+  public int getErrorCode() {
+    return this.errorCode;
+  }
+
+  public void setLinearRing(Node linearRing) {
+    this.linearRing = linearRing;
+  }
+
+  public Node getLinearRing() {
+    return this.linearRing;
   }
 }

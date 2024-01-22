@@ -29,6 +29,9 @@ public interface MessageError {
     String ERR_L09_001 = "L09: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
     String ERR_L09_002_1 = "L09: 地物\"({0})\":";
     String ERR_L09_002_2 = "\n<gml:LinearRing gml:id=\"({0})\">が自己交差しています。";
+    String ERR_L09_002_3 = "\n<gml:LinearRing gml:id=\"({0})\">が自己接触しています。";
+    String ERR_L09_002_4 = "\n<gml:LinearRing gml:id=\"({0})\">が始終点の不一致しています。";
+    String ERR_L09_002_5 = "\n<gml:LinearRing gml:id=\"({0})\">が重複座標しています。";
 
     String ERR_L10_001 = "L10: Building gml:id=\"{0}\" and {1} invalid";
     String ERR_L10_002 = "L10: 地物\"({0})\":({1})";
