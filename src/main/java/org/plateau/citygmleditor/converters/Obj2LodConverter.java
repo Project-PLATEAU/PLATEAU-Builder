@@ -98,9 +98,15 @@ public class Obj2LodConverter extends AbstractLodConverter {
         var path = Paths.get(new URL(image.getUrl()).toURI());
         var fileName = path.getFileName().toString();
         var gmlFileName = Paths.get(getCityModelView().getGmlPath()).getFileName().toString();
-        var gmlFileNameWithoutExtension = gmlFileName.substring(0, gmlFileName.lastIndexOf('.'));
 
-        var texturePath = String.format("%s_appearance/%s", gmlFileNameWithoutExtension, fileName);
+        String texturePath = null;
+        var codes = gmlFileName.split("_");
+        if (codes.length == 5) {
+            texturePath = String.format("%s_%s_%s_appearance/%s", codes[0], codes[1], codes[2], fileName);
+        } else {
+            texturePath = fileName;
+        }
+
         ParameterizedTexture parameterizedTexture = new ParameterizedTexture();
         parameterizedTexture.setImageURI(texturePath.toString());
         parameterizedTexture.setMimeType(new Code(Files.probeContentType(path)));
