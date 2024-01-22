@@ -3,6 +3,7 @@ package org.plateau.citygmleditor.citygmleditor;
 import javafx.beans.binding.ObjectBinding;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -11,7 +12,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 import org.plateau.citygmleditor.citymodel.BuildingView;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.converters.Obj2LodConverter;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
 import org.plateau.citygmleditor.world.*;
@@ -31,6 +34,7 @@ public class HierarchyController implements Initializable {
     public ContextMenu hierarchyContextMenu;
     public MenuItem exportGltfMenu;
     public MenuItem exportObjMenu;
+    public MenuItem importObjMenu;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -123,7 +127,7 @@ public class HierarchyController implements Initializable {
      * Export the selected solid to gLTF
      * @param actionEvent the event
      */
-    public void ExportGltf(ActionEvent actionEvent) {
+    public void exportGltf(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("gLTF", "*.gltf", "*.glb")
@@ -142,8 +146,9 @@ public class HierarchyController implements Initializable {
             return;
 
         ILODSolidView solid = (ILODSolidView)item;
+        BuildingView building = (BuildingView)solid.getParent();
         try {
-            GltfExporter.export(newFile.toString(), solid);
+            new GltfExporter().export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -153,7 +158,7 @@ public class HierarchyController implements Initializable {
      * Export the selected solid to OBJ
      * @param actionEvent the event
      */
-    public void ExportObj(ActionEvent actionEvent) {
+    public void exportObj(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("OBJ", "*.obj")
@@ -172,10 +177,44 @@ public class HierarchyController implements Initializable {
             return;
 
         ILODSolidView solid = (ILODSolidView)item;
+        BuildingView building = (BuildingView)solid.getParent();
         try {
-            ObjExporter.export(newFile.toString(), solid);
+            new ObjExporter().export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void importObj(ActionEvent actionEvent) {
+        var file = FileChooserService.showOpenDialog("*.obj", SessionManager.OBJ_FILE_PATH_PROPERTY);
+
+        if (file == null)
+            return;
+
+        var content = (Group)sceneContent.getContent();
+        var cityModelNode = content.getChildren().get(0);
+        if (cityModelNode == null)
+            return;
+
+        var cityModelView = (CityModelView)cityModelNode;
+        TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
+        if (selectedItem == null)
+            return;
+
+        var item = selectedItem.valueProperty().get();
+        if (!(item instanceof ILODSolidView))
+            return;
+
+        ILODSolidView lodSolidView = (ILODSolidView)item;
+        try {
+            var convertedCityModel = new Obj2LodConverter(cityModelView, lodSolidView).convert(file.toString());
+            var node = new Group();
+            node.setId(content.getId());
+            node.getChildren().add(convertedCityModel);
+
+            CityGMLEditorApp.getSceneContent().setContent(node);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
