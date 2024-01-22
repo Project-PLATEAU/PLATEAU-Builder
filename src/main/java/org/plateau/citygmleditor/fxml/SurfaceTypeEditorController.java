@@ -37,7 +37,7 @@ public class SurfaceTypeEditorController implements Initializable {
             if (view == null || section == null)
                 return;
 
-            view.updateSurfaceType(section, (CityGMLClass)newToggle.getUserData());
+            view.updateSurfaceType(section, (CityGMLClass) newToggle.getUserData());
         });
 
         var viewMode = CityGMLEditorApp.getCityModelViewMode();
@@ -48,7 +48,8 @@ public class SurfaceTypeEditorController implements Initializable {
 
         try {
             for (var entry : BuildingSurfaceTypeView.buildingSurfaceColors().entrySet()) {
-                var listItem = FXMLLoader.<ToggleButton>load(Objects.requireNonNull(CityGMLEditorApp.class.getResource("fxml/surface-type-editor-list-item.fxml")));
+                var listItem = FXMLLoader.<ToggleButton>load(Objects
+                        .requireNonNull(CityGMLEditorApp.class.getResource("fxml/surface-type-editor-list-item.fxml")));
                 listItem.setStyle("-fx-text-fill: " + ColorUtils.getWebString(entry.getValue()));
                 listItem.setText(entry.getKey().name());
                 listItem.setToggleGroup(toggleGroup);
@@ -77,7 +78,7 @@ public class SurfaceTypeEditorController implements Initializable {
                 return;
 
             for (var toggle : toggleGroup.getToggles()) {
-                if ((CityGMLClass)toggle.getUserData() == view.getSurfaceType(section)) {
+                if ((CityGMLClass) toggle.getUserData() == view.getSurfaceType(section)) {
                     toggleGroup.selectToggle(toggle);
                     break;
                 }
