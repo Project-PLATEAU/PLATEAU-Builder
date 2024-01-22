@@ -22,7 +22,7 @@ public interface MessageError {
 
     String ERR_L07_002_1 = "L07: 地物\"({0})\":\n" +
             "近接閾値（0.01m）未満の頂点が連続するインスタンスが存在します：";
-    String ERR_L07_002_2 = "\n<gml:LinearRing gml:id=\"{(0)}\">\n";
+    String ERR_L07_002_2 = "\n<gml:LinearRing ({0})>";
 
     String ERR_L08_001 = "L08: 地物\"({0})\":";
     String ERR_L08_002 = "L08: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
