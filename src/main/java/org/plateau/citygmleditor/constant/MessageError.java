@@ -39,7 +39,7 @@ public interface MessageError {
     String ERR_L10_003 = "L10: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
 
     String ERR_L11_002 = "L11: 地物\"({0})\":";
-    String ERR_L11_002_1 = "\n<gml:Polygon gml:id=\"({1})\">に同一平面上にない座標値が存在します。";
+    String ERR_L11_002_1 = "\n<gml:Polygon gml:id=\"({0})\">に同一平面上にない座標値が存在します。";
     String ERR_L11_003 = "L11: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
 
     String ERR_L12_001 = "L12: Building have ({0}) is invalid";
