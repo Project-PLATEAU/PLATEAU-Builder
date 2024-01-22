@@ -1,6 +1,9 @@
 package org.plateau.citygmleditor.utils;
 
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -197,7 +200,7 @@ public class XmlUtil {
 
     String filePath = String.format("%serror%s.txt", PATH_FOLDER, dtf.format(now));
 
-    BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, true));
+    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), StandardCharsets.UTF_8));
     for (String message : messages) {
       bw.write(message + "\n");
     }
