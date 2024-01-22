@@ -1,7 +1,6 @@
 package org.plateau.citygmleditor.validation;
 
 import org.plateau.citygmleditor.citymodel.CityModelView;
-import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.CollectionUtil;
@@ -11,7 +10,6 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,19 +20,11 @@ public class C04CompletenessValidator implements IValidator {
     private int length;
 
     static class BuildingInvalid {
-        private String ID;
+        private String buildingID;
         private List<String> uroBuildingIDs;
 
-        public String getID() {
-            return ID;
-        }
-
-        public void setID(String ID) {
-            this.ID = ID;
-        }
-
-        public List<String> getUroBuildingID() {
-            return uroBuildingIDs;
+        public void setBuildingID(String buildingID) {
+            this.buildingID = buildingID;
         }
 
         public void setUroBuildingID(List<String> uroBuildingID) {
@@ -42,11 +32,9 @@ public class C04CompletenessValidator implements IValidator {
         }
 
         public String toString() {
-            String errorMessage = MessageFormat.format(MessageError.ERR_C04_BLDG_1_001, ID);
-            for (String uroBuildingId : uroBuildingIDs) {
-                errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_C04_BLDG_1_002, uroBuildingId);
-            }
-            return errorMessage;
+            String uro = uroBuildingIDs.stream().map(u -> "[" + u + "]").collect(Collectors.joining(" "));
+            String buildingError = "地物\"%s\"次のuro:buildingIDが重複しています：%s";
+            return String.format(buildingError, buildingID, uro);
         }
     }
 
@@ -95,7 +83,7 @@ public class C04CompletenessValidator implements IValidator {
 
             if (CollectionUtil.isEmpty(uroBuildingIDInvalids)) continue;
             BuildingInvalid buildingInvalid = new BuildingInvalid();
-            buildingInvalid.setID(buildingID);
+            buildingInvalid.setBuildingID(buildingID);
             buildingInvalid.setUroBuildingID(uroBuildingIDInvalids);
             buildingInvalids.add(buildingInvalid);
         }
