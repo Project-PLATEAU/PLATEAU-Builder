@@ -100,16 +100,16 @@ public class L09LogicalConsistencyValidator implements IValidator {
           int errorCode = NO_ERROR;
           if (isContinuous) {
             // End point of first line segment is start point of second line segment
-            errorCode = first.p1.equals(second.p0) ? SELF_CONTACT_ERROR : errorCode;
+            errorCode = first.p1.equals(second.p0) ? NO_ERROR : SELF_CONTACT_ERROR;
           } else if (isReverseContinuous) {
             // End point of second line segment is start point of first line segment
-            errorCode = second.p1.equals(first.p0) ? SELF_CONTACT_ERROR : errorCode;
+            errorCode = second.p1.equals(first.p0) ? NO_ERROR : SELF_CONTACT_ERROR;
           } else {
             var relationship = ThreeDUtil.checkSegmentsRelationship(
                 new Vector3D(first.p0.x, first.p0.y, first.p0.z), new Vector3D(first.p1.x, first.p1.y, first.p1.z),
                 new Vector3D(second.p0.x, second.p0.y, second.p0.z), new Vector3D(second.p1.x, second.p1.y, second.p1.z)
             );
-            errorCode = relationship == SegmentRelationship.NONE ? SELF_INTERSECT_ERROR : errorCode;
+            errorCode = relationship == SegmentRelationship.NONE ? NO_ERROR : SELF_INTERSECT_ERROR;
           }
 
           if (errorCode != NO_ERROR) {
