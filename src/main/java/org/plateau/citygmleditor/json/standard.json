@@ -37,12 +37,12 @@
   {
     "id": "L08",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L09",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L10",
@@ -57,7 +57,7 @@
   {
     "id": "L12",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L13",
@@ -67,42 +67,42 @@
   {
     "id": "L14",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L15",
     "title": "位相一貫性(gml:Triangle)",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L16",
     "title": "位相一貫性(gml:TriangulatedSurface)",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L17",
     "title": "位相一貫性(gml:CompositeCurve)",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L18",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L-bldg-01",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L-bldg-02",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L-bldg-03",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "T-03",
@@ -117,6 +117,6 @@
   {
     "id": "L14",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   }
 ]
