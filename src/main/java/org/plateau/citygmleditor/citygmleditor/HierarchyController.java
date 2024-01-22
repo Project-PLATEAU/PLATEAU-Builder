@@ -179,7 +179,6 @@ public class HierarchyController implements Initializable {
             node.getChildren().add(convertedCityModel);
 
             CityGMLEditorApp.getSceneContent().setContent(node);
-            
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
