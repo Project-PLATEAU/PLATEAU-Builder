@@ -95,10 +95,15 @@ public class Obj2LodConverter extends AbstractLodConverter {
         PhongMaterial phongMaterial = (PhongMaterial) material;
 
         var image = phongMaterial.getDiffuseMap();
-        var texturePath = Paths.get(new URL(image.getUrl()).toURI());
+        var path = Paths.get(new URL(image.getUrl()).toURI());
+        var fileName = path.getFileName().toString();
+        var gmlFileName = Paths.get(getCityModelView().getGmlPath()).getFileName().toString();
+        var gmlFileNameWithoutExtension = gmlFileName.substring(0, gmlFileName.lastIndexOf('.'));
+
+        var texturePath = String.format("%s_appearance/%s", gmlFileNameWithoutExtension, fileName);
         ParameterizedTexture parameterizedTexture = new ParameterizedTexture();
         parameterizedTexture.setImageURI(texturePath.toString());
-        parameterizedTexture.setMimeType(new Code(Files.probeContentType(texturePath)));
+        parameterizedTexture.setMimeType(new Code(Files.probeContentType(path)));
         textureMap.put(materialName, parameterizedTexture);
 
         return parameterizedTexture;
