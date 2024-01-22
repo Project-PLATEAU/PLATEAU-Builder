@@ -160,7 +160,12 @@ public class L13LogicalConsistencyValidator implements IValidator {
         .map(point -> new Coordinate(point.getX(), point.getY(), point.getZ()))
         .toArray(Coordinate[]::new);
 
-    return new Polygon(new LinearRing(new CoordinateArraySequence(points), new GeometryFactory()), null, new GeometryFactory());
+    try {
+      return new Polygon(new LinearRing(new CoordinateArraySequence(points), new GeometryFactory()), null, new GeometryFactory());
+    } catch (IllegalArgumentException e) {
+      logger.severe("Got error when convert linear ring to polygon " + e.getMessage());
+      throw new InvalidPosStringException("Invalid LinearRing");
+    }
   }
 
   /**
