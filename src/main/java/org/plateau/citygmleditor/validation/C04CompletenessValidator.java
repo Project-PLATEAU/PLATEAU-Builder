@@ -1,6 +1,7 @@
 package org.plateau.citygmleditor.validation;
 
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
 import org.plateau.citygmleditor.utils.CollectionUtil;
@@ -33,8 +34,7 @@ public class C04CompletenessValidator implements IValidator {
 
         public String toString() {
             String uro = uroBuildingIDs.stream().map(u -> "[" + u + "]").collect(Collectors.joining(" "));
-            String buildingError = "地物\"%s\"次のuro:buildingIDが重複しています：%s";
-            return String.format(buildingError, buildingID, uro);
+            return String.format(MessageError.ERR_C04_BLDG_1_001, buildingID, uro);
         }
     }
 
