@@ -58,6 +58,11 @@ public class SessionManager {
      */
     public static final String GML_FILE_PATH_PROPERTY = "gmlFilePath";
 
+    /*
+     * インポートされたOBJファイルのパス
+     */
+    public static final String OBJ_FILE_PATH_PROPERTY = "objFilePath";
+
     public final String SESSION_PROPERTIES_FILENAME;
     private static final boolean ENABLE_SAVE_SESSION = true;
     private String name;

@@ -34,10 +34,9 @@
             <contextMenu>
                 <ContextMenu fx:id="hierarchyContextMenu">
                     <items>
-                        <MenuItem fx:id="exportGltfMenu" mnemonicParsing="false" onAction="#ExportGltf"
-                                  text="Export gLTF..."/>
-                        <MenuItem fx:id="exportObjMenu" mnemonicParsing="false" onAction="#ExportObj"
-                                  text="Export OBJ..."/>
+                        <MenuItem fx:id="exportGltfMenu" mnemonicParsing="false" onAction="#exportGltf" text="Export gLTF..." />
+                        <MenuItem fx:id="exportObjMenu" mnemonicParsing="false" onAction="#exportObj" text="Export OBJ..." />
+                        <MenuItem fx:id="importObjMenu" mnemonicParsing="false" onAction="#importObj" text="Import OBJ..." />
                     </items>
                 </ContextMenu>
             </contextMenu>
