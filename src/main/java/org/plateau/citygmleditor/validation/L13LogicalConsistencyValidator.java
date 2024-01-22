@@ -9,6 +9,7 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.constant.L13ErrorType;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
@@ -39,7 +40,7 @@ public class L13LogicalConsistencyValidator implements IValidator {
       throws ParserConfigurationException, IOException, SAXException {
 
     List<ValidationResultMessage> messages = new ArrayList<>();
-    Map<Node, Set<Node>> buildingWithErrorPolygonsSurfacePaths = new HashMap<>();
+    Map<Node, Map<Node, L13ErrorType>> buildingWithErrorPolygonsSurfacePaths = new HashMap<>();
 
     var polygons = CityGmlUtil.getXmlDocumentFrom(cityModel).getElementsByTagName(TagName.GML_POLYGON);
 
@@ -51,21 +52,31 @@ public class L13LogicalConsistencyValidator implements IValidator {
     buildingWithErrorPolygonsSurfacePaths.forEach((buildingNode, errorPolygonSurfacePath) -> {
       String buildingGmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
 
-      var nodeErrorDetail = errorPolygonSurfacePath.stream()
-          .map(node -> {
-            Node gmlIdNode = node.getAttributes().getNamedItem(TagName.GML_ID);
-
+      var nodeErrorDetail = errorPolygonSurfacePath.entrySet().stream()
+          .map(entry -> {
+            var node = entry.getKey();
+            var gmlIdNode = node.getAttributes().getNamedItem(TagName.GML_ID);
             var gmlId = gmlIdNode != null ? gmlIdNode.getTextContent() : "";
-            return String.format("%s gml:id=\"%s\"", node.getNodeName(), gmlId);
-          }).collect(Collectors.joining(", "));
+            switch (entry.getValue()) {
+              case INVALID_STANDARD_1:
+                return String.format(MessageError.ERR_L13_0001, gmlId);
+              case INVALID_STANDARD_2:
+                return String.format(MessageError.ERR_L13_0002, gmlId);
+              case INVALID_STANDARD_3:
+                return String.format(MessageError.ERR_L13_0003, gmlId);
+              case INVALID_FORMAT:
+                return String.format(MessageError.ERR_L13_0000, gmlId);
+              default: return "";
+            }
+          }).collect(Collectors.joining("\n"));
 
-      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageFormat.format(MessageError.ERR_L13_001, buildingGmlId, nodeErrorDetail)));
+      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format(MessageError.ERR_L13_001, buildingGmlId, nodeErrorDetail)));
     });
 
     return messages;
   }
 
-  private void validateExteriorAndInteriors(Node polygon, Map<Node, Set<Node>> buildingWithErrorLinearRing,
+  private void validateExteriorAndInteriors(Node polygon, Map<Node, Map<Node, L13ErrorType>> buildingWithErrorLinearRing,
                                             List<ValidationResultMessage> messages) {
 
     Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(polygon, TagName.BLDG_BUILDING, TagName.GML_ID);
@@ -78,16 +89,21 @@ public class L13LogicalConsistencyValidator implements IValidator {
       interiors = getInteriors(polygon, messages);
     } catch (InvalidGmlStructureException | InvalidPosStringException e) {
       logger.severe(e.getMessage());
-      CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygon);
+      updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygon, L13ErrorType.INVALID_FORMAT);
       return;
     }
 
     // Validate Standard 1: に内周が存在し、以下の条件のいずれかに合致する場合、エラーとする
     // All interiors should be within exterior
-    var invalidStandard1 = interiors.stream().anyMatch(interior -> !interior.within(exterior));
+    if (interiors.stream().anyMatch(interior -> !interior.within(exterior))) {
+      updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygon, L13ErrorType.INVALID_STANDARD_1);
+    }
+
 
     // Validate Standard 3: 内周同士が重なる、または包含関係にある。
-    var invalidStandard3 = !isValidStandard3(interiors);
+    if (!isValidStandard3(interiors)) {
+      updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygon, L13ErrorType.INVALID_STANDARD_3);
+    }
 
     // Validate Standard 2: 内周と外周が接し、gml:Polygonが2つ以上に分割されている
     // Union all interiors
@@ -100,9 +116,9 @@ public class L13LogicalConsistencyValidator implements IValidator {
     // If interiors split exterior into multiple polygons, then the polygon is invalid
     var invalidStandard2 = exterior.difference(interiorsUnionResult) instanceof MultiPolygon;
 
-    if (invalidStandard1 || invalidStandard2 || invalidStandard3) {
+    if (invalidStandard2) {
       // Update error list of building and exit function
-      CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygon);
+      updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygon, L13ErrorType.INVALID_STANDARD_2);
     }
 
   }
@@ -137,7 +153,7 @@ public class L13LogicalConsistencyValidator implements IValidator {
 
     var exterior = exteriorList.get(0);
 
-    return linearRingToPolygon(exterior.getFirstChild().getNextSibling(), messages);
+    return linearRingToPolygon(exterior.getFirstChild().getNextSibling());
   }
 
   public List<Polygon> getInteriors(Node polygon, List<ValidationResultMessage> messages) {
@@ -147,7 +163,7 @@ public class L13LogicalConsistencyValidator implements IValidator {
     XmlUtil.recursiveFindNodeByTagName(polygon, interiorList, TagName.GML_INTERIOR);
 
     return interiorList.stream()
-        .map(p-> linearRingToPolygon(p.getFirstChild().getNextSibling(), messages))
+        .map(p-> linearRingToPolygon(p.getFirstChild().getNextSibling()))
         .collect(Collectors.toList());
   }
 
@@ -156,9 +172,9 @@ public class L13LogicalConsistencyValidator implements IValidator {
    * @param linearRingNode LinearRing node
    * @return Polygon which created by LinearRing
    */
-  private Polygon linearRingToPolygon(Node linearRingNode, List<ValidationResultMessage> messages) {
+  private Polygon linearRingToPolygon(Node linearRingNode) {
 
-    var points = get3dPoints(linearRingNode, messages).stream()
+    var points = get3dPoints(linearRingNode).stream()
         .map(point -> new Coordinate(point.getX(), point.getY(), point.getZ()))
         .toArray(Coordinate[]::new);
 
@@ -175,7 +191,7 @@ public class L13LogicalConsistencyValidator implements IValidator {
    * @param linearRingNode LinearRing node
    * @return list of 3d points
    */
-  private List<Point3D> get3dPoints(Node linearRingNode, List<ValidationResultMessage> messages) {
+  private List<Point3D> get3dPoints(Node linearRingNode) {
     Element linearRingElement = (Element) linearRingNode;
     // There are 2 cases: posList and pos of LinearRing
     NodeList posListNodes = linearRingElement.getElementsByTagName(TagName.GML_POSLIST);
@@ -183,34 +199,29 @@ public class L13LogicalConsistencyValidator implements IValidator {
 
     if (posListNodes.getLength() > 0) {
       String[] posString = posListNodes.item(0).getTextContent().split(" ");
-      try {
-        return ThreeDUtil.createListPoint(posString);
-      } catch (InvalidPosStringException e) {
-        Node parentNode = XmlUtil.findNearestParentByAttribute(linearRingNode, TagName.GML_ID);
-        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                MessageFormat.format(MessageError.ERR_L13_002,
-                        parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
-                        linearRingNode.getFirstChild().getNodeValue())));
-        return new ArrayList<>();
-      }
+      return ThreeDUtil.createListPoint(posString);
     } else if (posNodes.getLength() > 0) {
       List<Point3D> point3DS = new ArrayList<>();
       for (int i = 0; i < posNodes.getLength(); i++) {
         Node posNode = posNodes.item(i);
         String[] posString = posNode.getTextContent().split(" ");
-        try {
-          point3DS.addAll(ThreeDUtil.createListPoint(posString));
-        } catch (InvalidPosStringException e) {
-          Node parentNode = XmlUtil.findNearestParentByAttribute(posNode, TagName.GML_ID);
-          messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                  MessageFormat.format(MessageError.ERR_L13_002,
-                          parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
-                          posNode.getFirstChild().getNodeValue())));
-          return new ArrayList<>();
-        }
+        point3DS.addAll(ThreeDUtil.createListPoint(posString));
       }
       return point3DS;
     }
-    return new ArrayList<>();
+    return List.of();
+  }
+
+  /**
+   * Update error map with parent node and error child node
+   * @param errorMap existing error map
+   * @param parentNode parent node for key
+   * @param errorChildNode error child node for value
+   * @param errorType error type
+   */
+  public static void updateErrorMap(Map<Node, Map<Node, L13ErrorType>> errorMap, Node parentNode, Node errorChildNode, L13ErrorType errorType) {
+    Map<Node, L13ErrorType> errorList = errorMap.getOrDefault(parentNode, new HashMap<>());
+    errorList.put(errorChildNode, errorType);
+    errorMap.put(parentNode, errorList);
   }
 }

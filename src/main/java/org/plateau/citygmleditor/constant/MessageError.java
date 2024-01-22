@@ -44,12 +44,11 @@ public interface MessageError {
             "次の座標値が許容誤差0.03m以外の同一平面インスタンスが存在します";
     String ERR_L12_002_2 = "\n<gml:Polygon gml:id=\"({0})\">";
 
-    String ERR_L13_001 = "L13: Building gml:id=\"({0})\" and ({1}) invalid";
-    String ERR_L13_002 = "L13: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
-    String ERR_L13_003 = "L13: 地物\"({0})\":\n" +
-            "<gml:Polygon gml:id=\"polygon_12345678\">内周が外周と交差している。\n" +
-            "<gml:Polygon gml:id=\"polygon_12345678\">内周と外周が接し、gml:Polygonが2つ以上に分割されている。\n" +
-            "<gml:Polygon gml:id=\"polygon_12345678\">内周同士が重なる、または包含関係にある。";
+    String ERR_L13_001 = "L13: 地物\"%s\": \n%s";
+    String ERR_L13_0001 = "<gml:Polygon gml:id=\"%s\">内周が外周と交差している。";
+    String ERR_L13_0002 = "<gml:Polygon gml:id=\"%s\">内周と外周が接し、gml:Polygonが2つ以上に分割されている。";
+    String ERR_L13_0003 = "<gml:Polygon gml:id=\"%s\">内周同士が重なる、または包含関係にある。";
+    String ERR_L13_0000 = "<gml:Polygon gml:id=\"%s\"> Invalid format";
 
     String ERR_L14_001 = "L14: Building have ({0}) is invalid";
     String ERR_L14_002 = "地物\"DENW43AL0000OBlN\":\n" +
