@@ -162,7 +162,7 @@ public class HierarchyController implements Initializable {
         if (cityModelNode == null)
             return;
 
-        var cityModel = (CityModelView)cityModelNode;
+        var cityModelView = (CityModelView)cityModelNode;
         TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
         if (selectedItem == null)
             return;
@@ -171,11 +171,15 @@ public class HierarchyController implements Initializable {
         if (!(item instanceof ILODSolidView))
             return;
 
-        ILODSolidView solid = (ILODSolidView)item;
-        BuildingView building = (BuildingView)solid.getParent();
+        ILODSolidView lodSolidView = (ILODSolidView)item;
         try {
-            new Obj2LodConverter(cityModel).convert(file.toString());
-            //CityGMLEditorApp.getSceneContent().setContent(root);
+            var convertedCityModel = new Obj2LodConverter(cityModelView, lodSolidView).convert(file.toString());
+            var node = new Group();
+            node.setId(content.getId());
+            node.getChildren().add(convertedCityModel);
+
+            CityGMLEditorApp.getSceneContent().setContent(node);
+            
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

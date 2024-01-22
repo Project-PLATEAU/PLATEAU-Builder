@@ -15,16 +15,21 @@ import java.util.UUID;
 import javax.vecmath.Point2f;
 
 import org.citygml4j.builder.copy.DeepCopyBuilder;
+import org.citygml4j.model.citygml.CityGMLClass;
 import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
 import org.citygml4j.model.citygml.appearance.TexCoordList;
 import org.citygml4j.model.citygml.appearance.TextureAssociation;
 import org.citygml4j.model.citygml.appearance.TextureCoordinates;
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
+import org.citygml4j.model.citygml.building.Building;
 import org.citygml4j.model.citygml.building.GroundSurface;
 import org.citygml4j.model.citygml.building.OuterFloorSurface;
 import org.citygml4j.model.citygml.building.RoofSurface;
 import org.citygml4j.model.citygml.building.WallSurface;
+import org.citygml4j.model.citygml.core.AbstractCityObject;
+import org.citygml4j.model.citygml.core.CityModel;
+import org.citygml4j.model.citygml.core.CityObjectMember;
 import org.citygml4j.model.gml.basicTypes.Code;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurfaceProperty;
@@ -40,13 +45,17 @@ import org.citygml4j.model.gml.geometry.primitives.Solid;
 import org.citygml4j.model.gml.geometry.primitives.SolidProperty;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
 import org.locationtech.jts.algorithm.Orientation;
+import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.citymodel.factory.CityModelFactory;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
-import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.geometry.GeoReference;
 import org.plateau.citygmleditor.importers.obj.ObjImporter;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
+import org.plateau.citygmleditor.validation.ValidationResultMessage;
+import org.plateau.citygmleditor.validation.ValidationResultMessageType;
 import org.plateau.citygmleditor.world.World;
 
 import javafx.scene.paint.Material;
@@ -62,17 +71,20 @@ public class Obj2LodConverter {
 
     private CityModelView _cityModelView;
 
+    private ILODSolidView _lodSolidView;
+
     private org.citygml4j.model.citygml.core.CityModel _cityModel;
 
     private GeoReference _geoReference;
 
-    public Obj2LodConverter(CityModelView cityModelView) {
+    public Obj2LodConverter(CityModelView cityModelView, ILODSolidView lodSolidView) {
         _cityModelView = cityModelView;
+        _lodSolidView = lodSolidView;
         _cityModel = (org.citygml4j.model.citygml.core.CityModel) cityModelView.getGmlObject();
         _geoReference = World.getActiveInstance().getGeoReference();
     }
 
-    public ILODSolidView convert(String fileUrl) throws Exception {
+    public CityModelView convert(String fileUrl) throws Exception {
         var reader = new ObjImporter(Paths.get(fileUrl).toUri().toURL().toString());
         var meshKeys = reader.getMeshes();
 
@@ -176,62 +188,21 @@ public class Obj2LodConverter {
                 toGmlPolygonList(jtsPolygon, groundTriangle, parameterizedTexture);
             }
 
-            // For:DEBUG
-            //dump(parameterizedTexture, _compositeSurface, _boundedBy);
+            // ParameterizedTextureを差し替える
+            // このメソッドの中でlod2Solidを参照しているため、lod2Solidより先に実行する必要がある
+            replaceParameterizedTexture(cityModel, parameterizedTexture);
 
-            for (var orgCityObjectMember : cityModel.getCityObjectMember()) {
-                var cityObject = orgCityObjectMember.getCityObject();
-                if (cityObject instanceof org.citygml4j.model.citygml.building.Building) {
-                    org.citygml4j.model.citygml.building.Building building = (org.citygml4j.model.citygml.building.Building)cityObject;
-
-                    // TODO: 差し替えるbuildingの特定
-                    if (!building.getId().equals("bldg_f6dddfcb-dfbd-4a3f-b256-993935806dc7")) continue;
-
-                    // lod2Solid
-                    Solid solid = new Solid();
-                    solid.setExterior(new SurfaceProperty(_compositeSurface));
-                    SolidProperty solidProperty = new SolidProperty(solid);
-                    building.setLod2Solid(solidProperty);
-
-                    // boundedBy
-                    var boundedBySurface = building.getBoundedBySurface();
-                    boundedBySurface.clear();
-                    for (var boundarySurface : _boundedBy) {
-                        boundedBySurface.add(new BoundarySurfaceProperty(boundarySurface));
-                    }
-                    break;
-                }
-            }
-
-            // gmlのParameterizedTextureを差し替える
-            var replaced = false;
-            for (var orgAppearanceMember : cityModel.getAppearanceMember()) {
-                if (replaced) break;
-                for (var orgSurfaceDataMember : orgAppearanceMember.getAppearance().getSurfaceDataMember()) {
-                    if (replaced) break;
-                    if (orgSurfaceDataMember.getSurfaceData() instanceof ParameterizedTexture) {
-                        ParameterizedTexture orgParameterizedTexture = (ParameterizedTexture)orgSurfaceDataMember.getSurfaceData();
-
-                        // TODO: 差し替えるテクスチャの特定
-                        if (orgParameterizedTexture.getImageURI().endsWith("hnap0665.jpg")) {
-                            orgSurfaceDataMember.setSurfaceData(parameterizedTexture);
-                            replaced = true;
-                        }
-                    }
-                }
-            }
+            // lod2Solidを差し替える
+            replaceLod2Solid(cityModel);
 
             // For:DEBUG
-            GmlExporter.export(Paths.get("E:\\Temp\\export\\gml\\udx\\bldg\\53392633_bldg_6697_2_op.gml").toString(), cityModel, _cityModelView.getSchemaHandler());
+            //GmlExporter.export(Paths.get("E:\\Temp\\export\\gml\\udx\\bldg\\53392633_bldg_6697_2_op.gml").toString(), cityModel, _cityModelView.getSchemaHandler());
         }
 
-        // Solid solid = new Solid();
-        // solid.setExterior(new SurfaceProperty(compositeSurface));
-        // LOD2SolidView lod2Solid = new LOD2SolidView(solid);
-        // lod2Solid.setBoundaries(boundedBy);
+        var cityModelFactory = new CityModelFactory();
+        var cityModelView = cityModelFactory.createCityModel(cityModel, _cityModelView.getGmlPath(), _cityModelView.getSchemaHandler());
 
-        // return lod2Solid;
-        return null;
+        return cityModelView;
     }
 
     private List<org.locationtech.jts.geom.Polygon> createPolygonList(List<TriangleModel> triangleList) {
@@ -281,7 +252,7 @@ public class Obj2LodConverter {
             // ポリゴンが1つなら判定不要
             var polygon = polygonList.get(0);
             for (var trianglePolygon : trianglePolygonList) {
-                AddUserData(polygon, trianglePolygon);
+                addUserData(polygon, trianglePolygon);
             }
         } else {
             // 元のTriangleが、分割したPolygonに内包されるかどうかを判定
@@ -290,7 +261,7 @@ public class Obj2LodConverter {
                 var found = false;
                 for (var polygon : polygonList) {
                     if (polygon.contains(trianglePolygon) || polygon.equalsExact(trianglePolygon)) {
-                        AddUserData(polygon, trianglePolygon);
+                        addUserData(polygon, trianglePolygon);
                         found = true;
                         break;
                     }
@@ -301,31 +272,11 @@ public class Obj2LodConverter {
                         var distance = polygon.distance(trianglePolygon);
                         //System.out.println(String.format("polygon distance:%f", distance));
                         if (distance <= 0.003) {
-                            AddUserData(polygon, trianglePolygon);
+                            addUserData(polygon, trianglePolygon);
                             found = true;
                             break;
                         }
                     }
-                }
-
-                // TODO:DEBUG
-                // check found
-                if (!found) {
-                    System.out.println("not found");
-                }
-                if (!found) {
-                    System.out.println("Triangle");
-                    dumpInsertSql(trianglePolygon);
-                    System.out.println("Polygon");
-                    for (var polygon : polygonList) {
-                        dumpInsertSql(polygon);
-                    }
-                    System.out.println("Base triangle");
-                    for (var i = 0; i < trianglePolygonList.size(); i++) {
-                        var polygon = trianglePolygonList.get(i);
-                        dumpInsertSql(polygon);
-                    }
-                    System.out.println();
                 }
             }
         }
@@ -546,7 +497,7 @@ public class Obj2LodConverter {
         return parameterizedTexture;
     }
 
-    private void AddUserData(org.locationtech.jts.geom.Polygon polygon, org.locationtech.jts.geom.Polygon trianglePolygon) {
+    private void addUserData(org.locationtech.jts.geom.Polygon polygon, org.locationtech.jts.geom.Polygon trianglePolygon) {
         if (polygon.getUserData() == null) {
             polygon.setUserData(new ArrayList<TriangleModel>());
         }
@@ -554,121 +505,63 @@ public class Obj2LodConverter {
         userDataList.add((TriangleModel)trianglePolygon.getUserData());
     }
 
-    private void dumpInsertSql(org.locationtech.jts.geom.Polygon polygon) {
-        var first = true;
-        System.out.print("INSERT INTO TEST (geom) VALUES (ST_GeomFromText('POLYGON Z((");
-        for (var c1 : polygon.getExteriorRing().getCoordinates()) {
-            if (first) {
-                first = false;
-            } else {
-                System.out.print(", ");
+    private void replaceParameterizedTexture(CityModel cityModel, ParameterizedTexture newParameterizedTexture) {
+        var lod2SolidView = (LOD2SolidView)_lodSolidView;
+        var solid = (Solid)lod2SolidView.getGmlObject();
+        var compositeSurface = (CompositeSurface)solid.getExterior().getObject();
+        for (var surfaceMember : compositeSurface.getSurfaceMember()) {
+            if (replaceParameterizedTexture(cityModel, newParameterizedTexture, surfaceMember.getHref())) {
+                return;
             }
-            System.out.print(String.format("%f %f %f", c1.x, c1.y, c1.z));
-        }
-        System.out.print(")");
-        for (var i = 0; i < polygon.getNumInteriorRing(); i++) {
-            System.out.print(", (");
-            first = true;
-            for (var c1 : polygon.getInteriorRingN(i).getCoordinates()) {
-                if (first) {
-                    first = false;
-                } else {
-                    System.out.print(", ");
-                }
-                System.out.print(String.format("%f %f %f", c1.x, c1.y, c1.z));
-            }
-            System.out.print(")");
-        }
-        System.out.println(")', 2451));");
-    }
-
-    private void dump(ParameterizedTexture parameterizedTexture, CompositeSurface compositeSurface, ArrayList<AbstractBoundarySurface> boundedBy) {
-        dump(parameterizedTexture);
-        dump(compositeSurface);
-        for (AbstractBoundarySurface boundarySurface : boundedBy) {
-            dump(boundarySurface);
         }
     }
 
-    private void dump (ParameterizedTexture parameterizedTexture) {
-        System.out.println("<app:surfaceDataMember>");
-        System.out.println("\t<app:ParameterizedTexture>");
-        System.out.println(String.format("\t\t<app:imageURI>%s</app:imageURI>", parameterizedTexture.getImageURI()));
-        System.out.println(String.format("\t\t<app:mimeType>%s</app:mimeType>", parameterizedTexture.getMimeType().getValue()));
-        for (TextureAssociation textureAssociation : parameterizedTexture.getTarget()) {
-            System.out.println(String.format("\t\t<app:target uri:href=\"%s\"/>", textureAssociation.getUri()));
-            var texCoordList = (TexCoordList)textureAssociation.getTextureParameterization();
-            System.out.println("\t\t\t<app:TexCoordList>");
-            for (var textureCoordinates : texCoordList.getTextureCoordinates()) {
-                System.out.print(String.format("\t\t\t\t\t<app:textureCoordinates ring=\"%s\"/>", textureCoordinates.getRing()));
-                var first = true;
-                for (var c : textureCoordinates.getValue()) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        System.out.print(" ");
+    private boolean replaceParameterizedTexture(CityModel cityModel, ParameterizedTexture newParameterizedTexture, String targetUri) {
+        for (var appearanceMember : cityModel.getAppearanceMember()) {
+            for (var surfaceDataMember : appearanceMember.getAppearance().getSurfaceDataMember()) {
+                if (surfaceDataMember.getSurfaceData() instanceof ParameterizedTexture) {
+                    // LOD2SolidのCompositeSurfaceのhrefと同じURIを持つParameterizedTextureを特定する
+                    ParameterizedTexture original = (ParameterizedTexture)surfaceDataMember.getSurfaceData();
+                    for (var originalTarget : original.getTarget()) {
+                        if (originalTarget.getUri().equals(targetUri)) {
+                            surfaceDataMember.setSurfaceData(newParameterizedTexture);
+                            return true;
+                        }
                     }
-                    System.out.print(String.format("%f", c));
                 }
-                System.out.println("</app:textureCoordinates>");
             }
-            System.out.println("\t\t\t</app:TexCoordList>");
-            System.out.println("\t\t</app:target>");
         }
-        System.out.println("\t</app:ParameterizedTexture>");
-        System.out.println("</app:surfaceDataMember>");
+
+        return false;
     }
 
-    private void dump(CompositeSurface compositeSurface) {
-        System.out.println("<bldg:lod2Solid>");
-        System.out.println("\t<bldg:Solid>");
-        System.out.println("\t\t<bldg:exterior>");
-        System.out.println("\t\t\t<bldg:CompositeSurface>");
-        for (SurfaceProperty surfaceProperty : compositeSurface.getSurfaceMember()) {
-            System.out.println(String.format("\t\t\t\t<gml:surfaceMember xlink:href=\"%s\"/>", surfaceProperty.getHref()));
-        }
-        System.out.println("\t\t\t</bldg:CompositeSurface>");
-        System.out.println("\t\t</bldg:exterior>");
-        System.out.println("\t</bldg:Solid>");
-        System.out.println("</bldg:lod2Solid>");
-    }
+    private void replaceLod2Solid(CityModel cityModel) {
+        // lod2Solid
+        BuildingView buildingView = (BuildingView)_lodSolidView.getParent();
+        Building original = (Building)buildingView.getGMLObject();
 
-    private void dump(AbstractBoundarySurface boundarySurface) {
-        System.out.println("<bldg:boundedBy>");
-        System.out.println(String.format("\t<bldg:%s gml:id=\"%s\">", boundarySurface.getClass().getSimpleName(), boundarySurface.getId()));
-        System.out.println("\t\t<bldg:lod2MultiSurface>");
-        System.out.println("\t\t\t<gml:MultiSurface>");
-        var surfaceMembers = boundarySurface.getLod2MultiSurface().getMultiSurface().getSurfaceMember();
-        for (SurfaceProperty surfaceMember : surfaceMembers) {
-            System.out.println("\t\t\t\t<gml:surfaceMember>");
-            var polygon = (Polygon)surfaceMember.getSurface();
-            dump(polygon);
-            System.out.println("\t\t\t\t</gml:surfaceMember>");
-        }
-        System.out.println("\t\t\t</gml:surfaceMember>");
-        System.out.println("\t\t</bldg:lod2MultiSurface>");
-        System.out.println(String.format("\t</bldg:%s>", boundarySurface.getClass().getSimpleName()));
-        System.out.println("</bldg:boundedBy>");
-    }
+        Building building = null;
+        for (CityObjectMember cityObjectMember : cityModel.getCityObjectMember()) {
+            AbstractCityObject cityObject = cityObjectMember.getCityObject();
+            if (cityObject.getCityGMLClass() != CityGMLClass.BUILDING) continue;
 
-    private void dump(Polygon polygon) {
-        System.out.println(String.format("\t\t\t\t\t<gml:Polygon gml:id=\"%s\">", polygon.getId()));
-        System.out.println("\t\t\t\t\t\t<gml:exterior>");
-        var exterior = (LinearRing)polygon.getExterior().getRing();
-        System.out.println(String.format("\t\t\t\t\t\t\t<gml:LinearRing gml:id=\"%s\">", exterior.getId()));
-        System.out.print("\t\t\t\t\t\t\t\t<gml:posList>");
-        var first = true;
-        for (var c : exterior.getCoord()) {
-            if (first) {
-                first = false;
-            } else {
-                System.out.print(" ");
+            var b = (Building)cityObject;
+            if (original.getId().equals(b.getId())) {
+                building = b;
+                break;
             }
-            System.out.print(String.format("%f %f %f", c.getX(), c.getY(), c.getZ()));
         }
-        System.out.println("</gml:posList>");
-        System.out.println("\t\t\t\t\t\t\t</gml:LinearRing>");
-        System.out.println("\t\t\t\t\t\t</gml:exterior>");
-        System.out.println("\t\t\t\t\t</gml:Polygon>");
+
+        Solid solid = new Solid();
+        solid.setExterior(new SurfaceProperty(_compositeSurface));
+        SolidProperty solidProperty = new SolidProperty(solid);
+        building.setLod2Solid(solidProperty);
+
+        // boundedBy
+        var boundedBySurface = building.getBoundedBySurface();
+        boundedBySurface.clear();
+        for (var boundarySurface : _boundedBy) {
+            boundedBySurface.add(new BoundarySurfaceProperty(boundarySurface));
+        }
     }
 }
