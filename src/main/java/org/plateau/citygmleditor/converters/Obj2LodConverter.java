@@ -54,8 +54,6 @@ import org.plateau.citygmleditor.converters.model.TriangleModel;
 import org.plateau.citygmleditor.geometry.GeoReference;
 import org.plateau.citygmleditor.importers.obj.ObjImporter;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
-import org.plateau.citygmleditor.validation.ValidationResultMessage;
-import org.plateau.citygmleditor.validation.ValidationResultMessageType;
 import org.plateau.citygmleditor.world.World;
 
 import javafx.scene.paint.Material;
