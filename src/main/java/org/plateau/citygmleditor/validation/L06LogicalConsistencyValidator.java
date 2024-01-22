@@ -77,7 +77,7 @@ public class L06LogicalConsistencyValidator implements IValidator {
             } catch (InvalidPosStringException e) {
                 Node parentNode = XmlUtil.findNearestParentByAttribute(node, TagName.GML_ID);
                 messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                        MessageFormat.format(MessageError.ERR_L06_001,
+                        MessageFormat.format(MessageError.ERR_L06_002,
                                 parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
                                 node.getFirstChild().getNodeValue())));
             }

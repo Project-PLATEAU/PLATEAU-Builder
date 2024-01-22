@@ -56,10 +56,11 @@ public class L07LogicalConsistencyValidator implements IValidator {
         }
 
         public String toString() {
-            String linearStringStr = this.lineStrings == null ? "" : "<gml:LineString gml:id=\"" + this.lineStrings + "\">";
-            String linearRingStr = this.linearRings == null ? "" : "<gml:LinearRing gml:id=\"" + this.linearRings + "\">";
-            return "地物\"" + this.ID + "\":\n" +
-                    "近接閾値（0.01m）未満の頂点が連続するインスタンスが存在します\n" + linearStringStr + "\n" + linearRingStr;
+            String errorMessage = MessageFormat.format(MessageError.ERR_L07_002_1, ID);
+            errorMessage = errorMessage + this.lineStrings == null ? "" : MessageFormat.format(MessageError.ERR_L07_002_2, this.lineStrings);
+            errorMessage = errorMessage + this.linearRings == null ? "" : MessageFormat.format(MessageError.ERR_L07_002_2, this.lineStrings);
+
+            return errorMessage;
         }
     }
 

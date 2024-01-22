@@ -89,9 +89,10 @@ public class ValidationController implements Initializable {
             }
         }
 
+        String resultMessage = String.format("品質検査が完了しました。（エラー数:%d, 警告数:%d）", errorCount, warningCount);
+        errorMessages.add(resultMessage);
         showMessage(new ValidationResultMessage(
-                ValidationResultMessageType.Info,
-                String.format("品質検査が完了しました。（エラー数:%d, 警告数:%d）", errorCount, warningCount)
+                ValidationResultMessageType.Info, resultMessage
         ));
 
         XmlUtil.writeErrorMessageInFile(errorMessages);
