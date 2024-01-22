@@ -19,7 +19,7 @@ import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
 import org.citygml4j.model.citygml.building.Building;
 import org.citygml4j.model.citygml.building.GroundSurface;
-import org.citygml4j.model.citygml.building.OuterFloorSurface;
+import org.citygml4j.model.citygml.building.OuterCeilingSurface;
 import org.citygml4j.model.citygml.building.RoofSurface;
 import org.citygml4j.model.citygml.building.WallSurface;
 import org.citygml4j.model.citygml.core.AbstractCityObject;
@@ -491,7 +491,7 @@ public abstract class AbstractLodConverter {
                 boundarySurface = new GroundSurface();
                 boundarySurface.setId(String.format("gnd_%s", polygon.getId()));
             } else {
-                boundarySurface = new OuterFloorSurface();
+                boundarySurface = new OuterCeilingSurface();
                 boundarySurface.setId(String.format("outerfloor_%s", polygon.getId()));
             }
         } else if (angle >= 90 - threshold && angle <= 90 + threshold) {
