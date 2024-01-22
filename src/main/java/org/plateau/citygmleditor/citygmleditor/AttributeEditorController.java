@@ -126,7 +126,11 @@ public class AttributeEditorController implements Initializable {
                 @Override
                 protected void updateItem(AttributeItem item, boolean empty) {
                     super.updateItem(item, empty);
-                    if (item != null && !empty) {
+                    // 項目が空、または存在しない場合、背景色なし。
+                    if (empty || item == null) {
+                        setStyle("");
+                    } else {
+                        // 項目が存在する場合のみ、チェックを行う。
                         TreeItem<AttributeItem> parentItem = getTreeItem().getParent();
                         String parentKey = parentItem != null ? parentItem.getValue().keyProperty().get() : null;
                         if (!isDeletable(item.keyProperty().get(), parentKey)) {
@@ -529,6 +533,17 @@ public class AttributeEditorController implements Initializable {
             String selectedAttributeKeyName) {
         Stage pStage = new Stage();
         ArrayList<ArrayList<String>> attributeList = getUroList(selectedAttributeKeyName);
+        if (attributeList.size() == 0) {
+            // アラートを作成
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("追加エラー");
+            alert.setHeaderText(null);
+            alert.setContentText("追加できる要素がありません。");
+
+            // アラートを表示
+            alert.showAndWait();
+            return null;
+        }
         // ListView
         ListView<String> listView = new ListView<>();
 
@@ -658,35 +673,36 @@ public class AttributeEditorController implements Initializable {
                     }
                 }
             }
+            if (!targetElement.getTagName().equals("uro")) {
+                // 基準となる要素の子要素を取得
+                NodeList targetNodeList = targetElement.getElementsByTagName("xs:element");
 
-            // 基準となる要素の子要素を取得
-            NodeList targetNodeList = targetElement.getElementsByTagName("xs:element");
-
-            for (int j = 0; j < targetNodeList.getLength(); j++) {
-                Node node = targetNodeList.item(j);
-                Element element = (Element) node;
-                int count = 0;
-                for (String itemName : treeViewChildItemList) {
-                    if (itemName.equals("uro:" + element.getAttribute("name"))) {
-                        count++;
+                for (int j = 0; j < targetNodeList.getLength(); j++) {
+                    Node node = targetNodeList.item(j);
+                    Element element = (Element) node;
+                    int count = 0;
+                    for (String itemName : treeViewChildItemList) {
+                        if (itemName.equals("uro:" + element.getAttribute("name"))) {
+                            count++;
+                        }
                     }
-                }
-                if (!targetName.toLowerCase().matches(element.getAttribute("name").toLowerCase())) {
-                    String maxOccurs = element.getAttribute("maxOccurs");
-                    int max;
-                    if (maxOccurs.equals("unbounded")) {
-                        max = Integer.MAX_VALUE;
-                    } else if (maxOccurs == "") {
-                        max = 1;
-                    } else {
-                        max = Integer.parseInt(maxOccurs);
-                    }
-                    if (count < max) {
-                        ArrayList<String> attributeSet = new ArrayList<>();
-                        attributeSet.add(element.getAttribute("name"));
-                        attributeSet.add(element.getAttribute("type"));
-                        attributeSet.add(element.getAttribute("minOccurs"));
-                        attributeList.add(attributeSet);
+                    if (!targetName.toLowerCase().matches(element.getAttribute("name").toLowerCase())) {
+                        String maxOccurs = element.getAttribute("maxOccurs");
+                        int max;
+                        if (maxOccurs.equals("unbounded")) {
+                            max = Integer.MAX_VALUE;
+                        } else if (maxOccurs == "") {
+                            max = 1;
+                        } else {
+                            max = Integer.parseInt(maxOccurs);
+                        }
+                        if (count < max) {
+                            ArrayList<String> attributeSet = new ArrayList<>();
+                            attributeSet.add(element.getAttribute("name"));
+                            attributeSet.add(element.getAttribute("type"));
+                            attributeSet.add(element.getAttribute("minOccurs"));
+                            attributeList.add(attributeSet);
+                        }
                     }
                 }
             }
