@@ -46,7 +46,7 @@ public interface MessageError {
 
     String ERR_L13_001 = "L13: Building gml:id=\"({0})\" and ({1}) invalid";
     String ERR_L13_002 = "L13: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
-    String ERR_L13_003 = "地物\"({0})\":\n" +
+    String ERR_L13_003 = "L13: 地物\"({0})\":\n" +
             "<gml:Polygon gml:id=\"polygon_12345678\">内周が外周と交差している。\n" +
             "<gml:Polygon gml:id=\"polygon_12345678\">内周と外周が接し、gml:Polygonが2つ以上に分割されている。\n" +
             "<gml:Polygon gml:id=\"polygon_12345678\">内周同士が重なる、または包含関係にある。";
@@ -64,7 +64,7 @@ public interface MessageError {
     String ERR_L18_003_3 = "\n<gml:CompositeSurface gml:id=\"[({0})]\">が接触していない。";
     String ERR_L18_003_4 = "L18: \nその他のエラー。";
 
-    String ERR_LBLDG_01_001 = "地物\"DENW43AL0000OBlN\":\n" +
+    String ERR_LBLDG_01_001 = "L_BLDG_01: 地物\"DENW43AL0000OBlN\":\n" +
             "次の重複しているgml:Solidが存在します：\n" +
             "<gml:Solid gml:id=\"[gml_id]\">\n" +
             "<gml:Solid gml:id=\"[gml_id]\">";

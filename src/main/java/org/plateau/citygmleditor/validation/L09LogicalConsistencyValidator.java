@@ -54,7 +54,9 @@ public class L09LogicalConsistencyValidator implements IValidator {
       String gmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
       String errorMessage = MessageFormat.format(MessageError.ERR_L09_002_1, gmlId);
       for (Node linearRing : linearRingNodesWithError) {
-        errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_L09_002_2, linearRing.getFirstChild().getNodeValue());
+        Node linearRingNode = linearRing.getAttributes().getNamedItem(TagName.GML_ID);
+        String linearRingId = linearRingNode != null ? linearRingNode.getTextContent() : "";
+        errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_L09_002_2, linearRingId);
       }
 
       messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage));
