@@ -67,12 +67,11 @@ public class L11LogicalConsistencyValidator implements IValidator {
         }
 
         public String toString(String err1, String err2) {
-            String messageError = MessageFormat.format(err1, buildingID);
+            StringBuilder messageError = new StringBuilder(MessageFormat.format(err1, buildingID));
             for (LODInvalid lodInvalid : lodInvalids) {
-                messageError = messageError +
-                MessageFormat.format(err2, lodInvalid.polygon);
+                messageError.append(MessageFormat.format(err2, lodInvalid.polygon));
             }
-            return  messageError;
+            return messageError.toString();
         }
     }
 
