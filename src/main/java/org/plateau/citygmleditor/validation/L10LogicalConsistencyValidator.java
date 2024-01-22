@@ -59,7 +59,9 @@ public class L10LogicalConsistencyValidator implements IValidator {
 
       String polygonErrorStr = "";
       for (Node polygon : polygonErrors) {
-        polygonErrorStr = polygonErrorStr + MessageFormat.format(MessageError.ERR_L10_002_1, polygon.getAttributes().getNamedItem(TagName.GML_ID).getTextContent());
+        var itemGmlId = polygon.getAttributes().getNamedItem(TagName.GML_ID);
+        String gmiId = itemGmlId != null ? itemGmlId.getTextContent() : "";
+        polygonErrorStr = polygonErrorStr + MessageFormat.format(MessageError.ERR_L10_002_1, gmiId);
       }
 
       messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
