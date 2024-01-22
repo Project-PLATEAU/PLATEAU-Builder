@@ -10,7 +10,7 @@ public interface MessageError {
     String ERR_L04_002_1 = "L04: 次の地物属性の値が、コード値と合致しない箇所";
     String ERR_L04_002_2 = "\n<gml:CodeType gml:id=\"[({0})]\">";
 
-    String ERR_C04_BLDG_1_001 = "C04: 地物\"({0})\":\n" +
+    String ERR_C04_BLDG_1_001 = "C04: 地物\"{0}\":\n" +
             "次のuro:buildingIDが重複しています：";
     String ERR_C04_BLDG_1_002 = "\n[{(0)}]";
 
