@@ -8,8 +8,11 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.input.KeyCode;
+import javafx.scene.shape.MeshView;
 import javafx.stage.FileChooser;
+import org.plateau.citygmleditor.citymodel.BuildingInstallationView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
 import org.plateau.citygmleditor.world.*;
@@ -144,6 +147,10 @@ public class HierarchyController implements Initializable {
             super(node);
             if (node instanceof Parent) {
                 for (Node n : ((Parent) node).getChildrenUnmodifiable()) {
+                    if (n instanceof MeshView) {
+                        if (!(n instanceof LOD1SolidView) && !(n instanceof BuildingInstallationView))
+                            continue;
+                    }
                     getChildren().add(new HierarchyController.TreeItemImpl(n));
                 }
             }
