@@ -86,7 +86,6 @@ import javafx.scene.shape.TriangleMesh;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.plateau.citygmleditor.importers.Importer3D;
-import org.plateau.citygmleditor.importers.gltf.GltfImporter;
 
 import org.plateau.citygmleditor.importers.Importer3D;
 import java.io.File;
