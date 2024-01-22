@@ -58,8 +58,9 @@ public class L06LogicalConsistencyValidator implements IValidator {
             try {
                 List<Point3D> point3Ds = ThreeDUtil.createListPoint(values.toArray(new String[0]));
 
-                Node nodeParentBuilding = XmlUtil.findNearestParentByAttribute(node, TagName.GML_ID);
-                String id = nodeParentBuilding.getAttributes().getNamedItem("gml:id").getTextContent();
+                Node nodeParentBuilding = XmlUtil.findNearestParentByName(node, TagName.BLDG_BUILDING);
+                Node gmlIdNode = nodeParentBuilding.getAttributes().getNamedItem(TagName.GML_ID);
+                String id = gmlIdNode != null ? gmlIdNode.getTextContent() : "";
 
                 // Check the point within spatial extent of the model city
                 for (Point3D point3D : point3Ds) {
