@@ -57,8 +57,17 @@ public class L07LogicalConsistencyValidator implements IValidator {
 
         public String toString() {
             String errorMessage = MessageFormat.format(MessageError.ERR_L07_002_1, ID);
-            errorMessage = errorMessage + this.lineStrings == null ? "" : MessageFormat.format(MessageError.ERR_L07_002_2, this.lineStrings);
-            errorMessage = errorMessage + this.linearRings == null ? "" : MessageFormat.format(MessageError.ERR_L07_002_2, this.lineStrings);
+            if (this.lineStrings != null) {
+                for (String lineString : lineStrings) {
+                    errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_L07_002_2, lineString);
+                }
+            }
+
+            if (this.linearRings != null) {
+                for (String linearRing : linearRings) {
+                    errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_L07_002_2, linearRing);
+                }
+            }
 
             return errorMessage;
         }

@@ -53,7 +53,9 @@ public class L13LogicalConsistencyValidator implements IValidator {
 
       var nodeErrorDetail = errorPolygonSurfacePath.stream()
           .map(node -> {
-            var gmlId = node.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
+            Node gmlIdNode = node.getAttributes().getNamedItem(TagName.GML_ID);
+
+            var gmlId = gmlIdNode != null ? gmlIdNode.getTextContent() : "";
             return String.format("%s gml:id=\"%s\"", node.getNodeName(), gmlId);
           }).collect(Collectors.joining(", "));
 
