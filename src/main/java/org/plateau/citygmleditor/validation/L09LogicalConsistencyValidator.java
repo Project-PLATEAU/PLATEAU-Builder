@@ -8,6 +8,7 @@ import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.SegmentRelationship;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.CityGmlUtil;
+import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.ThreeDUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
@@ -30,7 +31,7 @@ public class L09LogicalConsistencyValidator implements IValidator {
   private final static int SELF_CONTACT_ERROR = 2;
   private final static int CLOSE_ERROR = 3;
   private final static int DUPLICATE_ERROR = 4;
-  private final static int CATCH_EXCEPTION = 5;
+  private final static int INVALID_FORMAT_EXCEPTION = 5;
 
   public static Logger logger = Logger.getLogger(L09LogicalConsistencyValidator.class.getName());
 
@@ -79,9 +80,8 @@ public class L09LogicalConsistencyValidator implements IValidator {
       lineSegments = getLineSegments(linearRingNode);
     } catch (InvalidPosStringException e) {
       // If there is any error when parsing posString, update error list of building
-      Set<LinearRingError> linearRingErrors = new HashSet<>();
-      linearRingErrors.add(new LinearRingError(CATCH_EXCEPTION, linearRingNode));
-      buildingWithErrorLinearRing.put(buildingNode, linearRingErrors);
+      CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, new LinearRingError(
+          INVALID_FORMAT_EXCEPTION, linearRingNode));
       return;
     }
 
@@ -115,9 +115,7 @@ public class L09LogicalConsistencyValidator implements IValidator {
           if (errorCode != NO_ERROR) {
             logger.severe(String.format("L09 Line have (%s and %s) is not valid", first, second));
             // Update error list of building
-            Set<LinearRingError> linearRingErrors = new HashSet<>();
-            linearRingErrors.add(new LinearRingError(errorCode, linearRingNode));
-            buildingWithErrorLinearRing.put(buildingNode, linearRingErrors);
+            CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, new LinearRingError(errorCode, linearRingNode));
           }
         }
       }
@@ -146,15 +144,12 @@ public class L09LogicalConsistencyValidator implements IValidator {
         logger.severe(String.format("L09 polygon have duplicate point (%s)", points));
       }
       if (!isClosed || isDuplicated) {
-        Set<LinearRingError> linearRingErrors = new HashSet<>();
-        linearRingErrors.add(new LinearRingError(errorCode, linearRingNode));
-        buildingWithErrorLinearRing.put(buildingNode, linearRingErrors);
+        CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, new LinearRingError(errorCode, linearRingNode));
       }
     } catch (InvalidPosStringException e) {
       // If there is any error when parsing posString, update error list of building
-      Set<LinearRingError> linearRingErrors = new HashSet<>();
-      linearRingErrors.add(new LinearRingError(CATCH_EXCEPTION, linearRingNode));
-      buildingWithErrorLinearRing.put(buildingNode, linearRingErrors);
+      CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, new LinearRingError(
+          INVALID_FORMAT_EXCEPTION, linearRingNode));
     }
   }
 
@@ -187,15 +182,15 @@ public class L09LogicalConsistencyValidator implements IValidator {
   private String setErrorMessage(int errorCode, String linearRingId) {
     switch (errorCode) {
       case SELF_INTERSECT_ERROR:
-        return MessageFormat.format(MessageError.ERR_L09_002_2, linearRingId);
+        return MessageFormat.format(MessageError.ERR_L09_SELF_INTERSECT, linearRingId);
       case SELF_CONTACT_ERROR:
-        return MessageFormat.format(MessageError.ERR_L09_002_3, linearRingId);
+        return MessageFormat.format(MessageError.ERR_L09_SELF_CONTACT, linearRingId);
       case CLOSE_ERROR:
-        return MessageFormat.format(MessageError.ERR_L09_002_4, linearRingId);
+        return MessageFormat.format(MessageError.ERR_L09_NON_CLOSED, linearRingId);
       case DUPLICATE_ERROR:
-        return MessageFormat.format(MessageError.ERR_L09_002_5, linearRingId);
-      case CATCH_EXCEPTION:
-        return "";
+        return MessageFormat.format(MessageError.ERR_L09_DUPLICATE_POINT, linearRingId);
+      case INVALID_FORMAT_EXCEPTION:
+        return MessageFormat.format(MessageError.ERR_L09_INVALID_FORMAT, linearRingId);
     }
     return "";
   }

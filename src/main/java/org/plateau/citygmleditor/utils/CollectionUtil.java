@@ -18,8 +18,8 @@ public class CollectionUtil {
      * @param parentNode parent node for key
      * @param errorChildNode error child node for value
      */
-    public static void updateErrorMap(Map<Node, Set<Node>> errorMap, Node parentNode, Node errorChildNode) {
-        Set<Node> errorList = errorMap.getOrDefault(parentNode, new HashSet<>());
+    public static <T> void updateErrorMap(Map<Node, Set<T>> errorMap, Node parentNode, T errorChildNode) {
+        Set<T> errorList = errorMap.getOrDefault(parentNode, new HashSet<>());
         errorList.add(errorChildNode);
         errorMap.put(parentNode, errorList);
     }
