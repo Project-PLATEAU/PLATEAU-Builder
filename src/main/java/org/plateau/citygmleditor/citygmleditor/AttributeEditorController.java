@@ -73,6 +73,10 @@ public class AttributeEditorController implements Initializable {
     private Label featureID;
     @FXML
     private Label featureType;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ListView<String> attributeListView;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -196,8 +200,7 @@ public class AttributeEditorController implements Initializable {
         keyColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("key"));
         valueColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
 
-        valueColumn.setCellFactory(
-                TextFieldTreeTableCell.forTreeTableColumn());
+        valueColumn.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
 
         valueColumn.setOnEditCommit(event -> {
             TreeItem<AttributeItem> editedItem = event.getRowValue();
@@ -210,7 +213,10 @@ public class AttributeEditorController implements Initializable {
             // 編集したアイテムが持つType情報を取得
             String type = getType(attributeItemName, parentAttributeItemName);
             // バリデーションチェック
-            if (AttributeValidator.checkValue(newValue, type)) {
+            if (type == null) {
+                attributeItem.valueProperty().set(event.getNewValue());
+                System.out.println("event.getNewValue():" + event.getNewValue());
+            } else if (AttributeValidator.checkValue(newValue, type)) {
                 attributeItem.valueProperty().set(event.getNewValue());
             } else {
                 // アラートを作成
@@ -223,7 +229,6 @@ public class AttributeEditorController implements Initializable {
                 attributeItem.valueProperty().set(event.getOldValue());
                 attributeTreeTable.refresh();
             }
-
         });
 
     }
@@ -445,7 +450,9 @@ public class AttributeEditorController implements Initializable {
     private void addAttribute(ChildList<ADEComponent> childList, String parentAttributeName,
             String addAttributeName, String type, ArrayList<ArrayList<String>> attributeList) {
         String namespaceURI = uroAttributeDocument.getDocumentElement().getAttribute("xmlns:uro");
+
         if (parentAttributeName == null) {
+            // ルート要素を追加する際の処理
             var adeComponent = childList.get(0);
             var adeElement = (ADEGenericElement) adeComponent;
             Node node = adeElement.getContent();
@@ -454,6 +461,7 @@ public class AttributeEditorController implements Initializable {
 
             if (addAttributeName != null) {
                 Element newElement = doc.createElementNS(namespaceURI, addAttributeName);
+                newElement.setTextContent("NULL");
                 ADEGenericElement newAdelement = new ADEGenericElement(newElement);
                 childList.add(childList.size(), (ADEComponent) newAdelement);
 
@@ -471,6 +479,7 @@ public class AttributeEditorController implements Initializable {
                 }
             }
         } else {
+            // 第二階層以下を追加する際の処理
             for (int i = 0; i < childList.size(); i++) {
                 var adeComponent = childList.get(i);
                 var adeElement = (ADEGenericElement) adeComponent;
@@ -545,17 +554,17 @@ public class AttributeEditorController implements Initializable {
             return null;
         }
         // ListView
-        ListView<String> listView = new ListView<>();
+        attributeListView = new ListView<>();
 
         for (ArrayList<String> attribute : attributeList) {
-            listView.getItems().add(attribute.get(0));
+            attributeListView.getItems().add(attribute.get(0));
         }
 
         // メニュー内の要素をダブルクリックで要素を追加
-        listView.setOnMouseClicked((MouseEvent event) -> {
+        attributeListView.setOnMouseClicked((MouseEvent event) -> {
             if (event.getClickCount() == 2) {
-                String selectedItem = listView.getSelectionModel().getSelectedItem();
-                int selectedIndex = listView.getSelectionModel().getSelectedIndex();
+                String selectedItem = attributeListView.getSelectionModel().getSelectedItem();
+                int selectedIndex = attributeListView.getSelectionModel().getSelectedIndex();
                 // 要素を追加
                 addAttribute(childList, selectedAttributeKeyName, "uro:" + selectedItem,
                         attributeList.get(selectedIndex).get(1), attributeList);
@@ -564,20 +573,20 @@ public class AttributeEditorController implements Initializable {
         });
 
         // 検索欄
-        TextField searchField = new TextField();
+        searchField = new TextField();
         searchField.setPromptText("Search");
 
         // 検索用リスナーを追加
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            listView.getItems().clear();
+            attributeListView.getItems().clear();
             if (newValue == null || newValue.isEmpty()) {
                 for (var attribute : attributeList) {
-                    listView.getItems().add(attribute.get(0));
+                    attributeListView.getItems().add(attribute.get(0));
                 }
             } else {
                 for (var attribute : attributeList) {
                     if (attribute.get(0).toLowerCase().startsWith(newValue.toLowerCase())) {
-                        listView.getItems().add(attribute.get(0));
+                        attributeListView.getItems().add(attribute.get(0));
                     }
                 }
             }
@@ -588,7 +597,7 @@ public class AttributeEditorController implements Initializable {
         vbRoot.setAlignment(Pos.CENTER);
         vbRoot.setSpacing(20);
         vbRoot.getChildren().addAll(searchField);
-        vbRoot.getChildren().addAll(listView);
+        vbRoot.getChildren().addAll(attributeListView);
 
         pStage.setTitle("要素の追加");
         pStage.setWidth(500);
