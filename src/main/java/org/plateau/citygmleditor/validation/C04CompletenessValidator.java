@@ -33,7 +33,7 @@ public class C04CompletenessValidator implements IValidator {
         }
 
         public String toString() {
-            String uro = uroBuildingIDs.stream().map(u -> "[" + u + "]").collect(Collectors.joining(" "));
+            String uro = uroBuildingIDs.stream().map(u -> "[" + u + "]").collect(Collectors.joining("\n"));
             return String.format(MessageError.ERR_C04_BLDG_1_001, buildingID, uro);
         }
     }
