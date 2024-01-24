@@ -17,9 +17,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 
 public class L07LogicalConsistencyValidator implements IValidator {
@@ -28,48 +30,35 @@ public class L07LogicalConsistencyValidator implements IValidator {
 
     static class BuildingInvalid {
         private String ID;
-        private List<String> linearRings;
-        private List<String> lineStrings;
-
-        public String getID() {
-            return ID;
-        }
+        private Map<String, List<String>> linearRings;
+        private Map<String, List<String>> lineStrings;
 
         public void setID(String ID) {
             this.ID = ID;
         }
 
-        public List<String> getLinearRings() {
-            return linearRings;
-        }
-
-        public void setLinearRings(List<String> linearRings) {
+        public void setLinearRings(Map<String, List<String>> linearRings) {
             this.linearRings = linearRings;
         }
 
-        public List<String> getLineStrings() {
-            return lineStrings;
-        }
-
-        public void setLineStrings(List<String> lineStrings) {
+        public void setLineStrings(Map<String, List<String>> lineStrings) {
             this.lineStrings = lineStrings;
         }
 
         public String toString() {
-            String errorMessage = MessageFormat.format(MessageError.ERR_L07_002_1, ID);
-            if (this.lineStrings != null) {
-                for (String lineString : lineStrings) {
-                    errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_L07_002_2, lineString);
-                }
-            }
-
-            if (this.linearRings != null) {
-                for (String linearRing : linearRings) {
-                    errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_L07_002_2, linearRing);
-                }
-            }
-
-            return errorMessage;
+            String errorFormatLineString = this.lineStrings.get("FORMAT").stream().map(f -> "<gml:LineString gml:id=\"" + f + "\">")
+                    .collect(Collectors.joining("\n"));
+            String errorLogicalLineString = this.lineStrings.get("LOGICAL").stream().map(l -> "<gml:LineString gml:id=\"" + l + "\">")
+                    .collect(Collectors.joining("\n"));
+            String errorFormatLinearRing = this.linearRings.get("FORMAT").stream().map(f -> "<gml:LineString gml:id=\"" + f + "\">")
+                    .collect(Collectors.joining("\n"));
+            String errorLogicalLinearRing = this.linearRings.get("LOGICAL").stream().map(l -> "<gml:LineString gml:id=\"" + l + "\">")
+                    .collect(Collectors.joining("\n"));
+            String errorFormat = (errorFormatLineString.isBlank() ? "" : ("\n" + errorFormatLineString) + "\n")
+                    + (errorFormatLinearRing.isBlank() ? "" : errorFormatLinearRing + "\n");
+            String errorLogical = (errorLogicalLineString.isBlank() ? "" : ("\n" + errorLogicalLineString) + "\n")
+                    + (errorLogicalLinearRing.isBlank() ? "" : errorLogicalLinearRing + "\n");
+            return MessageFormat.format(MessageError.ERR_L07_002_1, ID, errorFormat, errorLogical);
         }
     }
 
@@ -83,21 +72,19 @@ public class L07LogicalConsistencyValidator implements IValidator {
 
             // get invalid linearRing tags
             NodeList tagLinearRings = building.getElementsByTagName(TagName.GML_LINEARRING);
-            List<String> linearRingIDInvalids = this.getListTagIDInvalid(tagLinearRings);
+            Map<String, List<String>> linearRingIDInvalids = this.getListTagIDInvalid(tagLinearRings);
             // get invalid lineString tags
             NodeList tagLineStrings = building.getElementsByTagName(TagName.GML_LINESTRING);
-            List<String> lineStringIDvalids = this.getListTagIDInvalid(tagLineStrings);
+            Map<String, List<String>> lineStringIDvalids = this.getListTagIDInvalid(tagLineStrings);
 
-            if (CollectionUtil.isEmpty(linearRingIDInvalids) && CollectionUtil.isEmpty(lineStringIDvalids))
+            if (linearRingIDInvalids.get("FORMAT").isEmpty() && linearRingIDInvalids.get("LOGICAL").isEmpty()
+                    && lineStringIDvalids.get("FORMAT").isEmpty() && lineStringIDvalids.get("LOGICAL").isEmpty())
                 continue;
+
             BuildingInvalid buildingInvalid = new BuildingInvalid();
             buildingInvalid.setID(buildingID);
-            if (!CollectionUtil.isEmpty(linearRingIDInvalids)) {
-                buildingInvalid.setLinearRings(linearRingIDInvalids);
-            }
-            if (!CollectionUtil.isEmpty(lineStringIDvalids)) {
-                buildingInvalid.setLineStrings(lineStringIDvalids);
-            }
+            buildingInvalid.setLinearRings(linearRingIDInvalids);
+            buildingInvalid.setLineStrings(lineStringIDvalids);
             buildingInvalids.add(buildingInvalid);
         }
 
@@ -109,41 +96,38 @@ public class L07LogicalConsistencyValidator implements IValidator {
         return messages;
     }
 
-    private List<String> getListTagIDInvalid(NodeList tags) {
+    private Map<String, List<String>> getListTagIDInvalid(NodeList tags) {
         if (tags == null) return null;
+        Map<String, List<String>> invalidTag = new HashMap<>();
 
-        List<String> tagInvalids = new ArrayList<>();
+        List<String> errorFormat = new ArrayList<>();
+        List<String> errorLogical = new ArrayList<>();
         for (int i = 0; i < tags.getLength(); i++) {
             Node tag = tags.item(i);
             Element tagElement = (Element) tag;
             String[] posString = tagElement.getTextContent().trim().split(" ");
+            String attribute = tagElement.getAttribute(TagName.GML_ID).trim();
 
             // split posList into points
             List<Point3D> point3Ds;
             try {
                 point3Ds = ThreeDUtil.createListPoint(posString);
             } catch (InvalidPosStringException e) {
-                String attribute = tagElement.getAttribute(TagName.GML_ID);
-                tagInvalids.add(this.createAttributeGmlID(attribute, posString));
+                errorFormat.add(attribute);
                 continue;
             }
-
+            // check polygon is closed
+            if (!point3Ds.get(0).equals(point3Ds.get(point3Ds.size() - 1))) {
+                errorFormat.add(attribute);
+                continue;
+            }
             // check valid distance from two point int point3Ds
             if (this.isListPointValid(point3Ds)) continue;
-            String attribute = tagElement.getAttribute(TagName.GML_ID);
-            tagInvalids.add(this.createAttributeGmlID(attribute, posString));
+            errorLogical.add(attribute);
         }
-
-        return tagInvalids;
-    }
-
-    private String createAttributeGmlID(String attribute, String[] posString) {
-        if (attribute.isBlank()) {
-            attribute = "[]" + Arrays.toString(posString);
-        } else {
-            attribute = "[gml:id=" + attribute + "]";
-        }
-        return attribute;
+        invalidTag.put("FORMAT", errorFormat);
+        invalidTag.put("LOGICAL", errorLogical);
+        return invalidTag;
     }
 
     private boolean isListPointValid(List<Point3D> points) {
