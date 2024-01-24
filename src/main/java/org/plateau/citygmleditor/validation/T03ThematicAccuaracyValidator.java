@@ -14,10 +14,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class T03ThematicAccuaracyValidator implements IValidator {
     @Override
@@ -38,16 +36,11 @@ public class T03ThematicAccuaracyValidator implements IValidator {
                 xHrefInvalid.add(gmlID);
             }
         }
+
+        if (xHrefInvalid.isEmpty()) return Collections.EMPTY_LIST;
+        String hrefInvalidStr = xHrefInvalid.stream().map(x -> "[" + x + "]").collect(Collectors.joining("\n"));
         List<ValidationResultMessage> messages = new ArrayList<>();
-        String errorMessage = MessageError.ERR_T03_002_1;
-        for (String href : xHrefInvalid) {
-            errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_T03_002_2, href);
-        }
-
-        if (!errorMessage.equals(MessageError.ERR_T03_002_1)) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage));
-        }
-
+        messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, MessageFormat.format(MessageError.ERR_T03_002_1, hrefInvalidStr)));
         return messages;
     }
 

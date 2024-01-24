@@ -4,14 +4,12 @@ public interface MessageError {
     String ERR_C01_001_1 = "C01: 次のgml:idが重複しています：\n";
     String ERR_C01_001_2 = "gml:id=\"[({0})]\"";
 
-    String ERR_T03_002_1 = "T03: 次の応用スキーマで定義された関連相手先となる地物型又は幾何オブジェクト型と合致しないインスタンスが存在します";
-    String ERR_T03_002_2 = "\n[({0})]";
+    String ERR_T03_002_1 = "T03: 次のxlink:href属性により参照されたインスタンスについて、応用スキーマで定義された関連相手先の地物型又は幾何オブジェクト型と合致しません\n{0}";
 
     String ERR_L04_002_1 = "L04: 次の地物属性の値が、コード値と合致しない箇所";
     String ERR_L04_002_2 = "\n<gml:CodeType gml:id=\"[({0})]\">";
 
-    String ERR_C04_BLDG_1_001 = "C04: 地物\"%s\"次のuro:buildingIDが重複しています：%s";
-    String ERR_C04_BLDG_1_002 = "\n[{(0)}]";
+    String ERR_C04_BLDG_1_001 = "C04: 地物\"%s\":\n次のuro:buildingIDが重複しています：\n%s";
 
     String ERR_L05_001 = "L05: gml:Envelopeに記述された空間参照系のURIが、製品仕様書に示されたURIと合致しません。：[({0})]";
 
@@ -80,7 +78,6 @@ public interface MessageError {
     String ERR_LBLDG_03_001_2 = "\n<bldg:Door gml:id=\"[({0})]”>";
     String ERR_LBLDG_03_001_3 = "\n<bldg:Window gml:id=\"[({0})]”>";
 
-//    String ERR_T_Bldg_02_002_1 = "地物\"({0})\":\n";
     String ERR_T_Bldg_02_002_1 = "T_BLDG 02: 次のbldg:lod2Geometry又はbldg:lod3Geometryにより保持又は参照する幾何オブジェクトの型が、gml:MultiSurface又はgml:Solidではないインスタンが存在します：";
     String ERR_T_Bldg_02_002_2 = "T_BLDG 02: <bldg:BuildingInstallation gml:id=“[({0})]”>";
 
