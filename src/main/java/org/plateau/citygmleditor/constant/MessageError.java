@@ -25,10 +25,11 @@ public interface MessageError {
 
     String ERR_L09_001 = "L09: Building have (bldg:Building gml:id=({0}) LinearRing = ({1})) is valid";
     String ERR_L09_002_1 = "L09: 地物\"({0})\":";
-    String ERR_L09_002_2 = "\n<gml:LinearRing gml:id=\"({0})\">が自己交差しています。";
-    String ERR_L09_002_3 = "\n<gml:LinearRing gml:id=\"({0})\">が自己接触しています。";
-    String ERR_L09_002_4 = "\n<gml:LinearRing gml:id=\"({0})\">が始終点の不一致しています。";
-    String ERR_L09_002_5 = "\n<gml:LinearRing gml:id=\"({0})\">が重複座標しています。";
+    String ERR_L09_SELF_INTERSECT = "\n<gml:LinearRing gml:id=\"({0})\">が自己交差しています。";
+    String ERR_L09_SELF_CONTACT = "\n<gml:LinearRing gml:id=\"({0})\">が自己接触しています。";
+    String ERR_L09_NON_CLOSED = "\n<gml:LinearRing gml:id=\"({0})\">が始終点の不一致しています。";
+    String ERR_L09_DUPLICATE_POINT = "\n<gml:LinearRing gml:id=\"({0})\">が重複座標しています。";
+    String ERR_L09_INVALID_FORMAT = "\n<gml:LinearRing gml:id=\"({0})\">無効な形式。";
 
     String ERR_L10_001 = "L10: Building gml:id=\"{0}\" and {1} invalid";
     String ERR_L10_002 = "L10: 地物\"({0})\":({1})";
@@ -48,7 +49,7 @@ public interface MessageError {
     String ERR_L13_0001 = "<gml:Polygon gml:id=\"%s\">内周が外周と交差している。";
     String ERR_L13_0002 = "<gml:Polygon gml:id=\"%s\">内周と外周が接し、gml:Polygonが2つ以上に分割されている。";
     String ERR_L13_0003 = "<gml:Polygon gml:id=\"%s\">内周同士が重なる、または包含関係にある。";
-    String ERR_L13_0000 = "<gml:Polygon gml:id=\"%s\"> Invalid format";
+    String ERR_L13_0000 = "<gml:Polygon gml:id=\"%s\"> 無効な形式";
 
     String ERR_L14_001 = "L14: Building have ({0}) is invalid";
     String ERR_L14_002 = "地物\"DENW43AL0000OBlN\":\n" +
