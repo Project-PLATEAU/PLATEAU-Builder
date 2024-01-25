@@ -22,6 +22,8 @@ public class FeatureSelection {
 
     private final ObjectProperty<SurfacePolygonSection> activeSection = new SimpleObjectProperty<>();
 
+    private final ObjectProperty<Node> selectElement = new SimpleObjectProperty<>();
+
     public FeatureSelection() {
         var material = new PhongMaterial();
         material.setDiffuseColor(new Color(1, 1, 0, 0.3));
@@ -136,5 +138,17 @@ public class FeatureSelection {
             node = node.getParent();
         }
         return (BuildingView)node;
+    }
+    
+    public void setSelectElement(Node node) {
+        selectElement.set(node);
+    }
+
+    public Node getSelectElement() {
+        return selectElement.get();
+    }
+    
+    public ObjectProperty<Node> getSelectElementProperty() {
+        return selectElement;
     }
 }
