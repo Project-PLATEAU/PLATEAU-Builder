@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.validation;
 
+import java.util.stream.Collectors;
 import javafx.geometry.Point3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.locationtech.jts.geom.LineSegment;
@@ -45,8 +46,9 @@ public class L09LogicalConsistencyValidator implements IValidator {
     for (int i = 0; i < linearRingNodes.getLength(); i++) {
       Node linearRingNode = linearRingNodes.item(i);
       try {
-        checkPointsNonDuplicatedAndClosed(linearRingNode, buildingWithErrorLinearRing);
-        checkPointsIntersect(linearRingNode, buildingWithErrorLinearRing);
+        if (isPointsNonDuplicatedAndClosed(linearRingNode, buildingWithErrorLinearRing)) {
+          checkPointsIntersect(linearRingNode, buildingWithErrorLinearRing);
+        }
       } catch (InvalidPosStringException e) {
         Node parentNode = XmlUtil.findNearestParentByAttribute(linearRingNodes.item(i), TagName.GML_ID);
         messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
@@ -116,13 +118,14 @@ public class L09LogicalConsistencyValidator implements IValidator {
             logger.severe(String.format("L09 Line have (%s and %s) is not valid", first, second));
             // Update error list of building
             CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, new LinearRingError(errorCode, linearRingNode));
+            return;
           }
         }
       }
     }
   }
 
-  private void checkPointsNonDuplicatedAndClosed(Node linearRingNode, Map<Node, Set<LinearRingError>> buildingWithErrorLinearRing) {
+  private boolean isPointsNonDuplicatedAndClosed(Node linearRingNode, Map<Node, Set<LinearRingError>> buildingWithErrorLinearRing) {
     Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(linearRingNode, TagName.BLDG_BUILDING, TagName.GML_ID);
 
     try {
@@ -130,27 +133,30 @@ public class L09LogicalConsistencyValidator implements IValidator {
       List<Point3D> points = get3dPoints(linearRingNode);
 
       boolean isClosed = points.get(0).equals(points.get(points.size() - 1));
-      int errorCode = NO_ERROR;
       if (!isClosed) {
-        errorCode = CLOSE_ERROR;
         logger.severe(String.format("L09 polygon have is don't close startpoint (%s) and endpoint (%s)", points.get(0), points.get(points.size() - 1)));
+        CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, new LinearRingError(CLOSE_ERROR, linearRingNode));
+        return false;
       }
 
       // Only first and last point are duplicated
       // Check if there is any other duplicated point
       boolean isDuplicated = new HashSet<>(points).size() != points.size() - 1;
       if (isDuplicated){
-        errorCode = DUPLICATE_ERROR;
-        logger.severe(String.format("L09 polygon have duplicate point (%s)", points));
+        var duplicatePoints = points.stream().filter(i -> Collections.frequency(points, i) > 1).collect(Collectors.toSet());
+        logger.severe(String.format("L09 polygon have duplicate point (%s)", duplicatePoints));
+        CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, new LinearRingError(DUPLICATE_ERROR, linearRingNode));
+        return false;
       }
-      if (!isClosed || isDuplicated) {
-        CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, new LinearRingError(errorCode, linearRingNode));
-      }
+
     } catch (InvalidPosStringException e) {
       // If there is any error when parsing posString, update error list of building
       CollectionUtil.updateErrorMap(buildingWithErrorLinearRing, buildingNode, new LinearRingError(
           INVALID_FORMAT_EXCEPTION, linearRingNode));
+      return false;
     }
+
+    return true;
   }
 
   private List<Point3D> get3dPoints(Node linearRingNode) {
