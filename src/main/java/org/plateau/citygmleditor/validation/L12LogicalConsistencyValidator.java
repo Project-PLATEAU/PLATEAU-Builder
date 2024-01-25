@@ -1,11 +1,11 @@
 package org.plateau.citygmleditor.validation;
 
+import javafx.geometry.Point3D;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
-import org.plateau.citygmleditor.utils.CityGmlUtil;
-import org.plateau.citygmleditor.utils.CollectionUtil;
-import org.plateau.citygmleditor.utils.XmlUtil;
+import org.plateau.citygmleditor.utils.*;
+import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -15,12 +15,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class L12LogicalConsistencyValidator implements IValidator {
     private final String LOD2OR3 = ".*[lLoOdD][23].*";
-
-    private final String L12 = "L12";
+    public static Logger logger = Logger.getLogger(L12LogicalConsistencyValidator.class.getName());
 
     @Override
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
@@ -35,8 +36,7 @@ public class L12LogicalConsistencyValidator implements IValidator {
             String buildingID = building.getAttribute(TagName.GML_ID);
             List<Node> tagLOD23s = XmlUtil.getTagsByRegex(LOD2OR3, tagBuilding);
 
-            L11LogicalConsistencyValidator l11Validate = new L11LogicalConsistencyValidator();
-            List<L11LogicalConsistencyValidator.LODInvalid> lodInvalids = l11Validate.getInvalidLOD(tagLOD23s, L12, messages);
+            List<L11LogicalConsistencyValidator.LODInvalid> lodInvalids = this.getInvalidLOD(tagLOD23s, messages);
 
             if (CollectionUtil.isEmpty(lodInvalids)) continue;
             L11LogicalConsistencyValidator.BuildingInvalid buildingInvalid = new L11LogicalConsistencyValidator.BuildingInvalid();
@@ -52,5 +52,114 @@ public class L12LogicalConsistencyValidator implements IValidator {
                             invalid.toString(MessageError.ERR_L12_002_1, MessageError.ERR_L12_002_2))));
         }
         return messages;
+    }
+
+    public List<L11LogicalConsistencyValidator.LODInvalid> getInvalidLOD(List<Node> tagLOD, List<ValidationResultMessage> messages) {
+        List<L11LogicalConsistencyValidator.LODInvalid> result = new ArrayList<>();
+        for (Node lodNode : tagLOD) {
+            Element lod = (Element) lodNode;
+            NodeList tagPolygons = lod.getElementsByTagName(TagName.GML_POLYGON);
+            List<String> polygonInvalids = this.getListPolygonInvalid(tagPolygons, messages);
+
+            if (CollectionUtil.isEmpty(polygonInvalids)) continue;
+            L11LogicalConsistencyValidator.LODInvalid lodInvalid = new L11LogicalConsistencyValidator.LODInvalid();
+            String content = lod.getTagName().trim();
+            lodInvalid.setLodTag(content);
+            lodInvalid.setPolygon(polygonInvalids);
+            result.add(lodInvalid);
+        }
+
+        return result;
+    }
+
+    private List<String> getListPolygonInvalid(NodeList tagPolygons, List<ValidationResultMessage> messages) {
+        List<String> polygonIdInvalids = new ArrayList<>();
+
+        for (int i = 0; i < tagPolygons.getLength(); i++) {
+            Element polygon = (Element) tagPolygons.item(i);
+            String polygonID = polygon.getAttribute(TagName.GML_ID);
+            NodeList tagPosList = polygon.getElementsByTagName(TagName.GML_POSLIST);
+
+            List<String> invalidPoslist = this.getListCoordinateInvalid(tagPosList, messages);
+            if (invalidPoslist.isEmpty()) continue;
+            polygonIdInvalids.add(polygonID.isBlank() ? String.valueOf(invalidPoslist) : polygonID);
+        }
+
+        return polygonIdInvalids;
+    }
+
+    private List<String> getListCoordinateInvalid(NodeList tagPoslists, List<ValidationResultMessage> messages) {
+        List<String> invalid = new ArrayList<>();
+
+        for (int i = 0; i < tagPoslists.getLength(); i++) {
+            Node tagPosList = tagPoslists.item(i);
+            Element posList = (Element) tagPosList;
+
+            String[] posString = posList.getTextContent().trim().split(" ");
+            try {
+                // split posList into points
+                List<Point3D> point3Ds = ThreeDUtil.createListPoint(posString);
+                if (this.isPoslistValid(point3Ds)) continue;
+                invalid.add(Arrays.toString(posString));
+            } catch (InvalidPosStringException e) {
+                Node parentNode = XmlUtil.findNearestParentByAttribute(posList, TagName.GML_ID);
+                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                        MessageFormat.format(MessageError.ERR_L11_003,
+                                parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
+                                posList.getFirstChild().getNodeValue())));
+                invalid.add(Arrays.toString(posString));
+            }
+        }
+        return invalid;
+    }
+
+    private boolean isPoslistValid(List<Point3D> points) {
+        // if polygon have <= 3 point always find the plone
+        if (points.size() <= 3) return true;
+
+        for (int i = 0; i < points.size(); i++) {
+            Point3D point1 = points.get(i);
+            for (int j = i + 1; j < points.size() - 2; j++) {
+                Point3D point2 = points.get(j);
+                Point3D point3 = points.get(j + 1);
+                // resolve plane equator by 3 points
+                double[] planeEquation = SolveEquationUtil.findPlaneEquation(point1, point2, point3);
+                if (planeEquation[0] == 0.0 && planeEquation[1] == 0.0 && planeEquation[2] == 0.0) {
+                    logger.severe("Plane is not exist");
+                    throw new RuntimeException("Invalid Coefficient");
+                }
+                boolean inValidStandard = this.isDistanceValid(points, planeEquation);
+                if (inValidStandard) return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isDistanceValid(List<Point3D> points, double[] plane) {
+        for (Point3D point : points) {
+            Point3D pointProject = this.projectOntoPlane(plane, point);
+            System.out.println(ThreeDUtil.distance(point, pointProject));
+            if (ThreeDUtil.distance(point, pointProject) > 0.03) return false;
+        }
+        return true;
+    }
+
+    /**
+     * The equation of the line is {x = x0 + at, y = y0 + bt , z = z0 + ct} with a,b,c is coordinates of plane's normal_vector
+     * Find the projection of the point on the plane
+     *
+     * @param plane known
+     * @param point need to find project
+     */
+    private Point3D projectOntoPlane(double[] plane, Point3D point) {
+        // find t in the equation of line
+        double a = plane[0];
+        double b = plane[1];
+        double c = plane[2];
+        double d = plane[3];
+        double t = -(a * point.getX() + b * point.getY() + c * point.getZ() + d) / (a * a + b * b + c * c);
+
+        return new Point3D(a * t + point.getX(), b * t + point.getY(), c * t + point.getZ());
     }
 }
