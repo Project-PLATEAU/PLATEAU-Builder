@@ -45,7 +45,7 @@
                      </VBox>
                  </TitledPane>
                  <TitledPane fx:id="tabContentsArea" animated="false" expanded="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="ライト１(カメラ)">
-                     <VBox spacing="10.0">
+                     <VBox fx:id="tabContentsArea" spacing="10.0">
                          <padding>
                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                          </padding>
@@ -80,7 +80,7 @@
                      </VBox>
                  </TitledPane>
                  <TitledPane fx:id="tabContentsArea" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="ライト2">
-                     <VBox spacing="10.0">
+                     <VBox fx:id="tabContentsArea" spacing="10.0">
                          <padding>
                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                          </padding>
@@ -109,7 +109,7 @@
                      </VBox>
                  </TitledPane>
                  <TitledPane fx:id="tabContentsArea" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="ライト3">
-                     <VBox spacing="10.0">
+                     <VBox fx:id="tabContentsArea" spacing="10.0">
                          <padding>
                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                          </padding>

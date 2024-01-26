@@ -1,32 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.net.URL?>
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<DialogPane prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.CoordinateDialogController">
+<DialogPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.CoordinateDialogController">
    <content>
-      <VBox alignment="CENTER" prefHeight="300.0" prefWidth="400.0" spacing="20.0">
+      <AnchorPane prefHeight="200.0" prefWidth="300.0">
          <children>
-            <Label text="空間参照系">
+            <ComboBox fx:id="comboboxCoordinateCodes" layoutX="25.0" layoutY="78.0" prefWidth="150.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" />
+            <Button layoutX="74.0" layoutY="161.0" mnemonicParsing="false" onAction="#onSubmit" prefHeight="30.0" text="インポート" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="80.0" />
+            <Label alignment="CENTER" contentDisplay="CENTER" layoutX="25.0" layoutY="45.0" text="空間参照系" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0">
                <font>
                   <Font size="16.0" />
                </font></Label>
-            <ComboBox fx:id="comboboxCoordinateCodes" prefWidth="250.0" />
-            <Button mnemonicParsing="false" onAction="#onSubmit" text="インポート">
-               <font>
-                  <Font size="14.0" />
-               </font>
-               <padding>
-                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
-               </padding></Button>
          </children>
-      </VBox>
+      </AnchorPane>
    </content>
    <stylesheets>
       <URL value="@../viewer.css" />
