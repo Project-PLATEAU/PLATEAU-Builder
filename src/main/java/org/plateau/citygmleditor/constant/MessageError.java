@@ -64,10 +64,12 @@ public interface MessageError {
     String ERR_L18_003_3 = "\n<gml:CompositeSurface gml:id=\"[({0})]\">が接触していない。";
     String ERR_L18_003_4 = "L18: \nその他のエラー。";
 
-    String ERR_LBLDG_01_001 = "L_BLDG_01: 地物\"DENW43AL0000OBlN\":\n" +
-            "次の重複しているgml:Solidが存在します：\n" +
-            "<gml:Solid gml:id=\"[gml_id]\">\n" +
-            "<gml:Solid gml:id=\"[gml_id]\">";
+    String ERR_LBLDG_01_PREFIX = "L_BLDG_01: ";
+    String ERR_LBLDG_01_BUILDING = "地物\"%s\":";
+    String ERR_LBLDG_01_SOLID = "次の重複しているgml:Solidが存在します：\n%s";
+    String ERR_LBLDG_01_POLYGON = "次のgml:Polygon座標の形式が不正です。\n%s";
+    String ERR_LBLDG_01_SOLID_DETAIL = "<gml:Solid gml:id=\"%s\">";
+    String ERR_LBLDG_01_POLYGON_DETAIL = "<gml:Polygon gml:id=\"%s\">";
 
     String ERR_L_BLDG_02_002_1 = "L_BLDG 02: 地物\"({0})\":\n" +
             "次の境界面を共有していないgml:Solidが存在します：\n";

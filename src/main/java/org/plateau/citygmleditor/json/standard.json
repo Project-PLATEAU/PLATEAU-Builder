@@ -118,5 +118,10 @@
     "id": "L14",
     "title": "位相一貫性",
     "enabled": false
+  },
+  {
+    "id": "L-bldg-01",
+    "title": "L-bldg-01",
+    "enabled": true
   }
 ]

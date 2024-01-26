@@ -8,6 +8,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.plateau.citygmleditor.constant.SegmentRelationship;
+import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
@@ -16,6 +17,9 @@ import org.plateau.citygmleditor.world.World;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class ThreeDUtil {
     public static Logger logger = Logger.getLogger(ThreeDUtil.class.getName());
@@ -198,5 +202,31 @@ public class ThreeDUtil {
         var sumDistance = pointToStart + pointToEnd;
 
         return (length - TOLERANCE) <= sumDistance && sumDistance <= (length + TOLERANCE);
+    }
+
+    /**
+     * Get list of 3d points from LinearRing node
+     * @param linearRingNode LinearRing node
+     * @return list of 3d points
+     */
+    public static List<Point3D> get3dPoints(Node linearRingNode) {
+        Element linearRingElement = (Element) linearRingNode;
+        // There are 2 cases: posList and pos of LinearRing
+        NodeList posListNodes = linearRingElement.getElementsByTagName(TagName.GML_POSLIST);
+        NodeList posNodes = linearRingElement.getElementsByTagName(TagName.GML_POS);
+
+        if (posListNodes.getLength() > 0) {
+            String[] posString = posListNodes.item(0).getTextContent().split(" ");
+            return ThreeDUtil.createListPoint(posString);
+        } else if (posNodes.getLength() > 0) {
+            List<Point3D> point3DS = new ArrayList<>();
+            for (int i = 0; i < posNodes.getLength(); i++) {
+                Node posNode = posNodes.item(i);
+                String[] posString = posNode.getTextContent().split(" ");
+                point3DS.addAll(ThreeDUtil.createListPoint(posString));
+            }
+            return point3DS;
+        }
+        return List.of();
     }
 }

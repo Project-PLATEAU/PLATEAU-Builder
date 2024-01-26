@@ -200,4 +200,10 @@ public class XmlUtil {
     }
     bw.close();
   }
+
+  public static List<Node> findAllNodeByTag(Node node, String tagName) {
+    var listNode = new ArrayList<Node>();
+    recursiveFindNodeByTagName(node, listNode, tagName);
+    return listNode;
+  }
 }
