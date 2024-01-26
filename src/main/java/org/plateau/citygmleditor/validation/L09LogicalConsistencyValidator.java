@@ -111,7 +111,11 @@ public class L09LogicalConsistencyValidator implements IValidator {
                 new Vector3D(first.p0.x, first.p0.y, first.p0.z), new Vector3D(first.p1.x, first.p1.y, first.p1.z),
                 new Vector3D(second.p0.x, second.p0.y, second.p0.z), new Vector3D(second.p1.x, second.p1.y, second.p1.z)
             );
-            errorCode = relationship == SegmentRelationship.NONE ? NO_ERROR : SELF_INTERSECT_ERROR;
+            if (relationship == SegmentRelationship.INTERSECT || relationship == SegmentRelationship.OVERLAP) {
+              errorCode = SELF_INTERSECT_ERROR;
+            } else if (relationship == SegmentRelationship.TOUCH) {
+              errorCode = SELF_CONTACT_ERROR;
+            }
           }
 
           if (errorCode != NO_ERROR) {
