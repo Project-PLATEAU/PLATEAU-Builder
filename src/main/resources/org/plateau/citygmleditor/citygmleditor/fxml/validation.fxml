@@ -8,6 +8,7 @@
             prefHeight="700.0" prefWidth="600.0"
             fx:controller="org.plateau.citygmleditor.citygmleditor.ValidationController">
     <Button layoutX="20.0" layoutY="35.0" mnemonicParsing="false" onAction="#execute" text="実行"/>
+    <Button layoutX="20.0" layoutY="35.0" mnemonicParsing="false" onAction="#showHideMessage" text="hide"/>
     <ScrollPane prefHeight="600.0" prefWidth="500.0"
                 AnchorPane.topAnchor="60.0" AnchorPane.bottomAnchor="10.0"
                 AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">

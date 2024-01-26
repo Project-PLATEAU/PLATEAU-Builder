@@ -31,6 +31,11 @@ public class ValidationController implements Initializable {
     @FXML
     ScrollPane scrollContentError;
 
+    @FXML
+    VBox notification;
+
+    private static boolean IS_HIDE = true;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
@@ -53,6 +58,15 @@ public class ValidationController implements Initializable {
         scrollContentError.setContent(resultTextContainer);
     }
 
+    private void showMessageLoading(ValidationResultMessage message) {
+        var text = new TextField(message.getMessage());
+        notification.getChildren().add(text);
+    }
+
+    private void hideMessageLoading() {
+        notification.setVisible(false);
+    }
+
     public void execute(ActionEvent event) throws ParserConfigurationException, IOException, SAXException {
         var cityModelView = World.getActiveInstance().getCityModel();
         if (cityModelView == null || cityModelView.getGmlObject() == null) {
@@ -62,6 +76,9 @@ public class ValidationController implements Initializable {
             ));
             return;
         }
+
+        // Show loading message
+        showMessageLoading(new ValidationResultMessage(ValidationResultMessageType.Info, "gml:idの完全性を検証中..."));
 
         var cityModel = cityModelView.getGmlObject();
         if (cityModel == null)
@@ -94,6 +111,9 @@ public class ValidationController implements Initializable {
         showMessage(new ValidationResultMessage(
                 ValidationResultMessageType.Info, resultMessage
         ));
+
+        // Hide loading message
+        hideMessageLoading();
 
         XmlUtil.writeErrorMessageInFile(errorMessages);
     }
