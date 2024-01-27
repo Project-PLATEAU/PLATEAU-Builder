@@ -2,14 +2,13 @@ package org.plateau.citygmleditor.fxml;
 
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import org.citygml4j.model.citygml.CityGMLClass;
 import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.control.BuildingSurfaceTypeView;
-import org.plateau.citygmleditor.control.SurfacePolygonSection;
+import org.plateau.citygmleditor.control.PolygonSection;
 import org.plateau.citygmleditor.utils.ColorUtils;
 
 import java.io.IOException;
@@ -23,7 +22,7 @@ public class SurfaceTypeEditorController implements Initializable {
     private final ToggleGroup toggleGroup = new ToggleGroup();
 
     private BuildingSurfaceTypeView view;
-    private SurfacePolygonSection section;
+    private PolygonSection section;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -37,7 +36,7 @@ public class SurfaceTypeEditorController implements Initializable {
             if (view == null || section == null)
                 return;
 
-            view.updateSurfaceType(section, (CityGMLClass)newToggle.getUserData());
+            view.setSurfaceType(section, (CityGMLClass)newToggle.getUserData());
         });
 
         var viewMode = CityGMLEditorApp.getCityModelViewMode();
@@ -47,7 +46,7 @@ public class SurfaceTypeEditorController implements Initializable {
         });
 
         try {
-            for (var entry : BuildingSurfaceTypeView.buildingSurfaceColors().entrySet()) {
+            for (var entry : BuildingSurfaceTypeView.getLOD2buildingSurfaceColors().entrySet()) {
                 var listItem = FXMLLoader.<ToggleButton>load(Objects.requireNonNull(CityGMLEditorApp.class.getResource("fxml/surface-type-editor-list-item.fxml")));
                 listItem.setStyle("-fx-text-fill: " + ColorUtils.getWebString(entry.getValue()));
                 listItem.setText(entry.getKey().name());

@@ -9,10 +9,16 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
+import org.apache.commons.math3.exception.OutOfRangeException;
 import org.citygml4j.model.citygml.CityGMLClass;
+import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
+import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
+import org.citygml4j.model.gml.geometry.aggregates.MultiSurfaceProperty;
+import org.citygml4j.model.gml.geometry.primitives.AbstractSurface;
 import org.plateau.citygmleditor.citymodel.geometry.BoundarySurfaceView;
-import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
 import org.plateau.citygmleditor.utils3d.geom.Vec2f;
 import org.plateau.citygmleditor.utils3d.polygonmesh.FaceBuffer;
@@ -21,42 +27,52 @@ import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import java.util.*;
 
 public class BuildingSurfaceTypeView extends MeshView {
-    private AbstractBuilding targetBuilding;
+    private final List<PolygonSection> faceBufferSections = new ArrayList<>();
+    private final Map<CityGMLClass, Color> colorMap;
+    private AbstractBuilding building;
+    private ILODSolidView solid;
 
-    private final List<SurfacePolygonSection> faceBufferSections = new ArrayList<>();
-    private final Map<CityGMLClass, Color> colorMap = buildingSurfaceColors();
-
-    private final SelectionOutline selectionOutline = new SelectionOutline();
     private final FaceBuffer faceBuffer = new FaceBuffer();
 
-    public BuildingSurfaceTypeView() {
+    private int lod;
+
+    public BuildingSurfaceTypeView(int lod) {
+        this.lod = lod;
+        colorMap = getBuildingSurfaceColors(lod);
+
         var material = new PhongMaterial();
         material.setSelfIlluminationMap(createBuildingTypeColorImage());
         setMaterial(material);
-//        setDepthTest(DepthTest.DISABLE);
         setViewOrder(-1);
     }
 
-    private void updateVisual(LOD2SolidView lod2Solid) {
+    public void updateVisual() {
         faceBufferSections.clear();
 
         var mesh = new TriangleMesh();
         mesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
 
-        var vertexBuffer = lod2Solid.getVertexBuffer();
+        var vertexBuffer = solid.getVertexBuffer();
         mesh.getPoints().addAll(vertexBuffer.getBufferAsArray());
 
         var texCoordBuffer = createTexCoords();
         mesh.getTexCoords().addAll(texCoordBuffer.getBufferAsArray());
 
         var faceIndexOffset = 0;
-        for (var boundarySurface : lod2Solid.getBoundaries()) {
+        for (var boundarySurface : solid.getBoundaries()) {
             var texCoordIndex = getIndex(boundarySurface);
-            for (var polygon : boundarySurface.getPolygons()) {
+
+            var polygons = new ArrayList<PolygonView>(boundarySurface.getPolygons());
+
+//            for (var opening : boundarySurface.getOpenings()) {
+//                polygons.addAll(opening);
+//            }
+
+            for (var polygon : polygons) {
                 var pointStartIndex = faceIndexOffset;
                 var pointEndIndex = faceIndexOffset + polygon.getFaceBuffer().getPointCount() - 1;
                 faceIndexOffset = pointEndIndex + 1;
-                faceBufferSections.add(new SurfacePolygonSection(pointStartIndex, pointEndIndex, polygon));
+                faceBufferSections.add(new PolygonSection(pointStartIndex, pointEndIndex, boundarySurface.getOriginal(), polygon.getOriginal(), polygon.getFaceBuffer()));
 
                 var polygonFaceBuffer = new FaceBuffer();
                 polygonFaceBuffer.addFaces(polygon.getFaceBuffer().getBuffer());
@@ -79,31 +95,60 @@ public class BuildingSurfaceTypeView extends MeshView {
         setMesh(mesh);
     }
 
-    public void setTarget(LOD2SolidView lod2SolidView) {
-        updateVisual(lod2SolidView);
+    public void setTarget(AbstractBuilding building, ILODSolidView solid) {
+        this.building = building;
+        this.solid = solid;
     }
 
-//    public void registerClickEvent(Scene scene) {
-//        scene.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-//            PickResult pickResult = event.getPickResult();
-//            updateSelectionOutline(pickResult);
-//        });
-//    }
+    public void setSurfaceType(PolygonSection section, CityGMLClass clazz) {
+        if (section.getBoundarySurface().getCityGMLClass() == clazz)
+            return;
 
-    public void updateSurfaceType(SurfacePolygonSection section, CityGMLClass clazz) {
         var mesh = (TriangleMesh)getMesh();
         for (int i = section.start; i <= section.end; ++i) {
             faceBuffer.setTexCoordIndex(i, getIndex(clazz));
         }
         mesh.getFaces().setAll(faceBuffer.getBufferAsArray());
+
+        var boundarySurface = section.getBoundarySurface();
+        boundarySurface.getLod2MultiSurface().setMultiSurface(null);
+        var polygon = section.getPolygon();
+
+        BoundarySurfaceProperty boundedBy = findBoundarySurfaceProperty(boundarySurface);
+        if (boundedBy != null)
+            building.getBoundedBySurface().remove(boundedBy);
+
+        try {
+            var ctor = clazz.getModelClass().getDeclaredConstructor();
+            var newBoundarySurface = (AbstractBoundarySurface)ctor.newInstance();
+            var surfaces = new ArrayList<AbstractSurface>();
+            surfaces.add(polygon);
+            newBoundarySurface.setLod2MultiSurface(new MultiSurfaceProperty(new MultiSurface(surfaces)));
+            building.addBoundedBySurface(new BoundarySurfaceProperty(newBoundarySurface));
+            section.setBoundarySurface(newBoundarySurface);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public CityGMLClass getSurfaceType(SurfacePolygonSection section) {
+    private BoundarySurfaceProperty findBoundarySurfaceProperty(AbstractBoundarySurface boundarySurface) {
+        BoundarySurfaceProperty targetBoundedBy = null;
+        for (var boundedBy : building.getBoundedBySurface()) {
+            if (boundedBy.getBoundarySurface() != boundarySurface)
+                continue;
+
+            targetBoundedBy = boundedBy;
+            break;
+        }
+        return targetBoundedBy;
+    }
+
+    public CityGMLClass getSurfaceType(PolygonSection section) {
         var index = faceBuffer.getTexCoordIndex(section.start);
         return getClazz(index);
     }
 
-    public SurfacePolygonSection getSection(PickResult pickResult) {
+    public PolygonSection getSection(PickResult pickResult) {
         // 選択されたPolygonを取得
         var selectedFace = pickResult.getIntersectedFace() * 3;
         for (var section : faceBufferSections) {
@@ -115,28 +160,26 @@ public class BuildingSurfaceTypeView extends MeshView {
         return null;
     }
 
-    public void updateSelectionOutLine(PolygonView selectedPolygon, MeshView outLine) {
-        if (selectedPolygon != null) {
-            var selfMesh = (TriangleMesh)getMesh();
-            var mesh = new TriangleMesh();
-            mesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
-            mesh.getPoints().addAll(selfMesh.getPoints());
-            mesh.getTexCoords().addAll(selfMesh.getTexCoords());
+    public void updateSelectionOutLine(FaceBuffer selectedFaces, MeshView outLine) {
+        var selfMesh = (TriangleMesh)getMesh();
+        var mesh = new TriangleMesh();
+        mesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
+        mesh.getPoints().addAll(selfMesh.getPoints());
+        mesh.getTexCoords().addAll(selfMesh.getTexCoords());
 
-            var faceBuffer = new FaceBuffer();
-            faceBuffer.addFaces(selectedPolygon.getFaceBuffer().getBuffer());
-            for (int i = 0; i < faceBuffer.getPointCount(); ++i) {
-                faceBuffer.setTexCoordIndex(i, 0);
-            }
-            mesh.getFaces().addAll(faceBuffer.getBufferAsArray());
-            mesh.getNormals().addAll(selfMesh.getNormals());
-
-            var smooths = new int[faceBuffer.getFaceCount()];
-            Arrays.fill(smooths, 1);
-            mesh.getFaceSmoothingGroups().addAll(smooths);
-
-            outLine.setMesh(mesh);
+        var faceBuffer = new FaceBuffer();
+        faceBuffer.addFaces(selectedFaces.getBuffer());
+        for (int i = 0; i < faceBuffer.getPointCount(); ++i) {
+            faceBuffer.setTexCoordIndex(i, 0);
         }
+        mesh.getFaces().addAll(faceBuffer.getBufferAsArray());
+        mesh.getNormals().addAll(selfMesh.getNormals());
+
+        var smooths = new int[faceBuffer.getFaceCount()];
+        Arrays.fill(smooths, 1);
+        mesh.getFaceSmoothingGroups().addAll(smooths);
+
+        outLine.setMesh(mesh);
     }
 
     private TexCoordBuffer createTexCoords() {
@@ -185,13 +228,28 @@ public class BuildingSurfaceTypeView extends MeshView {
         return image;
     }
 
-    public static Map<CityGMLClass, Color> buildingSurfaceColors() {
+    public static Map<CityGMLClass, Color> getBuildingSurfaceColors(int lod) {
+        switch (lod) {
+            case 2: return getLOD2buildingSurfaceColors();
+            case 3: return getLOD3buildingSurfaceColors();
+            default: throw new OutOfRangeException(lod, 2, 3);
+        }
+    }
+
+    public static Map<CityGMLClass, Color> getLOD2buildingSurfaceColors() {
         var map = new HashMap<CityGMLClass, Color>();
         map.put(CityGMLClass.BUILDING_WALL_SURFACE, Color.web("#dcdcdc"));
         map.put(CityGMLClass.BUILDING_ROOF_SURFACE, Color.web("#00008b"));
         map.put(CityGMLClass.BUILDING_GROUND_SURFACE, Color.web("#000000"));
         map.put(CityGMLClass.OUTER_BUILDING_CEILING_SURFACE, Color.web("#f0eb8c"));
         map.put(CityGMLClass.OUTER_BUILDING_FLOOR_SURFACE, Color.web("#66cdaa"));
+        return map;
+    }
+
+    public static Map<CityGMLClass, Color> getLOD3buildingSurfaceColors() {
+        var map = getLOD2buildingSurfaceColors();
+        map.put(CityGMLClass.BUILDING_DOOR, Color.web("#00a0e9"));
+        map.put(CityGMLClass.BUILDING_WINDOW, Color.web("#909090"));
         return map;
     }
 }

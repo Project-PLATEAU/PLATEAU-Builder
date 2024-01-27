@@ -20,7 +20,7 @@ public class FeatureSelection {
     private final ObjectProperty<BuildingView> active = new SimpleObjectProperty<>();
     private final MeshView outLine = new MeshView();
 
-    private final ObjectProperty<SurfacePolygonSection> activeSection = new SimpleObjectProperty<>();
+    private final ObjectProperty<PolygonSection> activeSection = new SimpleObjectProperty<>();
 
     public FeatureSelection() {
         var material = new PhongMaterial();
@@ -52,7 +52,7 @@ public class FeatureSelection {
         return active;
     }
 
-    public ObjectProperty<SurfacePolygonSection> getSurfacePolygonSectionProperty() {
+    public ObjectProperty<PolygonSection> getSurfacePolygonSectionProperty() {
         return activeSection;
     }
 
@@ -116,7 +116,7 @@ public class FeatureSelection {
             if (solid == null || solid.getSurfaceTypeView() == null || activeSection.get() == null)
                 return;
 
-            solid.getSurfaceTypeView().updateSelectionOutLine(activeSection.get().polygon, outLine);
+            solid.getSurfaceTypeView().updateSelectionOutLine(activeSection.get().getFaceBuffer(), outLine);
             return;
         }
 

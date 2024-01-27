@@ -51,6 +51,10 @@ public interface ILODSolidView {
      */
     public MeshView getMeshView();
 
+    default public List<BoundarySurfaceView> getBoundaries() {
+        return null;
+    }
+
     default public Mesh getTotalMesh() {
         if (getMeshView() == null)
             return null;
