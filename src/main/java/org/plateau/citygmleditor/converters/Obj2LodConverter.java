@@ -103,7 +103,10 @@ public class Obj2LodConverter extends AbstractLodConverter {
         PhongMaterial phongMaterial = (PhongMaterial) material;
 
         var image = phongMaterial.getDiffuseMap();
-        if (image == null) return null;
+        if (image == null)  {
+            return null;
+        }
+
         var path = Paths.get(new URL(image.getUrl()).toURI());
         var fileName = path.getFileName().toString();
         var gmlFileName = Paths.get(getCityModelView().getGmlPath()).getFileName().toString();

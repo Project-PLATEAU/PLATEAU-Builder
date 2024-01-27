@@ -3,8 +3,8 @@ package org.plateau.citygmleditor.converters;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -211,11 +211,13 @@ public abstract class AbstractLodConverter {
                     sameNormalList.add(triangleModel);
                 }
             }
-            sameTrianglesList.add(sameNormalList);
+            if (sameNormalList.size() > 0) {
+                sameTrianglesList.add(sameNormalList);
 
-            // 三角形のリストから削除
-            for (var sameTriangle : sameNormalList) {
-                triangleModels.remove(sameTriangle);
+                // 三角形のリストから削除
+                for (var sameTriangle : sameNormalList) {
+                    triangleModels.remove(sameTriangle);
+                }
             }
         }
 
@@ -247,7 +249,7 @@ public abstract class AbstractLodConverter {
     private List<org.locationtech.jts.geom.Polygon> createPolygonList(List<TriangleModel> triangleList) {
         var isInitCCW = false;
         boolean isTriangleCCW = false;
-        List<org.locationtech.jts.geom.Polygon> trianglePolygonList = new LinkedList<>();
+        List<org.locationtech.jts.geom.Polygon> trianglePolygonList = new ArrayList<>();
         var geometryFactory = getGeometryFactory();
         for (var triangleModel : triangleList) {
             var p1 = triangleModel.getVertex(0);
@@ -261,8 +263,11 @@ public abstract class AbstractLodConverter {
                             new org.locationtech.jts.geom.Coordinate(p1.x, p1.y, p1.z)
                         });
 
-            // PolygonにuserDataとしてTriangleModelを保持しておく
+            // 不正なポリゴンは除外する
             var polygon = geometryFactory.createPolygon(linearRing, null);
+            if (!polygon.isValid()) continue;
+
+            // PolygonにuserDataとしてTriangleModelを保持しておく
             polygon.setUserData(triangleModel);
             trianglePolygonList.add(polygon);
             if (!isInitCCW) {
@@ -270,6 +275,10 @@ public abstract class AbstractLodConverter {
                 isTriangleCCW = Orientation.isCCW(linearRing.getCoordinateSequence());
                 isInitCCW = true;
             }
+        }
+
+        if (trianglePolygonList.size() == 0) {
+            return Collections.emptyList();
         }
 
         org.locationtech.jts.geom.Geometry geometry = null;
@@ -297,6 +306,7 @@ public abstract class AbstractLodConverter {
         } else {
             // 元のTriangleが、分割したPolygonに内包されるかどうかを判定
             // 内包される場合は、そのTriangleModelのuserDataを保持する
+            var notFoundList = new ArrayList<org.locationtech.jts.geom.Polygon>();
             for (var trianglePolygon : trianglePolygonList) {
                 var found = false;
                 for (var polygon : polygonList) {
@@ -307,15 +317,23 @@ public abstract class AbstractLodConverter {
                     }
                 }
                 if (!found) {
-                    // 内包判定に失敗したら距離で判定する
-                    for (var polygon : polygonList) {
-                        if (polygon.distance(trianglePolygon) <= 0.003) {
-                            addUserData(polygon, trianglePolygon);
-                            found = true;
-                            break;
-                        }
+                    notFoundList.add(trianglePolygon);
+                }
+            }
+
+            // 内包されなかったTriangleModelのuserDataを何とかして特定する
+            // 現在の実装では最も距離が近いものを採用している
+            for (var trianglePolygon : notFoundList) {
+                var minDistance = Double.MAX_VALUE;
+                org.locationtech.jts.geom.Polygon minDistancePolygon = null;
+                for (var polygon : polygonList) {
+                    var distance = polygon.distance(trianglePolygon);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        minDistancePolygon = polygon;
                     }
                 }
+                addUserData(minDistancePolygon, trianglePolygon);
             }
         }
 
@@ -402,6 +420,7 @@ public abstract class AbstractLodConverter {
         }
 
         // TODO: lod1Solid
+
         // lod2Solid
         // 保持しておいたTriangleModelを取得する
         List<TriangleModel> userDataList = (List<TriangleModel>)jtsPolygon.getUserData();
@@ -525,7 +544,7 @@ public abstract class AbstractLodConverter {
             boundarySurface = new RoofSurface();
             boundarySurface.setId(String.format("roof_%s", polygon.getId()));
         } else {
-            throw new IllegalArgumentException("angle is invalid");
+            throw new IllegalArgumentException(String.format("angle is invalid. angle: %f", angle));
         }
 
         List<AbstractSurface> surfaces = new ArrayList<AbstractSurface>();

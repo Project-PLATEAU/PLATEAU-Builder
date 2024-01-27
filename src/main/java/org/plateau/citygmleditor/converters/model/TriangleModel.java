@@ -43,7 +43,8 @@ public class TriangleModel {
     }
 
     public boolean isValid() {
-        return !_vertices[0].equals(_vertices[1]) && !_vertices[1].equals(_vertices[2]) && !_vertices[2].equals(_vertices[0]);
+        return !_vertices[0].equals(_vertices[1]) && !_vertices[1].equals(_vertices[2]) && !_vertices[2].equals(_vertices[0])
+            && !Float.isNaN(_normal.x) && !Float.isNaN(_normal.y) && !Float.isNaN(_normal.z);
     }
 
     public Point3f[] getVertices() {
