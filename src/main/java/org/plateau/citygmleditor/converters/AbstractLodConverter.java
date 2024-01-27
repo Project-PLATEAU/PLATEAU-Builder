@@ -118,9 +118,8 @@ public abstract class AbstractLodConverter {
         // 各フォーマット用の初期化
         initialize(fileUrl);
 
-        Building building = null;
         if (_lodSolidView instanceof LOD1SolidView) {
-            building = convertLOD1();
+            convertLOD1();
         }
         else if (_lodSolidView instanceof LOD2SolidView) {
             convertLOD2();
@@ -128,20 +127,10 @@ public abstract class AbstractLodConverter {
             throw new IllegalArgumentException("Unsupported LOD");
         }
 
-        //return new CityModelFactory().createCityModel(cityModel, _cityModelView.getGmlPath(), _cityModelView.getSchemaHandler());
-        
-
-        GmlExporter.export(
-            String.format("E:\\Temp\\export\\gml\\udx\\bldg\\53392633_bldg_6697_2_op_%d.gml", ++exportCount),
-            _cityModelView.getGmlObject(),
-            _cityModelView.getSchemaHandler());
-
         return _cityModelView;
     }
 
-    private static int exportCount = 0;
-
-    private Building convertLOD1() throws Exception {
+    private void convertLOD1() throws Exception {
         // 各フォーマットの実装から三角形のリストを作成
         var triangleModels = createTriangleModels();
 
@@ -162,13 +151,13 @@ public abstract class AbstractLodConverter {
             toGmlPolygonList(jtsPolygon, groundTriangle);
         }
 
-        // 差し替え用にコピーを作成
-        var cityModel = (org.citygml4j.model.citygml.core.CityModel)_cityModel.copy(new DeepCopyBuilder());
+        // lod1Solidを差し替える(差し替え用にコピーを作成している)
+        var building = (AbstractBuilding) _buildingView.getGMLObject();
+        var copiedBuilding = (Building)building.copy(new DeepCopyBuilder());
+        BuildingView newBuildingView = createBuilding(copiedBuilding);
 
-        // lod1Solidを差し替える
-        replaceLod1Solid(cityModel);
-
-        return null;
+        _cityModelView.addCityObjectMember(newBuildingView);
+        _cityModelView.removeCityObjectMember(_buildingView);
     }
 
     private void convertLOD2() throws Exception {
