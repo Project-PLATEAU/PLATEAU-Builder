@@ -2,18 +2,17 @@ package org.plateau.citygmleditor.converters;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.vecmath.Point2f;
 
 import org.citygml4j.builder.copy.DeepCopyBuilder;
-import org.citygml4j.model.citygml.CityGMLClass;
 import org.citygml4j.model.citygml.appearance.Appearance;
 import org.citygml4j.model.citygml.appearance.AppearanceMember;
 import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
@@ -21,17 +20,15 @@ import org.citygml4j.model.citygml.appearance.SurfaceDataProperty;
 import org.citygml4j.model.citygml.appearance.TexCoordList;
 import org.citygml4j.model.citygml.appearance.TextureAssociation;
 import org.citygml4j.model.citygml.appearance.TextureCoordinates;
-import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
+import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
 import org.citygml4j.model.citygml.building.Building;
 import org.citygml4j.model.citygml.building.GroundSurface;
 import org.citygml4j.model.citygml.building.OuterCeilingSurface;
 import org.citygml4j.model.citygml.building.RoofSurface;
 import org.citygml4j.model.citygml.building.WallSurface;
-import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.citygml.core.CityModel;
-import org.citygml4j.model.citygml.core.CityObjectMember;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurfaceProperty;
 import org.citygml4j.model.gml.geometry.complexes.CompositeSurface;
@@ -50,14 +47,11 @@ import org.plateau.citygmleditor.citymodel.AppearanceView;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.factory.AppearanceFactory;
-import org.plateau.citygmleditor.citymodel.factory.CityModelFactory;
 import org.plateau.citygmleditor.citymodel.factory.CityObjectMemberFactory;
-import org.plateau.citygmleditor.citymodel.factory.LOD2SolidFactory;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
-import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.geometry.GeoReference;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.world.World;
@@ -132,29 +126,31 @@ public abstract class AbstractLodConverter {
 
     private void convertLOD1() throws Exception {
         // 各フォーマットの実装から三角形のリストを作成
-        var triangleModels = createTriangleModels();
+        var triangleModelsMap = createTriangleModelsMap();
 
         // 各フォーマットの実装から地面の基準となる三角形を特定する
-        var groundTriangle = getGroundTriangle(triangleModels);
+        var groundTriangle = getGroundTriangle(triangleModelsMap);
 
-        // 同一平面の三角形をグループ化
-        var sameTrianglesList = createSameTrianglesList(triangleModels, groundTriangle);
+        for (var meshKey : triangleModelsMap.keySet()) {
+            // 同一平面の三角形をグループ化
+            var sameTrianglesList = createSameTrianglesList(triangleModelsMap.get(meshKey), groundTriangle);
 
-        // グループ化したポリゴンごとに結合
-        List<org.locationtech.jts.geom.Polygon> jtsPolygonList = new ArrayList<>();
-        for (var sameTriangleList : sameTrianglesList) {
-            jtsPolygonList.addAll(createPolygonList(sameTriangleList));
-        }
+            // グループ化したポリゴンごとに結合
+            List<org.locationtech.jts.geom.Polygon> jtsPolygonList = new ArrayList<>();
+            for (var sameTriangleList : sameTrianglesList) {
+                jtsPolygonList.addAll(createPolygonList(sameTriangleList));
+            }
 
-        // gmlのPolygonに変換
-        for (var jtsPolygon : jtsPolygonList) {
-            toGmlPolygonList(jtsPolygon, groundTriangle);
+            // gmlのPolygonに変換
+            for (var jtsPolygon : jtsPolygonList) {
+                toGmlPolygonList(jtsPolygon, groundTriangle);
+            }
         }
 
         // lod1Solidを差し替える(差し替え用にコピーを作成している)
         var building = (AbstractBuilding) _buildingView.getGMLObject();
         var copiedBuilding = (Building)building.copy(new DeepCopyBuilder());
-        BuildingView newBuildingView = createBuilding(copiedBuilding);
+        BuildingView newBuildingView = createBuildingViewLOD1(copiedBuilding);
 
         _cityModelView.addCityObjectMember(newBuildingView);
         _cityModelView.removeCityObjectMember(_buildingView);
@@ -162,41 +158,43 @@ public abstract class AbstractLodConverter {
 
     private void convertLOD2() throws Exception {
         // 各フォーマットの実装からテクスチャを作成
-        var texture = createParameterizedTexture();
+        var textureMap = createParameterizedTextures();
 
         // 各フォーマットの実装から三角形のリストを作成
-        var triangleModels = createTriangleModels();
+        var triangleModelsMap = createTriangleModelsMap();
 
         // 各フォーマットの実装から地面の基準となる三角形を特定する
-        var groundTriangle = getGroundTriangle(triangleModels);
+        var groundTriangle = getGroundTriangle(triangleModelsMap);
 
-        // 同一平面の三角形をグループ化
-        var sameTrianglesList = createSameTrianglesList(triangleModels, groundTriangle);
+        for (var meshKey : triangleModelsMap.keySet()) {
+            // 同一平面の三角形をグループ化
+            var sameTrianglesList = createSameTrianglesList(triangleModelsMap.get(meshKey), groundTriangle);
 
-        // グループ化したポリゴンごとに結合
-        List<org.locationtech.jts.geom.Polygon> jtsPolygonList = new ArrayList<>();
-        for (var sameTriangleList : sameTrianglesList) {
-            jtsPolygonList.addAll(createPolygonList(sameTriangleList));
-        }
+            // グループ化したポリゴンごとに結合
+            List<org.locationtech.jts.geom.Polygon> jtsPolygonList = new ArrayList<>();
+            for (var sameTriangleList : sameTrianglesList) {
+                jtsPolygonList.addAll(createPolygonList(sameTriangleList));
+            }
 
-        // gmlのPolygonに変換
-        for (var jtsPolygon : jtsPolygonList) {
-            toGmlPolygonList(jtsPolygon, groundTriangle, texture);
+            // gmlのPolygonに変換
+            for (var jtsPolygon : jtsPolygonList) {
+                toGmlPolygonList(jtsPolygon, groundTriangle, textureMap.get(meshKey));
+            }
         }
 
         // ParameterizedTextureを差し替える(差し替え用にコピーを作成している)
-        // このメソッドの中でlod2Solidを参照しているため、lod2Solidより先に実行する必要がある
         var appearance = _appearanceView.getOriginal();
         var copiedAppearance = (Appearance)appearance.copy(new DeepCopyBuilder());
-        replaceTexture(copiedAppearance, texture);
+        var appearanceView = createAppearanceView(copiedAppearance, textureMap);
+        removeTexture(copiedAppearance);
+        _cityModelView.setRGBTextureAppearance(appearanceView);
 
         // lod2Solidを差し替える(差し替え用にコピーを作成している)
         var building = (AbstractBuilding) _buildingView.getGMLObject();
         var copiedBuilding = (Building)building.copy(new DeepCopyBuilder());
-        BuildingView newBuildingView = createBuilding(copiedBuilding);
-
-        _cityModelView.addCityObjectMember(newBuildingView);
+        var newBuildingView = createBuildingViewLOD2(copiedBuilding);
         _cityModelView.removeCityObjectMember(_buildingView);
+        _cityModelView.addCityObjectMember(newBuildingView);
     }
 
     private List<List<TriangleModel>> createSameTrianglesList(List<TriangleModel> triangleModels, TriangleModel groundTriangle) {
@@ -326,23 +324,28 @@ public abstract class AbstractLodConverter {
 
     private List<org.locationtech.jts.geom.Polygon> splitJtsPolygon(org.locationtech.jts.geom.Geometry geometry) {
         List<org.locationtech.jts.geom.Polygon> polygonList = new ArrayList<>();
-        if (geometry.getGeometryType().equals(org.locationtech.jts.geom.Geometry.TYPENAME_POLYGON)) {
-            var original = (org.locationtech.jts.geom.Polygon)geometry;
-            org.locationtech.jts.geom.LinearRing shellCopy = (org.locationtech.jts.geom.LinearRing)original.getExteriorRing().copy();
-            org.locationtech.jts.geom.LinearRing[] holeCopies = new org.locationtech.jts.geom.LinearRing[original.getNumInteriorRing()];
-            for (int i = 0; i < holeCopies.length; i++) {
-                holeCopies[i] = (org.locationtech.jts.geom.LinearRing)original.getInteriorRingN(i).copy();
+        try {
+            if (geometry.getGeometryType().equals(org.locationtech.jts.geom.Geometry.TYPENAME_POLYGON)) {
+                var original = (org.locationtech.jts.geom.Polygon)geometry;
+                org.locationtech.jts.geom.LinearRing shellCopy = (org.locationtech.jts.geom.LinearRing)original.getExteriorRing().copy();
+                org.locationtech.jts.geom.LinearRing[] holeCopies = new org.locationtech.jts.geom.LinearRing[original.getNumInteriorRing()];
+                for (int i = 0; i < holeCopies.length; i++) {
+                    holeCopies[i] = (org.locationtech.jts.geom.LinearRing)original.getInteriorRingN(i).copy();
+                }
+                polygonList.add(getGeometryFactory().createPolygon(shellCopy, holeCopies));
+            } else if (geometry.getGeometryType().equals(org.locationtech.jts.geom.Geometry.TYPENAME_MULTIPOLYGON)) {
+                for (var i = 0; i < geometry.getNumGeometries(); i++) {
+                    polygonList.add((org.locationtech.jts.geom.Polygon)geometry.getGeometryN(i));
+                }
+            } else {
+                System.out.println(String.format("Error splitJtsPolygon: GeometryType:%s", geometry.getGeometryType()));
             }
-            polygonList.add(getGeometryFactory().createPolygon(shellCopy, holeCopies));
-        } else if (geometry.getGeometryType().equals(org.locationtech.jts.geom.Geometry.TYPENAME_MULTIPOLYGON)) {
-            for (var i = 0; i < geometry.getNumGeometries(); i++) {
-                polygonList.add((org.locationtech.jts.geom.Polygon)geometry.getGeometryN(i));
-            }
-        } else {
-            System.out.println(String.format("Error splitJtsPolygon: GeometryType:%s", geometry.getGeometryType()));
-        }
 
-        return polygonList;
+            return polygonList;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return polygonList;
+        }
     }
 
     private org.locationtech.jts.geom.Polygon matchPolygonFace(boolean isTriangleCCW, org.locationtech.jts.geom.Polygon polygon) {
@@ -398,88 +401,86 @@ public abstract class AbstractLodConverter {
             polygon.setInterior(interiorList);
         }
 
+        // TODO: lod1Solid
+        // lod2Solid
+        // 保持しておいたTriangleModelを取得する
+        List<TriangleModel> userDataList = (List<TriangleModel>)jtsPolygon.getUserData();
+        if (userDataList == null) {
+            throw new IllegalArgumentException("userDataList == null");
+        }
+
+        _compositeSurface.addSurfaceMember(new SurfaceProperty(String.format("#%s", polygon.getId())));
+        _boundedBy.add(createBoundarySurface(polygon, userDataList.get(0), groundTriangle));
+
         if (texture == null) {
-            // lod1Solid
-            // TODO: CompositeSurfaceの下にsurfaceMember -> Polygonを追加する
-
-            return polygon;
-        } else {
-            // lod2Solid
-            // 保持しておいたTriangleModelを取得する
-            List<TriangleModel> userDataList = (List<TriangleModel>)jtsPolygon.getUserData();
-            if (userDataList == null) {
-                throw new IllegalArgumentException("userDataList == null");
-            }
-
-            _compositeSurface.addSurfaceMember(new SurfaceProperty(String.format("#%s", polygon.getId())));
-            _boundedBy.add(createBoundarySurface(polygon, userDataList.get(0), groundTriangle));
-
-            // テクスチャの頂点を特定する
-            List<Double> textureCoordinatesList = new ArrayList<Double>();
-            for (var coordinate : jtsExteriorRing.getCoordinates()) {
-                var found = false;
-                for (var triangleModel : userDataList) {
-                    if (found) break;
-                    for (var i = 0; i < 3. ; i++) {
-                        if (found) break;
-                        var vertex = triangleModel.getVertex(i);
-                        if (coordinate.x == vertex.x && coordinate.y == vertex.y && coordinate.z == vertex.z) {
-                            var uv = triangleModel.getUV(i);
-                            textureCoordinatesList.add((double)uv.x);
-                            textureCoordinatesList.add((double)uv.y);
-                            found = true;
-                        }
-                    }
-                }
-                if (!found) {
-                    System.out.println("not found textureCoord → search by distance");
-
-                    // 同一頂点が見つからなかったら距離で判定する
-                    var minDistance = Double.MAX_VALUE;
-                    Point2f minDistanceUv = null;
-                    for (var triangleModel : userDataList) {
-                        for (var i = 0; i < 3. ; i++) {
-                            var vertex = triangleModel.getVertex(i);
-                            var vertexCoord = new org.locationtech.jts.geom.Coordinate(vertex.x, vertex.y, vertex.z);
-                            var distance = vertexCoord.distance(coordinate);
-                            if (distance < minDistance) {
-                                minDistance = distance;
-                                minDistanceUv = triangleModel.getUV(i);
-                            }
-                            minDistance = Math.min(minDistance, distance);
-                        }
-                    }
-
-                    // 最も距離が近い頂点を採用する
-                    textureCoordinatesList.add((double)minDistanceUv.x);
-                    textureCoordinatesList.add((double)minDistanceUv.y);
-                    System.out.println(String.format("minDistance:%f", minDistance));
-                }
-            }
-
-            var any = false;
-            for (var i = 0; i < textureCoordinatesList.size(); i += 2) {
-                if (textureCoordinatesList.get(i) != 0 || textureCoordinatesList.get(i + 1) != 1) {
-                    any = true;
-                    break;
-                }
-            }
-            if (!any) return polygon;
-
-            // 有効な座標が設定されている場合はテクスチャ座標を設定する
-            TextureCoordinates textureCoordinates = new TextureCoordinates();
-            textureCoordinates.setRing(String.format("#%s", gmlExteriorRing.getId()));
-            textureCoordinates.setValue(textureCoordinatesList);
-
-            TexCoordList texCoordList = new TexCoordList();
-            texCoordList.addTextureCoordinates(textureCoordinates);
-
-            TextureAssociation textureAssociation = new TextureAssociation(texCoordList);
-            textureAssociation.setUri(String.format("#%s", polygon.getId()));
-            texture.addTarget(textureAssociation);
-
             return polygon;
         }
+
+        // テクスチャの頂点を特定する
+        List<Double> textureCoordinatesList = new ArrayList<Double>();
+        for (var coordinate : jtsExteriorRing.getCoordinates()) {
+            var found = false;
+            for (var triangleModel : userDataList) {
+                if (found) break;
+                for (var i = 0; i < 3. ; i++) {
+                    if (found) break;
+                    var vertex = triangleModel.getVertex(i);
+                    if (coordinate.x == vertex.x && coordinate.y == vertex.y && coordinate.z == vertex.z) {
+                        var uv = triangleModel.getUV(i);
+                        textureCoordinatesList.add((double)uv.x);
+                        textureCoordinatesList.add((double)uv.y);
+                        found = true;
+                    }
+                }
+            }
+            if (!found) {
+                System.out.println("not found textureCoord → search by distance");
+
+                // 同一頂点が見つからなかったら距離で判定する
+                var minDistance = Double.MAX_VALUE;
+                Point2f minDistanceUv = null;
+                for (var triangleModel : userDataList) {
+                    for (var i = 0; i < 3. ; i++) {
+                        var vertex = triangleModel.getVertex(i);
+                        var vertexCoord = new org.locationtech.jts.geom.Coordinate(vertex.x, vertex.y, vertex.z);
+                        var distance = vertexCoord.distance(coordinate);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            minDistanceUv = triangleModel.getUV(i);
+                        }
+                        minDistance = Math.min(minDistance, distance);
+                    }
+                }
+
+                // 最も距離が近い頂点を採用する
+                textureCoordinatesList.add((double)minDistanceUv.x);
+                textureCoordinatesList.add((double)minDistanceUv.y);
+                System.out.println(String.format("minDistance:%f", minDistance));
+            }
+        }
+
+        var any = false;
+        for (var i = 0; i < textureCoordinatesList.size(); i += 2) {
+            if (textureCoordinatesList.get(i) != 0 || textureCoordinatesList.get(i + 1) != 1) {
+                any = true;
+                break;
+            }
+        }
+        if (!any) return polygon;
+
+        // 有効な座標が設定されている場合はテクスチャ座標を設定する
+        TextureCoordinates textureCoordinates = new TextureCoordinates();
+        textureCoordinates.setRing(String.format("#%s", gmlExteriorRing.getId()));
+        textureCoordinates.setValue(textureCoordinatesList);
+
+        TexCoordList texCoordList = new TexCoordList();
+        texCoordList.addTextureCoordinates(textureCoordinates);
+
+        TextureAssociation textureAssociation = new TextureAssociation(texCoordList);
+        textureAssociation.setUri(String.format("#%s", polygon.getId()));
+        texture.addTarget(textureAssociation);
+
+        return polygon;
     }
 
     private LinearRing createLinearRing(org.locationtech.jts.geom.LinearRing jtsLinearRing) {
@@ -542,7 +543,7 @@ public abstract class AbstractLodConverter {
         userDataList.add((TriangleModel)trianglePolygon.getUserData());
     }
 
-    private void replaceTexture(Appearance appearance, ParameterizedTexture texture) {
+    private void removeTexture(Appearance appearance) {
         var lod2SolidView = (LOD2SolidView)_lodSolidView;
         var solid = (Solid)lod2SolidView.getGmlObject();
         var compositeSurface = (CompositeSurface)solid.getExterior().getObject();
@@ -553,17 +554,6 @@ public abstract class AbstractLodConverter {
             hrefSet.add(surfaceMember.getHref());
         }
         removeTexture(appearance, hrefSet);
-
-        var surfaceDataProperty = new SurfaceDataProperty();
-        surfaceDataProperty.setSurfaceData(texture);
-        appearance.getSurfaceDataMember().add(surfaceDataProperty);
-
-        var appearanceMember = new AppearanceMember();
-        appearanceMember.setAppearance(appearance);
-
-        var appearanceFactory = new AppearanceFactory(_cityModelView);
-        var newAppearanceView = appearanceFactory.createAppearance(appearanceMember);
-        _cityModelView.setRGBTextureAppearance(newAppearanceView);
     }
 
     private boolean removeTexture(Appearance appearance, Set<String> hrefSet) {
@@ -589,30 +579,33 @@ public abstract class AbstractLodConverter {
         return true;
     }
 
-    private void replaceLod1Solid(CityModel cityModel) {
-        // lod2Solid
-        BuildingView buildingView = (BuildingView)_lodSolidView.getParent();
-        Building original = (Building)buildingView.getGMLObject();
-
-        Building building = null;
-        for (CityObjectMember cityObjectMember : cityModel.getCityObjectMember()) {
-            AbstractCityObject cityObject = cityObjectMember.getCityObject();
-            if (cityObject.getCityGMLClass() != CityGMLClass.BUILDING) continue;
-
-            var b = (Building)cityObject;
-            if (original.getId().equals(b.getId())) {
-                building = b;
-                break;
-            }
+    private AppearanceView createAppearanceView(Appearance appearance, Map<String, ParameterizedTexture> textureMap) {
+        var surfaceDataProperty = new SurfaceDataProperty();
+        for (var texture : textureMap.values()) {
+            surfaceDataProperty.setSurfaceData(texture);
+            appearance.getSurfaceDataMember().add(surfaceDataProperty);
         }
 
+        var appearanceMember = new AppearanceMember();
+        appearanceMember.setAppearance(appearance);
+
+        var appearanceFactory = new AppearanceFactory(_cityModelView);
+        return appearanceFactory.createAppearance(appearanceMember);
+    }
+
+    private BuildingView createBuildingViewLOD1(Building building) {
+        // lod1Solid
         Solid solid = new Solid();
+
+        // TODO:CompositeSurfaceをlod1用にする
         solid.setExterior(new SurfaceProperty(_compositeSurface));
         SolidProperty solidProperty = new SolidProperty(solid);
         building.setLod1Solid(solidProperty);
+
+        return new CityObjectMemberFactory(_cityModelView).createBuilding(building);
     }
 
-    private BuildingView createBuilding(Building building) {
+    private BuildingView createBuildingViewLOD2(Building building) {
         // lod2Solid
         Solid solid = new Solid();
         solid.setExterior(new SurfaceProperty(_compositeSurface));
@@ -631,9 +624,9 @@ public abstract class AbstractLodConverter {
 
     abstract protected void initialize(String fileUrl) throws Exception;
 
-    abstract protected ParameterizedTexture createParameterizedTexture() throws IOException, URISyntaxException;
+    abstract protected Map<String, ParameterizedTexture> createParameterizedTextures() throws IOException, URISyntaxException;
 
-    abstract protected List<TriangleModel> createTriangleModels();
+    abstract protected Map<String, List<TriangleModel>> createTriangleModelsMap();
 
-    abstract protected TriangleModel getGroundTriangle(List<TriangleModel> triangleModels);
+    abstract protected TriangleModel getGroundTriangle(Map<String, List<TriangleModel>> triangleModelsMap);
 }
