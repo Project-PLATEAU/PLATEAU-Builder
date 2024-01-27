@@ -22,14 +22,15 @@ module CityGMLEditor {
     requires jgltf.impl.v1;
     requires jgltf.impl.v2;
     requires com.fasterxml.jackson.core;
+    requires com.sun.xml.fastinfoset;
     requires commons.math3;
     requires org.locationtech.jts;
     requires proj4j;
     requires vecmath;
+    requires com.sun.xml.bind;
 
     provides Importer with
             ObjOrPolyObjImporter;
-
     exports org.plateau.citygmleditor.importers;
     exports org.plateau.citygmleditor.importers.obj;
 
