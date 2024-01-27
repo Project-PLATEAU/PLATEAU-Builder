@@ -13,13 +13,13 @@ wrapper {
 }
 
 group = 'org.plateau.citygmleditor'
-version = '1.0.0-SNAPSHOT'
+version = '1.0.0'
 
 ext {
     mainModuleName = 'CityGMLEditor'
     mainClassName = 'org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp'
     launcherClassName = 'org.plateau.citygmleditor.citygmleditor.Launcher'
-    javafxVersion = '17.0.2'  //requires JDK11+
+    javafxVersion = '17.0.10'  //requires JDK11+
 }
 
 repositories {
@@ -57,7 +57,7 @@ dependencies {
 }
 
 compileJava {
-    options.release = 11  //use JDK11+ for compiling & running
+    options.release = 11
     options.encoding = 'UTF-8'
 }
 
@@ -146,32 +146,59 @@ task uberJar(type: Jar) {
     duplicatesStrategy 'exclude'
 }
 
-
-task createInstaller(type: Exec, dependsOn: jlink) {
-    if (org.gradle.internal.os.OperatingSystem.current().windows) {
-        commandLine 'cmd', '/c', 'jpackage', '--input', 'build/libs', '--name', '<your-app-name>', '--main-jar', '<your-app-jar>.jar', '--main-class', '<your-main-class>', '--runtime-image', 'build/image', '--output', 'build/installer', '--win-dir-chooser', '--win-per-user-install', '--type', 'exe'
-    } else if (org.gradle.internal.os.OperatingSystem.current().linux) {
-        commandLine 'sh', '-c', 'jpackage', '--input', 'build/libs', '--name', '<your-app-name>', '--main-jar', '<your-app-jar>.jar', '--main-class', '<your-main-class>', '--runtime-image', 'build/image', '--output', 'build/installer', '--type', 'deb'
-    } else if (org.gradle.internal.os.OperatingSystem.current().macOsX) {
-        commandLine 'sh', '-c', 'jpackage', '--input', 'build/libs', '--name', '<your-app-name>', '--main-jar', '<your-app-jar>.jar', '--main-class', '<your-main-class>', '--runtime-image', 'build/image', '--output', 'build/installer', '--type', 'pkg'
-    }
-}
 jlink {
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
     launcher {
-        name = project.mainModuleName
+        name = project.launcherClassName
     }
 //    outputDir = file("build/image")
+
+    mergedModule {
+        uses 'javax.xml.bind.JAXBContextFactory'
+
+        // `gradlew suggestMergedModuleInfo`の結果を記載(今後変わる可能性あり)
+        requires 'com.google.gson';
+        requires 'com.fasterxml.jackson.annotation';
+        requires 'java.logging';
+        requires 'com.sun.xml.xsom';
+        requires 'java.xml';
+        requires 'com.sun.xml.txw2';
+        requires 'java.desktop';
+        requires 'java.datatransfer';
+        requires 'java.compiler';
+        requires 'com.sun.xml.fastinfoset';
+    }
 }
 
-launch4j {
+tasks.createExe.dependsOn('uberJar')
+
+launch4j() {
     mainClassName = project.mainClassName
-//    icon = '<replace with icon file path>'
-//    outfile = '<replace with output file name>'
-//    workDir = './build/launch4j'
-    jar = '../libs/CityGMLEditor-1.0.0-SNAPSHOT-no-deps-win.jar'
-    headerType = 'console'
+    outputDir = './product/CityGMLEditor'
+    // TODO: jar名変数化
+    jar = '../../libs/CityGMLEditor-1.0.0-no-deps-win.jar'
+    headerType = 'gui' // ログを確認したい場合は'console'に設定
+    bundledJrePath = './image'
+    bundledJre64Bit = true
 }
 
-//tasks.createExe(dependsOn: ['createExe', 'uberJar'])
+// JREをコピー
+task copyJre(type: Copy, dependsOn: ['jlink']) {
+    from './build/image'
+    into './build/product/CityGMLEditor/image'
+}
 
+task copyResources(type: Copy) {
+    from 'src/main/resources/org/plateau/citygmleditor/citygmleditor/'
+    include 'Locater*'
+    into './build/product/CityGMLEditor/'
+}
+
+// exeファイル一式を`build/product/CityGMLEditor`に生成する
+task deploy(dependsOn: [
+        'uberJar',
+        'jlink',
+        'launch4j',
+        'copyJre',
+        'copyResources'
+]) {}
