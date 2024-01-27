@@ -163,6 +163,10 @@ public class ObjImporter {
                     addMesh(key);
                     key = line.length() > 2 ? line.substring(2) : "default";
                     log("key = " + key);
+                } else if (line.startsWith("o ") || line.equals("o")) {
+                    addMesh(key);
+                    key = line.length() > 2 ? line.substring(2) : "default";
+                    log("key = " + key);
                 } else if (line.startsWith("v ")) {
                     String[] split = line.substring(2).trim().split(" +");
                     float x = Float.parseFloat(split[0]) * scale;
