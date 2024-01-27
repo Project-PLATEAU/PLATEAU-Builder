@@ -492,7 +492,7 @@ public abstract class AbstractLodConverter {
                 boundarySurface.setId(String.format("gnd_%s", polygon.getId()));
             } else {
                 boundarySurface = new OuterCeilingSurface();
-                boundarySurface.setId(String.format("outerfloor_%s", polygon.getId()));
+                boundarySurface.setId(String.format("ceil_%s", polygon.getId()));
             }
         } else if (angle >= 90 - threshold && angle <= 90 + threshold) {
             boundarySurface = new WallSurface();
