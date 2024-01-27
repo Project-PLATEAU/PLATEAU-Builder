@@ -1,6 +1,5 @@
 package org.plateau.citygmleditor.citymodel.factory;
 
-import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.paint.PhongMaterial;
 import org.citygml4j.model.citygml.CityGMLClass;
@@ -15,7 +14,7 @@ import java.nio.file.Paths;
 
 public class AppearanceFactory extends CityGMLFactory {
 
-    protected AppearanceFactory(CityModelView target) {
+    public AppearanceFactory(CityModelView target) {
         super(target);
     }
 
