@@ -2,19 +2,26 @@ package org.plateau.citygmleditor.converters;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.vecmath.Point2f;
 
 import org.citygml4j.builder.copy.DeepCopyBuilder;
 import org.citygml4j.model.citygml.CityGMLClass;
+import org.citygml4j.model.citygml.appearance.Appearance;
+import org.citygml4j.model.citygml.appearance.AppearanceMember;
 import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
+import org.citygml4j.model.citygml.appearance.SurfaceDataProperty;
 import org.citygml4j.model.citygml.appearance.TexCoordList;
 import org.citygml4j.model.citygml.appearance.TextureAssociation;
 import org.citygml4j.model.citygml.appearance.TextureCoordinates;
+import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
 import org.citygml4j.model.citygml.building.Building;
@@ -39,13 +46,18 @@ import org.citygml4j.model.gml.geometry.primitives.Solid;
 import org.citygml4j.model.gml.geometry.primitives.SolidProperty;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
 import org.locationtech.jts.algorithm.Orientation;
+import org.plateau.citygmleditor.citymodel.AppearanceView;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.citymodel.factory.AppearanceFactory;
 import org.plateau.citygmleditor.citymodel.factory.CityModelFactory;
+import org.plateau.citygmleditor.citymodel.factory.CityObjectMemberFactory;
+import org.plateau.citygmleditor.citymodel.factory.LOD2SolidFactory;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
+import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.geometry.GeoReference;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.world.World;
@@ -55,9 +67,13 @@ public abstract class AbstractLodConverter {
 
     private CityModelView _cityModelView;
 
+    private BuildingView _buildingView;
+
     private ILODSolidView _lodSolidView;
 
-    private org.citygml4j.model.citygml.core.CityModel _cityModel;
+    private AppearanceView _appearanceView;
+
+    private CityModel _cityModel;
 
     private GeoReference _geoReference;
 
@@ -68,7 +84,9 @@ public abstract class AbstractLodConverter {
     public AbstractLodConverter(CityModelView cityModelView, ILODSolidView lodSolidView) {
         _cityModelView = cityModelView;
         _lodSolidView = lodSolidView;
-        _cityModel = (org.citygml4j.model.citygml.core.CityModel) cityModelView.getGmlObject();
+        _buildingView = (BuildingView)lodSolidView.getParent();
+        _appearanceView = cityModelView.getRGBTextureAppearance();
+        _cityModel = (CityModel) cityModelView.getGmlObject();
         _geoReference = World.getActiveInstance().getGeoReference();
     }
 
@@ -78,6 +96,10 @@ public abstract class AbstractLodConverter {
 
     protected CityModelView getCityModelView() {
         return _cityModelView;
+    }
+
+    protected BuildingView getBuildingView() {
+        return _buildingView;
     }
 
     protected ILODSolidView getLodSolidView() {
@@ -96,20 +118,30 @@ public abstract class AbstractLodConverter {
         // 各フォーマット用の初期化
         initialize(fileUrl);
 
-        CityModel cityModel = null;
+        Building building = null;
         if (_lodSolidView instanceof LOD1SolidView) {
-            cityModel = convertLOD1();
+            building = convertLOD1();
         }
         else if (_lodSolidView instanceof LOD2SolidView) {
-            cityModel = convertLOD2();
+            convertLOD2();
         } else {
             throw new IllegalArgumentException("Unsupported LOD");
         }
 
-        return new CityModelFactory().createCityModel(cityModel, _cityModelView.getGmlPath(), _cityModelView.getSchemaHandler());
+        //return new CityModelFactory().createCityModel(cityModel, _cityModelView.getGmlPath(), _cityModelView.getSchemaHandler());
+        
+
+        GmlExporter.export(
+            String.format("E:\\Temp\\export\\gml\\udx\\bldg\\53392633_bldg_6697_2_op_%d.gml", ++exportCount),
+            _cityModelView.getGmlObject(),
+            _cityModelView.getSchemaHandler());
+
+        return _cityModelView;
     }
 
-    private CityModel convertLOD1() throws Exception {
+    private static int exportCount = 0;
+
+    private Building convertLOD1() throws Exception {
         // 各フォーマットの実装から三角形のリストを作成
         var triangleModels = createTriangleModels();
 
@@ -133,13 +165,13 @@ public abstract class AbstractLodConverter {
         // 差し替え用にコピーを作成
         var cityModel = (org.citygml4j.model.citygml.core.CityModel)_cityModel.copy(new DeepCopyBuilder());
 
-        // lod2Solidを差し替える
+        // lod1Solidを差し替える
         replaceLod1Solid(cityModel);
 
-        return cityModel;
+        return null;
     }
 
-    private CityModel convertLOD2() throws Exception {
+    private void convertLOD2() throws Exception {
         // 各フォーマットの実装からテクスチャを作成
         var texture = createParameterizedTexture();
 
@@ -163,17 +195,19 @@ public abstract class AbstractLodConverter {
             toGmlPolygonList(jtsPolygon, groundTriangle, texture);
         }
 
-        // 差し替え用にコピーを作成
-        var cityModel = (org.citygml4j.model.citygml.core.CityModel)_cityModel.copy(new DeepCopyBuilder());
-
-        // ParameterizedTextureを差し替える
+        // ParameterizedTextureを差し替える(差し替え用にコピーを作成している)
         // このメソッドの中でlod2Solidを参照しているため、lod2Solidより先に実行する必要がある
-        replaceTexture(cityModel, texture);
+        var appearance = _appearanceView.getOriginal();
+        var copiedAppearance = (Appearance)appearance.copy(new DeepCopyBuilder());
+        replaceTexture(copiedAppearance, texture);
 
-        // lod2Solidを差し替える
-        replaceLod2Solid(cityModel);
+        // lod2Solidを差し替える(差し替え用にコピーを作成している)
+        var building = (AbstractBuilding) _buildingView.getGMLObject();
+        var copiedBuilding = (Building)building.copy(new DeepCopyBuilder());
+        BuildingView newBuildingView = createBuilding(copiedBuilding);
 
-        return cityModel;
+        _cityModelView.addCityObjectMember(newBuildingView);
+        _cityModelView.removeCityObjectMember(_buildingView);
     }
 
     private List<List<TriangleModel>> createSameTrianglesList(List<TriangleModel> triangleModels, TriangleModel groundTriangle) {
@@ -519,34 +553,51 @@ public abstract class AbstractLodConverter {
         userDataList.add((TriangleModel)trianglePolygon.getUserData());
     }
 
-    private void replaceTexture(CityModel cityModel, ParameterizedTexture texture) {
+    private void replaceTexture(Appearance appearance, ParameterizedTexture texture) {
         var lod2SolidView = (LOD2SolidView)_lodSolidView;
         var solid = (Solid)lod2SolidView.getGmlObject();
         var compositeSurface = (CompositeSurface)solid.getExterior().getObject();
+
+        // もともと参照していたテクスチャを削除する
+        var hrefSet = new HashSet<String>();
         for (var surfaceMember : compositeSurface.getSurfaceMember()) {
-            if (replaceTexture(cityModel, texture, surfaceMember.getHref())) {
-                return;
-            }
+            hrefSet.add(surfaceMember.getHref());
         }
+        removeTexture(appearance, hrefSet);
+
+        var surfaceDataProperty = new SurfaceDataProperty();
+        surfaceDataProperty.setSurfaceData(texture);
+        appearance.getSurfaceDataMember().add(surfaceDataProperty);
+
+        var appearanceMember = new AppearanceMember();
+        appearanceMember.setAppearance(appearance);
+
+        var appearanceFactory = new AppearanceFactory(_cityModelView);
+        var newAppearanceView = appearanceFactory.createAppearance(appearanceMember);
+        _cityModelView.setRGBTextureAppearance(newAppearanceView);
     }
 
-    private boolean replaceTexture(CityModel cityModel, ParameterizedTexture texture, String targetUri) {
-        for (var appearanceMember : cityModel.getAppearanceMember()) {
-            for (var surfaceDataMember : appearanceMember.getAppearance().getSurfaceDataMember()) {
-                if (surfaceDataMember.getSurfaceData() instanceof ParameterizedTexture) {
-                    // LOD2SolidのCompositeSurfaceのhrefと同じURIを持つParameterizedTextureを特定する
-                    ParameterizedTexture original = (ParameterizedTexture)surfaceDataMember.getSurfaceData();
-                    for (var originalTarget : original.getTarget()) {
-                        if (originalTarget.getUri().equals(targetUri)) {
-                            surfaceDataMember.setSurfaceData(texture);
-                            return true;
-                        }
+    private boolean removeTexture(Appearance appearance, Set<String> hrefSet) {
+        var removeTextureList = new ArrayList<ParameterizedTexture>();
+        var surfaceDataMemberList = appearance.getSurfaceDataMember();
+        for (var surfaceDataMember : surfaceDataMemberList) {
+            if (surfaceDataMember.getSurfaceData() instanceof ParameterizedTexture) {
+                // LOD2SolidのCompositeSurfaceのhrefと同じURIを持つParameterizedTextureを特定する
+                ParameterizedTexture original = (ParameterizedTexture)surfaceDataMember.getSurfaceData();
+                for (var originalTarget : original.getTarget()) {
+                    if (hrefSet.contains(originalTarget.getUri())) {
+                        removeTextureList.add(original);
+                        break;
                     }
                 }
             }
         }
 
-        return false;
+        for (var removeTexture : removeTextureList) {
+            surfaceDataMemberList.removeIf(surfaceDataMember -> surfaceDataMember.getSurfaceData() == removeTexture);
+        }
+
+        return true;
     }
 
     private void replaceLod1Solid(CityModel cityModel) {
@@ -572,23 +623,8 @@ public abstract class AbstractLodConverter {
         building.setLod1Solid(solidProperty);
     }
 
-    private void replaceLod2Solid(CityModel cityModel) {
+    private BuildingView createBuilding(Building building) {
         // lod2Solid
-        BuildingView buildingView = (BuildingView)_lodSolidView.getParent();
-        Building original = (Building)buildingView.getGMLObject();
-
-        Building building = null;
-        for (CityObjectMember cityObjectMember : cityModel.getCityObjectMember()) {
-            AbstractCityObject cityObject = cityObjectMember.getCityObject();
-            if (cityObject.getCityGMLClass() != CityGMLClass.BUILDING) continue;
-
-            var b = (Building)cityObject;
-            if (original.getId().equals(b.getId())) {
-                building = b;
-                break;
-            }
-        }
-
         Solid solid = new Solid();
         solid.setExterior(new SurfaceProperty(_compositeSurface));
         SolidProperty solidProperty = new SolidProperty(solid);
@@ -600,6 +636,8 @@ public abstract class AbstractLodConverter {
         for (var boundarySurface : _boundedBy) {
             boundedBySurface.add(new BoundarySurfaceProperty(boundarySurface));
         }
+
+        return new CityObjectMemberFactory(_cityModelView).createBuilding(building);
     }
 
     abstract protected void initialize(String fileUrl) throws Exception;

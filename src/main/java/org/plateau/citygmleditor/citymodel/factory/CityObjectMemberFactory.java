@@ -1,13 +1,12 @@
 package org.plateau.citygmleditor.citymodel.factory;
 
 import org.citygml4j.model.citygml.building.AbstractBuilding;
-import org.citygml4j.model.gml.geometry.primitives.Solid;
 import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 
 public class CityObjectMemberFactory extends CityGMLFactory {
-    protected CityObjectMemberFactory(CityModelView target) {
+    public CityObjectMemberFactory(CityModelView target) {
         super(target);
     }
 
