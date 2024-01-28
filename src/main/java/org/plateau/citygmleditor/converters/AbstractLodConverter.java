@@ -52,6 +52,7 @@ import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
+import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.geometry.GeoReference;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.world.World;
@@ -128,22 +129,15 @@ public abstract class AbstractLodConverter {
         // 各フォーマットの実装から三角形のリストを作成
         var triangleModelsMap = createTriangleModelsMap();
 
-        // 各フォーマットの実装から地面の基準となる三角形を特定する
-        var groundTriangle = getGroundTriangle(triangleModelsMap);
-
         for (var meshKey : triangleModelsMap.keySet()) {
-            // 同一平面の三角形をグループ化
-            var sameTrianglesList = createSameTrianglesList(triangleModelsMap.get(meshKey), groundTriangle);
+            var trianglesList = triangleModelsMap.get(meshKey);
 
-            // グループ化したポリゴンごとに結合
-            List<org.locationtech.jts.geom.Polygon> jtsPolygonList = new ArrayList<>();
-            for (var sameTriangleList : sameTrianglesList) {
-                jtsPolygonList.addAll(createPolygonList(sameTriangleList));
-            }
+            // 三角形を結合
+            List<org.locationtech.jts.geom.Polygon> jtsPolygonList = createPolygonList(trianglesList);
 
             // gmlのPolygonに変換
             for (var jtsPolygon : jtsPolygonList) {
-                toGmlPolygonList(jtsPolygon, groundTriangle);
+                toGmlPolygonList(jtsPolygon, null, null);
             }
         }
 
@@ -388,10 +382,6 @@ public abstract class AbstractLodConverter {
         return matchPolygon;
     }
 
-    private void toGmlPolygonList(org.locationtech.jts.geom.Geometry jtsGeometry, TriangleModel groundTriangle) {
-        toGmlPolygonList(jtsGeometry, groundTriangle, null);
-    }
-
     private void toGmlPolygonList(org.locationtech.jts.geom.Geometry jtsGeometry, TriangleModel groundTriangle, ParameterizedTexture texture) {
         if (jtsGeometry.getGeometryType().equals(org.locationtech.jts.geom.Geometry.TYPENAME_POLYGON)) {
             createPolygon((org.locationtech.jts.geom.Polygon)jtsGeometry, groundTriangle, texture);
@@ -419,20 +409,38 @@ public abstract class AbstractLodConverter {
             polygon.setInterior(interiorList);
         }
 
-        // TODO: lod1Solid
-
-        // lod2Solid
         // 保持しておいたTriangleModelを取得する
         List<TriangleModel> userDataList = (List<TriangleModel>)jtsPolygon.getUserData();
         if (userDataList == null) {
             throw new IllegalArgumentException("userDataList == null");
         }
 
+        // LODの種別ごとにSurfaceを構築する
+        if (_lodSolidView instanceof LOD1SolidView) {
+            applyLOD1Surface(polygon, jtsPolygon, userDataList);
+        }
+        else if (_lodSolidView instanceof LOD2SolidView) {
+            applyLOD2Surface(polygon, jtsPolygon, groundTriangle, texture, userDataList);
+        } else {
+            throw new IllegalArgumentException("Unsupported LOD");
+        }
+
+        return polygon;
+    }
+
+    private void applyLOD1Surface(Polygon polygon, org.locationtech.jts.geom.Polygon jtsPolygon, List<TriangleModel> userDataList) {
+        _compositeSurface.addSurfaceMember(new SurfaceProperty(polygon));
+    }
+
+    private void applyLOD2Surface(Polygon polygon, org.locationtech.jts.geom.Polygon jtsPolygon, TriangleModel groundTriangle, ParameterizedTexture texture, List<TriangleModel> userDataList) {
+        var jtsExteriorRing = jtsPolygon.getExteriorRing();
+        var gmlExteriorRing = createLinearRing(jtsExteriorRing);
+
         _compositeSurface.addSurfaceMember(new SurfaceProperty(String.format("#%s", polygon.getId())));
         _boundedBy.add(createBoundarySurface(polygon, userDataList.get(0), groundTriangle));
 
         if (texture == null) {
-            return polygon;
+            return;
         }
 
         // テクスチャの頂点を特定する
@@ -485,7 +493,7 @@ public abstract class AbstractLodConverter {
                 break;
             }
         }
-        if (!any) return polygon;
+        if (!any) return;
 
         // 有効な座標が設定されている場合はテクスチャ座標を設定する
         TextureCoordinates textureCoordinates = new TextureCoordinates();
@@ -498,8 +506,6 @@ public abstract class AbstractLodConverter {
         TextureAssociation textureAssociation = new TextureAssociation(texCoordList);
         textureAssociation.setUri(String.format("#%s", polygon.getId()));
         texture.addTarget(textureAssociation);
-
-        return polygon;
     }
 
     private LinearRing createLinearRing(org.locationtech.jts.geom.LinearRing jtsLinearRing) {
@@ -615,8 +621,6 @@ public abstract class AbstractLodConverter {
     private BuildingView createBuildingViewLOD1(Building building) {
         // lod1Solid
         Solid solid = new Solid();
-
-        // TODO:CompositeSurfaceをlod1用にする
         solid.setExterior(new SurfaceProperty(_compositeSurface));
         SolidProperty solidProperty = new SolidProperty(solid);
         building.setLod1Solid(solidProperty);
