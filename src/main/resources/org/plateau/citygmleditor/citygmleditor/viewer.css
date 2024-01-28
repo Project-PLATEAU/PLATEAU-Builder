@@ -248,6 +248,9 @@
     -fx-background-insets: -0.2, 1, 2, 1 32 1 1, 1 33 1 1;
     -fx-background-radius: 3px, 2px, 1px, 2px 0 0 2px, 1 0 0 1;
 }
+.alert {
+    -fx-background-color: #000;
+}
 #playControls * {
     -fx-content-display: graphic-only;
 }
@@ -295,4 +298,4 @@
 }
 .timeline-display .progress {
     -fx-background-color: #52574a;
-}
+}}

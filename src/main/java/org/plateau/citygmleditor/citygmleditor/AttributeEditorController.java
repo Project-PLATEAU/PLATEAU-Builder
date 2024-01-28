@@ -222,6 +222,8 @@ public class AttributeEditorController implements Initializable {
                 // アラートを作成
                 Alert alert = new Alert(AlertType.WARNING);
                 alert.setTitle("変更エラー");
+                alert.getDialogPane().getStylesheets().add(getClass().getResource("viewer.css").toExternalForm());
+                alert.getDialogPane().getStyleClass().add("alert");
                 alert.setHeaderText(null);
                 alert.setContentText("変更後の値が要素の条件を満たしていません。\n" + type + "に従ってください");
                 // アラートを表示
@@ -303,6 +305,8 @@ public class AttributeEditorController implements Initializable {
             if (!isDeletable(deleteAttributeKeyName, deleteAttributeParentKeyName)) {
                 // アラートを作成
                 Alert alert = new Alert(AlertType.WARNING);
+                alert.getDialogPane().getStylesheets().add(getClass().getResource("viewer.css").toExternalForm());
+                alert.getDialogPane().getStyleClass().add("alert");
                 alert.setTitle("削除エラー");
                 alert.setHeaderText(null);
                 alert.setContentText("削除できない要素です。");
@@ -545,6 +549,8 @@ public class AttributeEditorController implements Initializable {
         if (attributeList.size() == 0) {
             // アラートを作成
             Alert alert = new Alert(AlertType.WARNING);
+            alert.getDialogPane().getStylesheets().add(getClass().getResource("viewer.css").toExternalForm());
+            alert.getDialogPane().getStyleClass().add("alert");
             alert.setTitle("追加エラー");
             alert.setHeaderText(null);
             alert.setContentText("追加できる要素がありません。");
