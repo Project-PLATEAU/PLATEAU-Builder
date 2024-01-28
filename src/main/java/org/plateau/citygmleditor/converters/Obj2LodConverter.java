@@ -22,7 +22,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.TriangleMesh;
 
 public class Obj2LodConverter extends AbstractLodConverter {
-    
+
     private ObjImporter _objImporter;
 
     public Obj2LodConverter(CityModelView cityModelView, ILODSolidView lodSolidView) {
