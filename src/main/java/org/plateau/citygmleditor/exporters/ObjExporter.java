@@ -5,7 +5,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -133,11 +138,17 @@ public class ObjExporter {
     }
 
     private MaterialModel createMaterialModel(PhongMaterial material) {
-        var materialUrl = new File(material.getDiffuseMap().getUrl());
-        var fileName = materialUrl.getName();
+        File materialPath = null;
+        try {
+            materialPath = new File(new URI(material.getDiffuseMap().getUrl()).getPath());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return null;
+        }
+        var fileName = materialPath.getName();
         var name = fileName.substring(0, fileName.lastIndexOf("."));
 
-        return new MaterialModel(name, fileName, materialUrl.getAbsolutePath());
+        return new MaterialModel(name, fileName, materialPath.toString());
     }
 
     private static class ObjectModel {
