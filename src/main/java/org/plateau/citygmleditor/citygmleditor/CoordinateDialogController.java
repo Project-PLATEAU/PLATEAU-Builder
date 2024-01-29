@@ -3,6 +3,7 @@ package org.plateau.citygmleditor.citygmleditor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
 import javafx.collections.FXCollections;
@@ -23,7 +24,7 @@ import javafx.util.Callback;
 public class CoordinateDialogController implements Initializable {
     private Stage root;
 
-    private File droppedFile;
+    private List<File> gmlFiles;
 
     @FXML
     private ComboBox<CoordinateCodesEnum> comboboxCoordinateCodes;
@@ -72,8 +73,8 @@ public class CoordinateDialogController implements Initializable {
      * 読み込むGMLファイルを設定
      * @param file
      */
-    public void setFile(File file) {
-        droppedFile = file;
+    public void setFiles(List<File> files) {
+        gmlFiles = files;
     }
 
     /**
@@ -89,7 +90,15 @@ public class CoordinateDialogController implements Initializable {
         String code = buffer.toString();
 
         try {
-            Node root = GmlImporter.loadGml(droppedFile.toString(), code);
+            Node root = null;
+            for (var gmlFile : gmlFiles) {
+                if (root == null) {
+                    root = GmlImporter.loadGml(gmlFile.toString(), code, true);
+                }
+                else {
+                    root = GmlImporter.loadGmlAdd(gmlFile.toString());
+                }
+            }
             CityGMLEditorApp.getSceneContent().setContent(root);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -119,16 +128,16 @@ public class CoordinateDialogController implements Initializable {
     /**
      * 座標系選択ダイアログ表示
      * 
-     * @param file
+     * @param files
      */
-    public static void createCoorinateDialog(File file) {
+    public static void createCoorinateDialog(List<File> files) {
         try {
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             FXMLLoader loader = new FXMLLoader(CoordinateDialogController.class.getResource("fxml/coordinate-dialog.fxml"));
             stage.setScene(new Scene(loader.load()));
             var controller = (CoordinateDialogController) loader.getController();
-            controller.setFile(file);
+            controller.setFiles(files);
             controller.setRoot(stage);
             stage.showAndWait();
         } catch (IOException e) {

@@ -15,7 +15,7 @@ import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.exporters.GmlExporter;
 import org.plateau.citygmleditor.exporters.TextureExporter;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
-
+import org.plateau.citygmleditor.world.World;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,12 +24,19 @@ import java.util.Optional;
 
 public class TopPanelController {
     public void importGml(ActionEvent actionEvent) {
-        var file = FileChooserService.showOpenDialog("*.gml", SessionManager.GML_FILE_PATH_PROPERTY);
+        var files = FileChooserService.showOpenDialog("*.gml", SessionManager.GML_FILE_PATH_PROPERTY);
 
-        if (file == null)
+        if (files == null)
             return;
 
-        CoordinateDialogController.createCoorinateDialog(file);
+        String epsgCode = World.getActiveInstance().getEPSGCode();
+        
+        if (epsgCode == null || epsgCode.isEmpty()) {
+            CoordinateDialogController.createCoorinateDialog(files);
+        }
+        else {
+            LoadGMLDialogController.createLoadGMLDialog(files);
+        }
     }
 
     public void exportDataset(ActionEvent event) {

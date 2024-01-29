@@ -19,6 +19,7 @@ public class World {
     private GeoReference geoReference;
     private CityModelView cityModel;
     private Material defaultMaterial;
+    private String epsgCode;
 
     public World() {
         defaultMaterial = new PhongMaterial(Color.WHITE);
@@ -55,5 +56,13 @@ public class World {
 
     public void setCityModel(CityModelView cityModel) {
         this.cityModel = cityModel;
+    }
+
+    public String getEPSGCode() {
+        return epsgCode;
+    }
+
+    public void setEPSGCode(String epsgCode) {
+        this.epsgCode = epsgCode;
     }
 }

@@ -13,6 +13,8 @@ import org.citygml4j.model.citygml.CityGMLClass;
 import org.citygml4j.model.citygml.core.CityModel;
 import org.citygml4j.xml.io.CityGMLInputFactory;
 import org.citygml4j.xml.io.reader.CityGMLReader;
+import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.factory.CityModelFactory;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.geometry.GeoReference;
@@ -23,7 +25,7 @@ import java.io.IOException;
 
 public class GmlImporter {
 
-    public static Node loadGml(String fileUrl, String epsgCode) throws Exception {
+    public static Node loadGml(String fileUrl, String epsgCode, boolean isNew) throws Exception {
         // get extension
         final int dot = fileUrl.lastIndexOf('.');
         if (dot <= 0) {
@@ -49,25 +51,55 @@ public class GmlImporter {
                 continue;
 
             var world = World.getActiveInstance();
-
-            // 座標投影設定
-            var envelope = ((org.citygml4j.model.citygml.core.CityModel) citygml).getBoundedBy().getEnvelope();
-            var lowerCorner = envelope.getLowerCorner().toList3d();
-            var min = new GeoCoordinate(lowerCorner);
-            var upperCorner = envelope.getUpperCorner().toList3d();
-            var max = new GeoCoordinate(upperCorner);
-            var center = min.add(max).divide(2);
-            world.setGeoReference(new GeoReference(center, epsgCode));
-
+            if (isNew) {
+                // 座標投影設定
+                var envelope = ((org.citygml4j.model.citygml.core.CityModel) citygml).getBoundedBy().getEnvelope();
+                var lowerCorner = envelope.getLowerCorner().toList3d();
+                var min = new GeoCoordinate(lowerCorner);
+                var upperCorner = envelope.getUpperCorner().toList3d();
+                var max = new GeoCoordinate(upperCorner);
+                var center = min.add(max).divide(2);
+                world.setGeoReference(new GeoReference(center, epsgCode));
+                world.setEPSGCode(epsgCode);
+            }
             var cityModelFactory = new CityModelFactory();
             var cityModel = cityModelFactory.createCityModel((CityModel) citygml, fileUrl, in.getSchemaHandler());
 
             node.getChildren().add(cityModel);
 
-            world.setCityModel(cityModel);
+            if (isNew) {
+                world.setCityModel(cityModel);
+            }
         }
         reader.close();
 
         return node;
+    }
+    
+    public static Node loadGmlAdd(String fileUrl) throws Exception {
+        var world = World.getActiveInstance();
+        var city = world.getCityModel();
+
+        var cityRoot = GmlImporter.loadGml(fileUrl.toString(), world.getEPSGCode(), false);
+        var newCity = (CityModelView) ((Group)cityRoot).getChildren().get(0);
+
+        // View追加
+        for (var building : newCity.getCityObjectMembersUnmodifiable()) {
+            city.addCityObjectMember(building);
+        }
+        if (newCity.getRGBTextureAppearance() != null) {
+            city.addRGBTextureAppearances(newCity.getRGBTextureAppearance());
+        }
+        // GML追加
+        for (var cityObjectMember : newCity.getGmlObject().getCityObjectMember()) {
+            city.getGmlObject().addCityObjectMember(cityObjectMember);
+        }
+        for (var appearanceMember : newCity.getGmlObject().getAppearanceMember()) {
+            city.getGmlObject().addAppearanceMember(appearanceMember);
+        }
+        // gml:Envelope再計算
+        city.getGmlObject().getBoundedBy().updateEnvelope(newCity.getGmlObject().getBoundedBy().getEnvelope());
+        
+        return city.getParent();
     }
 }
