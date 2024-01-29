@@ -21,6 +21,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Attr;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.Flow.Subscriber;
@@ -59,6 +60,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.fxml.FXMLLoader;
 
 public class AttributeEditorController implements Initializable {
     public TreeTableView<AttributeItem> attributeTreeTable;
@@ -544,6 +546,13 @@ public class AttributeEditorController implements Initializable {
      */
     private ArrayList<ArrayList<String>> showListView(ChildList<ADEComponent> childList,
             String selectedAttributeKeyName) {
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/add-attribute-list-view.fxml"));
+            VBox listViewVBox = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Stage pStage = new Stage();
         ArrayList<ArrayList<String>> attributeList = getUroList(selectedAttributeKeyName);
         if (attributeList.size() == 0) {

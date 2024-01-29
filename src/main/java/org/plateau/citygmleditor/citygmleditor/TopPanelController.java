@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import javafx.scene.layout.VBox;
 
 public class TopPanelController {
     public void importGml(ActionEvent actionEvent) {
@@ -45,13 +46,13 @@ public class TopPanelController {
     }
 
     public void exportDataset(ActionEvent event) {
-        var content = (Group)CityGMLEditorApp.getSceneContent().getContent();
+        var content = (Group) CityGMLEditorApp.getSceneContent().getContent();
         var cityModelNode = content.getChildren().get(0);
 
         if (cityModelNode == null)
             return;
 
-        var cityModel = (CityModelView)cityModelNode;
+        var cityModel = (CityModelView) cityModelNode;
         var gmlPath = cityModel.getGmlPath();
 
         var importGmlPathComponents = gmlPath.split("\\\\");
@@ -66,7 +67,8 @@ public class TopPanelController {
         String rootDirName;// エクスポート先のルートフォルダの名前
         String udxDirName = "udx";
         String bldgDirName = "bldg";
-
+        FXMLLoader loader = null;
+        VBox dialogVBox = null;
         // ダイアログで表示される初期のフォルダ名を指定
         String defaultDirName = "";
         if (destRootDirComponents[destRootDirComponents.length - 1].equals("op")) {
@@ -89,13 +91,21 @@ public class TopPanelController {
             }
         }
         // テキスト入力ダイアログを表示し、ユーザーにフォルダ名を入力させる(仮のフォルダ名は表示)
-        TextInputDialog dialog = new TextInputDialog(defaultDirName);
-        dialog.setTitle("Input Root Folder Name");
-        dialog.setHeaderText(null);
-        dialog.setContentText("Folder Name:");
 
-        Optional<String> result = dialog.showAndWait();
-        rootDirName = dialog.getResult();
+        try {
+            loader = new FXMLLoader(getClass().getResource("fxml/export-dialog.fxml"));
+            dialogVBox = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ExportDialogController dialogController = loader.getController();
+
+        Stage dialogStage = new Stage();
+        dialogController.setDialogStage(dialogStage);
+        dialogStage.setTitle("Input Root Folder Name");
+        dialogStage.setScene(new Scene(dialogVBox));
+        dialogStage.showAndWait();
+        rootDirName = dialogController.getFolderName();
 
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(Paths.get(gmlPath).getParent().toFile());// 初期ディレクトリ指定
@@ -117,9 +127,9 @@ public class TopPanelController {
             // CityGMLのエクスポート
             GmlExporter.export(
                     Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" +
-                                    udxDirName + "/"
-                                    + bldgDirName
-                                    + "/" + importGmlPathComponents[importGmlPathComponents.length - 1])
+                            udxDirName + "/"
+                            + bldgDirName
+                            + "/" + importGmlPathComponents[importGmlPathComponents.length - 1])
                             .toString(),
                     cityModel.getGmlObject(),
                     cityModel.getSchemaHandler());
