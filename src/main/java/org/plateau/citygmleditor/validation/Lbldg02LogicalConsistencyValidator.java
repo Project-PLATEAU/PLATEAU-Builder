@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.validation;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Plane;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.PolygonRelationship;

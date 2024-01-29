@@ -27,4 +27,8 @@ public class LineSegment3D {
   public void setEnd(Point3D end) {
     this.end = end;
   }
+
+  public boolean equal(LineSegment3D other){
+    return this.start.equals(other.start) && this.end.equals(other.end);
+  }
 }

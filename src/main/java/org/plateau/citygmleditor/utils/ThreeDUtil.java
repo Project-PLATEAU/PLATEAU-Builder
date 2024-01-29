@@ -11,6 +11,7 @@ import org.plateau.citygmleditor.constant.SegmentRelationship;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
+import org.plateau.citygmleditor.validation.LineSegment3D;
 import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.plateau.citygmleditor.world.World;
 
@@ -68,6 +69,17 @@ public class ThreeDUtil {
             Coordinate startCoordinate = new Coordinate(start.getX(), start.getY(), start.getZ());
             Coordinate endCoordinate = new Coordinate(end.getX(), end.getY(), end.getZ());
             LineSegment lineSegment = new LineSegment(startCoordinate, endCoordinate);
+            lineSegments.add(lineSegment);
+        }
+        return lineSegments;
+    }
+    public static List<LineSegment3D> getLineSegments(String[] posList) {
+        List<Point3D> points = createListPoint(posList);
+        List<LineSegment3D> lineSegments = new ArrayList<>();
+        for (int i = 0; i < points.size() - 1; i++) {
+            Point3D start = points.get(i);
+            Point3D end = points.get(i + 1);
+            LineSegment3D lineSegment = new LineSegment3D(start, end);
             lineSegments.add(lineSegment);
         }
         return lineSegments;
