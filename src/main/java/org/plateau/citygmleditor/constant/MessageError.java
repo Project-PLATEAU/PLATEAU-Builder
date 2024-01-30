@@ -32,7 +32,7 @@ public interface MessageError {
     String ERR_L09_INVALID_FORMAT = "\n<gml:LinearRing gml:id=\"{0}\">無効な形式。";
     String ERR_L10_001 = "L10: Building gml:id=\"{0}\" and {1} invalid";
     String ERR_L10_002 = "L10: 地物\"{0}\":{1}";
-    String ERR_L10_002_1 = "\n\"<gml:Polygon gml:id=\\\"{0}\\\">の外周または内周の座標列向きが不正です。\"";
+    String ERR_L10_002_1 = "\n\"<gml:Polygon gml:id=\"{0}\">の外周または内周の座標列向きが不正です。\"";
     String ERR_L10_003 = "L10: Building have (bldg:Building gml:id={0} LinearRing = {1}) is valid";
     String ERR_L11_002 = "L11: 地物\"{0}\":";
     String ERR_L11_002_1 = "\n<gml:Polygon gml:id=\"{0}\">に同一平面上にない座標値が存在します。";
