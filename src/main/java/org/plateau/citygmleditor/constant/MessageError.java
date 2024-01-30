@@ -47,7 +47,7 @@ public interface MessageError {
     String ERR_L13_0003 = "<gml:Polygon gml:id=\"%s\">内周同士が重なる、または包含関係にある。";
     String ERR_L13_0000 = "<gml:Polygon gml:id=\"%s\"> 無効な形式";
     String ERR_L14_001 = "L14: Building have {0} is invalid";
-    String ERR_L14_002_1 = "地物\"{0}\":\n";
+    String ERR_L14_002_1 = "L14: 地物\"{0}\":\n";
     String ERR_L14_002_2 = "<gml:Polygon gml:id=\"{0}\">境界面が自己交差している。\n";
     String ERR_L14_002_3 = "<gml:Polygon gml:id=\"{0}\">境界面が閉じていない。\n";
     String ERR_L14_002_4 = "<gml:Polygon gml:id=\"{0}\">全ての境界面の向きが外側を向いていない。\n";
