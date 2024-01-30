@@ -50,6 +50,10 @@ public class SolveEquationUtil {
     return planeEquation;
   }
 
+  public static boolean onPlane(double[] plane1, double[] plane2){
+    return plane1[0] == plane2[0] && plane1[1] == plane2[1] && plane1[2] == plane2[2];
+  }
+
   public static Vec3f createNormal(Point3D vector12, Point3D vector23) {
     double xNormalVector = calculateDeterminant(vector12.getY(), vector12.getZ(), vector23.getY(), vector23.getZ());
     double yNormalVector = calculateDeterminant(vector12.getZ(), vector12.getX(), vector23.getZ(), vector23.getX());
