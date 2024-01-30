@@ -2,9 +2,11 @@ package org.plateau.citygmleditor.citygmleditor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -38,7 +40,6 @@ public class ValidationController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
     }
 
     private void showMessage(ValidationResultMessage message) {
@@ -67,7 +68,20 @@ public class ValidationController implements Initializable {
         notification.setVisible(false);
     }
 
-    public void execute(ActionEvent event) throws ParserConfigurationException, IOException, SAXException {
+    public void showHideMessage() {
+        IS_HIDE = !IS_HIDE;
+        resultTextContainer.setVisible(true);
+    }
+
+    Task<Integer> task = new Task<>() {
+        @Override
+        protected Integer call() {
+            showMessageLoading(new ValidationResultMessage(ValidationResultMessageType.Info, "gml:idの完全性を検証中..."));
+            return 1;
+        }
+    };
+
+    public void execute(ActionEvent event) throws ParserConfigurationException, IOException, SAXException, InterruptedException {
         var cityModelView = World.getActiveInstance().getCityModel();
         if (cityModelView == null || cityModelView.getGmlObject() == null) {
             showMessage(new ValidationResultMessage(
@@ -77,8 +91,8 @@ public class ValidationController implements Initializable {
             return;
         }
 
-        // Show loading message
-        showMessageLoading(new ValidationResultMessage(ValidationResultMessageType.Info, "gml:idの完全性を検証中..."));
+        Thread thread = new Thread(task);
+        thread.start();
 
         var cityModel = cityModelView.getGmlObject();
         if (cityModel == null)
