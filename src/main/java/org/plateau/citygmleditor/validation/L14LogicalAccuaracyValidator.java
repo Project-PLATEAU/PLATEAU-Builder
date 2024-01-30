@@ -33,15 +33,15 @@ public class L14LogicalAccuaracyValidator implements IValidator {
             Element building = (Element) tagBuilding;
             String buildingID = building.getAttribute(TagName.GML_ID);
             Map<String, List<String>> invalidSolid = this.getInvalidSolid(building);
-            List<String> selfIntersect = invalidSolid.get("SELF_INTERSECT");
-            List<String> isClosed = invalidSolid.get("IS_CLOSED");
-            String buildingError = MessageFormat.format(MessageError.ERR_L14_002_1,buildingID) + selfIntersect + "\n" + isClosed;
+//            String selfIntersect = String.join("\n", invalidSolid.get("SELF_INTERSECT"));
+            String isClosed = String.join("\n", invalidSolid.get("IS_NOT_CLOSED"));
+            String notSameDirection = String.join("\n", invalidSolid.get("NOT_SAME_DIRECTION"));
+            String buildingError = MessageFormat.format(MessageError.ERR_L14_002_1, buildingID) + isClosed + "\n" + notSameDirection;
             buildingErrors.add(buildingError);
         }
         List<ValidationResultMessage> messages = new ArrayList<>();
         for (String invalid : buildingErrors) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                    MessageFormat.format(MessageError.ERR_L14_001, invalid)));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid));
         }
         return messages;
     }
@@ -51,27 +51,58 @@ public class L14LogicalAccuaracyValidator implements IValidator {
         Map<String, List<String>> result = new HashMap<>();
         List<String> polygonSelfIntersect = new ArrayList<>();
         List<String> polygonNotClosed = new ArrayList<>();
+        List<String> polygonNoteSameDirection = new ArrayList<>();
         for (int i = 0; i < solids.getLength(); i++) {
             Element solid = (Element) solids.item(i);
             NodeList polygonNode = solid.getElementsByTagName(TagName.GML_POLYGON);
             // check polygon intersect
-            List<String> selfIntersect = this.getSelfIntersectPolygon(polygonNode);
-            if (!selfIntersect.isEmpty()) {
-                polygonSelfIntersect.addAll(selfIntersect);
-            }
-
-
+//            List<String> selfIntersect = this.getSelfIntersectPolygon(polygonNode);
+//            if (!selfIntersect.isEmpty()) {
+//                polygonSelfIntersect.addAll(selfIntersect);
+//            }
+//            if (polygonSelfIntersect.isEmpty()) continue;
+//            polygonSelfIntersect.add("solid=[" + polygonSelfIntersect + "]");
             // check polgyon closed
+            String solidID = solid.getAttribute(TagName.GML_ID);
             if (!this.isPolygonClosed(polygonNode)) {
-                polygonNotClosed.add("gml:Solid gml:id=" + solid.getAttribute(TagName.GML_ID) + "境界面が閉じていない。");
+                polygonNotClosed.add("gml:Solid gml:id=" + (solidID.isBlank() ? "[]" : solidID) + "境界面が閉じていない。");
             }
-
-            if (polygonSelfIntersect.isEmpty()) continue;
-            polygonSelfIntersect.add("solid=[" + polygonSelfIntersect + "]");
+            // check same derection
+            if (!this.checkSameDirection(polygonNode)) {
+                polygonNoteSameDirection.add("gml:Solid gml:id=" + (solidID.isBlank() ? "[]" : solidID) + "全ての境界面の向きが外側を向いていない。");
+            }
         }
         result.put("SELF_INTERSECT", polygonSelfIntersect);
-        result.put("IS_CLOSED", polygonSelfIntersect);
+        result.put("IS_NOT_CLOSED", polygonNotClosed);
+        result.put("NOT_SAME_DIRECTION", polygonNoteSameDirection);
         return result;
+    }
+
+    private boolean checkSameDirection(NodeList polgyonNode) {
+        List<List<LineSegment3D>> polygons = this.createPolygons(polgyonNode);
+        int size = polygons.size();
+        for (int i = 0; i < size; i++) {
+            List<LineSegment3D> polygon1 = polygons.get(i);
+            int count = 0;
+            for (int j = i++; j < size; j++) {
+                List<LineSegment3D> polygon2 = polygons.get(j);
+                if (!this.isSameDirection(polygon1, polygon2)) count++;
+            }
+            // polygon not same direction with others
+            if (count == size - 1) return false;
+        }
+
+        return true;
+    }
+
+    private boolean isSameDirection(List<LineSegment3D> polygon1, List<LineSegment3D> polygon2) {
+        for (LineSegment3D segment3D1 : polygon1) {
+            for (LineSegment3D segment3D2 : polygon2) {
+                if (segment3D1.getStart().equals(segment3D2.getEnd()) && segment3D1.getEnd().equals(segment3D2.getStart()))
+                    return true;
+            }
+        }
+        return false;
     }
 
     private boolean isPolygonClosed(NodeList polygonNodes) {
@@ -96,9 +127,12 @@ public class L14LogicalAccuaracyValidator implements IValidator {
         }
 
         for (List<LineSegment3D> polygon1 : polygonConvert) {
+            int count = 0;
             for (List<LineSegment3D> polygon2 : polygonConvert) {
-                if (!checkDuplicateSegment(polygon1, polygon2)) return false;
+                if (!checkDuplicateSegment(polygon1, polygon2)) count++;
             }
+            // polygon have no duplicate segment with others polygon
+            if (count == polygonConvert.size() - 1) return false;
         }
         return true;
     }
