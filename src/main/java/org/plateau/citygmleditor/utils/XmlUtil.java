@@ -206,4 +206,10 @@ public class XmlUtil {
     recursiveFindNodeByTagName(node, listNode, tagName);
     return listNode;
   }
+
+  public static String getGmlId(Node node) {
+    if (node == null) return "";
+    var attribute = node.getAttributes().getNamedItem("gml:id");
+    return attribute != null ? attribute.getTextContent() : "";
+  }
 }
