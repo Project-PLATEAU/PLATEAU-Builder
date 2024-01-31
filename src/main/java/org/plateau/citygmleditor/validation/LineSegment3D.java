@@ -28,7 +28,7 @@ public class LineSegment3D {
     this.end = end;
   }
 
-  public boolean equal(LineSegment3D other){
-    return this.start.equals(other.start) && this.end.equals(other.end);
+  public boolean equal(LineSegment3D other) {
+    return (this.start.equals(other.start) && this.end.equals(other.end)) || (this.start.equals(other.end) && this.end.equals(other.start));
   }
 }

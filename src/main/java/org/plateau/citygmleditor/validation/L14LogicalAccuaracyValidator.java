@@ -36,6 +36,7 @@ public class L14LogicalAccuaracyValidator implements IValidator {
 //            String selfIntersect = String.join("\n", invalidSolid.get("SELF_INTERSECT"));
             String isClosed = String.join("\n", invalidSolid.get("IS_NOT_CLOSED"));
             String notSameDirection = String.join("\n", invalidSolid.get("NOT_SAME_DIRECTION"));
+            if (isClosed.isBlank() && notSameDirection.isBlank()) continue;
             String buildingError = MessageFormat.format(MessageError.ERR_L14_002_1, buildingID) + isClosed + "\n" + notSameDirection;
             buildingErrors.add(buildingError);
         }
@@ -55,20 +56,13 @@ public class L14LogicalAccuaracyValidator implements IValidator {
         for (int i = 0; i < solids.getLength(); i++) {
             Element solid = (Element) solids.item(i);
             NodeList polygonNode = solid.getElementsByTagName(TagName.GML_POLYGON);
-            // check polygon intersect
-//            List<String> selfIntersect = this.getSelfIntersectPolygon(polygonNode);
-//            if (!selfIntersect.isEmpty()) {
-//                polygonSelfIntersect.addAll(selfIntersect);
-//            }
-//            if (polygonSelfIntersect.isEmpty()) continue;
-//            polygonSelfIntersect.add("solid=[" + polygonSelfIntersect + "]");
             // check polgyon closed
             String solidID = solid.getAttribute(TagName.GML_ID);
             if (!this.isPolygonClosed(polygonNode)) {
                 polygonNotClosed.add("gml:Solid gml:id=" + (solidID.isBlank() ? "[]" : solidID) + "境界面が閉じていない。");
             }
             // check same derection
-            if (!this.checkSameDirection(polygonNode)) {
+            if (!this.isValidDirection(polygonNode)) {
                 polygonNoteSameDirection.add("gml:Solid gml:id=" + (solidID.isBlank() ? "[]" : solidID) + "全ての境界面の向きが外側を向いていない。");
             }
         }
@@ -78,21 +72,28 @@ public class L14LogicalAccuaracyValidator implements IValidator {
         return result;
     }
 
-    private boolean checkSameDirection(NodeList polgyonNode) {
+    private boolean isValidDirection(NodeList polgyonNode) {
         List<List<LineSegment3D>> polygons = this.createPolygons(polgyonNode);
         int size = polygons.size();
         for (int i = 0; i < size; i++) {
-            List<LineSegment3D> polygon1 = polygons.get(i);
-            int count = 0;
-            for (int j = i++; j < size; j++) {
-                List<LineSegment3D> polygon2 = polygons.get(j);
-                if (!this.isSameDirection(polygon1, polygon2)) count++;
-            }
-            // polygon not same direction with others
-            if (count == size - 1) return false;
+            if (!this.checkSameDrection(polygons, i)) return false;
         }
-
         return true;
+    }
+
+    /**
+     * Check any direction's polygon of solid with others
+     * return false if the polygon  have no same direction with any others
+     */
+    private boolean checkSameDrection(List<List<LineSegment3D>> listPolygons, int index) {
+        List<LineSegment3D> polygonCheck = listPolygons.get(index);
+        for (int i = 0; i < listPolygons.size(); i++) {
+            // Don't need to check with itself
+            if (i == index) continue;
+            List<LineSegment3D> polygon = listPolygons.get(i);
+            if (this.isSameDirection(polygonCheck, polygon)) return true;
+        }
+        return false;
     }
 
     private boolean isSameDirection(List<LineSegment3D> polygon1, List<LineSegment3D> polygon2) {
