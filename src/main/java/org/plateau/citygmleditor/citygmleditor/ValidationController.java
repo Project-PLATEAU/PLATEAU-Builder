@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.plateau.citygmleditor.constant.StandardID.*;
+import static org.plateau.citygmleditor.validation.AppConst.VALIDATION_CONFIG_PATH_DEFAULT;
 
 public class ValidationController implements Initializable {
     @FXML
@@ -31,9 +32,14 @@ public class ValidationController implements Initializable {
     @FXML
     ScrollPane scrollContentError;
 
+    @FXML
+    TextField pathJsonFile;
+
+    private static String JSON_PATH_CONFIG = "";
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        pathJsonFile.setText(VALIDATION_CONFIG_PATH_DEFAULT);
     }
 
     private void showMessage(ValidationResultMessage message) {
@@ -69,7 +75,13 @@ public class ValidationController implements Initializable {
 
         var errorCount = 0;
         var warningCount = 0;
-        List<IValidator> validators = this.loadValidators();
+
+        if (JSON_PATH_CONFIG.isBlank()) {
+            JSON_PATH_CONFIG = VALIDATION_CONFIG_PATH_DEFAULT;
+        } else {
+            pathJsonFile.setText(JSON_PATH_CONFIG);
+        }
+        List<IValidator> validators = this.loadValidators(JSON_PATH_CONFIG);
 
         List<String> errorMessages = new ArrayList<>();
         for (var validator : validators) {
@@ -98,9 +110,18 @@ public class ValidationController implements Initializable {
         XmlUtil.writeErrorMessageInFile(errorMessages);
     }
 
-    private List<IValidator> loadValidators() throws IOException {
+    public void setPathFileJson() {
+        var file = FileChooserService.showOpenDialog("*.json", SessionManager.JSON_FILE_PATH_CONFIG);
+
+        if (file == null)
+            return;
+
+        JSON_PATH_CONFIG = file.getPath();
+    }
+
+    private List<IValidator> loadValidators(String path) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        List<Standard> standards = mapper.readValue(new File(AppConst.VALIDATION_CONFIG_PATH), new TypeReference<>() {
+        List<Standard> standards = mapper.readValue(new File(path), new TypeReference<>() {
         });
         List<IValidator> result = new ArrayList<>();
 

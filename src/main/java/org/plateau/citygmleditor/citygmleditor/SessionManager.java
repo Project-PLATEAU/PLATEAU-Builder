@@ -58,6 +58,8 @@ public class SessionManager {
      */
     public static final String GML_FILE_PATH_PROPERTY = "gmlFilePath";
 
+    public static final String JSON_FILE_PATH_CONFIG = "jsonFilePath";
+
     public final String SESSION_PROPERTIES_FILENAME;
     private static final boolean ENABLE_SAVE_SESSION = true;
     private String name;
