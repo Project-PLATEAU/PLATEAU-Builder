@@ -1,5 +1,10 @@
 package org.plateau.citygmleditor.validation;
 
+import static org.plateau.citygmleditor.constant.L13ErrorType.INVALID_FORMAT;
+import static org.plateau.citygmleditor.constant.L13ErrorType.INVALID_STANDARD_1;
+import static org.plateau.citygmleditor.constant.L13ErrorType.INVALID_STANDARD_2;
+import static org.plateau.citygmleditor.constant.L13ErrorType.INVALID_STANDARD_3;
+
 import javafx.geometry.Point3D;
 import javax.xml.parsers.ParserConfigurationException;
 import org.locationtech.jts.geom.Coordinate;
@@ -39,45 +44,43 @@ public class L13LogicalConsistencyValidator implements IValidator {
   public List<ValidationResultMessage> validate(CityModelView cityModel)
       throws ParserConfigurationException, IOException, SAXException {
 
-    List<ValidationResultMessage> messages = new ArrayList<>();
-    Map<Node, Map<Node, L13ErrorType>> buildingWithErrorPolygonsSurfacePaths = new HashMap<>();
+    List<ValidationResultMessage> validationResults = new ArrayList<>();
+    List<GmlElementError> elementErrors = new ArrayList<>();
 
     var polygons = CityGmlUtil.getXmlDocumentFrom(cityModel).getElementsByTagName(TagName.GML_POLYGON);
 
     // Check if exterior and interior of each polygon is invalid
     for (int i = 0; i < polygons.getLength(); i++) {
-      validateExteriorAndInteriors(polygons.item(i), buildingWithErrorPolygonsSurfacePaths, messages);
+      validateExteriorAndInteriors(polygons.item(i), elementErrors);
     }
 
-    buildingWithErrorPolygonsSurfacePaths.forEach((buildingNode, errorPolygonSurfacePath) -> {
-      String buildingGmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
+    elementErrors.stream()
+        .collect(Collectors.groupingBy(GmlElementError::getBuildingId))
+        .forEach((buildingId, buildingElementErrors) -> {
+          var msg = buildingElementErrors.stream()
+              .map(elementError -> {
+                var errorElementId = elementError.getErrorElementId();
+                switch (elementError.getError()) {
+                  case INVALID_STANDARD_1:
+                    return String.format(MessageError.ERR_L13_0001, errorElementId);
+                  case INVALID_STANDARD_2:
+                    return String.format(MessageError.ERR_L13_0002, errorElementId);
+                  case INVALID_STANDARD_3:
+                    return String.format(MessageError.ERR_L13_0003, errorElementId);
+                  case INVALID_FORMAT:
+                    return String.format(MessageError.ERR_L13_0000, errorElementId);
+                  default: return "";
+                }
+              }).collect(Collectors.joining("\n"));
 
-      var nodeErrorDetail = errorPolygonSurfacePath.entrySet().stream()
-          .map(entry -> {
-            var node = entry.getKey();
-            var gmlIdNode = node.getAttributes().getNamedItem(TagName.GML_ID);
-            var gmlId = gmlIdNode != null ? gmlIdNode.getTextContent() : "";
-            switch (entry.getValue()) {
-              case INVALID_STANDARD_1:
-                return String.format(MessageError.ERR_L13_0001, gmlId);
-              case INVALID_STANDARD_2:
-                return String.format(MessageError.ERR_L13_0002, gmlId);
-              case INVALID_STANDARD_3:
-                return String.format(MessageError.ERR_L13_0003, gmlId);
-              case INVALID_FORMAT:
-                return String.format(MessageError.ERR_L13_0000, gmlId);
-              default: return "";
-            }
-          }).collect(Collectors.joining("\n"));
+          var buildingErrorMsg = String.format(MessageError.ERR_L13_001, buildingId, msg);
+          validationResults.add(new ValidationResultMessage(ValidationResultMessageType.Error, buildingErrorMsg, buildingElementErrors));
+        });
 
-      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, String.format(MessageError.ERR_L13_001, buildingGmlId, nodeErrorDetail)));
-    });
-
-    return messages;
+    return validationResults;
   }
 
-  private void validateExteriorAndInteriors(Node polygon, Map<Node, Map<Node, L13ErrorType>> buildingWithErrorLinearRing,
-                                            List<ValidationResultMessage> messages) {
+  private void validateExteriorAndInteriors(Node polygon, List<GmlElementError> elementErrors) {
 
     Node buildingNode = XmlUtil.findNearestParentByTagAndAttribute(polygon, TagName.BLDG_BUILDING, TagName.GML_ID);
 
@@ -85,24 +88,51 @@ public class L13LogicalConsistencyValidator implements IValidator {
     List<Polygon> interiors;
 
     try {
-      exterior = getExterior(polygon, messages);
-      interiors = getInteriors(polygon, messages);
+      exterior = getExterior(polygon);
+      interiors = getInteriors(polygon);
     } catch (InvalidGmlStructureException | InvalidPosStringException e) {
       logger.severe(e.getMessage());
-      updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygon, L13ErrorType.INVALID_FORMAT);
+      elementErrors.add(
+          new GmlElementError(
+              XmlUtil.getGmlId(buildingNode),
+              null,
+              XmlUtil.getGmlId(polygon),
+              XmlUtil.getGmlId(polygon),
+              polygon.getNodeName(),
+              INVALID_FORMAT
+          )
+      );
       return;
     }
 
     // Validate Standard 1: に内周が存在し、以下の条件のいずれかに合致する場合、エラーとする
     // All interiors should be within exterior
     if (interiors.stream().anyMatch(interior -> !interior.within(exterior))) {
-      updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygon, L13ErrorType.INVALID_STANDARD_1);
+      elementErrors.add(
+          new GmlElementError(
+              XmlUtil.getGmlId(buildingNode),
+              null,
+              XmlUtil.getGmlId(polygon),
+               XmlUtil.getGmlId(polygon),
+              polygon.getNodeName(),
+              INVALID_STANDARD_1
+          )
+      );
     }
 
 
     // Validate Standard 3: 内周同士が重なる、または包含関係にある。
     if (!isValidStandard3(interiors)) {
-      updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygon, L13ErrorType.INVALID_STANDARD_3);
+      elementErrors.add(
+          new GmlElementError(
+              XmlUtil.getGmlId(buildingNode),
+              null,
+              XmlUtil.getGmlId(polygon),
+              XmlUtil.getGmlId(polygon),
+              polygon.getNodeName(),
+              INVALID_STANDARD_3
+          )
+      );
     }
 
     // Validate Standard 2: 内周と外周が接し、gml:Polygonが2つ以上に分割されている
@@ -118,7 +148,16 @@ public class L13LogicalConsistencyValidator implements IValidator {
 
     if (invalidStandard2) {
       // Update error list of building and exit function
-      updateErrorMap(buildingWithErrorLinearRing, buildingNode, polygon, L13ErrorType.INVALID_STANDARD_2);
+      elementErrors.add(
+          new GmlElementError(
+              XmlUtil.getGmlId(buildingNode),
+              null,
+              XmlUtil.getGmlId(polygon),
+              XmlUtil.getGmlId(polygon),
+              polygon.getNodeName(),
+              INVALID_STANDARD_2
+          )
+      );
     }
 
   }
@@ -141,7 +180,7 @@ public class L13LogicalConsistencyValidator implements IValidator {
   }
 
 
-  public Polygon getExterior(Node polygon, List<ValidationResultMessage> messages) {
+  public Polygon getExterior(Node polygon) {
     var exteriorList = new ArrayList<Node>();
 
     XmlUtil.recursiveFindNodeByTagName(polygon, exteriorList, TagName.GML_EXTERIOR);
@@ -156,7 +195,7 @@ public class L13LogicalConsistencyValidator implements IValidator {
     return linearRingToPolygon(exterior.getFirstChild().getNextSibling());
   }
 
-  public List<Polygon> getInteriors(Node polygon, List<ValidationResultMessage> messages) {
+  public List<Polygon> getInteriors(Node polygon) {
 
     var interiorList = new ArrayList<Node>();
 
