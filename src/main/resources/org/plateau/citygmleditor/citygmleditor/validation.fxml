@@ -5,7 +5,18 @@
 
 <AnchorPane prefHeight="700.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.ValidationController">
    <children>
-      <Button layoutX="20.0" layoutY="35.0" mnemonicParsing="false" onAction="#execute" text="実行" />
+       <VBox layoutX="20.0" layoutY="15.0">
+           <children>
+               <HBox spacing="10.0">
+                   <children>
+                       <Label>ファイルを選択:</Label>
+                       <TextField fx:id="pathJsonFile" maxWidth="200.0"></TextField>
+                       <Button mnemonicParsing="false" onAction="#setPathFileJson" text="選択する" />
+                   </children>
+               </HBox>
+               <Button mnemonicParsing="false" onAction="#execute" text="実行"/>
+           </children>
+       </VBox>
       <ScrollPane layoutX="20.0" layoutY="68.0" prefHeight="600.0" prefWidth="500.0">
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
