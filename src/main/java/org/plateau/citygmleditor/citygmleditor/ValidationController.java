@@ -5,9 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Shape;
+import javafx.scene.shape.Shape3D;
 import org.plateau.citygmleditor.modelstandard.Standard;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.validation.*;
@@ -43,7 +48,7 @@ public class ValidationController implements Initializable {
     }
 
     private void showMessage(ValidationResultMessage message) {
-        var text = new TextField(message.getMessage());
+        var text = new Button(message.getMessage());
         switch (message.getType()) {
             case Info:
                 text.setStyle("-fx-font-size: 16px;");
@@ -55,6 +60,14 @@ public class ValidationController implements Initializable {
                 text.setStyle("-fx-text-fill: red; -fx-font-size: 16px;");
                 break;
         }
+
+        var node = CityGMLEditorApp.getScene().getRoot().lookupAll("#" + "bldg_f6dddfcb-dfbd-4a3f-b256-993935806dc7");
+        node.forEach(n -> {
+
+            if (n instanceof Shape) {
+                ((Shape3D)n).setMaterial(new PhongMaterial(Color.PURPLE));
+            }
+        });
         resultTextContainer.getChildren().add(text);
         scrollContentError.setContent(resultTextContainer);
     }

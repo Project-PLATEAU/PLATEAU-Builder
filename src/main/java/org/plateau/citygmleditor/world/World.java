@@ -21,7 +21,7 @@ public class World {
     private Material defaultMaterial;
 
     public World() {
-        defaultMaterial = new PhongMaterial(Color.WHITE);
+        defaultMaterial = new PhongMaterial(Color.RED);
     }
 
     public static World getActiveInstance() {

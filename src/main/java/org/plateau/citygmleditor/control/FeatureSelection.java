@@ -78,7 +78,7 @@ public class FeatureSelection {
             if (viewMode.isSurfaceViewModeProperty().get() && feature.getLOD2Solid() != null) {
                 activeSection.set(feature.getLOD2Solid().getSurfaceTypeView().getSection(pickResult));
             }
-
+1
             refreshOutLine();
         });
     }

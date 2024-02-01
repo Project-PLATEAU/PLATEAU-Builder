@@ -1,5 +1,8 @@
 package org.plateau.citygmleditor.citymodel.factory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.URI;
 import javafx.scene.image.Image;
 import javafx.scene.paint.PhongMaterial;
 import org.citygml4j.model.citygml.CityGMLClass;
@@ -39,9 +42,22 @@ public class AppearanceFactory extends CityGMLFactory {
         var imageRelativePath = Paths.get(parameterizedTexture.getImageURI());
         var imageAbsolutePath = Paths.get(getTarget().getGmlPath()).getParent().resolve(imageRelativePath);
 
+        Image image = null;
+        URI u = null;
+        try {
+            u = new URI(imageAbsolutePath.toString());
+            boolean isWeb = "http".equalsIgnoreCase(u.getScheme())
+                || "https".equalsIgnoreCase(u.getScheme());
+            if(isWeb) {
+                image = new Image(imageAbsolutePath.toString(), 256, 256, true, false);
+            } else {
+                image = new Image(new FileInputStream(new File(imageAbsolutePath.toString())), 256, 256, true, false);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         // サイズが大きすぎるテクスチャがあると極端にパフォーマンス落ちるためリサイズ
         // TODO: 元の解像度で表示
-        var image = new Image(imageAbsolutePath.toString(), 256, 256, true, false);
         var material = new PhongMaterial();
         material.setDiffuseMap(image);
 

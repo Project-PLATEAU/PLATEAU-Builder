@@ -5,6 +5,7 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Shape3D;
 import org.citygml4j.CityGMLContext;
 import org.citygml4j.ade.iur.UrbanRevitalizationADEContext;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
@@ -13,6 +14,8 @@ import org.citygml4j.model.citygml.CityGMLClass;
 import org.citygml4j.model.citygml.core.CityModel;
 import org.citygml4j.xml.io.CityGMLInputFactory;
 import org.citygml4j.xml.io.reader.CityGMLReader;
+import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
+import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.factory.CityModelFactory;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.geometry.GeoReference;
@@ -62,10 +65,22 @@ public class GmlImporter {
             var cityModelFactory = new CityModelFactory();
             var cityModel = cityModelFactory.createCityModel((CityModel) citygml, fileUrl, in.getSchemaHandler());
 
+            cityModel.setStyle("-fx-background-color: red;");
+            cityModel.applyCss();
+
             node.getChildren().add(cityModel);
 
             world.setCityModel(cityModel);
         }
+
+        var x = World.getActiveInstance().getCityModel().lookupAll("#" + "bldg_f6dddfcb-dfbd-4a3f-b256-993935806dc7");
+
+        x.forEach(n -> {
+            if (n instanceof BuildingView) {
+                ((BuildingView)n).getLOD1Solid().setMaterial(new PhongMaterial(Color.PURPLE));
+                ((BuildingView)n).getLOD2Solid().setStyle("-fx-background-color: green;");
+            }
+        });
         reader.close();
 
         return node;

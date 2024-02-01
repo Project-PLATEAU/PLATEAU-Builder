@@ -1,0 +1,48 @@
+gml:idの完全性を検証中...
+L07: 地物"bldg_f6dddfcb-dfbd-4a3f-b256-993935806dc7":
+次のgml:LineStringとgml:LinearRing座標の形式が不正です。
+近接閾値（0.01m）未満の頂点が連続するインスタンスが存在します：
+<gml:LineString gml:id="line_HNAP0665_p4751_14">
+<gml:LineString gml:id="line_HNAP0665_p4740_2">
+<gml:LineString gml:id="line_HNAP0665_p4740_4">
+<gml:LineString gml:id="line_HNAP0665_p4740_5">
+<gml:LineString gml:id="line_HNAP0665_p4740_7">
+<gml:LineString gml:id="line_HNAP0665_p4735_2">
+<gml:LineString gml:id="line_HNAP0665_p4735_8">
+<gml:LineString gml:id="line_HNAP0665_p4735_16">
+<gml:LineString gml:id="line_HNAP0665_p4735_17">
+<gml:LineString gml:id="line_HNAP0665_p4757_5">
+<gml:LineString gml:id="line_HNAP0665_p4757_20">
+<gml:LineString gml:id="line_HNAP0665_p4756_0">
+<gml:LineString gml:id="line_HNAP0665_p4756_10">
+<gml:LineString gml:id="line_HNAP0665_p4755_13">
+<gml:LineString gml:id="line_HNAP0665_p4754_0">
+<gml:LineString gml:id="line_HNAP0665_p4734_16">
+
+L07: 地物"bldg_bdc161ef-9ae3-4a6c-b554-8a2ce507e6c8":
+次のgml:LineStringとgml:LinearRing座標の形式が不正です。
+近接閾値（0.01m）未満の頂点が連続するインスタンスが存在します：
+<gml:LineString gml:id="line_HNAP0669_p4864_0">
+<gml:LineString gml:id="line_HNAP0669_p4866_16">
+<gml:LineString gml:id="line_HNAP0669_p4870_15">
+<gml:LineString gml:id="line_HNAP0669_p4870_22">
+<gml:LineString gml:id="line_HNAP0669_p4867_0">
+<gml:LineString gml:id="line_HNAP0669_p4868_12">
+<gml:LineString gml:id="line_HNAP0669_p4864_3">
+<gml:LineString gml:id="line_HNAP0669_p4866_1">
+<gml:LineString gml:id="line_HNAP0669_p4870_18">
+<gml:LineString gml:id="line_HNAP0669_p4869_16">
+<gml:LineString gml:id="line_HNAP0669_p4865_8">
+<gml:LineString gml:id="line_HNAP0669_p4865_9">
+<gml:LineString gml:id="line_HNAP0669_p4865_10">
+<gml:LineString gml:id="line_HNAP0669_p4865_19">
+
+L07: 地物"bldg_ede55277-ede8-44fe-9ed1-827c5fd4c3fe":
+次のgml:LineStringとgml:LinearRing座標の形式が不正です。
+近接閾値（0.01m）未満の頂点が連続するインスタンスが存在します：
+<gml:LineString gml:id="line_HNAP0670_b_0">
+<gml:LineString gml:id="line_HNAP0670_p4720_0">
+<gml:LineString gml:id="line_HNAP0670_p4719_6">
+<gml:LineString gml:id="line_HNAP0670_p4720_3">
+
+品質検査が完了しました。（エラー数:3, 警告数:0）
