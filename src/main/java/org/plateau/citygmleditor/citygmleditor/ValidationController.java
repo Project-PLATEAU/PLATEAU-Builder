@@ -10,8 +10,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
+import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.modelstandard.Standard;
+import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.validation.*;
 import org.plateau.citygmleditor.world.World;
@@ -60,6 +64,9 @@ public class ValidationController implements Initializable {
         }
         resultTextContainer.getChildren().add(text);
         scrollContentError.setContent(resultTextContainer);
+        if (!CollectionUtil.isEmpty(message.getElementErrors())) {
+            highlightErrors(message.getElementErrors());
+        }
     }
 
     private void hiddenMessageLoading(int index) {
@@ -232,5 +239,22 @@ public class ValidationController implements Initializable {
             }
         }
         return result;
+    }
+
+    private void highlightErrors(List<GmlElementError> elementErrors) {
+        elementErrors.forEach(this::highlightError);
+    }
+
+    private void highlightError(GmlElementError elementError) {
+        World.getActiveInstance().getCityModel()
+            .lookupAll("#" + elementError.getBuildingId())
+            .forEach(node -> {
+                ((BuildingView) node).getLOD1Solid().setMaterial(new PhongMaterial(Color.RED));
+                ((BuildingView) node).getLOD2Solid().getSurfaceTypeView().setMaterial(new PhongMaterial(Color.RED));
+                ((BuildingView) node).getLOD2Solid().getMeshView().setMaterial(new PhongMaterial(Color.RED));
+
+                // TODO check LOD2SolidView highlight, now only highlight bottom surface
+                // TODO highlight solid and polygon
+            });
     }
 }
