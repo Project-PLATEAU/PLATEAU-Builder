@@ -1,0 +1,60 @@
+gml:idの完全性を検証中...
+C01: 次のgml:idが重複しています：
+gml:id="[(C01_invalid_poly_HNAP0664_b_0)]"gml:id="[(poly_HNAP0664_p4728_7)]"gml:id="[(poly_HNAP0664_p4726_9)]"gml:id="[(poly_HNAP0664_p4728_5)]"gml:id="[(poly_HNAP0664_p4726_7)]"gml:id="[(poly_HNAP0664_p4728_6)]"gml:id="[(poly_HNAP0664_p4726_8)]"gml:id="[(poly_HNAP0664_p4726_5)]"gml:id="[(poly_HNAP0664_p4728_3)]"gml:id="[(poly_HNAP0664_p4728_4)]"gml:id="[(poly_HNAP0664_p4726_6)]"gml:id="[(poly_HNAP0664_p4726_3)]"gml:id="[(poly_HNAP0664_p4728_1)]"gml:id="[(poly_HNAP0664_p4726_4)]"gml:id="[(poly_HNAP0664_p4728_2)]"gml:id="[(poly_HNAP0664_p4726_1)]"gml:id="[(poly_HNAP0664_p4728_0)]"gml:id="[(poly_HNAP0664_p4726_2)]"gml:id="[(wall_HNAP0664_p4728_7)]"gml:id="[(wall_HNAP0664_p4726_9)]"gml:id="[(poly_HNAP0664_p4726_0)]"gml:id="[(roof_HNAP0664_p4728_0)]"gml:id="[(roof_HNAP0664_p4726_2)]"gml:id="[(roof_HNAP0664_p4728_4)]"gml:id="[(roof_HNAP0664_p4726_5)]"gml:id="[(roof_HNAP0664_p4726_4)]"gml:id="[(roof_HNAP0664_p4726_3)]"gml:id="[(gnd_ea4a660d-44c9-42b1-822b-4fb016144cda)]"gml:id="[(wall_HNAP0664_p4728_1)]"gml:id="[(line_HNAP0664_p4726_1)]"gml:id="[(line_HNAP0664_p4728_0)]"gml:id="[(line_HNAP0664_p4726_2)]"gml:id="[(wall_HNAP0664_p4728_2)]"gml:id="[(wall_HNAP0664_p4726_1)]"gml:id="[(line_HNAP0664_p4726_0)]"gml:id="[(wall_HNAP0664_p4728_5)]"gml:id="[(wall_HNAP0664_p4726_7)]"gml:id="[(wall_HNAP0664_p4728_6)]"gml:id="[(wall_HNAP0664_p4726_8)]"gml:id="[(wall_HNAP0664_p4728_3)]"gml:id="[(wall_HNAP0664_p4726_6)]"gml:id="[(wall_HNAP0664_p4726_0)]"gml:id="[(L06_invalid)]"gml:id="[(line_HNAP0664_p4728_7)]"gml:id="[(line_HNAP0664_p4726_9)]"gml:id="[(line_HNAP0664_p4728_5)]"gml:id="[(line_HNAP0664_p4726_7)]"gml:id="[(line_HNAP0664_p4728_6)]"gml:id="[(line_HNAP0664_p4726_8)]"gml:id="[(line_HNAP0664_p4726_5)]"gml:id="[(line_HNAP0664_p4728_3)]"gml:id="[(line_HNAP0664_p4728_4)]"gml:id="[(line_HNAP0664_p4726_6)]"gml:id="[(line_HNAP0664_p4726_3)]"gml:id="[(line_HNAP0664_p4728_1)]"gml:id="[(line_HNAP0664_p4726_4)]"gml:id="[(line_HNAP0664_p4728_2)]"
+C04: 地物"intersect-solid-building":
+次のuro:buildingIDが重複しています：
+[13111-bldg-10]
+C04: 地物"non-closed-polygon-building":
+次のuro:buildingIDが重複しています：
+[13111-bldg-10]
+L05: gml:Envelopeに記述された空間参照系のURIが、製品仕様書に示されたURIと合致しません。：[(http://www.opengis.net/def/crs/EPSG/0/669)]
+L06: 地物"(non-closed-polygon-building)":
+次の座標が都市モデルの空間範囲外です:
+35.53311595314706, 139.9964326572955, 7.313
+0.0 0.0 0.0
+0.0 3.0 0.0
+5.0 3.0 0.0
+0.0 1.0 0.0
+0.0 0.0 0.0
+0.0 0.0 0.0
+0.0 3.0 0.0
+5.0 3.0 0.0
+5.0 0.0 0.0
+2.0 4.0 0.0
+0.0 0.0 0.0
+L06: 地物"(intersect-solid-building)":
+次の座標が都市モデルの空間範囲外です:
+35.53311595314706, 139.9964326572955, 7.313
+0.0 0.0 2.0
+0.0 1.0 2.0
+1.0 1.0 2.0
+1.0 0.0 2.0
+0.0 0.0 2.0
+0.0 0.0 2.0
+0.0 1.0 2.0
+1.0 1.0 2.0
+1.0 0.0 2.0
+0.0 0.0 2.0
+L07: 地物"(non-closed-polygon-building)":
+次のgml:LineStringとgml:LinearRing座標の形式が不正です。
+<gml:LineString gml:id="L09_invalid_startpoint_diff_endpoint_by_remove_end_point">
+<gml:LineString gml:id="">
+近接閾値（0.01m）未満の頂点が連続するインスタンスが存在します：
+
+L11: 地物"(non-closed-polygon-building)":
+<gml:Polygon gml:id="([L11_invalid])">に同一平面上にない座標値が存在します。
+L13: 地物"non-closed-polygon-building": 
+<gml:Polygon gml:id="non_closed_linearing"> 無効な形式
+T03: 次のxlink:href属性により参照されたインスタンスについて、応用スキーマで定義された関連相手先の地物型又は幾何オブジェクト型と合致しません
+[T03_invalid_poly_HNAP0664_b_0]
+
+L_BLDG_01: 
+地物"intersect-solid-building": 
+次の重複しているgml:Solidが存在します：
+<gml:Solid gml:id="solid-1">
+<gml:Solid gml:id="solid-2">
+地物"non-closed-polygon-building": 次のgml:Polygon座標の形式が不正です。
+<gml:Polygon gml:id="non_closed_linearing">
+
+
+品質検査が完了しました。（エラー数:11, 警告数:0）

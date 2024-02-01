@@ -1,0 +1,7 @@
+L09: 地物"(bldg_1290f570-9df8-4956-bef3-6d0976c835be)":
+<gml:LinearRing gml:id="(L09_intersect)">が自己交差しています。
+<gml:LinearRing gml:id="(L09_same_coordinate)">が重複座標しています。
+<gml:LinearRing gml:id="(L09_self_touch)">が自己接触しています。
+<gml:LinearRing gml:id="()">が始終点の不一致しています。
+<gml:LinearRing gml:id="(L09_invalid_startpoint_diff_endpoint_by_remove_end_point)">が始終点の不一致しています。
+品質検査が完了しました。（エラー数:1, 警告数:0）

@@ -11,8 +11,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Shape;
 import javafx.scene.shape.Shape3D;
+import org.plateau.citygmleditor.citymodel.BuildingView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.modelstandard.Standard;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.validation.*;
@@ -61,13 +64,35 @@ public class ValidationController implements Initializable {
                 break;
         }
 
-        var node = CityGMLEditorApp.getScene().getRoot().lookupAll("#" + "bldg_f6dddfcb-dfbd-4a3f-b256-993935806dc7");
-        node.forEach(n -> {
+        var x = World.getActiveInstance().getCityModel().lookupAll("#" + message.getElementErrors().get(0).getBuildingId());
+        x.forEach(n -> {
+//            ((BuildingView)n).getLOD1Solid().setMaterial(new PhongMaterial(Color.GREEN));
 
-            if (n instanceof Shape) {
-                ((Shape3D)n).setMaterial(new PhongMaterial(Color.PURPLE));
+            var k = ((BuildingView) n).getChildrenUnmodifiable();
+            for(var i=0; i<k.size(); i+=2) {
+                if (k.get(i) instanceof Shape3D) {
+                    ((Shape3D) k.get(i)).setMaterial(new PhongMaterial(Color.LIGHTBLUE));
+                }
+            }
+
+
+
+            ((BuildingView) n).getLOD1Solid().getPolygons().forEach(p -> {
+                if (p.getSurfaceData() != null) {
+                    p.getSurfaceData().setMaterial(new PhongMaterial(Color.LIGHTBLUE));
+                }
+            });
+
+
+            if (n instanceof BuildingView) {
+                 ((BuildingView)n).getLOD1Solid().setMaterial(new PhongMaterial(Color.GREEN));
+//                ((BuildingView)n).getLOD2Solid().getMeshView().setStyle("-fx-background-color: #0d5db9;");
+//                ((BuildingView)n).getLOD2Solid().getMeshView().setMaterial(new PhongMaterial(Color.GREEN));
+//                ((BuildingView)n).getLOD2Solid().getSurfaceTypeView().setStyle("-fx-background-color: #1776e7;");
+//                ((BuildingView)n).getLOD2Solid().getSurfaceTypeView().setMaterial(new PhongMaterial(Color.GREEN));
             }
         });
+
         resultTextContainer.getChildren().add(text);
         scrollContentError.setContent(resultTextContainer);
     }

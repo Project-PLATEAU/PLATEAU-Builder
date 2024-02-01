@@ -1,0 +1,8 @@
+L_BLDG_01: 
+地物"bldg_1290f570-9df8-4956-bef3-6d0976c835be":
+次のgml:Polygon座標の形式が不正です。
+<gml:Polygon gml:id=“non_closed_linearing_polygon”>
+次の重複しているgml:Solidが存在します：
+
+
+品質検査が完了しました。（エラー数:1, 警告数:0）

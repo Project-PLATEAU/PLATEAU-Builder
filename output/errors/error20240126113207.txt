@@ -1,0 +1,9 @@
+L_BLDG_01: 
+地物"intersect-solid-building": 
+次の重複しているgml:Solidが存在します：
+<gml:Solid gml:id="solid-1">
+地物"non-closed-polygon-building": 次のgml:Polygon座標の形式が不正です。
+<gml:Polygon gml:id=“non_closed_linearing”>
+
+
+品質検査が完了しました。（エラー数:1, 警告数:0）

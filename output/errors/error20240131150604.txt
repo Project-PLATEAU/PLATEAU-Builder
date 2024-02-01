@@ -1,0 +1,10 @@
+L13: 地物"bldg_943bee21-394f-4efa-b7ab-bfa6fbfd36a4": 
+<gml:Polygon gml:id="polygon-invalid-4">内周同士が重なる、または包含関係にある。
+L13: 地物"bldg_7263c902-41e5-44bd-bce1-4d308a26d9da": 
+<gml:Polygon gml:id="polygon-invalid-1">内周が外周と交差している。
+<gml:Polygon gml:id="polygon-invalid-2">内周と外周が接し、gml:Polygonが2つ以上に分割されている。
+<gml:Polygon gml:id="polygon-invalid-3">内周同士が重なる、または包含関係にある。
+<gml:Polygon gml:id="polygon-invalid-4">内周同士が重なる、または包含関係にある。
+<gml:Polygon gml:id="polygon-invalid-5">内周と外周が接し、gml:Polygonが2つ以上に分割されている。
+<gml:Polygon gml:id="polygon-invalid-6">内周が外周と交差している。
+品質検査が完了しました。（エラー数:2, 警告数:0）
