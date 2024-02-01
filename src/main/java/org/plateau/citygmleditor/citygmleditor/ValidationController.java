@@ -2,19 +2,21 @@ package org.plateau.citygmleditor.citygmleditor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.modelstandard.Standard;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.validation.*;
 import org.plateau.citygmleditor.world.World;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -36,6 +38,10 @@ public class ValidationController implements Initializable {
     TextField pathJsonFile;
 
     private static String JSON_PATH_CONFIG = "";
+
+    private List<ValidationResultMessage> validationResultMessages;
+
+    private Task task;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -59,7 +65,82 @@ public class ValidationController implements Initializable {
         scrollContentError.setContent(resultTextContainer);
     }
 
-    public void execute(ActionEvent event) throws ParserConfigurationException, IOException, SAXException {
+    private void hiddenMessageLoading(int index) {
+        resultTextContainer.getChildren().remove(index - 1);
+    }
+
+    private void showLoadingMessage() {
+        showMessage(new ValidationResultMessage(
+                ValidationResultMessageType.Info, "検証中..."
+        ));
+    }
+
+    private void validating(CityModelView cityModelView) {
+        task = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                validationResultMessages = new ArrayList<>();
+                var cityModel = cityModelView.getGmlObject();
+                if (cityModel == null)
+                    return null;
+
+                if (JSON_PATH_CONFIG.isBlank()) {
+                    JSON_PATH_CONFIG = VALIDATION_CONFIG_PATH_DEFAULT;
+                } else {
+                    pathJsonFile.setText(JSON_PATH_CONFIG);
+                }
+
+                List<IValidator> validators = loadValidators(JSON_PATH_CONFIG);
+                for (var validator : validators) {
+                    validationResultMessages.addAll(validator.validate(cityModelView));
+                }
+
+                return null;
+            }
+        };
+    }
+
+    private int getIndexLoadingMessage() {
+        return resultTextContainer.getChildren().size();
+    }
+
+    private void validateSuccess() {
+        task.setOnSucceeded(new EventHandler<>() {
+            @Override
+            public void handle(Event event) {
+                int indexValidating = getIndexLoadingMessage();
+                var errorCount = 0;
+                var warningCount = 0;
+                List<String> errorMessages = new ArrayList<>();
+                for (var message : validationResultMessages) {
+                    showMessage(message);
+                    errorMessages.add(message.getMessage());
+                    switch (message.getType()) {
+                        case Error:
+                            errorCount++;
+                            break;
+                        case Warning:
+                            warningCount++;
+                            break;
+                    }
+                }
+
+                String countResultMessage = String.format("品質検査が完了しました。（エラー数:%d, 警告数:%d）", errorCount, warningCount);
+                hiddenMessageLoading(indexValidating);
+                showMessage(new ValidationResultMessage(
+                        ValidationResultMessageType.Info, countResultMessage
+                ));
+                errorMessages.add(countResultMessage);
+                try {
+                    XmlUtil.writeErrorMessageInFile(errorMessages);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public void execute(ActionEvent event) throws IOException, InterruptedException {
         var cityModelView = World.getActiveInstance().getCityModel();
         if (cityModelView == null || cityModelView.getGmlObject() == null) {
             showMessage(new ValidationResultMessage(
@@ -69,45 +150,14 @@ public class ValidationController implements Initializable {
             return;
         }
 
-        var cityModel = cityModelView.getGmlObject();
-        if (cityModel == null)
-            return;
+        showLoadingMessage();
 
-        var errorCount = 0;
-        var warningCount = 0;
+        validating(cityModelView);
 
-        if (JSON_PATH_CONFIG.isBlank()) {
-            JSON_PATH_CONFIG = VALIDATION_CONFIG_PATH_DEFAULT;
-        } else {
-            pathJsonFile.setText(JSON_PATH_CONFIG);
-        }
-        List<IValidator> validators = this.loadValidators(JSON_PATH_CONFIG);
+        validateSuccess();
 
-        List<String> errorMessages = new ArrayList<>();
-        for (var validator : validators) {
-            var messages = validator.validate(cityModelView);
-
-            for (var message : messages) {
-                showMessage(message);
-                errorMessages.add(message.getMessage());
-                switch (message.getType()) {
-                    case Error:
-                        errorCount++;
-                        break;
-                    case Warning:
-                        warningCount++;
-                        break;
-                }
-            }
-        }
-
-        String resultMessage = String.format("品質検査が完了しました。（エラー数:%d, 警告数:%d）", errorCount, warningCount);
-        errorMessages.add(resultMessage);
-        showMessage(new ValidationResultMessage(
-                ValidationResultMessageType.Info, resultMessage
-        ));
-
-        XmlUtil.writeErrorMessageInFile(errorMessages);
+        Thread validationThread = new Thread(task);
+        validationThread.start();
     }
 
     public void setPathFileJson() {
