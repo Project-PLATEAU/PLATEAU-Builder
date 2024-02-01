@@ -202,7 +202,7 @@ public class L14LogicalAccuaracyValidator implements IValidator {
                 String[] posString2 = posList2.getTextContent().trim().split(" ");
 
                 try {
-                    PolygonRelationship relationship = PythonUtil.checkPolygonRelationship(AppConst.PATH_PYTHON, posString1, posString2);
+                    PolygonRelationship relationship = PythonUtil.checkPolygonRelationship(AppConst.PATH_PYTHON_INTERSECT, posString1, posString2);
                     // if 2 polygon intersect invalid
                     if (relationship == PolygonRelationship.INTERSECT_3D || relationship == PolygonRelationship.FLAT_INTERSECT) {
                         this.setPolygonError(polygon1, result);

@@ -156,7 +156,7 @@ public class L18LogicalConsistencyValidator implements IValidator {
                 String[] posString2 = posList2.getTextContent().trim().split(" ");
 
                 try {
-                    PolygonRelationship relationship = PythonUtil.checkPolygonRelationship(AppConst.PATH_PYTHON, posString1, posString2);
+                    PolygonRelationship relationship = PythonUtil.checkPolygonRelationship(AppConst.PATH_PYTHON_INTERSECT, posString1, posString2);
                     // 1 poglyon of solid intersect with the others of solid is invalid
                     if (relationship == PolygonRelationship.INTERSECT_3D) return OVERLAP_ERROR;
                     // count the polygon not intersect with the others

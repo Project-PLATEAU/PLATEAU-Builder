@@ -1,6 +1,5 @@
 package org.plateau.citygmleditor.validation;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Plane;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.PolygonRelationship;
@@ -188,7 +187,7 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
             String[] posString2 = posList2.getTextContent().trim().split(" ");
 
             try {
-                PolygonRelationship relationship = PythonUtil.checkPolygonRelationship(AppConst.PATH_PYTHON, posString1, posString2);
+                PolygonRelationship relationship = PythonUtil.checkPolygonRelationship(AppConst.PATH_PYTHON_INTERSECT, posString1, posString2);
                 // polyyon intersect in 3D 1 face of solid is invalid
                 if (relationship == PolygonRelationship.INTERSECT_3D) return false;
                 // polygon touch or intersect in flat of 1 face of solid is valid
