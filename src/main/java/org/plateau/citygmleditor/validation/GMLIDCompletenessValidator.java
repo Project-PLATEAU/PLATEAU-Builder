@@ -36,7 +36,6 @@ public class GMLIDCompletenessValidator implements IValidator {
         List<Node> allTags = new ArrayList<>();
         XmlUtil.recursiveFindNodeByAttribute(doc, allTags, TagName.GML_ID);
         List<ValidationResultMessage> messages = new ArrayList<>();
-        messages.add(new ValidationResultMessage(ValidationResultMessageType.Info, "gml:idの完全性を検証中..."));
 
         List<String> allID = allTags.stream().map(e -> ((Element) e).getAttribute(TagName.GML_ID)).collect(Collectors.toList());
         if (allID.contains("")) {
