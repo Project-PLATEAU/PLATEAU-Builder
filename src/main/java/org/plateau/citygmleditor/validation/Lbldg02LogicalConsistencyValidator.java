@@ -1,15 +1,13 @@
 package org.plateau.citygmleditor.validation;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Plane;
+import javafx.geometry.Point3D;
+import org.locationtech.jts.geom.Geometry;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
-import org.plateau.citygmleditor.constant.PolygonRelationship;
 import org.plateau.citygmleditor.constant.TagName;
-import org.plateau.citygmleditor.utils.CityGmlUtil;
-import org.plateau.citygmleditor.utils.CollectionUtil;
-import org.plateau.citygmleditor.utils.PythonUtil;
-import org.plateau.citygmleditor.validation.exception.GeometryPyException;
+import org.plateau.citygmleditor.utils.*;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -18,7 +16,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -42,14 +39,18 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
 
         public String toString() {
             if (CollectionUtil.isEmpty(polygons) && CollectionUtil.isEmpty(buildingParts)) return "";
-            String polygonStr = "次のgml:Polygon座標の形式が不正です。：\n" + this.polygons.stream().map(p -> "<gml:Polygon gml:id=“" + p + "”>").collect(Collectors.joining(":\n"));
-            String bpStr = "次の境界面を共有していないgml:Solidが存在します：\n" + this.buildingParts.stream().map(b -> "<gml:BuildingPart gml:id=“" + b + "”>").collect(Collectors.joining(":\n"));
             if (CollectionUtil.isEmpty(buildingParts)) {
+                String polygonStr = "次のgml:Polygon座標の形式が不正です。：\n"
+                        + this.polygons.stream().map(p -> "<gml:Polygon gml:id=“" + p + "”>")
+                        .collect(Collectors.joining(":\n"));
                 return String.format(MessageError.ERR_L_BLDG_02_001, ID, polygonStr, "");
             }
             if (CollectionUtil.isEmpty(polygons)) {
+                String bpStr = "次の境界面を共有していないgml:Solidが存在します：\n" + this.buildingParts.stream().map(b -> "<gml:BuildingPart gml:id=“" + b + "”>").collect(Collectors.joining(":\n"));
                 return String.format(MessageError.ERR_L_BLDG_02_001, ID, bpStr, "");
             }
+            String bpStr = "次の境界面を共有していないgml:Solidが存在します：\n" + this.buildingParts.stream().map(b -> "<gml:BuildingPart gml:id=“" + b + "”>").collect(Collectors.joining(":\n"));
+            String polygonStr = "次のgml:Polygon座標の形式が不正です。：\n" + this.polygons.stream().map(p -> "<gml:Polygon gml:id=“" + p + "”>").collect(Collectors.joining(":\n"));
             return String.format(MessageError.ERR_L_BLDG_02_001, ID, polygonStr, "\n" + bpStr);
         }
     }
@@ -71,6 +72,10 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
             this.solid = solid;
         }
 
+        public String getID() {
+            return ID;
+        }
+
         @Override
         public String toString() {
             return "bldg:BuildingPart = " + this.ID + " solid = " + solid;
@@ -85,11 +90,16 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
             Element building = (Element) buildings.item(i);
             String buildingID = building.getAttribute(TagName.GML_ID);
 
-            // get invalid building part tags
             NodeList tagBuildingParts = building.getElementsByTagName(TagName.BLGD_BUILDING_PART);
+            if (tagBuildingParts.getLength() == 0) continue;
+            // validate building parts
+            List<String> invalidSolid = this.getInvalidBP(tagBuildingParts);
+            // validate format points
+            List<String> invalidPolygon = this.getWrongFormatePolygon(tagBuildingParts);
+            if (invalidPolygon.isEmpty() && invalidSolid.isEmpty()) continue;
             BuildingInvalid buildingInvalid = new BuildingInvalid();
             buildingInvalid.setID(buildingID);
-            this.setFieldError(tagBuildingParts, buildingInvalid);
+            buildingInvalid.setPolygons(invalidPolygon);
             buildingInvalids.add(buildingInvalid);
         }
 
@@ -103,102 +113,98 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
         return messages;
     }
 
-    private void setFieldError(NodeList buildingParts, BuildingInvalid building) throws IOException {
-        List<BuildingPart> invalidBPs = new ArrayList<>();
-
-        for (int i = 0; i < buildingParts.getLength(); i++) {
-            Element buildingPart = (Element) buildingParts.item(i);
-            NodeList solids = buildingPart.getElementsByTagName(TagName.GML_SOLID);
-            // building part have only one solid always valid
-            if (solids.getLength() <= 1) {
-                building.setBuidlingPart(Collections.EMPTY_LIST);
-                return;
-            }
-            List<String> invalidSolid = this.validateSolidAndSetPolygon(solids, building);
-            if (invalidSolid.isEmpty()) continue;
-
-            BuildingPart invalidBP = new BuildingPart();
-            invalidBP.setID(buildingPart.getAttribute(TagName.GML_ID));
-            invalidBP.setSolid(invalidSolid);
-            invalidBPs.add(invalidBP);
-        }
-        if (!invalidBPs.isEmpty()) {
-            building.setBuidlingPart(invalidBPs);
-        }
-    }
-
-    private List<String> validateSolidAndSetPolygon(NodeList solids, BuildingInvalid buildingInvalid) throws IOException {
+    public List<String> getWrongFormatePolygon(NodeList nodeList) {
         List<String> result = new ArrayList<>();
 
-        outterLoop:
-        for (int i = 0; i < solids.getLength(); i++) {
-            Element solid1 = (Element) solids.item(i);
-            for (int j = i + 1; j < solids.getLength(); j++) {
-                Element solid2 = (Element) solids.item(j);
-                if (this.checkTouchAndSetInvalidPolygon(solid1, solid2, buildingInvalid)) continue outterLoop;
-                result.add(solid1.getAttribute(TagName.GML_ID));
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Element element = (Element) nodeList.item(i);
+            NodeList posLists = element.getElementsByTagName(TagName.GML_POSLIST);
+            for (int j = 0; j < posLists.getLength(); j++) {
+                Node posList = posLists.item(j);
+                String[] posString = posList.getTextContent().trim().split(" ");
+                if (posString.length % 3 != 0) {
+                    Element parent = (Element) XmlUtil.findNearestParentByName(posList, TagName.GML_POLYGON);
+                    assert parent != null;
+                    String polygonID = parent.getAttribute(TagName.GML_ID);
+                    result.add(polygonID.isBlank() ? "[]" : polygonID);
+                }
             }
         }
         return result;
     }
 
-    /**
-     * Check 2 solid touch
-     *
-     * @param solid1 solid1 input
-     * @param solid2 solid2 input
-     * @return true if polygon touch 1 polygon of solid and not intersect the others polygon of solid
-     */
-    private boolean checkTouchAndSetInvalidPolygon(Element solid1, Element solid2, BuildingInvalid buildingInvalid) throws IOException {
-        List<String> invalidPolygons = new ArrayList<>();
-        NodeList polygons = solid1.getElementsByTagName(TagName.GML_POLYGON);
-        for (int i = 0; i < polygons.getLength(); i++) {
-            Element polygon = (Element) polygons.item(i);
-            Element exterior1 = (Element) polygon.getElementsByTagName(TagName.GML_EXTERIOR).item(0);
-            Element posList1 = (Element) exterior1.getElementsByTagName(TagName.GML_POSLIST).item(0);
-            String[] posString1 = posList1.getTextContent().trim().split(" ");
-            int length = posString1.length;
-            // check posString closed or miss x,y,z
-            boolean isClosed = Objects.equals(posString1[0], posString1[length - 3]) && Objects.equals(posString1[1], posString1[length - 2]) && Objects.equals(posString1[2], posString1[length - 1]);
-            if (length % 3 != 0 || isClosed) {
-                invalidPolygons.add(polygon.getAttribute(TagName.GML_ID));
+    private List<String> getInvalidBP(NodeList buildingParts) {
+        List<String> invalidBPs = new ArrayList<>();
+
+        for (int i = 0; i < buildingParts.getLength(); i++) {
+            Element buildingPart = (Element) buildingParts.item(i);
+            NodeList solids = buildingPart.getElementsByTagName(TagName.GML_SOLID);
+            // building part have only one or no solid always valid
+            if (solids.getLength() <= 1) {
+                return Collections.EMPTY_LIST;
             }
-            if (this.isTouch(posString1, solid2)) return true;
+
+            List<String> invalidSolids = new ArrayList<>();
+            for (int j = 0; j < solids.getLength(); j++) {
+                Node solid = solids.item(j);
+                if (!this.checkTouch(solids, j)) {
+                    invalidSolids.add(((Element) solid).getAttribute(TagName.GML_ID));
+                }
+            }
+            if (!invalidSolids.isEmpty()) {
+                String blgPartID = buildingPart.getAttribute(TagName.GML_ID);
+                invalidBPs.add(blgPartID.isBlank() ? "[]" : blgPartID);
+            }
         }
-        if (!invalidPolygons.isEmpty()) {
-            buildingInvalid.setPolygons(invalidPolygons);
+        return invalidBPs;
+    }
+
+    private boolean checkTouch(NodeList solids, int index) {
+        for (int i = 0; i < solids.getLength(); i++) {
+            Element solid1 = (Element) solids.item(i);
+            for (int j = 0; j < solids.getLength(); j++) {
+                Element solid2 = (Element) solids.item(j);
+                if (j != index && this.touch(solid1, solid2)) return true;
+            }
         }
         return false;
     }
 
     /**
-     * Check polygon and solid touch
-     *
-     * @param posString1 a list coornidate of polygon
-     * @param solid      a solid which need to check touch
-     * @return true if polygon touch 1 polygon of solid and not intersect the others polygon of solid
+     * one face of solid touch any face of solid2 => solid 1 touch solid 2
      */
-    private boolean isTouch(String[] posString1, Element solid) throws IOException {
-        NodeList polygonSolids = solid.getElementsByTagName(TagName.GML_POLYGON);
-        int totalPolygonOfSolid = polygonSolids.getLength();
-        for (int i = 0; i < totalPolygonOfSolid; i++) {
-            Element polygonOfSolid = (Element) polygonSolids.item(i);
-            Element exterior2 = (Element) polygonOfSolid.getElementsByTagName(TagName.GML_EXTERIOR).item(0);
-            Element posList2 = (Element) exterior2.getElementsByTagName(TagName.GML_POSLIST).item(0);
-            String[] posString2 = posList2.getTextContent().trim().split(" ");
-
-            try {
-                PolygonRelationship relationship = PythonUtil.checkPolygonRelationship(AppConst.PATH_PYTHON, posString1, posString2);
-                // polyyon intersect in 3D 1 face of solid is invalid
-                if (relationship == PolygonRelationship.INTERSECT_3D) return false;
-                // polygon touch or intersect in flat of 1 face of solid is valid
-                if (relationship == PolygonRelationship.TOUCH || relationship == PolygonRelationship.FLAT_INTERSECT) {
-                    return true;
-                }
-            } catch (GeometryPyException geometryPyException) {
-                return false;
+    private boolean touch(Element solid1, Element solid2) {
+        NodeList polygon1s = solid1.getElementsByTagName(TagName.GML_POLYGON);
+        NodeList polygon2s = solid2.getElementsByTagName(TagName.GML_POLYGON);
+        for (int i = 0; i < polygon1s.getLength(); i++) {
+            Element polygon1 = (Element) polygon1s.item(i);
+            Element exterior1 = (Element) polygon1.getElementsByTagName(TagName.GML_EXTERIOR).item(0);
+            Element posList1 = (Element) exterior1.getElementsByTagName(TagName.GML_POSLIST).item(0);
+            String[] posString1 = posList1.getTextContent().trim().split(" ");
+            List<Point3D> point3D1s = ThreeDUtil.createListPoint(posString1);
+            for (int j = 0; j < polygon2s.getLength(); j++) {
+                Element polygon2 = (Element) polygon2s.item(i);
+                Element exterior2 = (Element) polygon2.getElementsByTagName(TagName.GML_EXTERIOR).item(0);
+                Element posList2 = (Element) exterior2.getElementsByTagName(TagName.GML_POSLIST).item(0);
+                String[] posString2 = posList2.getTextContent().trim().split(" ");
+                List<Point3D> point3D2s = ThreeDUtil.createListPoint(posString2);
+                // check 2 polygons touch
+                if (this.touch(point3D1s, point3D2s)) return true;
             }
         }
         return false;
+    }
+
+    /**
+     * 2 polyon is touch in 3D when they're in a same plane and intersect
+     */
+    private boolean touch(List<Point3D> polygon1, List<Point3D> polygon2) {
+        var plane1 = SolveEquationUtil.findPlaneEquation(polygon1.get(0), polygon1.get(1), polygon1.get(2));
+        var plane2 = SolveEquationUtil.findPlaneEquation(polygon2.get(0), polygon2.get(1), polygon2.get(2));
+        if (!SolveEquationUtil.onPlane(plane1, plane2)) return false;
+
+        Geometry geometry1 = ThreeDUtil.createPolygon(polygon1);
+        Geometry geometry2 = ThreeDUtil.createPolygon(polygon2);
+        return geometry1.intersects(geometry2);
     }
 }

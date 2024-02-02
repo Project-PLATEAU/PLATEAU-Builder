@@ -58,6 +58,7 @@ module CityGMLEditor {
     opens org.plateau.citygmleditor.control to javafx.fxml, javafx.graphics;
     exports org.plateau.citygmleditor.world;
     opens org.plateau.citygmleditor.world to javafx.fxml, javafx.graphics;
+    opens org.plateau.citygmleditor.validation;
 
     uses Importer;
 }
