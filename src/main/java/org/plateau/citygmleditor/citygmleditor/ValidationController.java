@@ -95,12 +95,6 @@ public class ValidationController implements Initializable {
               return null;
             }
 
-            if (JSON_PATH_CONFIG.isBlank()) {
-              JSON_PATH_CONFIG = VALIDATION_CONFIG_PATH_DEFAULT;
-            } else {
-              pathJsonFile.setText(JSON_PATH_CONFIG);
-            }
-
             List<IValidator> validators = loadValidators(JSON_PATH_CONFIG);
             for (var validator : validators) {
               validationResultMessages.addAll(validator.validate(cityModelView));
@@ -173,7 +167,12 @@ public class ValidationController implements Initializable {
         if (file == null)
             return;
 
-        JSON_PATH_CONFIG = file.getPath();
+        if (file.getPath().isBlank()) {
+            JSON_PATH_CONFIG = VALIDATION_CONFIG_PATH_DEFAULT;
+        } else {
+            JSON_PATH_CONFIG = file.getPath();
+            pathJsonFile.setText(JSON_PATH_CONFIG);
+        }
     }
 
     private List<IValidator> loadValidators(String path) throws IOException {
