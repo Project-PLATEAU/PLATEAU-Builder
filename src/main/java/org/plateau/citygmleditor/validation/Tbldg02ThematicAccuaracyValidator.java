@@ -26,6 +26,8 @@ public class Tbldg02ThematicAccuaracyValidator implements IValidator {
         NodeList buildingInstallations = CityGmlUtil.getXmlDocumentFrom(cityModelView)
                 .getElementsByTagName(TagName.BLDG_BUILDING_INSTALLATION);
         List<String> invalidInstallations = new ArrayList<>();
+        List<GmlElementError> elementErrors = new ArrayList<>();
+
         for (int i = 0; i < buildingInstallations.getLength(); i++) {
             Node installation = buildingInstallations.item(i);
             // Get all tags that are not A and B
@@ -35,8 +37,8 @@ public class Tbldg02ThematicAccuaracyValidator implements IValidator {
                 Element eInstallation = (Element) installation;
                 String invalidInstallation = "gml:id=" + eInstallation.getAttribute(TagName.GML_ID) + " [" + invalidLodGeometry + "]";
                 invalidInstallations.add(invalidInstallation);
+                elementErrors.add(new GmlElementError(null, null, null, invalidInstallation, TagName.BLDG_BUILDING_INSTALLATION, 0));
             }
-
         }
         List<ValidationResultMessage> messages = new ArrayList<>();
         StringBuilder errorMessage = new StringBuilder(MessageError.ERR_T_Bldg_02_002_1);
@@ -45,7 +47,7 @@ public class Tbldg02ThematicAccuaracyValidator implements IValidator {
         }
 
         if (!errorMessage.toString().equals(MessageError.ERR_T_Bldg_02_002_1)) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage.toString()));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage.toString(), elementErrors));
         }
         return messages;
     }

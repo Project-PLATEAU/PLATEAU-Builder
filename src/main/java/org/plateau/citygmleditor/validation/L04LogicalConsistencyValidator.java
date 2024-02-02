@@ -24,6 +24,7 @@ public class L04LogicalConsistencyValidator implements IValidator {
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
         List<String> invalidBuildings = new ArrayList<>();
+        List<GmlElementError> elementErrors = new ArrayList<>();
         for (int i = 0; i < buildings.getLength(); i++) {
             Node building = buildings.item(i);
             Element buildingE = (Element) building;
@@ -33,17 +34,25 @@ public class L04LogicalConsistencyValidator implements IValidator {
             XmlUtil.recursiveFindNodeByAttribute(building, tagHaveCodeSpaces, TagName.ATTRIBUTE_CODE_SPACE);
             List<String> invalidCodeSpaces = this.getInvalidCodeSpaces(tagHaveCodeSpaces);
             if (invalidCodeSpaces.isEmpty()) continue;
+            elementErrors.add(new GmlElementError(
+                    buildingID,
+                    null,
+                    null,
+                    invalidCodeSpaces.toString(),
+                    null,
+                    0
+            ));
             invalidBuildings.add(String.format("gml:id = (%s) [%s]", buildingID, invalidCodeSpaces));
         }
 
         List<ValidationResultMessage> messages = new ArrayList<>();
-        String errorMessage = MessageError.ERR_L04_002_1;
+        StringBuilder errorMessage = new StringBuilder(MessageError.ERR_L04_002_1);
         for (String invalid : invalidBuildings) {
-            errorMessage = errorMessage + MessageFormat.format(MessageError.ERR_L04_002_2, invalid);
+            errorMessage.append(MessageFormat.format(MessageError.ERR_L04_002_2, invalid));
         }
 
-        if (!errorMessage.equals(MessageError.ERR_L04_002_1)) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage));
+        if (!errorMessage.toString().equals(MessageError.ERR_L04_002_1)) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage.toString(), elementErrors));
         }
 
         return messages;

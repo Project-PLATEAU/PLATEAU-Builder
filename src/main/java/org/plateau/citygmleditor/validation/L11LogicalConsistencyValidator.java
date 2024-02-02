@@ -81,6 +81,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
         // get buildings from gml file
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
+        List<GmlElementError> elementErrors = new ArrayList<>();
 
         for (int i = 0; i < buildings.getLength(); i++) {
             Node tagBuilding = buildings.item(i);
@@ -94,12 +95,14 @@ public class L11LogicalConsistencyValidator implements IValidator {
             buildingInvalid.setBuildingID(buildingID);
             buildingInvalid.setLodInvalids(lodInvalids);
             buildingInvalids.add(buildingInvalid);
+
+            elementErrors.add(new GmlElementError(buildingID, null, null, lodInvalids.toString(), "LOD1", 0));
         }
 
         if (CollectionUtil.isEmpty(buildingInvalids)) return new ArrayList<>();
         for (BuildingInvalid invalid : buildingInvalids) {
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                    invalid.toString(MessageError.ERR_L11_002, MessageError.ERR_L11_002_1)));
+                    invalid.toString(MessageError.ERR_L11_002, MessageError.ERR_L11_002_1), elementErrors));
         }
         return messages;
     }

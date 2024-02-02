@@ -27,6 +27,7 @@ public class L14LogicalAccuaracyValidator implements IValidator {
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
         List<String> buildingErrors = new ArrayList<>();
+        List<GmlElementError> elementErrors = new ArrayList<>();
 
         for (int i = 0; i < buildings.getLength(); i++) {
             Node tagBuilding = buildings.item(i);
@@ -39,15 +40,17 @@ public class L14LogicalAccuaracyValidator implements IValidator {
             if (isClosed.isBlank() && notSameDirection.isBlank()) continue;
             String buildingError = MessageFormat.format(MessageError.ERR_L14_002_1, buildingID) + isClosed + "\n" + notSameDirection;
             buildingErrors.add(buildingError);
+            String totalInvalidSolid = String.valueOf(invalidSolid.get("IS_NOT_CLOSED").addAll(invalidSolid.get("NOT_SAME_DIRECTION")));
+            elementErrors.add(new GmlElementError(buildingID, totalInvalidSolid, null, null, null, 0));
         }
         List<ValidationResultMessage> messages = new ArrayList<>();
         for (String invalid : buildingErrors) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid, elementErrors));
         }
         return messages;
     }
 
-    private Map<String, List<String>> getInvalidSolid(Element building) throws IOException {
+    private Map<String, List<String>> getInvalidSolid(Element building) {
         NodeList solids = building.getElementsByTagName(TagName.GML_SOLID);
         Map<String, List<String>> result = new HashMap<>();
         List<String> polygonSelfIntersect = new ArrayList<>();

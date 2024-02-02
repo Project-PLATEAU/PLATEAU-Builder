@@ -42,24 +42,29 @@ public class GMLIDCompletenessValidator implements IValidator {
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "Exists GmlId null\\n"));
         }
 
+        StringBuilder invalidID = getInvalidID(allID);
+
+        if (!invalidID.toString().equals(MessageError.ERR_C01_001_1)) {
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalidID.toString()));
+        }
+
+        return messages;
+    }
+
+    private static StringBuilder getInvalidID(List<String> allID) {
         Map<String, Integer> elementCountMap = new HashMap<>();
         // Count the number of occurrences of each element
         for (String gmlID : allID) {
             elementCountMap.put(gmlID, elementCountMap.getOrDefault(gmlID, 0) + 1);
         }
 
-        String messageError = MessageError.ERR_C01_001_1;
+        StringBuilder messageError = new StringBuilder(MessageError.ERR_C01_001_1);
         for (Map.Entry<String, Integer> entry : elementCountMap.entrySet()) {
             String gmlID = entry.getKey();
             if (entry.getValue() > 1) {
-                messageError = messageError + MessageFormat.format(MessageError.ERR_C01_001_2, gmlID);
+                messageError.append(MessageFormat.format(MessageError.ERR_C01_001_2, gmlID));
             }
         }
-
-        if (!messageError.equals(MessageError.ERR_C01_001_1)) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, messageError));
-        }
-
-        return messages;
+        return messageError;
     }
 }

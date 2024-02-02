@@ -65,6 +65,7 @@ public class L07LogicalConsistencyValidator implements IValidator {
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
+        List<GmlElementError> elementErrors = new ArrayList<>();
 
         for (int i = 0; i < buildings.getLength(); i++) {
             Element building = (Element) buildings.item(i);
@@ -86,12 +87,38 @@ public class L07LogicalConsistencyValidator implements IValidator {
             buildingInvalid.setLinearRings(linearRingIDInvalids);
             buildingInvalid.setLineStrings(lineStringIDvalids);
             buildingInvalids.add(buildingInvalid);
+
+            List<String> linearRings = linearRingIDInvalids.get("FORMAT");
+            linearRings.addAll(linearRingIDInvalids.get("LOGICAL"));
+            List<String> lineStrings = lineStringIDvalids.get("FORMAT");
+            lineStrings.addAll(lineStringIDvalids.get("LOGICAL"));
+
+            // add linearRing to gmlElementError
+            for (String linearRing : linearRings) {
+                elementErrors.add(new GmlElementError(
+                        buildingID,
+                        null,
+                        null,
+                        linearRing, TagName.GML_LINEARRING,
+                        0));
+            }
+
+            // add lineString to gmlElementError
+            for (String lineString : lineStrings) {
+                elementErrors.add(new GmlElementError(
+                        buildingID,
+                        null,
+                        null,
+                        lineString, TagName.GML_LINESTRING,
+                        0));
+            }
         }
 
         if (CollectionUtil.isEmpty(buildingInvalids)) return new ArrayList<>();
+        elementErrors.stream().collect(Collectors.groupingBy(GmlElementError::getBuildingId));
         List<ValidationResultMessage> messages = new ArrayList<>();
         for (BuildingInvalid invalid : buildingInvalids) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid.toString()));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid.toString(), elementErrors));
         }
         return messages;
     }

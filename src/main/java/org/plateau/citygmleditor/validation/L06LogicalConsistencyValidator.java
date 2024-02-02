@@ -83,8 +83,12 @@ public class L06LogicalConsistencyValidator implements IValidator {
                                 node.getFirstChild().getNodeValue())));
             }
         }
+
+        List<GmlElementError> elementErrors = new ArrayList<>();
         for (Map.Entry<String, String> k : errorMap.entrySet()) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, k.getValue()));
+            String buildingID = k.getKey();
+            elementErrors.add(new GmlElementError(buildingID, null, null, null, null, 0));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, k.getValue(), elementErrors));
         }
 
         return messages;
