@@ -7,6 +7,7 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -14,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.control.FeatureSelection;
 import org.plateau.citygmleditor.modelstandard.Standard;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
@@ -64,6 +66,10 @@ public class ValidationController implements Initializable {
         }
         resultTextContainer.getChildren().add(text);
         scrollContentError.setContent(resultTextContainer);
+
+        text.setOnMousePressed(event -> {
+            activeBuildingElements(message.getElementErrors());
+        });
         if (!CollectionUtil.isEmpty(message.getElementErrors())) {
             highlightErrors(message.getElementErrors());
         }
@@ -256,5 +262,19 @@ public class ValidationController implements Initializable {
                 // TODO check LOD2SolidView highlight, now only highlight bottom surface
                 // TODO highlight solid and polygon
             });
+    }
+
+    private void activeBuildingElements(List<GmlElementError> elementErrors) {
+        elementErrors.forEach(this::activeBuildingElement);
+    }
+
+    private void activeBuildingElement(GmlElementError elementError) {
+        var nodes = World.getActiveInstance().getCityModel().lookupAll("#" + elementError.getBuildingId());
+        if (nodes.isEmpty()) {
+            return;
+        }
+        var node = nodes.iterator().next();
+        var building = (BuildingView) node;
+        CityGMLEditorApp.getFeatureSellection().select(building);
     }
 }
