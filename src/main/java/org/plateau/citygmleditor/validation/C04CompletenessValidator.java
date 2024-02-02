@@ -72,6 +72,7 @@ public class C04CompletenessValidator implements IValidator {
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
+        List<GmlElementError> elementErrors = new ArrayList<>();
 
         for (int i = 0; i < buildings.getLength(); i++) {
             Element building = (Element) buildings.item(i);
@@ -80,8 +81,13 @@ public class C04CompletenessValidator implements IValidator {
             List<UROBuildingAtrribute> uroBuildingIDDuplicate = this.getUroBuildingIDDuplicate(building);
             // get tag <uro:BuildingID> invalid
             List<String> uroBuildingIDInvalids = this.getUroBuildingIDInvalid(uroBuildingIDDuplicate);
-
             if (CollectionUtil.isEmpty(uroBuildingIDInvalids)) continue;
+            elementErrors.add(new GmlElementError(
+                    buildingID,
+                    null,
+                    null,
+                    uroBuildingIDInvalids.toString(),
+                    TagName.URO_BUILDING_ID_ATTRIBUTE, 0));
             BuildingInvalid buildingInvalid = new BuildingInvalid();
             buildingInvalid.setBuildingID(buildingID);
             buildingInvalid.setUroBuildingID(uroBuildingIDInvalids);
@@ -91,7 +97,7 @@ public class C04CompletenessValidator implements IValidator {
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
         for (BuildingInvalid invalid : buildingInvalids) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid.toString()));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid.toString(), elementErrors));
         }
         return messages;
     }
