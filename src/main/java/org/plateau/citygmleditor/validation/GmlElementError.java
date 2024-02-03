@@ -1,5 +1,7 @@
 package org.plateau.citygmleditor.validation;
 
+import java.util.Objects;
+
 public class GmlElementError {
   private String buildingId;
   private String solidId;
@@ -40,5 +42,26 @@ public class GmlElementError {
 
   public int getError() {
     return error;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    GmlElementError that = (GmlElementError) o;
+    return error == that.error && Objects.equals(buildingId, that.buildingId) && Objects.equals(
+        solidId, that.solidId) && Objects.equals(polygonId, that.polygonId) && Objects.equals(
+        errorElementId, that.errorElementId) && Objects.equals(errorElementNodeName,
+        that.errorElementNodeName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(buildingId, solidId, polygonId, errorElementId, errorElementNodeName,
+        error);
   }
 }

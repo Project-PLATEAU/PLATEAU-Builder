@@ -1,12 +1,17 @@
 package org.plateau.citygmleditor.validation;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.geometry.Point3D;
-import org.locationtech.jts.geom.*;
+import javax.xml.parsers.ParserConfigurationException;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
@@ -18,16 +23,36 @@ import org.plateau.citygmleditor.validation.exception.InvalidPosStringException;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class Lbldg01LogicalAccuracyValidator implements IValidator {
 
-  enum ErrorType {
-    ERR_INVALID_FORMAT_POINTS, ERR_SOLID_INTERSECT
+  private static final String BUILDING_ID = "buildingId";
+
+  interface Lbldg01ErrorType {
+    int ERR_INVALID_FORMAT_POINTS = 0;
+    int ERR_SOLID_INTERSECT = 1;
   }
+
+  /**
+   * Find all solids in lodTagName (lod1Solid or lod2Solid) in buildings
+   * @param buildings list of building nodes
+   * @param lodTagName TagName.BLDG_LOD_1_SOLID or TagName.BLDG_LOD_2_SOLID
+   * @return list of solid nodes
+   */
+  private List<Node> getAllSolidsInLodSolidInBuildings(List<Node> buildings, String lodTagName) {
+    List<Node> solids = new ArrayList<>();
+    for (var building : buildings) {
+      String buildingGmlId = building.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
+
+      List<Node> lodSolids = XmlUtil.findAllNodeByTag(building, lodTagName);
+      for (var solid : lodSolids) {
+        XmlUtil.findAllNodeByTag(solid, TagName.GML_SOLID).stream()
+            .peek(n -> n.setUserData(BUILDING_ID, buildingGmlId, null))
+            .forEach(solids::add);
+      }
+    }
+    return solids;
+  }
+
 
   @Override
   public List<ValidationResultMessage> validate(CityModelView cityModel)
@@ -36,92 +61,93 @@ public class Lbldg01LogicalAccuracyValidator implements IValidator {
     List<Node> buildings = XmlUtil.findAllNodeByTag(CityGmlUtil.getXmlDocumentFrom(cityModel),
         TagName.BLDG_BUILDING);
 
-    Map<Node, Map<Node, ErrorType>> buildingWithErrorSolids = new HashMap<>();
 
-    for (var building : buildings) {
-      // Loop through all buildings
-      validateBuildingSolids(building, buildingWithErrorSolids);
-    }
+    List<ValidationResultMessage> validationResults = new ArrayList<>();
+    Set<GmlElementError> elementErrors = new HashSet<>();
 
-    if (buildingWithErrorSolids.isEmpty()) {
-      return List.of();
-    }
+    validateBuildingSolids(buildings, elementErrors);
 
-    StringBuffer finalErrorMsg = new StringBuffer("\n")
-        .append(MessageError.ERR_LBLDG_01_PREFIX)
-        .append("\n");
+    elementErrors.stream()
+        .collect(Collectors.groupingBy(GmlElementError::getBuildingId))
+        .forEach((buildingId, buildingElementErrors) -> {
+            var invalidPolygonTxt = new ArrayList<String>();
+            var invalidSolidTxt = new ArrayList<String>();
 
-    buildingWithErrorSolids.forEach((building, errorNodes) -> {
-      String buildingGmlId = building.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
-      var invalidPolygonTxt = new ArrayList<String>();
-      var invalidSolidTxt = new ArrayList<String>();
+            buildingElementErrors.forEach(error -> {
+              if (error.getError() == Lbldg01ErrorType.ERR_INVALID_FORMAT_POINTS) {
+                invalidPolygonTxt.add(String.format(MessageError.ERR_LBLDG_01_POLYGON_DETAIL, error.getErrorElementId()));
+              } else if (error.getError() == Lbldg01ErrorType.ERR_SOLID_INTERSECT) {
+                invalidSolidTxt.add(String.format(MessageError.ERR_LBLDG_01_SOLID_DETAIL, error.getErrorElementId()));
+              }
+            });
 
-      errorNodes.forEach((key, value) -> {
-        var gmlIdNode = key.getAttributes().getNamedItem(TagName.GML_ID);
-        var gmlId = gmlIdNode != null ? gmlIdNode.getTextContent() : "";
-        if (value == ErrorType.ERR_INVALID_FORMAT_POINTS) {
-          invalidPolygonTxt.add(String.format(MessageError.ERR_LBLDG_01_POLYGON_DETAIL, gmlId));
-        } else if (value == ErrorType.ERR_SOLID_INTERSECT) {
-          invalidSolidTxt.add(String.format(MessageError.ERR_LBLDG_01_SOLID_DETAIL, gmlId));
-        }
-      });
+            if (!invalidPolygonTxt.isEmpty()) {
+              var polygonsError = String.format(MessageError.ERR_LBLDG_01_POLYGON, String.join("\n", invalidPolygonTxt));
+              var buildingWarningMsg = String.format(MessageError.ERR_LBLDG_01_BUILDING, buildingId, polygonsError);
+              validationResults.add(new ValidationResultMessage(ValidationResultMessageType.Error, buildingWarningMsg, buildingElementErrors));
+            }
 
-      String invalidFormatMsg = invalidPolygonTxt.isEmpty() ? "" : String.format(MessageError.ERR_LBLDG_01_POLYGON, String.join("\n", invalidPolygonTxt));
-      String intersectFormatMsg = invalidSolidTxt.isEmpty() ? "" : String.format(MessageError.ERR_LBLDG_01_SOLID, String.join("\n", invalidSolidTxt));
+            if (!invalidSolidTxt.isEmpty()) {
+              var solidsError = String.format(MessageError.ERR_LBLDG_01_SOLID, String.join("\n", invalidSolidTxt));
+              var buildingWarningMsg = String.format(MessageError.ERR_LBLDG_01_BUILDING, buildingId, solidsError);
+              validationResults.add(new ValidationResultMessage(ValidationResultMessageType.Warning, buildingWarningMsg, buildingElementErrors));
+            }
+        });
 
-      var buildingErrorMsg = Stream.of(String.format(MessageError.ERR_LBLDG_01_BUILDING, buildingGmlId), invalidFormatMsg, intersectFormatMsg)
-          .filter(s -> !s.isEmpty())
-          .collect(Collectors.joining("\n"));
-      finalErrorMsg.append(buildingErrorMsg).append("\n");
-    });
 
-    var message = new ValidationResultMessage(ValidationResultMessageType.Error,
-        finalErrorMsg.toString());
-    return List.of(message);
+    return validationResults;
   }
 
-  private void validateBuildingSolids(Node building,
-      Map<Node, Map<Node, ErrorType>> buildingWithErrorSolids) {
-    // Find all lod1Solids of building
-    List<Node> lod1Solids = XmlUtil.findAllNodeByTag(building, TagName.BLDG_LOD_1_SOLID);
-    // Find all lod2Solids of building
-    List<Node> lod2Solids = XmlUtil.findAllNodeByTag(building, TagName.BLDG_LOD_2_SOLID);
+  private void validateBuildingSolids(List<Node> buildings, Set<GmlElementError> elementErrors) {
+    // Find all lod1Solids of buildings
+    List<Node> lod1Solids = getAllSolidsInLodSolidInBuildings(buildings, TagName.BLDG_LOD_1_SOLID);
+    // Find all lod2Solids of buildings
+    List<Node> lod2Solids = getAllSolidsInLodSolidInBuildings(buildings, TagName.BLDG_LOD_2_SOLID);
 
-    List<Node> solids = new ArrayList<>();
+    checkSolidIntersect(lod1Solids, elementErrors);
+    checkSolidIntersect(lod2Solids, elementErrors);
+  }
 
-    // push all solids to one list
-    lod1Solids.forEach(solid -> solids.addAll(XmlUtil.findAllNodeByTag(solid, TagName.GML_SOLID)));
-    lod2Solids.forEach(solid -> solids.addAll(XmlUtil.findAllNodeByTag(solid, TagName.GML_SOLID)));
-
-    // With each combination of two solids, compute their projection of their solids on 2D and check intersection
+  private void checkSolidIntersect(List<Node> solids, Set<GmlElementError> elementErrors) {
     for (int i = 0; i < solids.size(); i++) {
       Node solid1 = solids.get(i);
-      Geometry projectedOnOxyPlane1;
-      try {
-        projectedOnOxyPlane1 = getSolidExteriorProjectedOnOxyPlane(building, solid1,
-            buildingWithErrorSolids);
-      } catch (IllegalArgumentException | InvalidPosStringException e) {
-        continue;
-      }
       for (int j = i + 1; j < solids.size(); j++) {
         Node solid2 = solids.get(j);
-        Geometry projectedOnOxyPlane2;
-        try {
-          projectedOnOxyPlane2 = getSolidExteriorProjectedOnOxyPlane(building, solid2,
-              buildingWithErrorSolids);
-        } catch (IllegalArgumentException | InvalidPosStringException e) {
-          continue;
-        }
+        if (isSolidIntersect(solid1, solid2, elementErrors)) {
+          String building1Id = XmlUtil.getUserDataAttribute(solid1, BUILDING_ID, String.class);
+          String solid1Id = XmlUtil.getAttribute(solid1, TagName.GML_ID);
 
-        // Check intersection
-        // If intersection is a polygon, then two solids intersect
-        // Otherwise, two solids do not intersect (perhaps touch or no touch)
-        if ((projectedOnOxyPlane1.intersection(projectedOnOxyPlane2)) instanceof Polygon) {
-          CollectionUtil.updateErrorMap(buildingWithErrorSolids, building, solid1, ErrorType.ERR_SOLID_INTERSECT);
-          CollectionUtil.updateErrorMap(buildingWithErrorSolids, building, solid2, ErrorType.ERR_SOLID_INTERSECT);
+          String building2Id = XmlUtil.getUserDataAttribute(solid2, BUILDING_ID, String.class);
+          String solid2Id = XmlUtil.getAttribute(solid2, TagName.GML_ID);
+          var error = Lbldg01ErrorType.ERR_SOLID_INTERSECT;
+          var element1Error = new GmlElementError(building1Id, solid1Id, null, solid1Id, solid1.getNodeName(), error);
+          var element2Error = new GmlElementError(building2Id, solid2Id, null, solid2Id, solid2.getNodeName(), error);
+
+          elementErrors.add(element1Error);
+          elementErrors.add(element2Error);
         }
       }
     }
+  }
+
+  private boolean isSolidIntersect(Node solid1, Node solid2, Set<GmlElementError> elementErrors) {
+    Geometry projectedOnOxyPlane1;
+    try {
+      projectedOnOxyPlane1 = getSolidExteriorProjectedOnOxyPlane(solid1, elementErrors);
+    } catch (IllegalArgumentException | InvalidPosStringException e) {
+      return false;
+    }
+    Geometry projectedOnOxyPlane2;
+    try {
+      projectedOnOxyPlane2 = getSolidExteriorProjectedOnOxyPlane(solid2, elementErrors);
+    } catch (IllegalArgumentException | InvalidPosStringException e) {
+      return false;
+    }
+
+    // Check intersection
+    // If intersection is a polygon, then two solids intersect
+    // Otherwise, two solids do not intersect (perhaps touch or no touch)
+    return (projectedOnOxyPlane1.intersection(projectedOnOxyPlane2)) instanceof Polygon;
   }
 
   /**
@@ -130,8 +156,10 @@ public class Lbldg01LogicalAccuracyValidator implements IValidator {
    * @param solid solid node
    * @return Get result of union the exterior polygons of a solid and project them on Oxy plane
    */
-  Geometry getSolidExteriorProjectedOnOxyPlane(Node building, Node solid,
-      Map<Node, Map<Node, ErrorType>> buildingWithErrorSolids) {
+  Geometry getSolidExteriorProjectedOnOxyPlane(Node solid, Set<GmlElementError> elementErrors) {
+    String buildingGmlId = XmlUtil.getUserDataAttribute(solid, BUILDING_ID, String.class);
+    String solidGmlId = XmlUtil.getAttribute(solid, TagName.GML_ID);
+
     boolean isError = false;
     List<Geometry> results = new ArrayList<>();
     // Find list of solid's exteriors
@@ -153,8 +181,14 @@ public class Lbldg01LogicalAccuracyValidator implements IValidator {
             try {
               results.add(ThreeDUtil.createPolygon(pointOnOxyPlane));
             } catch (IllegalArgumentException e) {
-              CollectionUtil.updateErrorMap(buildingWithErrorSolids, building, polygon,
-                  ErrorType.ERR_INVALID_FORMAT_POINTS);
+              elementErrors.add(new GmlElementError(
+                  buildingGmlId,
+                  solidGmlId,
+                  null,
+                  XmlUtil.getGmlId(polygon),
+                  polygon.getNodeName(),
+                  Lbldg01ErrorType.ERR_INVALID_FORMAT_POINTS
+              ));
               isError = true;
             }
           }
@@ -163,10 +197,7 @@ public class Lbldg01LogicalAccuracyValidator implements IValidator {
     }
 
     if (isError) {
-      String buildingGmlId = building.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
-      throw new IllegalArgumentException(
-          String.format("There are some polygons of building %s are invalid points",
-              buildingGmlId));
+      throw new IllegalArgumentException(String.format("There are some polygons of building %s are invalid points", buildingGmlId));
     }
     // Union all exterior polygons
     return new GeometryFactory().createGeometryCollection(

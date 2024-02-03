@@ -42,7 +42,7 @@ public class ValidationController implements Initializable {
     @FXML
     TextField pathJsonFile;
 
-    private static String JSON_PATH_CONFIG = "";
+    private static String JSON_PATH_CONFIG = VALIDATION_CONFIG_PATH_DEFAULT;
 
     private List<ValidationResultMessage> validationResultMessages;
 
@@ -58,7 +58,7 @@ public class ValidationController implements Initializable {
                 text.setStyle("-fx-font-size: 16px;");
                 break;
             case Warning:
-                text.setStyle("-fx-text-fill: yellow; -fx-font-size: 16px;");
+                text.setStyle("-fx-text-fill: #be762d; -fx-font-size: 16px;");
                 break;
             case Error:
                 text.setStyle("-fx-text-fill: red; -fx-font-size: 16px;");

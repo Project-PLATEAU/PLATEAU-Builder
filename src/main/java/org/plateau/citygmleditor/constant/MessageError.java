@@ -58,12 +58,12 @@ public interface MessageError {
     String ERR_L18_003_3 = "\n<gml:CompositeSurface gml:id=\"[{0}]\">が接触していない。";
     String ERR_L18_003_4 = "L18: \nその他のエラー。";
     String ERR_LBLDG_01_PREFIX = "L_BLDG_01: ";
-    String ERR_LBLDG_01_BUILDING = "地物\"%s\":";
-    String ERR_LBLDG_01_SOLID = "次の重複しているgml:Solidが存在します：\n%s";
-    String ERR_LBLDG_01_POLYGON = "次のgml:Polygon座標の形式が不正です。\n%s";
-    String ERR_LBLDG_01_SOLID_DETAIL = "<gml:Solid gml:id=\"%s\">";
-    String ERR_LBLDG_01_POLYGON_DETAIL = "<gml:Polygon gml:id=\"%s\">";
     String ERR_L_BLDG_02_001 = "L_BLDG 02: 地物\"%s\":\n" + "%s" + " %s";
+    String ERR_LBLDG_01_BUILDING = "L-BLDG-01: 地物\"%s\": \n%s";
+    String ERR_LBLDG_01_SOLID = "  次の重複しているgml:Solidが存在します：\n%s";
+    String ERR_LBLDG_01_POLYGON = "  次のgml:Polygon座標の形式が不正です。\n%s";
+    String ERR_LBLDG_01_SOLID_DETAIL = "    <gml:Solid gml:id=\"%s\">";
+    String ERR_LBLDG_01_POLYGON_DETAIL = "    <gml:Polygon gml:id=\"%s\">";
     String ERR_LBLDG_03_001_1 = "L_BLDG 03: 地物\"{0}\":\n" +
             "部が境界面の外側に存在するbldg:Window及びbldg:Doorのインスタンスが存在します：";
     String ERR_LBLDG_03_001_2 = "\n<bldg:Door gml:id=\"[{0}]”>";

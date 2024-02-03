@@ -212,4 +212,14 @@ public class XmlUtil {
     var attribute = node.getAttributes().getNamedItem("gml:id");
     return attribute != null ? attribute.getTextContent() : "";
   }
+
+  public static <T> T getUserDataAttribute(Node node, String attributeName, Class<T> clazz) {
+    var attribute = node.getUserData(attributeName);
+    return attribute != null ? clazz.cast(attribute) : null;
+  }
+
+  public static String getAttribute(Node node, String attributeName) {
+    var attribute = node.getAttributes().getNamedItem(attributeName);
+    return attribute != null ? attribute.getTextContent() : "";
+  }
 }
