@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 
 
 public class L10LogicalConsistencyValidator implements IValidator {
+  private final static int ERROR_L10 = 1;
+  private final static int INVALID_FORMAT_EXCEPTION = 2;
 
   @Override
   public List<ValidationResultMessage> validate(CityModelView cityModel)
@@ -53,19 +55,33 @@ public class L10LogicalConsistencyValidator implements IValidator {
     }
 
     buildingWithErrorPolygonsSurfacePaths.forEach((buildingNode, errorPolygonSurfacePath) -> {
-      String buildingGmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
+      String buildingGmlId = XmlUtil.getGmlId(buildingNode);
 
       Set<Node> polygonErrors = buildingWithErrorPolygonsSurfacePaths.get(buildingNode);
 
       String polygonErrorStr = "";
+      List<GmlElementError> gmlElementErrors = new ArrayList<>();
       for (Node polygon : polygonErrors) {
+        String errorElementNodeName = polygon.getFirstChild().getNodeName();
+        int error = ERROR_L10;
+
+        GmlElementError gmlElementError = new GmlElementError(
+                buildingGmlId,
+                null,
+                XmlUtil.getGmlId(polygon),
+                XmlUtil.getGmlId(polygon),
+                errorElementNodeName,
+                error);
+        gmlElementErrors.add(gmlElementError);
+
         var itemGmlId = polygon.getAttributes().getNamedItem(TagName.GML_ID);
         String gmiId = itemGmlId != null ? itemGmlId.getTextContent() : "";
         polygonErrorStr = polygonErrorStr + MessageFormat.format(MessageError.ERR_L10_002_1, gmiId);
       }
 
       messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-              MessageFormat.format(MessageError.ERR_L10_002, buildingGmlId, polygonErrorStr)));
+              MessageFormat.format(MessageError.ERR_L10_002, buildingGmlId, polygonErrorStr),
+              gmlElementErrors));
     });
 
     return messages;
@@ -148,17 +164,26 @@ public class L10LogicalConsistencyValidator implements IValidator {
     // There are 2 cases: posList and pos of LinearRing
     NodeList posListNodes = linearRingElement.getElementsByTagName(TagName.GML_POSLIST);
     NodeList posNodes = linearRingElement.getElementsByTagName(TagName.GML_POS);
+    Node building = XmlUtil.findNearestParentByTagAndAttribute(linearRingNode, TagName.BLDG_BUILDING, TagName.GML_ID);
+    Node polygon = XmlUtil.findNearestParentByName(linearRingNode, TagName.GML_POLYGON);
 
     if (posListNodes.getLength() > 0) {
       String[] posString = posListNodes.item(0).getTextContent().split(" ");
       try {
         return ThreeDUtil.createListPoint(posString);
       } catch (InvalidPosStringException e) {
-        Node parentNode = XmlUtil.findNearestParentByAttribute(linearRingNode, TagName.GML_ID);
+
+        String errorElementNodeName = linearRingNode.getFirstChild().getNodeName();
+        int error = INVALID_FORMAT_EXCEPTION;
+        GmlElementError gmlElementError = new GmlElementError(
+                XmlUtil.getGmlId(building), null, XmlUtil.getGmlId(polygon), XmlUtil.getGmlId(linearRingNode), errorElementNodeName, error
+        );
+
         messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
                 MessageFormat.format(MessageError.ERR_L10_001,
-                        parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
-                        linearRingElement.getFirstChild().getNodeValue())));
+                        XmlUtil.getGmlId(building),
+                        linearRingElement.getFirstChild().getNodeValue()),
+                List.of(gmlElementError)));
         return new ArrayList<>();
       }
     } else if (posNodes.getLength() > 0) {
@@ -166,14 +191,26 @@ public class L10LogicalConsistencyValidator implements IValidator {
       for (int i = 0; i < posNodes.getLength(); i++) {
         Node posNode = posNodes.item(i);
         String[] posString = posNode.getTextContent().split(" ");
+        String buildingId = XmlUtil.getGmlId(building);
         try {
           point3DS.addAll(ThreeDUtil.createListPoint(posString));
         } catch (InvalidPosStringException e) {
-          Node parentNode = XmlUtil.findNearestParentByAttribute(linearRingNode, TagName.GML_ID);
+          int error = INVALID_FORMAT_EXCEPTION;
+          GmlElementError gmlElementError = new GmlElementError(
+                  buildingId,
+                  null,
+                  XmlUtil.getGmlId(polygon),
+                  XmlUtil.getGmlId(linearRingNode),
+                  linearRingNode.getNodeName(),
+                  error
+          );
+
           messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
                   MessageFormat.format(MessageError.ERR_L10_003,
-                          parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
-                          linearRingElement.getFirstChild().getNodeValue())));
+                          buildingId,
+                          linearRingElement.getFirstChild().getNodeValue()),
+                  List.of(gmlElementError)));
+
           return new ArrayList<>();
         }
       }

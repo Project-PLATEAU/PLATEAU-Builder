@@ -50,25 +50,55 @@ public class L09LogicalConsistencyValidator implements IValidator {
           checkPointsIntersect(linearRingNode, buildingWithErrorLinearRing);
         }
       } catch (InvalidPosStringException e) {
-        Node parentNode = XmlUtil.findNearestParentByAttribute(linearRingNodes.item(i), TagName.GML_ID);
+        Node building = XmlUtil.findNearestParentByTagAndAttribute(linearRingNodes.item(i), TagName.BLDG_BUILDING, TagName.GML_ID);
+        Node polygonNode = XmlUtil.findNearestParentByAttribute(linearRingNode, TagName.GML_POLYGON);
+
+        int error = INVALID_FORMAT_EXCEPTION;
+        GmlElementError gmlElementError = new GmlElementError(
+                XmlUtil.getGmlId(building),
+                null,
+                XmlUtil.getGmlId(polygonNode),
+                XmlUtil.getGmlId(linearRingNodes.item(i)),
+                linearRingNodes.item(i).getNodeName(),
+                error
+        );
+
         messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
                 MessageFormat.format(MessageError.ERR_L09_001,
-                        parentNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent(),
-                        linearRingNodes.item(i).getFirstChild().getNodeValue())));
+                        XmlUtil.getGmlId(building),
+                        linearRingNodes.item(i).getFirstChild().getNodeValue()),
+                List.of(gmlElementError)));
       }
     }
 
     buildingWithErrorLinearRing.forEach((buildingNode, linearRingNodesWithError) -> {
 
-      String gmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
+      String gmlId = XmlUtil.getGmlId(buildingNode);
       String errorMessage = MessageFormat.format(MessageError.ERR_L09_002_1, gmlId);
+      List<GmlElementError> gmlElementErrors = new ArrayList<>();
+
       for (LinearRingError linearRing : linearRingNodesWithError) {
+        Node polygonNode = XmlUtil.findNearestParentByName(linearRing.getLinearRing(), TagName.GML_POLYGON);
+
+        String errorElementNodeName = linearRing.getLinearRing().getFirstChild().getNodeName();
+        int error = linearRing.getErrorCode();
+
+        GmlElementError gmlElementError = new GmlElementError(
+                gmlId,
+                null,
+                XmlUtil.getGmlId(polygonNode),
+                XmlUtil.getGmlId(linearRing.getLinearRing()),
+                errorElementNodeName,
+                error
+        );
+        gmlElementErrors.add(gmlElementError);
+
         Node linearRingNode = linearRing.getLinearRing().getAttributes().getNamedItem(TagName.GML_ID);
         String linearRingId = linearRingNode != null ? linearRingNode.getTextContent() : "";
         errorMessage = errorMessage + setErrorMessage(linearRing.getErrorCode(), linearRingId);
       }
 
-      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage));
+      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage, gmlElementErrors));
     });
 
     return messages;
