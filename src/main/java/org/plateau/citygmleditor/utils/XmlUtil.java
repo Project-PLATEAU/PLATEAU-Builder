@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -95,6 +96,25 @@ public class XmlUtil {
           resultList.add(childNode);
         }
         recursiveFindNodeByTagName(childNode, resultList, tagName);
+      }
+    }
+  }
+
+  public static void recursiveGetNodeByTagNameAndAttr(Node node, List<Node> resultList, String tagName, String attrName, String attrValue) {
+    if (node.hasChildNodes()) {
+      var childNodes = node.getChildNodes();
+      for (int i = 0; i < childNodes.getLength(); i++) {
+        var childNode = childNodes.item(i);
+        if (childNode.getNodeName().equals(tagName)) {
+          if (!StringUtils.isEmpty(XmlUtil.getAttribute(childNode, attrName))) {
+            if (XmlUtil.getAttribute(childNode, attrName).equals(attrValue)) {
+              resultList.add(childNode);
+              return;
+            }
+          }
+        } else {
+          recursiveGetNodeByTagNameAndAttr(childNode, resultList, tagName, attrName, attrValue);
+        }
       }
     }
   }
