@@ -94,7 +94,11 @@ public class ValidationController implements Initializable {
             if (cityModel == null) {
               return null;
             }
-
+          if (JSON_PATH_CONFIG.isBlank()) {
+              JSON_PATH_CONFIG = VALIDATION_CONFIG_PATH_DEFAULT;
+          } else {
+              pathJsonFile.setText(VALIDATION_CONFIG_PATH_DEFAULT);
+          }
             List<IValidator> validators = loadValidators(JSON_PATH_CONFIG);
             for (var validator : validators) {
               validationResultMessages.addAll(validator.validate(cityModelView));

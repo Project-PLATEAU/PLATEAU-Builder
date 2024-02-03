@@ -2,102 +2,102 @@
   {
     "id": "C01",
     "title": "gml:idの完全性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "C04",
     "title": "gml:idの完全性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "C-bldg-01",
     "title": "LODに指定された地物型の過剰",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L04",
     "title": "定義域一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L05",
     "title": "定義域一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L06",
     "title": "論理一貫性・定義域一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L07",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L08",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L09",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L10",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L11",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L12",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L13",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L14",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L15",
     "title": "位相一貫性(gml:Triangle)",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L16",
     "title": "位相一貫性(gml:TriangulatedSurface)",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L17",
     "title": "位相一貫性(gml:CompositeCurve)",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L18",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L-bldg-01",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L-bldg-02",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L-bldg-03",
@@ -107,21 +107,21 @@
   {
     "id": "T-03",
     "title": "主題正確度・分類の正しさ(xlink:hrefの地物型の正確度)",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "T-bldg-02",
     "title": "主題正確度・分類の正しさ(bldg:BuildingInstallationの幾何オブジェクトの型の分類の正しさ)",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L14",
     "title": "位相一貫性",
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "L-bldg-01",
     "title": "L-bldg-01",
-    "enabled": true
+    "enabled": false
   }
 ]
