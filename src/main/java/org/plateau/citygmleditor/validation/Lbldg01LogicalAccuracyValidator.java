@@ -147,7 +147,8 @@ public class Lbldg01LogicalAccuracyValidator implements IValidator {
     // Check intersection
     // If intersection is a polygon, then two solids intersect
     // Otherwise, two solids do not intersect (perhaps touch or no touch)
-    return (projectedOnOxyPlane1.intersection(projectedOnOxyPlane2)) instanceof Polygon;
+    var intersection = projectedOnOxyPlane1.intersection(projectedOnOxyPlane2);
+    return (intersection instanceof Polygon) && !intersection.isEmpty();
   }
 
   /**
