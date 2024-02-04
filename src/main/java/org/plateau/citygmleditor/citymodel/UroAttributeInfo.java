@@ -7,6 +7,8 @@ import javax.swing.text.html.StyleSheet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.*;
+import java.io.FileInputStream;
+import org.xml.sax.InputSource;
 
 public class UroAttributeInfo {
     NodeList nodeListElement;
@@ -20,7 +22,10 @@ public class UroAttributeInfo {
         try {
             // DOMパーサのインスタンスを作成
             DOMParser parser = new DOMParser();
+
             // XMLファイルをパース
+            var fileStream = new FileInputStream(path);
+            var inputSource = new InputSource(fileStream);
             parser.parse(path);
             // ドキュメントオブジェクトを取得
             document = parser.getDocument();
