@@ -306,6 +306,8 @@ public class AttributeEditorController implements Initializable {
                 Alert alert = new Alert(AlertType.WARNING);
                 alert.setTitle("削除エラー");
                 alert.setHeaderText(null);
+                alert.getDialogPane().getStylesheets().add(getClass().getResource("viewer.css").toExternalForm());
+                alert.getDialogPane().getStyleClass().add("alert");
                 alert.setContentText("削除できない要素です。");
 
                 // アラートを表示
