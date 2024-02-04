@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class Lbldg02LogicalConsistencyValidator implements IValidator {
     static class BuildingInvalid {
         private String ID;
-        private List<BuildingPart> buildingParts;
+        private List<String> buildingParts;
         private List<String> polygons;
 
         public void setPolygons(List<String> polygons) {
@@ -33,7 +33,7 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
             this.ID = ID;
         }
 
-        public void setBuidlingPart(List<BuildingPart> buidlingPart) {
+        public void setBuidlingPart(List<String> buidlingPart) {
             this.buildingParts = buidlingPart;
         }
 
@@ -93,13 +93,14 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
             NodeList tagBuildingParts = building.getElementsByTagName(TagName.BLGD_BUILDING_PART);
             if (tagBuildingParts.getLength() == 0) continue;
             // validate building parts
-            List<String> invalidSolid = this.getInvalidBP(tagBuildingParts);
+            List<String> invalidBP = this.getInvalidBP(tagBuildingParts);
             // validate format points
             List<String> invalidPolygon = this.getWrongFormatePolygon(tagBuildingParts);
-            if (invalidPolygon.isEmpty() && invalidSolid.isEmpty()) continue;
+            if (invalidPolygon.isEmpty() && invalidBP.isEmpty()) continue;
             BuildingInvalid buildingInvalid = new BuildingInvalid();
             buildingInvalid.setID(buildingID);
             buildingInvalid.setPolygons(invalidPolygon);
+            buildingInvalid.setBuidlingPart(invalidBP);
             buildingInvalids.add(buildingInvalid);
         }
 
