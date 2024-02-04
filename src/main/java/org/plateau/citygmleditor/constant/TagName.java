@@ -23,9 +23,12 @@ public interface TagName {
     String X_HREF = "xlink:href";
     String BLDG_BUILDING_INSTALLATION = "bldg:BuildingInstallation";
     String GML_SOLID = "gml:Solid";
+    String GML_SURFACE_MEMBER = "gml:surfaceMember";
     String BLDG_LOD_1_SOLID = "bldg:lod1Solid";
     String BLDG_LOD_2_SOLID = "bldg:lod2Solid";
     String BLGD_BUILDING_PART = "bldg:BuildingPart";
     String ATTRIBUTE_CODE_SPACE = "codeSpace";
     String GML_NAME = "gml:name";
+
+    String ATTR_XLINK_HREF = "xlink:href";
 }
