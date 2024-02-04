@@ -1,5 +1,9 @@
 package org.plateau.citygmleditor.citymodel.factory;
 
+import java.util.HashMap;
+import java.util.List;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
@@ -8,6 +12,7 @@ import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.SurfaceDataView;
 import org.plateau.citygmleditor.citymodel.geometry.BoundarySurfaceView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
+import org.plateau.citygmleditor.citymodel.geometry.MeshViewUserData;
 import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
 import org.plateau.citygmleditor.world.World;
 
@@ -36,18 +41,16 @@ public class LOD2SolidFactory extends GeometryFactory {
         }
         solid.setBoundaries(boundaries);
 
-        var polygonsMap = solid.getSurfaceDataPolygonsMap();
-        // 1メッシュにつき1マテリアルしか登録できないため、マテリアルごとに別メッシュとして生成
-        for (Map.Entry<SurfaceDataView, ArrayList<PolygonView>> entry : polygonsMap.entrySet()) {
-            var meshView = new MeshView();
-            meshView.setMesh(createTriangleMesh(entry.getValue()));
-            if (entry.getKey() == null) {
-                meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
-            } else {
-                meshView.setMaterial(entry.getKey().getMaterial());
-            }
-            solid.addMeshView(meshView);
-        }
+        boundaries.forEach(
+            boundary -> boundary.getPolygons().forEach(
+                polygon -> {
+                  var meshView = new MeshView();
+                  meshView.setUserData(new MeshViewUserData(polygon.getGMLID(), boundary.getGMLID()));
+                  meshView.setMesh(createTriangleMesh(List.of(polygon)));
+                  meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
+                  solid.addMeshView(meshView);
+                }
+            ));
 
         return solid;
     }

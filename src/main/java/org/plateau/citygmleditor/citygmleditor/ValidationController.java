@@ -2,6 +2,7 @@ package org.plateau.citygmleditor.citygmleditor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.stream.Collectors;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
@@ -12,12 +13,16 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.MeshView;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.citymodel.geometry.MeshViewUserData;
 import org.plateau.citygmleditor.control.FeatureSelection;
 import org.plateau.citygmleditor.modelstandard.Standard;
 import org.plateau.citygmleditor.utils.CollectionUtil;
+import org.plateau.citygmleditor.utils.JavaFxUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.validation.*;
 import org.plateau.citygmleditor.world.World;
@@ -251,15 +256,40 @@ public class ValidationController implements Initializable {
     }
 
     private void highlightError(GmlElementError elementError) {
+
+        Material redColorMaterial = new PhongMaterial(Color.RED);
         World.getActiveInstance().getCityModel()
             .lookupAll("#" + elementError.getBuildingId())
             .forEach(node -> {
-                ((BuildingView) node).getLOD1Solid().setMaterial(new PhongMaterial(Color.RED));
-                ((BuildingView) node).getLOD2Solid().getSurfaceTypeView().setMaterial(new PhongMaterial(Color.RED));
-                ((BuildingView) node).getLOD2Solid().getMeshView().setMaterial(new PhongMaterial(Color.RED));
 
-                // TODO check LOD2SolidView highlight, now only highlight bottom surface
-                // TODO highlight solid and polygon
+                ((BuildingView) node).getLOD1Solid().setMaterial(redColorMaterial);
+
+                var lod2Solid =  ((BuildingView) node).getLOD2Solid();
+
+                // Find the boundary surface that contains the error polygon
+
+                lod2Solid.getMeshViews()
+                    .forEach(meshView -> {
+                        var userData = JavaFxUtil.getMeshViewUserData(meshView);
+
+                        // If not specify the polygon id, then highlight the whole solid
+                        if (elementError.getPolygonId() == null) {
+                            meshView.setMaterial(redColorMaterial);
+                            return;
+                        }
+                        // If specify error polygon id, highlight the error polygon and the surface that contains it
+                        if (userData != null && userData.getPolygonGmlId().equals(elementError.getPolygonId())) {
+
+                            meshView.setMaterial(redColorMaterial);
+
+                            // TODO remove the following code, only highlight the error polygon
+                            fillColorForSameParentGmlId(
+                                lod2Solid.getMeshViews(),
+                                JavaFxUtil.getMeshViewUserData(meshView).getParentGmlId(),
+                                redColorMaterial
+                            );
+                        }
+                    });
             });
     }
 
@@ -275,5 +305,14 @@ public class ValidationController implements Initializable {
         var node = nodes.iterator().next();
         var building = (BuildingView) node;
         CityGMLEditorApp.getFeatureSellection().select(building);
+    }
+
+    private void fillColorForSameParentGmlId(List<MeshView> meshViews, String parentGmlId, Material material) {
+        meshViews.forEach(meshView -> {
+            var userData = JavaFxUtil.getMeshViewUserData(meshView);
+            if (userData != null && userData.getParentGmlId().equals(parentGmlId)) {
+                meshView.setMaterial(material);
+            }
+        });
     }
 }

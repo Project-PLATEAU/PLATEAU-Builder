@@ -118,6 +118,10 @@ public class LOD2SolidView extends Parent implements ILODSolidView {
         return meshViews.isEmpty() ? null : meshViews.get(0);
     }
 
+    public List<MeshView> getMeshViews() {
+        return meshViews;
+    }
+
     @Override
     public TexCoordBuffer getTexCoordBuffer() {
         return this.texCoordBuffer;
