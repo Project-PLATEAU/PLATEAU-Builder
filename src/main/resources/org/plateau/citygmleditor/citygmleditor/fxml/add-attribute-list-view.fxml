@@ -4,10 +4,10 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.AttributeEditorController">
+<VBox fx:id="addingAttributeMenu" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.AddingAttributeController">
     <!-- 検索ボックス -->
     <TextField fx:id="searchField" promptText="Search" />
     
     <!-- ListView -->
-    <ListView fx:id="attributeListView" />
+    <ListView fx:id="attributeListView" onMouseClicked="#handleMouseClick"/>
 </VBox>

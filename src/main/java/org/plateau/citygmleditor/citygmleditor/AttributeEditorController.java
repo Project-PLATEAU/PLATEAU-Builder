@@ -21,7 +21,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Attr;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.Flow.Subscriber;
@@ -61,6 +60,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import java.io.IOException;
 
 public class AttributeEditorController implements Initializable {
     public TreeTableView<AttributeItem> attributeTreeTable;
@@ -75,10 +77,6 @@ public class AttributeEditorController implements Initializable {
     private Label featureID;
     @FXML
     private Label featureType;
-    @FXML
-    private TextField searchField;
-    @FXML
-    private ListView<String> attributeListView;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -202,7 +200,8 @@ public class AttributeEditorController implements Initializable {
         keyColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("key"));
         valueColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
 
-        valueColumn.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
+        valueColumn.setCellFactory(
+                TextFieldTreeTableCell.forTreeTableColumn());
 
         valueColumn.setOnEditCommit(event -> {
             TreeItem<AttributeItem> editedItem = event.getRowValue();
@@ -215,24 +214,22 @@ public class AttributeEditorController implements Initializable {
             // 編集したアイテムが持つType情報を取得
             String type = getType(attributeItemName, parentAttributeItemName);
             // バリデーションチェック
-            if (type == null) {
-                attributeItem.valueProperty().set(event.getNewValue());
-                System.out.println("event.getNewValue():" + event.getNewValue());
-            } else if (AttributeValidator.checkValue(newValue, type)) {
+            if (AttributeValidator.checkValue(newValue, type)) {
                 attributeItem.valueProperty().set(event.getNewValue());
             } else {
                 // アラートを作成
                 Alert alert = new Alert(AlertType.WARNING);
                 alert.setTitle("変更エラー");
+                alert.setHeaderText(null);
                 alert.getDialogPane().getStylesheets().add(getClass().getResource("viewer.css").toExternalForm());
                 alert.getDialogPane().getStyleClass().add("alert");
-                alert.setHeaderText(null);
                 alert.setContentText("変更後の値が要素の条件を満たしていません。\n" + type + "に従ってください");
                 // アラートを表示
                 alert.showAndWait();
                 attributeItem.valueProperty().set(event.getOldValue());
                 attributeTreeTable.refresh();
             }
+
         });
 
     }
@@ -307,8 +304,6 @@ public class AttributeEditorController implements Initializable {
             if (!isDeletable(deleteAttributeKeyName, deleteAttributeParentKeyName)) {
                 // アラートを作成
                 Alert alert = new Alert(AlertType.WARNING);
-                alert.getDialogPane().getStylesheets().add(getClass().getResource("viewer.css").toExternalForm());
-                alert.getDialogPane().getStyleClass().add("alert");
                 alert.setTitle("削除エラー");
                 alert.setHeaderText(null);
                 alert.setContentText("削除できない要素です。");
@@ -456,9 +451,7 @@ public class AttributeEditorController implements Initializable {
     private void addAttribute(ChildList<ADEComponent> childList, String parentAttributeName,
             String addAttributeName, String type, ArrayList<ArrayList<String>> attributeList) {
         String namespaceURI = uroAttributeDocument.getDocumentElement().getAttribute("xmlns:uro");
-
         if (parentAttributeName == null) {
-            // ルート要素を追加する際の処理
             var adeComponent = childList.get(0);
             var adeElement = (ADEGenericElement) adeComponent;
             Node node = adeElement.getContent();
@@ -467,7 +460,6 @@ public class AttributeEditorController implements Initializable {
 
             if (addAttributeName != null) {
                 Element newElement = doc.createElementNS(namespaceURI, addAttributeName);
-                newElement.setTextContent("NULL");
                 ADEGenericElement newAdelement = new ADEGenericElement(newElement);
                 childList.add(childList.size(), (ADEComponent) newAdelement);
 
@@ -485,7 +477,6 @@ public class AttributeEditorController implements Initializable {
                 }
             }
         } else {
-            // 第二階層以下を追加する際の処理
             for (int i = 0; i < childList.size(); i++) {
                 var adeComponent = childList.get(i);
                 var adeElement = (ADEGenericElement) adeComponent;
@@ -546,21 +537,26 @@ public class AttributeEditorController implements Initializable {
      */
     private ArrayList<ArrayList<String>> showListView(ChildList<ADEComponent> childList,
             String selectedAttributeKeyName) {
+        AddingAttributeController addingAttributeController = null;
+        Parent root = null;
+        Stage pStage = new Stage();
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/add-attribute-list-view.fxml"));
-            VBox listViewVBox = loader.load();
+            root = loader.load();
+            addingAttributeController = loader.getController();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Stage pStage = new Stage();
+
         ArrayList<ArrayList<String>> attributeList = getUroList(selectedAttributeKeyName);
         if (attributeList.size() == 0) {
             // アラートを作成
             Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("追加エラー");
             alert.getDialogPane().getStylesheets().add(getClass().getResource("viewer.css").toExternalForm());
             alert.getDialogPane().getStyleClass().add("alert");
-            alert.setTitle("追加エラー");
             alert.setHeaderText(null);
             alert.setContentText("追加できる要素がありません。");
 
@@ -568,56 +564,24 @@ public class AttributeEditorController implements Initializable {
             alert.showAndWait();
             return null;
         }
-        // ListView
-        attributeListView = new ListView<>();
 
+        List<String> attributeLists = new ArrayList<>();
         for (ArrayList<String> attribute : attributeList) {
-            attributeListView.getItems().add(attribute.get(0));
+            // listView.getItems().add(attribute.get(0));
+            attributeLists.add(attribute.get(0));
         }
+        addingAttributeController.setList(attributeLists);
+        // // メニュー内の要素をダブルクリックで要素を追加
+        addingAttributeController.setItemSelectedCallback(selectedItem -> {
 
-        // メニュー内の要素をダブルクリックで要素を追加
-        attributeListView.setOnMouseClicked((MouseEvent event) -> {
-            if (event.getClickCount() == 2) {
-                String selectedItem = attributeListView.getSelectionModel().getSelectedItem();
-                int selectedIndex = attributeListView.getSelectionModel().getSelectedIndex();
-                // 要素を追加
-                addAttribute(childList, selectedAttributeKeyName, "uro:" + selectedItem,
-                        attributeList.get(selectedIndex).get(1), attributeList);
-                pStage.close();
-            }
+            String selectedItemName = selectedItem.getSelectedItem();
+            int selectedItemndex = selectedItem.getSelectedIndex();
+            addAttribute(childList, selectedAttributeKeyName, "uro:" + selectedItemName,
+                    attributeList.get(selectedItemndex).get(1), attributeList);
+            pStage.close();
         });
 
-        // 検索欄
-        searchField = new TextField();
-        searchField.setPromptText("Search");
-
-        // 検索用リスナーを追加
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            attributeListView.getItems().clear();
-            if (newValue == null || newValue.isEmpty()) {
-                for (var attribute : attributeList) {
-                    attributeListView.getItems().add(attribute.get(0));
-                }
-            } else {
-                for (var attribute : attributeList) {
-                    if (attribute.get(0).toLowerCase().startsWith(newValue.toLowerCase())) {
-                        attributeListView.getItems().add(attribute.get(0));
-                    }
-                }
-            }
-        });
-
-        // 配置
-        VBox vbRoot = new VBox();
-        vbRoot.setAlignment(Pos.CENTER);
-        vbRoot.setSpacing(20);
-        vbRoot.getChildren().addAll(searchField);
-        vbRoot.getChildren().addAll(attributeListView);
-
-        pStage.setTitle("要素の追加");
-        pStage.setWidth(500);
-        pStage.setHeight(300);
-        pStage.setScene(new Scene(vbRoot));
+        pStage.setScene(new Scene(root));
         pStage.show();
         return attributeList;
     }
