@@ -9,6 +9,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.*;
 import java.io.FileInputStream;
 import org.xml.sax.InputSource;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class UroAttributeInfo {
     NodeList nodeListElement;
@@ -111,6 +113,8 @@ public class UroAttributeInfo {
                     elementType = element.getAttribute("type").substring(4);
                     NodeList complexTypeNodeList = document.getElementsByTagName("xs:complexType");
                     if (element.getAttribute("name") != "") {
+                        // System.out.println("element.getAttribute(\"name\"):" +
+                        // element.getAttribute("name"));
                         Node importedNode = uroDocument.importNode(elementNode, false);
                         parentElement.appendChild(importedNode);
                         traverseComplexType(complexTypeNodeList, elementType, (Element) importedNode);
@@ -139,6 +143,64 @@ public class UroAttributeInfo {
 
     }
 
+    /**
+     * removeExtraItems
+     * 追加可能な要素リストから不要な要素を削除
+     * 
+     * @param パースしたuroの要素リスト
+     */
+    private void removeExtraItems(Node node) {
+        NodeList childNodes = node.getChildNodes();
+        ArrayList<Node> removeNodeList = new ArrayList<>();
+
+        // 重複チェック用のセット
+        HashSet<String> nodeNameSet = new HashSet<>();
+
+        // 重複をチェックし、条件に合致するノードを削除対象リストに追加
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node childNode = childNodes.item(i);
+            if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) childNode;
+                String nodeName = element.getAttribute("name");
+                String nodeNameLowerCase = nodeName.toLowerCase();
+                String abstractInfo = element.getAttribute("abstract");
+
+                if (nodeNameSet.contains(nodeNameLowerCase)) {
+                    // 既に小文字で同じ名前のノードが存在する場合は、大文字で始まるノードを削除対象に
+                    if (Character.isUpperCase(nodeName.charAt(0))) {
+                        removeNodeList.add(childNode);
+                    }
+                } else {
+                    nodeNameSet.add(nodeNameLowerCase);
+                }
+
+                // abstract="true"属性を持つノードを削除対象に
+                if (abstractInfo.equals("true")) {
+                    removeNodeList.add(childNode);
+                }
+            }
+        }
+
+        // 削除対象のノードを削除
+        for (Node n : removeNodeList) {
+            // 親ノードがこのノードを持っているか確認
+            if (n.getParentNode() == node) {
+                node.removeChild(n);
+            }
+        }
+    }
+
+    /**
+     * getUroAttributeDocument
+     * パースしたuroの要素リストを返す
+     * 
+     * @return パースしたuroの要素リスト
+     */
+    public Document getUroAttributeDocument() {
+        removeExtraItems(uroDocument.getDocumentElement());
+        return uroDocument;
+    }
+
     // ノードを表示するメソッド
     private static void printNode(Node node, int depth) {
         if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -155,15 +217,5 @@ public class UroAttributeInfo {
                 printNode(childNodes.item(i), depth + 1);
             }
         }
-    }
-
-    /**
-     * getUroAttributeDocument
-     * パースしたuroの要素リストを返す
-     * 
-     * @return パースしたuroの要素リスト
-     */
-    public Document getUroAttributeDocument() {
-        return uroDocument;
     }
 }
