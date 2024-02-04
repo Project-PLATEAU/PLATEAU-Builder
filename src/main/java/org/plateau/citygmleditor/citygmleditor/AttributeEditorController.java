@@ -321,6 +321,7 @@ public class AttributeEditorController implements Initializable {
             // 第一階層の要素が削除対象である場合、削除
             if (nodeTagName.equals(deleteAttributeKeyName)) {
                 childList.remove(i);
+                refreshListView();
                 return;
             }
             // 再帰的に削除対象の要素を探し、削除
