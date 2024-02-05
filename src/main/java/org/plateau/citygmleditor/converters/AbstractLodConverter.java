@@ -197,7 +197,7 @@ public abstract class AbstractLodConverter {
         removeTexture(copiedAppearance);
         _cityModelView.setRGBTextureAppearance(appearanceView);
 
-        //dump(copiedAppearance, "appearance");
+        dump(copiedAppearance, "appearance");
 
         // lod2Solidを差し替える(差し替え用にコピーを作成している)
         var building = (AbstractBuilding) _buildingView.getGMLObject();
@@ -206,7 +206,7 @@ public abstract class AbstractLodConverter {
         _cityModelView.removeCityObjectMember(_buildingView);
         _cityModelView.addCityObjectMember(newBuildingView);
 
-        //dump(copiedBuilding, "building");
+        dump(copiedBuilding, "building");
     }
 
     private List<List<TriangleModel>> createSamePlaneTrianglesList(List<TriangleModel> triangleModels, TriangleModel groundTriangle) {

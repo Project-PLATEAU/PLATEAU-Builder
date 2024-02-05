@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.citymodel.factory;
 
+import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
@@ -41,6 +42,7 @@ public class LOD2SolidFactory extends GeometryFactory {
         for (Map.Entry<SurfaceDataView, ArrayList<PolygonView>> entry : polygonsMap.entrySet()) {
             var meshView = new MeshView();
             meshView.setMesh(createTriangleMesh(entry.getValue()));
+            //meshView.setDrawMode(DrawMode.LINE);
             if (entry.getKey() == null) {
                 meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
             } else {

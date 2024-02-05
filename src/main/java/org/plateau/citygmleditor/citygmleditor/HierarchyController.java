@@ -17,6 +17,7 @@ import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.BuildingInstallationView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
+import org.plateau.citygmleditor.converters.Gltf2LodConverter;
 import org.plateau.citygmleditor.converters.Obj2LodConverter;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
@@ -37,6 +38,7 @@ public class HierarchyController implements Initializable {
     public ContextMenu hierarchyContextMenu;
     public MenuItem exportGltfMenu;
     public MenuItem exportObjMenu;
+    public MenuItem importGltfMenu;
     public MenuItem importObjMenu;
 
     @Override
@@ -188,6 +190,39 @@ public class HierarchyController implements Initializable {
             new ObjExporter().export(newFile.toString(), solid, building.getId());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void importGltf(ActionEvent actionEvent) {
+        var file = FileChooserService.showOpenDialog("*.gltf", SessionManager.GLTF_FILE_PATH_PROPERTY);
+
+        if (file == null)
+            return;
+
+        var content = (Group)sceneContent.getContent();
+        var cityModelNode = content.getChildren().get(0);
+        if (cityModelNode == null)
+            return;
+
+        var cityModelView = (CityModelView)cityModelNode;
+        TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
+        if (selectedItem == null)
+            return;
+
+        var item = selectedItem.valueProperty().get();
+        if (!(item instanceof ILODSolidView))
+            return;
+
+        ILODSolidView lodSolidView = (ILODSolidView)item;
+        try {
+            var convertedCityModel = new Gltf2LodConverter(cityModelView, lodSolidView).convert(file.toString());
+            var node = new Group();
+            node.setId(content.getId());
+            node.getChildren().add(convertedCityModel);
+
+            CityGMLEditorApp.getSceneContent().setContent(node);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
