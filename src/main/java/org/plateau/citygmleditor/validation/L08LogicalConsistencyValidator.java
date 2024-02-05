@@ -4,6 +4,7 @@ import javafx.geometry.Point3D;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.locationtech.jts.geom.LineSegment;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.constant.L08ErrorType;
 import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.SegmentRelationship;
 import org.plateau.citygmleditor.constant.TagName;
@@ -41,33 +42,65 @@ public class L08LogicalConsistencyValidator implements IValidator {
       try {
         checkPointsIntersect(lineStringNodes.item(i), buildingWithErrorLineString);
       } catch (InvalidPosStringException e) {
-        Node gmlId = XmlUtil.findNearestParentByAttribute(lineStringNodes.item(i), TagName.GML_ID);
+        Node building = XmlUtil.findNearestParentByAttribute(lineStringNodes.item(i), TagName.GML_ID);
+        Node polygon = XmlUtil.findNearestParentByName(lineStringNodes.item(i), TagName.GML_POLYGON);
+        String errorElementNodeName = lineStringNodes.item(i).getFirstChild().getNodeName();
+
+        int error = L08ErrorType.INVALID_FORMAT;
+
+        GmlElementError gmlElementError = new GmlElementError(
+                XmlUtil.getGmlId(building),
+                null,
+                XmlUtil.getGmlId(polygon),
+                XmlUtil.getGmlId(lineStringNodes.item(i)),
+                errorElementNodeName,
+                error
+        );
+
         messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                MessageFormat.format(MessageError.ERR_L08_002,
-                        gmlId.getAttributes().getNamedItem("gml:id").getTextContent(),
-                        lineStringNodes.item(i).getFirstChild().getNodeValue())));
+                        MessageFormat.format(MessageError.ERR_L08_002, XmlUtil.getGmlId(building), lineStringNodes.item(i).getFirstChild().getNodeValue(),
+                        List.of(gmlElementError))));
       }
     }
 
     buildingWithErrorLineString.forEach((buildingNode, lineStringNodesWithError) -> {
-      String buildingGmlId = buildingNode.getAttributes().getNamedItem(TagName.GML_ID).getTextContent();
+      String buildingGmlId = XmlUtil.getGmlId(buildingNode);
       String msg = MessageFormat.format(MessageError.ERR_L08_001, buildingGmlId);
+
+      List<GmlElementError> gmlElementErrors = new ArrayList<>();
       for (ErrorLineString errorLineString : lineStringNodesWithError) {
+        String errorElementNodeName = errorLineString.getLineStringError().getFirstChild().getNodeName();
+        int error = L08ErrorType.NO_ERROR;
+
         Node gmlIdItem = errorLineString.getLineStringError().getAttributes().getNamedItem(TagName.GML_ID);
+        Node polygon = XmlUtil.findNearestParentByName(errorLineString.getLineStringError(), TagName.GML_POLYGON);
 
         String gmlId = gmlIdItem == null ? "" : gmlIdItem.getTextContent();
 
         if (errorLineString.getErrorCode() == INTERSECTION_ERROR_CODE) {
+          error = L08ErrorType.INTERSECTION_ERROR_CODE;
           msg = msg + String.format("<gml:LineString gml:id=\"%s\">が自己交差しています。\n", gmlId);
         } else if (errorLineString.getErrorCode() == TOUCH_ERROR_CODE) {
+          error = L08ErrorType.TOUCH_ERROR_CODE;
           msg = msg + String.format("<gml:LineString gml:id=\"%s\">が自己接触しています。\n", gmlId);
         } else if (errorLineString.getErrorCode() == CONTINUOUS_ERROR_CODE) {
+          error = L08ErrorType.CONTINUOUS_ERROR_CODE;
           msg = msg + "\n" + gmlId;
         }
+        
+        gmlElementErrors.add(new GmlElementError(
+                buildingGmlId,
+                null,
+                XmlUtil.getGmlId(polygon),
+                XmlUtil.getGmlId(errorLineString.getLineStringError()),
+                errorElementNodeName,
+                error
+        ));
       }
 
-//      String.format("L08: Building which gml:id=\"%s\" has %s <gml:LineString> invalid", gmlId, lineStringNodesWithError.size());
-      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, msg));
+      messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+              msg,
+              gmlElementErrors));
     });
 
     return messages;
