@@ -140,28 +140,10 @@ public class L12LogicalConsistencyValidator implements IValidator {
 
     private boolean isDistanceValid(List<Point3D> points, double[] plane) {
         for (Point3D point : points) {
-            Point3D pointProject = this.projectOntoPlane(plane, point);
+            Point3D pointProject = SolveEquationUtil.projectOntoPlane(plane, point);
             System.out.println(ThreeDUtil.distance(point, pointProject));
             if (ThreeDUtil.distance(point, pointProject) > 0.03) return false;
         }
         return true;
-    }
-
-    /**
-     * The equation of the line is {x = x0 + at, y = y0 + bt , z = z0 + ct} with a,b,c is coordinates of plane's normal_vector
-     * Find the projection of the point on the plane
-     *
-     * @param plane known
-     * @param point need to find project
-     */
-    private Point3D projectOntoPlane(double[] plane, Point3D point) {
-        // find t in the equation of line
-        double a = plane[0];
-        double b = plane[1];
-        double c = plane[2];
-        double d = plane[3];
-        double t = -(a * point.getX() + b * point.getY() + c * point.getZ() + d) / (a * a + b * b + c * c);
-
-        return new Point3D(a * t + point.getX(), b * t + point.getY(), c * t + point.getZ());
     }
 }

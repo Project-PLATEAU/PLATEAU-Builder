@@ -29,6 +29,8 @@ public interface TagName {
     String BLGD_BUILDING_PART = "bldg:BuildingPart";
     String ATTRIBUTE_CODE_SPACE = "codeSpace";
     String GML_NAME = "gml:name";
-
     String ATTR_XLINK_HREF = "xlink:href";
+    String BLDG_WALLSURFACE = "bldg:WallSurface";
+    String BLDG_LOD3_MULTISURFACE = "bldg:lod3MultiSurface";
+    String BLDG_OPENING = "bldg:opening";
 }

@@ -34,9 +34,10 @@ public class SolveEquationUtil {
   public static double[] findPlaneEquation(Point3D point1, Point3D point2, Point3D point3) {
     Point3D vector12 = point2.subtract(point1);
     Point3D vector23 = point3.subtract(point2);
-
     double[] planeEquation = new double[4];
     Vec3f normalVector = createNormal(vector12, vector23);
+    if (normalVector.equals(new Vec3f(0, 0, 0))) return null;
+
     normalVector.normalize();
     // Coefficient A
     planeEquation[0] = normalVector.x;
@@ -64,5 +65,23 @@ public class SolveEquationUtil {
 
   private static double calculateDeterminant(double a1, double a2, double b1, double b2) {
     return a1 * b2 - a2 * b1;
+  }
+
+  /**
+   * The equation of the line is {x = x0 + at, y = y0 + bt , z = z0 + ct} with a,b,c is coordinates of plane's normal_vector
+   * Find the projection of the point on the plane
+   *
+   * @param plane known
+   * @param point need to find project
+   */
+  public static Point3D projectOntoPlane(double[] plane, Point3D point) {
+    // find t in the equation of line
+    double a = plane[0];
+    double b = plane[1];
+    double c = plane[2];
+    double d = plane[3];
+    double t = -(a * point.getX() + b * point.getY() + c * point.getZ() + d) / (a * a + b * b + c * c);
+
+    return new Point3D(a * t + point.getX(), b * t + point.getY(), c * t + point.getZ());
   }
 }

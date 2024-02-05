@@ -85,7 +85,7 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
         List<BuildingInvalid> buildingInvalids = new ArrayList<>();
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
-
+        List<GmlElementError> elementErrors = new ArrayList<>();
         for (int i = 0; i < buildings.getLength(); i++) {
             Element building = (Element) buildings.item(i);
             String buildingID = building.getAttribute(TagName.GML_ID);
@@ -102,6 +102,13 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
             buildingInvalid.setPolygons(invalidPolygon);
             buildingInvalid.setBuidlingPart(invalidBP);
             buildingInvalids.add(buildingInvalid);
+            elementErrors.add(new GmlElementError(
+                    buildingID,
+                    invalidBP.toString(),
+                    invalidPolygon.toString(),
+                    null,
+                    null,
+                    0));
         }
 
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
@@ -109,7 +116,7 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
         for (BuildingInvalid invalid : buildingInvalids) {
             String buildingStr = invalid.toString();
             if (buildingStr.isBlank()) continue;
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, buildingStr));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, buildingStr, elementErrors));
         }
         return messages;
     }
