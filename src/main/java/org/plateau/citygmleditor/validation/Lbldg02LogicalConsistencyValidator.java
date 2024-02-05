@@ -3,9 +3,9 @@ package org.plateau.citygmleditor.validation;
 import javafx.geometry.Point3D;
 import org.locationtech.jts.geom.Geometry;
 import org.plateau.citygmleditor.citymodel.CityModelView;
-import org.plateau.citygmleditor.constant.MessageError;
 import org.plateau.citygmleditor.constant.TagName;
 import org.plateau.citygmleditor.utils.*;
+import org.plateau.citygmleditor.validation.invalid.Lbldg02BuildingError;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -14,76 +14,12 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 public class Lbldg02LogicalConsistencyValidator implements IValidator {
-    static class BuildingInvalid {
-        private String ID;
-        private List<String> buildingParts;
-        private List<String> polygons;
-
-        public void setPolygons(List<String> polygons) {
-            this.polygons = polygons;
-        }
-
-        public void setID(String ID) {
-            this.ID = ID;
-        }
-
-        public void setBuidlingPart(List<String> buidlingPart) {
-            this.buildingParts = buidlingPart;
-        }
-
-        public String toString() {
-            if (CollectionUtil.isEmpty(polygons) && CollectionUtil.isEmpty(buildingParts)) return "";
-            if (CollectionUtil.isEmpty(buildingParts)) {
-                String polygonStr = "次のgml:Polygon座標の形式が不正です。：\n"
-                        + this.polygons.stream().map(p -> "<gml:Polygon gml:id=“" + p + "”>")
-                        .collect(Collectors.joining(":\n"));
-                return String.format(MessageError.ERR_L_BLDG_02_001, ID, polygonStr, "");
-            }
-            if (CollectionUtil.isEmpty(polygons)) {
-                String bpStr = "次の境界面を共有していないgml:Solidが存在します：\n" + this.buildingParts.stream().map(b -> "<gml:BuildingPart gml:id=“" + b + "”>").collect(Collectors.joining(":\n"));
-                return String.format(MessageError.ERR_L_BLDG_02_001, ID, bpStr, "");
-            }
-            String bpStr = "次の境界面を共有していないgml:Solidが存在します：\n" + this.buildingParts.stream().map(b -> "<gml:BuildingPart gml:id=“" + b + "”>").collect(Collectors.joining(":\n"));
-            String polygonStr = "次のgml:Polygon座標の形式が不正です。：\n" + this.polygons.stream().map(p -> "<gml:Polygon gml:id=“" + p + "”>").collect(Collectors.joining(":\n"));
-            return String.format(MessageError.ERR_L_BLDG_02_001, ID, polygonStr, "\n" + bpStr);
-        }
-    }
-
-    static class BuildingPart {
-        private String ID;
-
-        private List<String> solid;
-
-        public void setID(String ID) {
-            this.ID = ID;
-        }
-
-        public List<String> getSolid() {
-            return solid;
-        }
-
-        public void setSolid(List<String> solid) {
-            this.solid = solid;
-        }
-
-        public String getID() {
-            return ID;
-        }
-
-        @Override
-        public String toString() {
-            return "bldg:BuildingPart = " + this.ID + " solid = " + solid;
-        }
-    }
-
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
-        List<BuildingInvalid> buildingInvalids = new ArrayList<>();
+        List<Lbldg02BuildingError> buildingErrors = new ArrayList<>();
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
         List<GmlElementError> elementErrors = new ArrayList<>();
         for (int i = 0; i < buildings.getLength(); i++) {
@@ -92,33 +28,52 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
 
             NodeList tagBuildingParts = building.getElementsByTagName(TagName.BLGD_BUILDING_PART);
             if (tagBuildingParts.getLength() == 0) continue;
+            List<Node> lod1Solid = createLod1Solid(tagBuildingParts);
+            if (lod1Solid.isEmpty()) continue;
             // validate building parts
-            List<String> invalidBP = this.getInvalidBP(tagBuildingParts);
+            List<String> lod1Invalid = this.validateBuildingPartLod1(lod1Solid);
             // validate format points
             List<String> invalidPolygon = this.getWrongFormatePolygon(tagBuildingParts);
-            if (invalidPolygon.isEmpty() && invalidBP.isEmpty()) continue;
-            BuildingInvalid buildingInvalid = new BuildingInvalid();
-            buildingInvalid.setID(buildingID);
-            buildingInvalid.setPolygons(invalidPolygon);
-            buildingInvalid.setBuidlingPart(invalidBP);
-            buildingInvalids.add(buildingInvalid);
-            elementErrors.add(new GmlElementError(
-                    buildingID,
-                    invalidBP.toString(),
-                    invalidPolygon.toString(),
-                    null,
-                    null,
-                    0));
+            if (invalidPolygon.isEmpty() && lod1Invalid.isEmpty()) continue;
+            this.setBuildingError(buildingID, invalidPolygon, lod1Invalid, buildingErrors, elementErrors);
         }
 
-        if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
+        if (CollectionUtil.isEmpty(buildingErrors)) return List.of();
         List<ValidationResultMessage> messages = new ArrayList<>();
-        for (BuildingInvalid invalid : buildingInvalids) {
+        for (Lbldg02BuildingError invalid : buildingErrors) {
             String buildingStr = invalid.toString();
             if (buildingStr.isBlank()) continue;
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, buildingStr, elementErrors));
         }
         return messages;
+    }
+
+    private List<Node> createLod1Solid(NodeList tagBuildingParts) {
+        List<Node> result = new ArrayList<>();
+        for (int j = 0; j < tagBuildingParts.getLength(); j++) {
+            Element buildingPart = (Element) tagBuildingParts.item(j);
+            Node lod1Solid = buildingPart.getElementsByTagName(TagName.BLDG_LOD_1_SOLID).item(0);
+            if (lod1Solid == null) continue;
+            result.add(lod1Solid);
+        }
+        return result;
+    }
+
+    private void setBuildingError(String buildingID, List<String> invalidPolygon, List<String> invalidBP
+            , List<Lbldg02BuildingError> buildingInvalids, List<GmlElementError> elementErrors) {
+
+        Lbldg02BuildingError buildingInvalid = new Lbldg02BuildingError();
+        buildingInvalid.setBuildingID(buildingID);
+        buildingInvalid.setPolygons(invalidPolygon);
+        buildingInvalid.setBuildingPart(invalidBP);
+        buildingInvalids.add(buildingInvalid);
+        elementErrors.add(new GmlElementError(
+                buildingID,
+                invalidBP.toString(),
+                invalidPolygon.toString(),
+                null,
+                null,
+                0));
     }
 
     public List<String> getWrongFormatePolygon(NodeList nodeList) {
@@ -141,30 +96,34 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
         return result;
     }
 
-    private List<String> getInvalidBP(NodeList buildingParts) {
-        List<String> invalidBPs = new ArrayList<>();
+    private List<Node> getPolygonByAttrbute(Node buildingPart, String attrValue) {
+        List<Node> result = new ArrayList<>();
+        XmlUtil.recursiveGetNodeByTagNameAndAttr(buildingPart, result, TagName.GML_POLYGON, TagName.ATTR_XLINK_HREF, attrValue);
+        return result;
+    }
 
-        for (int i = 0; i < buildingParts.getLength(); i++) {
-            Element buildingPart = (Element) buildingParts.item(i);
-            NodeList solids = buildingPart.getElementsByTagName(TagName.GML_SOLID);
-            // building part have only one or no solid always valid
-            if (solids.getLength() <= 1) {
-                return Collections.EMPTY_LIST;
-            }
-
-            List<String> invalidSolids = new ArrayList<>();
-            for (int j = 0; j < solids.getLength(); j++) {
-                Node solid = solids.item(j);
-                if (!this.checkTouch(solids, j)) {
-                    invalidSolids.add(((Element) solid).getAttribute(TagName.GML_ID));
-                }
-            }
-            if (!invalidSolids.isEmpty()) {
-                String blgPartID = buildingPart.getAttribute(TagName.GML_ID);
-                invalidBPs.add(blgPartID.isBlank() ? "[]" : blgPartID);
+    private List<String> validateBuildingPartLod1(List<Node> lod1Solid) {
+        List<String> invalidLodBP = new ArrayList<>();
+        for (int i = 0; i < lod1Solid.size(); i++) {
+            Node solid = lod1Solid.get(i);
+            if (!this.checkTouch(lod1Solid, i)) {
+                Element parent = (Element) XmlUtil.findNearestParentByName(solid, TagName.BLGD_BUILDING_PART);
+                invalidLodBP.add(parent.getAttribute(TagName.GML_ID));
             }
         }
-        return invalidBPs;
+
+        return invalidLodBP;
+    }
+
+    private boolean checkTouch(List<Node> solids, int index) {
+        for (int i = 0; i < solids.size(); i++) {
+            Element solid1 = (Element) solids.get(i);
+            for (int j = 0; j < solids.size(); j++) {
+                Element solid2 = (Element) solids.get(j);
+                if (j != index && this.touch(solid1, solid2)) return true;
+            }
+        }
+        return false;
     }
 
     private boolean checkTouch(NodeList solids, int index) {
