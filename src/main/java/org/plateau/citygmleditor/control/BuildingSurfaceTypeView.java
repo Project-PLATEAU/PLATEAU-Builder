@@ -117,6 +117,19 @@ public class BuildingSurfaceTypeView extends MeshView {
 
     public void updateSelectionOutLine(PolygonView selectedPolygon, MeshView outLine) {
         if (selectedPolygon != null) {
+            var original = selectedPolygon.getExteriorRing().getOriginal();
+            System.out.println("ExteriorRing");
+            for (var c : original.getCoord()) {
+                System.out.println(c);
+            }
+            for (var i = 0; i < selectedPolygon.getInteriorRings().size(); i++) {
+                original = selectedPolygon.getInteriorRings().get(i).getOriginal();
+                System.out.println("InteriorRing" + i);
+                for (var c : original.getCoord()) {
+                    System.out.println(c);
+                }
+            }
+
             var selfMesh = (TriangleMesh)getMesh();
             var mesh = new TriangleMesh();
             mesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
