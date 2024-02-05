@@ -64,8 +64,7 @@ public interface MessageError {
     String ERR_LBLDG_01_POLYGON = "  次のgml:Polygon座標の形式が不正です。\n%s";
     String ERR_LBLDG_01_SOLID_DETAIL = "    <gml:Solid gml:id=\"%s\">";
     String ERR_LBLDG_01_POLYGON_DETAIL = "    <gml:Polygon gml:id=\"%s\">";
-    String ERR_LBLDG_03_001_1 = "L_BLDG 03: 地物\"{0}\":\n" +
-            "部が境界面の外側に存在するbldg:Window及びbldg:Doorのインスタンスが存在します：";
+    String ERR_LBLDG_03_001_1 = "L_BLDG 03: 地物\"" + "%s" + "\"" + ":\n" + "%s %s";
     String ERR_LBLDG_03_001_2 = "\n<bldg:Door gml:id=\"[{0}]”>";
     String ERR_LBLDG_03_001_3 = "\n<bldg:Window gml:id=\"[{0}]”>";
     String ERR_T_Bldg_02_002_1 = "T_BLDG 02: 次のbldg:lod2Geometry又はbldg:lod3Geometryにより保持又は参照する幾何オブジェクトの型が、gml:MultiSurface又はgml:Solidではないインスタンが存在します：";
