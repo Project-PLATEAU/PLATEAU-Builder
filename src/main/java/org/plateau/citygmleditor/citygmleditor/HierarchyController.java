@@ -274,7 +274,6 @@ public class HierarchyController implements Initializable {
             lod2polygon.getTransforms().clear();
             lod2polygon.getTransforms().addAll(rotate, translate);
             lod2Geometries.add(createJTSPolygon(lod2polygon));
-            // World.getRoot3D().getChildren().add(createJavaFXPolygon(createJTSPolygon(lod2polygon)));
         }
         var index1 = findNear(lod1geometry, lod2Geometries);
         var baseangle = index1 * 10;
@@ -290,14 +289,10 @@ public class HierarchyController implements Initializable {
                 lod2polygon.getTransforms().clear();
                 lod2polygon.getTransforms().addAll(rotate, translate);
                 lod2Geometries.add(createJTSPolygon(lod2polygon));
-                // World.getRoot3D().getChildren().add(createJavaFXPolygon(createJTSPolygon(lod2polygon)));
             }
         }
         var index2 = findNear(lod1geometry, lod2Geometries);
         var fixangle = angles.get(index2);
-        // var fixGeometry = lod2Geometries.get(index2);
-        // var fixpolygon = createJavaFXPolygon((org.locationtech.jts.geom.Polygon) fixGeometry);
-        // World.getRoot3D().getChildren().addAll(fixpolygon);
         // 反映
         var manipulator = lod2SolidView.getTransformManipulator();
         Transform worldToLocalTransform = manipulator.getTransformCache();
