@@ -10,10 +10,13 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.shape.MeshView;
 import javafx.stage.FileChooser;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.citymodel.BuildingInstallationView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.converters.Obj2LodConverter;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
@@ -70,6 +73,9 @@ public class HierarchyController implements Initializable {
             TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
             if (selectedItem != null && selectedItem.valueProperty().get() instanceof BuildingView) {
                 CityGMLEditorApp.getFeatureSellection().select((BuildingView) selectedItem.valueProperty().get());
+            }
+            if (selectedItem != null && selectedItem.valueProperty().get() instanceof ILODSolidView) {
+                CityGMLEditorApp.getFeatureSellection().setSelectElement((Node)selectedItem.valueProperty().get());
             }
         });
 
@@ -224,6 +230,10 @@ public class HierarchyController implements Initializable {
             super(node);
             if (node instanceof Parent) {
                 for (Node n : ((Parent) node).getChildrenUnmodifiable()) {
+                    if (n instanceof MeshView) {
+                        if (!(n instanceof LOD1SolidView) && !(n instanceof BuildingInstallationView))
+                            continue;
+                    }
                     getChildren().add(new HierarchyController.TreeItemImpl(n));
                 }
             }

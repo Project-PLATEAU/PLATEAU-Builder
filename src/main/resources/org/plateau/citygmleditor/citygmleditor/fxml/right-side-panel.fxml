@@ -33,41 +33,7 @@
                                 <Font size="16.0"/>
                             </font>
                         </Text>
-                        <VBox prefWidth="100.0" spacing="5.0">
-                            <children>
-                                <HBox prefWidth="200.0">
-                                    <children>
-                                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物ID">
-                                            <HBox.margin>
-                                                <Insets right="50.0"/>
-                                            </HBox.margin>
-                                        </Text>
-                                        <Text fill="WHITE" layoutX="10.0" layoutY="23.0" strokeType="OUTSIDE"
-                                              strokeWidth="0.0" text="gml:id"/>
-                                    </children>
-                                    <VBox.margin>
-                                        <Insets/>
-                                    </VBox.margin>
-                                </HBox>
-                                <HBox maxWidth="1.7976931348623157E308" prefWidth="200.0">
-                                    <children>
-                                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物型">
-                                            <HBox.margin>
-                                                <Insets right="50.0"/>
-                                            </HBox.margin>
-                                        </Text>
-                                        <Text fill="WHITE" layoutX="10.0" layoutY="23.0" strokeType="OUTSIDE"
-                                              strokeWidth="0.0" text="地物型(Building)"/>
-                                    </children>
-                                    <padding>
-                                        <Insets bottom="5.0"/>
-                                    </padding>
-                                </HBox>
-                            </children>
-                            <padding>
-                                <Insets left="5.0" right="5.0" top="5.0"/>
-                            </padding>
-                        </VBox>
+                        <fx:include source="featureinfo/feature-info.fxml"/>
                         <fx:include minHeight="200.0" prefWidth="200.0" source="attribute-editor.fxml"/>
                         <Accordion>
                             <panes>

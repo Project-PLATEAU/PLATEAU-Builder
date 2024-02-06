@@ -22,14 +22,16 @@ module CityGMLEditor {
     requires jgltf.impl.v1;
     requires jgltf.impl.v2;
     requires com.fasterxml.jackson.core;
+    requires com.sun.xml.fastinfoset;
     requires commons.math3;
     requires org.locationtech.jts;
     requires proj4j;
     requires vecmath;
+    requires com.sun.xml.bind;
+    requires xercesImpl;
 
     provides Importer with
             ObjOrPolyObjImporter;
-
     exports org.plateau.citygmleditor.importers;
     exports org.plateau.citygmleditor.importers.obj;
 
@@ -50,6 +52,8 @@ module CityGMLEditor {
     opens org.plateau.citygmleditor.utils3d.polygonmesh to javafx.fxml, javafx.graphics;
     exports org.plateau.citygmleditor.fxml;
     opens org.plateau.citygmleditor.fxml to javafx.fxml, javafx.graphics;
+    exports org.plateau.citygmleditor.fxml.featureinfo;
+    opens org.plateau.citygmleditor.fxml.featureinfo to javafx.fxml, javafx.graphics;
     exports org.plateau.citygmleditor.control;
     opens org.plateau.citygmleditor.control to javafx.fxml, javafx.graphics;
     exports org.plateau.citygmleditor.world;

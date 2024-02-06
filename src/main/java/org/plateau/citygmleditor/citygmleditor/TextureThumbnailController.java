@@ -1,7 +1,9 @@
 package org.plateau.citygmleditor.citygmleditor;
 
 import java.awt.Desktop;
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -27,13 +29,14 @@ public class TextureThumbnailController implements Initializable {
                 return;
 
             for (var image : newValue.getTexturePaths()) {
-                addImage(image);
+                var imageUri = Paths.get(image).toUri().toString();
+                addImage(imageUri);
             }
         });
     }
 
     private void addImage(String imageUrl) {
-        ImageView imageView = new ImageView(new Image(imageUrl));
+        ImageView imageView = new ImageView(imageUrl);
         imageView.setFitWidth(60);
         imageView.setFitHeight(60);
         imageView.setOnMouseClicked(event -> {

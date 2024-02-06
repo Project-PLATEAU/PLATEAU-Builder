@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
 import org.plateau.citygmleditor.world.World;
@@ -22,6 +23,7 @@ import javafx.scene.control.ListView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import org.plateau.citygmleditor.world.World;
 
 public class CoordinateDialogController implements Initializable {
     private Stage root;
@@ -103,6 +105,13 @@ public class CoordinateDialogController implements Initializable {
                 }
             }
             CityGMLEditorApp.getSceneContent().setContent(root);
+
+            var datasetPath = Paths.get(World.getActiveInstance().getCityModels().get(0).getGmlPath()).getParent().getParent()
+                    .getParent();
+            // TODO: gmlから参照されるschemaで設定
+            String uroSchemasPath = datasetPath + "\\schemas\\iur\\uro\\2.0\\urbanObject.xsd";
+            CityGMLEditorApp.setDatasetPath(datasetPath.toString());
+            CityGMLEditorApp.settingUroAttributeInfo(uroSchemasPath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
