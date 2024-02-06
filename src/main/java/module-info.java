@@ -28,6 +28,7 @@ module CityGMLEditor {
     requires proj4j;
     requires vecmath;
     requires com.sun.xml.bind;
+    requires xercesImpl;
 
     provides Importer with
             ObjOrPolyObjImporter;
@@ -51,6 +52,8 @@ module CityGMLEditor {
     opens org.plateau.citygmleditor.utils3d.polygonmesh to javafx.fxml, javafx.graphics;
     exports org.plateau.citygmleditor.fxml;
     opens org.plateau.citygmleditor.fxml to javafx.fxml, javafx.graphics;
+    exports org.plateau.citygmleditor.fxml.featureinfo;
+    opens org.plateau.citygmleditor.fxml.featureinfo to javafx.fxml, javafx.graphics;
     exports org.plateau.citygmleditor.control;
     opens org.plateau.citygmleditor.control to javafx.fxml, javafx.graphics;
     exports org.plateau.citygmleditor.world;
