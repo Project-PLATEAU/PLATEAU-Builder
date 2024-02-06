@@ -14,7 +14,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -92,23 +91,14 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
 
             NodeList tagBuildingParts = building.getElementsByTagName(TagName.BLGD_BUILDING_PART);
             if (tagBuildingParts.getLength() == 0) continue;
+            List<Node> lod1Solid = createLod1Solid(tagBuildingParts);
+            if (lod1Solid.isEmpty()) continue;
             // validate building parts
-            List<String> invalidBP = this.getInvalidBP(tagBuildingParts);
+            List<String> invalidBP = this.getInvalidLod1Solids(lod1Solid);
             // validate format points
             List<String> invalidPolygon = this.getWrongFormatePolygon(tagBuildingParts);
             if (invalidPolygon.isEmpty() && invalidBP.isEmpty()) continue;
-            BuildingInvalid buildingInvalid = new BuildingInvalid();
-            buildingInvalid.setID(buildingID);
-            buildingInvalid.setPolygons(invalidPolygon);
-            buildingInvalid.setBuidlingPart(invalidBP);
-            buildingInvalids.add(buildingInvalid);
-            elementErrors.add(new GmlElementError(
-                    buildingID,
-                    invalidBP.toString(),
-                    invalidPolygon.toString(),
-                    null,
-                    null,
-                    0));
+            this.setBuildingError(buildingID, invalidPolygon, invalidBP, buildingInvalids, elementErrors);
         }
 
         if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
@@ -119,6 +109,32 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, buildingStr, elementErrors));
         }
         return messages;
+    }
+
+    private List<Node> createLod1Solid(NodeList tagBuildingParts) {
+        List<Node> result = new ArrayList<>();
+        for (int j = 0; j < tagBuildingParts.getLength(); j++) {
+            Element buildingPart = (Element) tagBuildingParts.item(j);
+            Node lod1Solid = buildingPart.getElementsByTagName(TagName.BLDG_LOD_1_SOLID).item(0);
+            if (lod1Solid == null) continue;
+            result.add(lod1Solid);
+        }
+        return result;
+    }
+
+    private void setBuildingError(String buildingID, List<String> invalidPolygon, List<String> invalidBP, List<BuildingInvalid> buildingInvalids, List<GmlElementError> elementErrors) {
+        BuildingInvalid buildingInvalid = new BuildingInvalid();
+        buildingInvalid.setID(buildingID);
+        buildingInvalid.setPolygons(invalidPolygon);
+        buildingInvalid.setBuidlingPart(invalidBP);
+        buildingInvalids.add(buildingInvalid);
+        elementErrors.add(new GmlElementError(
+                buildingID,
+                invalidBP.toString(),
+                invalidPolygon.toString(),
+                null,
+                null,
+                0));
     }
 
     public List<String> getWrongFormatePolygon(NodeList nodeList) {
@@ -141,30 +157,37 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
         return result;
     }
 
-    private List<String> getInvalidBP(NodeList buildingParts) {
-        List<String> invalidBPs = new ArrayList<>();
+    private List<Node> getPolygonByAttrbute(Node buildingPart, String attrValue) {
+        List<Node> result = new ArrayList<>();
+        XmlUtil.recursiveGetNodeByTagNameAndAttr(buildingPart, result, TagName.GML_POLYGON, TagName.ATTR_XLINK_HREF, attrValue);
+        return result;
+    }
 
-        for (int i = 0; i < buildingParts.getLength(); i++) {
-            Element buildingPart = (Element) buildingParts.item(i);
-            NodeList solids = buildingPart.getElementsByTagName(TagName.GML_SOLID);
-            // building part have only one or no solid always valid
-            if (solids.getLength() <= 1) {
-                return Collections.EMPTY_LIST;
-            }
-
-            List<String> invalidSolids = new ArrayList<>();
-            for (int j = 0; j < solids.getLength(); j++) {
-                Node solid = solids.item(j);
-                if (!this.checkTouch(solids, j)) {
-                    invalidSolids.add(((Element) solid).getAttribute(TagName.GML_ID));
-                }
-            }
-            if (!invalidSolids.isEmpty()) {
-                String blgPartID = buildingPart.getAttribute(TagName.GML_ID);
-                invalidBPs.add(blgPartID.isBlank() ? "[]" : blgPartID);
+    private List<String> getInvalidLod1Solids(List<Node> lod1Solid) {
+        List<String> invalidSolids = new ArrayList<>();
+        for (int i = 0; i < lod1Solid.size(); i++) {
+            Node solid = lod1Solid.get(i);
+            if (!this.checkTouch(lod1Solid, i)) {
+                invalidSolids.add(((Element) solid).getAttribute(TagName.GML_ID));
             }
         }
-        return invalidBPs;
+//        if (!invalidSolids.isEmpty()) {
+//            String blgPartID = buildingPart.getAttribute(TagName.GML_ID);
+//            invalidSolids.add(blgPartID.isBlank() ? "[]" : blgPartID);
+//        }
+
+        return invalidSolids;
+    }
+
+    private boolean checkTouch(List<Node> solids, int index) {
+        for (int i = 0; i < solids.size(); i++) {
+            Element solid1 = (Element) solids.get(i);
+            for (int j = 0; j < solids.size(); j++) {
+                Element solid2 = (Element) solids.get(j);
+                if (j != index && this.touch(solid1, solid2)) return true;
+            }
+        }
+        return false;
     }
 
     private boolean checkTouch(NodeList solids, int index) {
