@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.List;
 import org.plateau.citygmleditor.citygmleditor.CoordinateDialogController.CoordinateCodesEnum;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
+import org.plateau.citygmleditor.world.World;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
@@ -46,9 +48,14 @@ public class LoadGMLDialogController {
      */
     public void onAddGML(ActionEvent actionEvent) {
         try {
+            var root = CityGMLEditorApp.getSceneContent().getContent();
             for (var gmlFile : gmlFiles) {
-                GmlImporter.loadGmlAdd(gmlFile.toString());
+                var newroot = GmlImporter.loadGml(gmlFile.toString(), World.getActiveInstance().getEPSGCode(), false);
+                ((Group) root).getChildren().add(((Group) newroot).getChildren().get(0));
+                // ツリー更新のため一度変更する
+                CityGMLEditorApp.getSceneContent().setContent(newroot);
             }
+            CityGMLEditorApp.getSceneContent().setContent(root);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

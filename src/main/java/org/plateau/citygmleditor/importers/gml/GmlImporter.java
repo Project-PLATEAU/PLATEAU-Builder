@@ -70,6 +70,9 @@ public class GmlImporter {
             if (isNew) {
                 world.setCityModel(cityModel);
             }
+            else {
+                world.addCityModel(cityModel);
+            }
         }
         reader.close();
 
@@ -78,7 +81,7 @@ public class GmlImporter {
     
     public static Node loadGmlAdd(String fileUrl) throws Exception {
         var world = World.getActiveInstance();
-        var city = world.getCityModel();
+        var city = world.getCityModels().get(0);
 
         var cityRoot = GmlImporter.loadGml(fileUrl.toString(), world.getEPSGCode(), false);
         var newCity = (CityModelView) ((Group)cityRoot).getChildren().get(0);

@@ -6,12 +6,14 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
+import org.plateau.citygmleditor.world.World;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
@@ -96,7 +98,8 @@ public class CoordinateDialogController implements Initializable {
                     root = GmlImporter.loadGml(gmlFile.toString(), code, true);
                 }
                 else {
-                    root = GmlImporter.loadGmlAdd(gmlFile.toString());
+                    var newroot = GmlImporter.loadGml(gmlFile.toString(), code, false);
+                    ((Group)root).getChildren().add(((Group) newroot).getChildren().get(0));
                 }
             }
             CityGMLEditorApp.getSceneContent().setContent(root);

@@ -108,22 +108,26 @@ public class TopPanelController {
             System.out.println(e);
         }
 
-        try {
-            // CityGMLのエクスポート
-            GmlExporter.export(
-                    Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" +
-                                    udxDirName + "/"
-                                    + bldgDirName
-                                    + "/" + importGmlPathComponents[importGmlPathComponents.length - 1])
-                            .toString(),
-                    cityModel.getGmlObject(),
-                    cityModel.getSchemaHandler());
-            // Appearanceのエクスポート
-            TextureExporter.export(
-                    selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" + udxDirName + "/" + bldgDirName,
-                    cityModel);
-        } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
-            throw new RuntimeException(e);
+        for (var cityModelView : World.getActiveInstance().getCityModels()) {
+            cityModel = cityModelView;
+            var path = cityModel.getGmlPath().split("\\\\");
+            try {
+                // CityGMLのエクスポート
+                GmlExporter.export(
+                        Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" +
+                                        udxDirName + "/"
+                                        + bldgDirName
+                                        + "/" + path[path.length - 1])
+                                .toString(),
+                        cityModel.getGmlObject(),
+                        cityModel.getSchemaHandler());
+                // Appearanceのエクスポート
+                TextureExporter.export(
+                        selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" + udxDirName + "/" + bldgDirName,
+                        cityModel);
+            } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

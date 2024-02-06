@@ -42,44 +42,43 @@ public class ValidationController implements Initializable {
     }
 
     public void execute(ActionEvent event) {
-        var cityModelView = World.getActiveInstance().getCityModel();
-        if (cityModelView == null || cityModelView.getGmlObject() == null) {
-            showMessage(new ValidationResultMessage(
-                    ValidationResultMessageType.Error,
-                    "CityGMLがインポートされていません"
-            ));
-            return;
-        }
-
-        var cityModel = cityModelView.getGmlObject();
-        if (cityModel == null)
-            return;
-
-        List<IValidator> validators = new ArrayList<IValidator>() {
-            {
-                add(new GMLIDCompletenessValidator());
-            }
-        };
-
         var errorCount = 0;
         var warningCount = 0;
 
-        for (var validator : validators) {
-            var messages = validator.validate(cityModel);
+        if (World.getActiveInstance().getCityModels() == null) {
+            showMessage(new ValidationResultMessage(ValidationResultMessageType.Error,
+                    "CityGMLがインポートされていません"));
+            return;
+        }
+        
+        for (var cityModelView : World.getActiveInstance().getCityModels()) {
+            var cityModel = cityModelView.getGmlObject();
+            if (cityModel == null)
+                return;
 
-            for (var message : messages) {
-                showMessage(message);
-                switch (message.getType()) {
-                    case Error:
-                        errorCount++;
-                        break;
-                    case Warning:
-                        warningCount++;
-                        break;
+            List<IValidator> validators = new ArrayList<IValidator>() {
+                {
+                    add(new GMLIDCompletenessValidator());
+                }
+            };
+
+            for (var validator : validators) {
+                var messages = validator.validate(cityModel);
+
+                for (var message : messages) {
+                    showMessage(message);
+                    switch (message.getType()) {
+                        case Error:
+                            errorCount++;
+                            break;
+                        case Warning:
+                            warningCount++;
+                            break;
+                    }
                 }
             }
         }
-
+        
         showMessage(new ValidationResultMessage(
                 ValidationResultMessageType.Info,
                 String.format("品質検査が完了しました。（エラー数:%d, 警告数:%d）", errorCount, warningCount)

@@ -1,5 +1,7 @@
 package org.plateau.citygmleditor.world;
 
+import java.util.List;
+import java.util.ArrayList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
@@ -17,7 +19,7 @@ public class World {
     private static World activeInstance;
     private static Group root3D;
     private GeoReference geoReference;
-    private CityModelView cityModel;
+    private List<CityModelView> cityModel;
     private Material defaultMaterial;
     private String epsgCode;
 
@@ -50,12 +52,17 @@ public class World {
         this.geoReference = geoReference;
     }
 
-    public CityModelView getCityModel() {
+    public List<CityModelView> getCityModels() {
         return cityModel;
     }
 
     public void setCityModel(CityModelView cityModel) {
-        this.cityModel = cityModel;
+        this.cityModel = new ArrayList<CityModelView>();
+        this.cityModel.add(cityModel);
+    }
+
+    public void addCityModel(CityModelView cityModel) {
+        this.cityModel.add(cityModel);
     }
 
     public String getEPSGCode() {
