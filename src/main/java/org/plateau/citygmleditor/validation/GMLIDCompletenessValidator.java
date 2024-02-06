@@ -36,13 +36,14 @@ public class GMLIDCompletenessValidator implements IValidator {
         List<Node> allTags = new ArrayList<>();
         XmlUtil.recursiveFindNodeByAttribute(doc, allTags, TagName.GML_ID);
         List<ValidationResultMessage> messages = new ArrayList<>();
+        List<GmlElementError> gmlElementErrors = new ArrayList<>();
 
         List<String> allID = allTags.stream().map(e -> ((Element) e).getAttribute(TagName.GML_ID)).collect(Collectors.toList());
         if (allID.contains("")) {
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, "Exists GmlId null\\n"));
         }
 
-        StringBuilder invalidID = getInvalidID(allID);
+        StringBuilder invalidID = getInvalidID(allID, gmlElementErrors);
 
         if (!invalidID.toString().equals(MessageError.ERR_C01_001_1)) {
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalidID.toString()));
@@ -51,7 +52,7 @@ public class GMLIDCompletenessValidator implements IValidator {
         return messages;
     }
 
-    private static StringBuilder getInvalidID(List<String> allID) {
+    private static StringBuilder getInvalidID(List<String> allID, List<GmlElementError> gmlElementErrors) {
         Map<String, Integer> elementCountMap = new HashMap<>();
         // Count the number of occurrences of each element
         for (String gmlID : allID) {
@@ -63,6 +64,7 @@ public class GMLIDCompletenessValidator implements IValidator {
             String gmlID = entry.getKey();
             if (entry.getValue() > 1) {
                 messageError.append(MessageFormat.format(MessageError.ERR_C01_001_2, gmlID));
+                gmlElementErrors.add(new GmlElementError(gmlID, null, null, null, null, 0));
             }
         }
         return messageError;

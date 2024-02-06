@@ -38,7 +38,7 @@ public class L06LogicalConsistencyValidator implements IValidator {
 
         // Read all posList objects in gml file
         File input = new File(World.getActiveInstance().getCityModel().getGmlPath());
-        NodeList nodes = XmlUtil.getAllTagFromXmlFile(input, TagName.GML_POSLIST);
+        NodeList poslists = XmlUtil.getAllTagFromXmlFile(input, TagName.GML_POSLIST);
 
         DirectPosition lowerCorner = cityModel.getBoundedBy().getEnvelope().getLowerCorner();
         DirectPosition upperCorner = cityModel.getBoundedBy().getEnvelope().getUpperCorner();
@@ -51,8 +51,8 @@ public class L06LogicalConsistencyValidator implements IValidator {
         Point3D upperPoint = new Point3D(upperCorner.getValue().get(0), upperCorner.getValue().get(1), upperCorner.getValue().get(2));
 
         Map<String, String> errorMap = new HashMap<>();
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Node node = nodes.item(i);
+        for (int i = 0; i < poslists.getLength(); i++) {
+            Node node = poslists.item(i);
             List<String> values = new ArrayList<>(Arrays.asList(node.getFirstChild().getNodeValue().split(" ")));
 
             try {
@@ -76,19 +76,34 @@ public class L06LogicalConsistencyValidator implements IValidator {
                     }
                 }
             } catch (InvalidPosStringException e) {
-                Node parentNode = XmlUtil.findNearestParentByAttribute(node, TagName.GML_ID);
+                Node building = XmlUtil.findNearestParentByTagAndAttribute(node, TagName.BLDG_BUILDING, TagName.GML_ID);
+                Node polygon = XmlUtil.findNearestParentByName(node, TagName.GML_POLYGON);
+
                 messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
                         MessageFormat.format(MessageError.ERR_L06_002,
-                                parentNode.getAttributes().getNamedItem("gml:id").getTextContent(),
-                                node.getFirstChild().getNodeValue())));
+                                XmlUtil.getGmlId(building),
+                                node.getFirstChild().getNodeValue()),
+                        List.of(new GmlElementError(
+                                XmlUtil.getGmlId(building),
+                                null,
+                                XmlUtil.getGmlId(polygon),
+                                XmlUtil.getGmlId(node),
+                                node.getNodeName(),
+                                0))));
             }
         }
 
-        List<GmlElementError> elementErrors = new ArrayList<>();
         for (Map.Entry<String, String> k : errorMap.entrySet()) {
             String buildingID = k.getKey();
-            elementErrors.add(new GmlElementError(buildingID, null, null, null, null, 0));
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, k.getValue(), elementErrors));
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
+                    k.getValue(),
+                    List.of(new GmlElementError(
+                            buildingID,
+                            null,
+                            null,
+                            null,
+                            null,
+                            0))));
         }
 
         return messages;
