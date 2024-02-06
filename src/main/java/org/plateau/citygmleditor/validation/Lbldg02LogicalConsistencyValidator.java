@@ -82,32 +82,36 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
     }
 
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
-        List<BuildingInvalid> buildingInvalids = new ArrayList<>();
+        List<ValidationResultMessage> messages = new ArrayList<>();
+
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
-        List<GmlElementError> elementErrors = new ArrayList<>();
         for (int i = 0; i < buildings.getLength(); i++) {
+            List<GmlElementError> elementErrors = new ArrayList<>();
             Element building = (Element) buildings.item(i);
             String buildingID = building.getAttribute(TagName.GML_ID);
 
             NodeList tagBuildingParts = building.getElementsByTagName(TagName.BLGD_BUILDING_PART);
+
             if (tagBuildingParts.getLength() == 0) continue;
+
             List<Node> lod1Solid = createLod1Solid(tagBuildingParts);
             if (lod1Solid.isEmpty()) continue;
+
             // validate building parts
             List<String> invalidBP = this.getInvalidLod1Solids(lod1Solid);
+
             // validate format points
             List<String> invalidPolygon = this.getWrongFormatePolygon(tagBuildingParts);
             if (invalidPolygon.isEmpty() && invalidBP.isEmpty()) continue;
-            this.setBuildingError(buildingID, invalidPolygon, invalidBP, buildingInvalids, elementErrors);
+
+            BuildingInvalid buildingInvalid = this.setBuildingError(buildingID, invalidPolygon, invalidBP, elementErrors);
+
+            String buildingStr = buildingInvalid.toString();
+            if (!buildingStr.isBlank()) {
+                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, buildingStr, elementErrors));
+            }
         }
 
-        if (CollectionUtil.isEmpty(buildingInvalids)) return List.of();
-        List<ValidationResultMessage> messages = new ArrayList<>();
-        for (BuildingInvalid invalid : buildingInvalids) {
-            String buildingStr = invalid.toString();
-            if (buildingStr.isBlank()) continue;
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, buildingStr, elementErrors));
-        }
         return messages;
     }
 
@@ -122,12 +126,11 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
         return result;
     }
 
-    private void setBuildingError(String buildingID, List<String> invalidPolygon, List<String> invalidBP, List<BuildingInvalid> buildingInvalids, List<GmlElementError> elementErrors) {
+    private BuildingInvalid setBuildingError(String buildingID, List<String> invalidPolygon, List<String> invalidBP, List<GmlElementError> elementErrors) {
         BuildingInvalid buildingInvalid = new BuildingInvalid();
         buildingInvalid.setID(buildingID);
         buildingInvalid.setPolygons(invalidPolygon);
         buildingInvalid.setBuidlingPart(invalidBP);
-        buildingInvalids.add(buildingInvalid);
         elementErrors.add(new GmlElementError(
                 buildingID,
                 invalidBP.toString(),
@@ -135,6 +138,8 @@ public class Lbldg02LogicalConsistencyValidator implements IValidator {
                 null,
                 null,
                 0));
+
+        return buildingInvalid;
     }
 
     public List<String> getWrongFormatePolygon(NodeList nodeList) {

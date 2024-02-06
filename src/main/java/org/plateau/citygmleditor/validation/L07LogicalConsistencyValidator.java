@@ -28,6 +28,9 @@ public class L07LogicalConsistencyValidator implements IValidator {
     public static Logger logger = Logger.getLogger(L07LogicalConsistencyValidator.class.getName());
     public static final double VALID_DISTANCE_L07 = 0.01;
 
+    private final static String FORMAT_ERROR = "FORMAT";
+    private final static String LOGICAL_ERROR = "LOGICAL";
+
     static class BuildingInvalid {
         private String ID;
         private Map<String, List<String>> linearRings;
@@ -46,13 +49,13 @@ public class L07LogicalConsistencyValidator implements IValidator {
         }
 
         public String toString() {
-            String errorFormatLineString = this.lineStrings.get("FORMAT").stream().map(f -> "<gml:LineString gml:id=\"" + f + "\">")
+            String errorFormatLineString = this.lineStrings.get(FORMAT_ERROR).stream().map(f -> "<gml:LineString gml:id=\"" + f + "\">")
                     .collect(Collectors.joining("\n"));
-            String errorLogicalLineString = this.lineStrings.get("LOGICAL").stream().map(l -> "<gml:LineString gml:id=\"" + l + "\">")
+            String errorLogicalLineString = this.lineStrings.get(LOGICAL_ERROR).stream().map(l -> "<gml:LineString gml:id=\"" + l + "\">")
                     .collect(Collectors.joining("\n"));
-            String errorFormatLinearRing = this.linearRings.get("FORMAT").stream().map(f -> "<gml:LineString gml:id=\"" + f + "\">")
+            String errorFormatLinearRing = this.linearRings.get(FORMAT_ERROR).stream().map(f -> "<gml:LineString gml:id=\"" + f + "\">")
                     .collect(Collectors.joining("\n"));
-            String errorLogicalLinearRing = this.linearRings.get("LOGICAL").stream().map(l -> "<gml:LineString gml:id=\"" + l + "\">")
+            String errorLogicalLinearRing = this.linearRings.get(LOGICAL_ERROR).stream().map(l -> "<gml:LineString gml:id=\"" + l + "\">")
                     .collect(Collectors.joining("\n"));
             String errorFormat = (errorFormatLineString.isBlank() ? "" : ("\n" + errorFormatLineString) + "\n")
                     + (errorFormatLinearRing.isBlank() ? "" : errorFormatLinearRing + "\n");
@@ -63,11 +66,12 @@ public class L07LogicalConsistencyValidator implements IValidator {
     }
 
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
-        List<BuildingInvalid> buildingInvalids = new ArrayList<>();
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
-        List<GmlElementError> elementErrors = new ArrayList<>();
+        List<ValidationResultMessage> messages = new ArrayList<>();
 
         for (int i = 0; i < buildings.getLength(); i++) {
+            List<GmlElementError> elementErrors = new ArrayList<>();
+
             Element building = (Element) buildings.item(i);
             String buildingID = building.getAttribute(TagName.GML_ID);
 
@@ -78,20 +82,19 @@ public class L07LogicalConsistencyValidator implements IValidator {
             NodeList tagLineStrings = building.getElementsByTagName(TagName.GML_LINESTRING);
             Map<String, List<String>> lineStringIDvalids = this.getListTagIDInvalid(tagLineStrings);
 
-            if (linearRingIDInvalids.get("FORMAT").isEmpty() && linearRingIDInvalids.get("LOGICAL").isEmpty()
-                    && lineStringIDvalids.get("FORMAT").isEmpty() && lineStringIDvalids.get("LOGICAL").isEmpty())
+            if (linearRingIDInvalids.get(FORMAT_ERROR).isEmpty() && linearRingIDInvalids.get(LOGICAL_ERROR).isEmpty()
+                    && lineStringIDvalids.get(FORMAT_ERROR).isEmpty() && lineStringIDvalids.get(LOGICAL_ERROR).isEmpty())
                 continue;
 
             BuildingInvalid buildingInvalid = new BuildingInvalid();
             buildingInvalid.setID(buildingID);
             buildingInvalid.setLinearRings(linearRingIDInvalids);
             buildingInvalid.setLineStrings(lineStringIDvalids);
-            buildingInvalids.add(buildingInvalid);
 
-            List<String> linearRings = linearRingIDInvalids.get("FORMAT");
-            linearRings.addAll(linearRingIDInvalids.get("LOGICAL"));
-            List<String> lineStrings = lineStringIDvalids.get("FORMAT");
-            lineStrings.addAll(lineStringIDvalids.get("LOGICAL"));
+            List<String> linearRings = linearRingIDInvalids.get(FORMAT_ERROR);
+            linearRings.addAll(linearRingIDInvalids.get(LOGICAL_ERROR));
+            List<String> lineStrings = lineStringIDvalids.get(FORMAT_ERROR);
+            lineStrings.addAll(lineStringIDvalids.get(LOGICAL_ERROR));
 
             // add linearRing to gmlElementError
             for (String linearRing : linearRings) {
@@ -112,14 +115,10 @@ public class L07LogicalConsistencyValidator implements IValidator {
                         lineString, TagName.GML_LINESTRING,
                         0));
             }
+
+            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, buildingInvalid.toString(), elementErrors));
         }
 
-        if (CollectionUtil.isEmpty(buildingInvalids)) return new ArrayList<>();
-        elementErrors.stream().collect(Collectors.groupingBy(GmlElementError::getBuildingId));
-        List<ValidationResultMessage> messages = new ArrayList<>();
-        for (BuildingInvalid invalid : buildingInvalids) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, invalid.toString(), elementErrors));
-        }
         return messages;
     }
 
@@ -152,8 +151,8 @@ public class L07LogicalConsistencyValidator implements IValidator {
             if (this.isListPointValid(point3Ds)) continue;
             errorLogical.add(attribute);
         }
-        invalidTag.put("FORMAT", errorFormat);
-        invalidTag.put("LOGICAL", errorLogical);
+        invalidTag.put(FORMAT_ERROR, errorFormat);
+        invalidTag.put(LOGICAL_ERROR, errorLogical);
         return invalidTag;
     }
 
