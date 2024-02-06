@@ -8,7 +8,7 @@ public interface TagName {
     String GML_POS = "gml:pos";
     String GML_POSLIST = "gml:posList";
     String BLDG_WINDOW = "bldg:Window";
-    String BLDG_DOOR = "bldg:door";
+    String BLDG_DOOR = "bldg:Door";
     String BLDG_BOUNDARY_SURFACE = "bldg:_BoundarySurface";
     String GML_ID = "gml:id";
     String GML_POLYGON = "gml:Polygon";

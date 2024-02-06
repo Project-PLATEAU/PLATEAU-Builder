@@ -49,6 +49,9 @@ public class Lbldg03LogicalAccuaracyValidator implements IValidator {
     private void validdateBuilding(Element building, List<Lbldg03BuildingError> buildingErrors, List<GmlElementError> elementErrors) {
         String buildingID = building.getAttribute(TagName.GML_ID);
         NodeList lod3MultiSurface = building.getElementsByTagName(TagName.BLDG_WALLSURFACE);
+        List<String> totalDoors = new ArrayList<>();
+        List<String> totalWindows = new ArrayList<>();
+        List<String> totalPolygons = new ArrayList<>();
         for (int j = 0; j < lod3MultiSurface.getLength(); j++) {
             Element lod3 = (Element) lod3MultiSurface.item(j);
             // create doors, windows, walls from lod3Multisurface
@@ -63,12 +66,24 @@ public class Lbldg03LogicalAccuaracyValidator implements IValidator {
             // validate format polygon
             List<String> invalidPolygons = this.getWrongFormatPolygon(lod3);
             if (invalidPolygons.isEmpty() && invalidDoors.isEmpty() && invalidWindows.isEmpty()) continue;
-            // set building error
-            setBuildingError(buildingErrors, elementErrors, buildingID, invalidDoors, invalidWindows, invalidPolygons);
+            addInvalid(invalidDoors, totalDoors);
+            addInvalid(invalidWindows, totalWindows);
+            addInvalid(invalidPolygons, totalPolygons);
+        }
+        if (totalDoors.isEmpty() && totalWindows.isEmpty() && totalPolygons.isEmpty()) return;
+        // set building error
+        setBuildingError(buildingErrors, elementErrors, buildingID, totalDoors, totalWindows, totalPolygons);
+    }
+
+    private static void addInvalid(List<String> invalidDoors, List<String> totalDoors) {
+        if (!invalidDoors.isEmpty()) {
+            totalDoors.addAll(invalidDoors);
         }
     }
 
-    private static void setBuildingError(List<Lbldg03BuildingError> buildingErrors, List<GmlElementError> elementErrors, String buildingID, List<String> invalidDoors, List<String> invalidWindows, List<String> invalidPolygons) {
+    private static void setBuildingError(List<Lbldg03BuildingError> buildingErrors, List<GmlElementError> elementErrors,
+                                         String buildingID, List<String> invalidDoors, List<String> invalidWindows,
+                                         List<String> invalidPolygons) {
         Lbldg03BuildingError buildingInvalid = new Lbldg03BuildingError();
         buildingInvalid.setBuildingID(buildingID);
         buildingInvalid.setDoors(invalidDoors);
@@ -134,19 +149,54 @@ public class Lbldg03LogicalAccuaracyValidator implements IValidator {
             if (wallPlane == null) wallPlane = this.reFindWallPlane(pointOfWall);
             if (wallPlane == null || (wallPlane[0] == 0.0 && wallPlane[1] == 0.0 && wallPlane[2] == 0.0))
                 return false;
-            Geometry geometry1 = ThreeDUtil.createPolygon(pointOfWall);
-            List<Point3D> projects = this.getProjectPoint3D(pointOfOpening, wallPlane);
-            try {
-                Geometry geometry2 = ThreeDUtil.createPolygon(projects);
-                if (geometry1.covers(geometry2)) {
-                    return true;
-                }
-            } catch (Exception e) {
-                logger.severe("error: " + e);
-                return false;
+
+            if (this.containYOZ(pointOfWall, pointOfOpening, wallPlane) || this.containXOZ(pointOfWall, pointOfOpening, wallPlane)) {
+                return true;
             }
         }
         return false;
+    }
+
+    private boolean containYOZ(List<Point3D> wall, List<Point3D> opening, double[] wallPlane) {
+        List<Point3D> projects = this.getProjectPoint3D(opening, wallPlane);
+        List<Point3D> projectsYOZ = this.projectYOZ(projects);
+        List<Point3D> wallYOZ = this.projectYOZ(wall);
+        Geometry geometry1 = ThreeDUtil.createPolygon(wallYOZ);
+        try {
+            Geometry geometry2 = ThreeDUtil.createPolygon(projectsYOZ);
+            if (geometry1.covers(geometry2)) {
+                return true;
+            }
+        } catch (Exception e) {
+            logger.severe("error: " + e);
+            return false;
+        }
+        return false;
+    }
+
+    private boolean containXOZ(List<Point3D> wall, List<Point3D> opening, double[] wallPlane) {
+        List<Point3D> projects = this.getProjectPoint3D(opening, wallPlane);
+        List<Point3D> projectsXOZ = this.projectXOZ(projects);
+        List<Point3D> wallXOZ = this.projectXOZ(wall);
+        Geometry geometry1 = ThreeDUtil.createPolygon(wallXOZ);
+        try {
+            Geometry geometry2 = ThreeDUtil.createPolygon(projectsXOZ);
+            if (geometry1.covers(geometry2)) {
+                return true;
+            }
+        } catch (Exception e) {
+            logger.severe("error: " + e);
+            return false;
+        }
+        return false;
+    }
+
+    private List<Point3D> projectYOZ(List<Point3D> input) {
+        return input.stream().map(p -> new Point3D(p.getY(), p.getZ(), p.getX())).collect(Collectors.toList());
+    }
+
+    private List<Point3D> projectXOZ(List<Point3D> input) {
+        return input.stream().map(p -> new Point3D(p.getX(), p.getZ(), p.getY())).collect(Collectors.toList());
     }
 
     private double[] reFindWallPlane(List<Point3D> pointOfWall) {
