@@ -18,4 +18,8 @@ public class AppearanceView extends GMLObjectView<Appearance> {
     public void setSurfaceData(ArrayList<SurfaceDataView> surfaceData) {
         this.surfaceData = surfaceData;
     }
+
+    public void addSurfaceData(ArrayList<SurfaceDataView> surfaceData) {
+        this.surfaceData.addAll(surfaceData);
+    }
 }

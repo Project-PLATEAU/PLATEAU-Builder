@@ -3,6 +3,7 @@ package org.plateau.citygmleditor.citygmleditor;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -15,7 +16,7 @@ public class FileChooserService {
      * @param sessionPropertyKey 前回選択したファイルの情報をセッションに保存する際のキー
      * @return 選択されたファイル
      */
-    public static File showOpenDialog(String extensions, String sessionPropertyKey) {
+    public static List<File> showOpenDialog(String extensions, String sessionPropertyKey) {
         var sessionProperties = SessionManager.getSessionManager().getProperties();
 
         FileChooser chooser = new FileChooser();
@@ -27,13 +28,13 @@ public class FileChooserService {
         if (initialDirectory != null && initialDirectory.isDirectory())
             chooser.setInitialDirectory(initialDirectory);
 
-        File file = chooser.showOpenDialog(CityGMLEditorApp.getWindow());
+        var files = chooser.showOpenMultipleDialog(CityGMLEditorApp.getWindow());
 
-        if (file != null) {
-            sessionProperties.setProperty(sessionPropertyKey, file.getParent());
+        if (files != null) {
+            sessionProperties.setProperty(sessionPropertyKey, files.get(0).getParent());
         }
 
-        return file;
+        return files;
     }
 
     private static File getFilePropertyFromSession(String sessionPropertyKey, Properties sessionProperties) {

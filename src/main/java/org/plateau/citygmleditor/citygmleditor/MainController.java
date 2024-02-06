@@ -34,8 +34,10 @@ package org.plateau.citygmleditor.citygmleditor;
 import java.io.File;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
-
+import org.plateau.citygmleditor.world.World;
 import javafx.application.Platform;
 import javafx.fxml.Initializable;
 import javafx.scene.input.Dragboard;
@@ -72,19 +74,26 @@ public class MainController implements Initializable {
             boolean success = false;
             if (db.hasFiles()) {
                 File supportedFile = null;
+                List<File> files = new ArrayList<File>();
                 fileLoop: for (File file : db.getFiles()) {
                     if (file.getName().matches(".*\\.gml")) {
                         supportedFile = file;
-                        break fileLoop;
+                        // workaround for RT-30195
+                        if (supportedFile.getAbsolutePath().indexOf('%') != -1) {
+                            supportedFile = new File(URLDecoder.decode(supportedFile.getAbsolutePath()));
+                        }
+                        files.add(supportedFile);
                     }
                 }
                 if (supportedFile != null) {
-                    // workaround for RT-30195
-                    if (supportedFile.getAbsolutePath().indexOf('%') != -1) {
-                        supportedFile = new File(URLDecoder.decode(supportedFile.getAbsolutePath()));
+                    String epsgCode = World.getActiveInstance().getEPSGCode();
+                    
+                    if (epsgCode == null || epsgCode.isEmpty()) {
+                        Platform.runLater(() -> CoordinateDialogController.createCoorinateDialog(files));
                     }
-                    droppedFile = supportedFile;
-                    Platform.runLater(() -> CoordinateDialogController.createCoorinateDialog(droppedFile));
+                    else {
+                        Platform.runLater(() -> LoadGMLDialogController.createLoadGMLDialog(files));
+                    }
                 }
                 success = true;
             }
