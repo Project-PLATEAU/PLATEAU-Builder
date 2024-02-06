@@ -39,11 +39,12 @@ public class Lbldg03BuildingError extends BuildlingError {
     }
 
     private String getOpeningStr(String opening) {
-        if (doors.isEmpty()) {
-            String windowStr = this.windows.stream().map(d -> "<bldg:Window gml:id=\"" + d + "\"").collect(Collectors.joining("\n"));
+        if (!doors.isEmpty()) {
+            String windowStr = this.doors.stream().map(d -> "<bldg:Door gml:id=\"" + d + "\"").collect(Collectors.joining("\n"));
             opening += windowStr;
-        } else {
-            String doorStr = this.windows.stream().map(d -> "<bldg:Door gml:id=\"" + d + "\"").collect(Collectors.joining("\n"));
+        }
+        if (!windows.isEmpty()) {
+            String doorStr = this.windows.stream().map(d -> "<bldg:Window gml:id=\"" + d + "\"").collect(Collectors.joining("\n"));
             opening += doorStr;
         }
         return opening;
