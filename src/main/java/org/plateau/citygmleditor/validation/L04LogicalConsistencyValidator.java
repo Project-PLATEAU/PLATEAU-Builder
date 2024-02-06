@@ -22,10 +22,12 @@ import java.util.Objects;
 public class L04LogicalConsistencyValidator implements IValidator {
     @Override
     public List<ValidationResultMessage> validate(CityModelView cityModelView) throws ParserConfigurationException, IOException, SAXException {
+        List<ValidationResultMessage> messages = new ArrayList<>();
+
         NodeList buildings = CityGmlUtil.getXmlDocumentFrom(cityModelView).getElementsByTagName(TagName.BLDG_BUILDING);
-        List<String> invalidBuildings = new ArrayList<>();
-        List<GmlElementError> elementErrors = new ArrayList<>();
+
         for (int i = 0; i < buildings.getLength(); i++) {
+            List<GmlElementError> elementErrors = new ArrayList<>();
             Node building = buildings.item(i);
             Element buildingE = (Element) building;
             String buildingID = buildingE.getAttribute(TagName.GML_ID);
@@ -42,17 +44,15 @@ public class L04LogicalConsistencyValidator implements IValidator {
                     null,
                     0
             ));
-            invalidBuildings.add(String.format("gml:id = (%s) [%s]", buildingID, invalidCodeSpaces));
-        }
 
-        List<ValidationResultMessage> messages = new ArrayList<>();
-        StringBuilder errorMessage = new StringBuilder(MessageError.ERR_L04_002_1);
-        for (String invalid : invalidBuildings) {
-            errorMessage.append(MessageFormat.format(MessageError.ERR_L04_002_2, invalid));
-        }
+            StringBuilder errorMessage = new StringBuilder(MessageError.ERR_L04_002_1);
+            for (String invalid : invalidCodeSpaces) {
+                errorMessage.append(MessageFormat.format(MessageError.ERR_L04_002_2, invalid));
+            }
 
-        if (!errorMessage.toString().equals(MessageError.ERR_L04_002_1)) {
-            messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage.toString(), elementErrors));
+            if (!errorMessage.toString().equals(MessageError.ERR_L04_002_1)) {
+                messages.add(new ValidationResultMessage(ValidationResultMessageType.Error, errorMessage.toString(), elementErrors));
+            }
         }
 
         return messages;
