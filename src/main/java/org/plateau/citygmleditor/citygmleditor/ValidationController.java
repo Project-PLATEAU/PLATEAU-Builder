@@ -2,6 +2,7 @@ package org.plateau.citygmleditor.citygmleditor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Objects;
 import java.util.logging.Logger;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -113,6 +114,7 @@ public class ValidationController implements Initializable {
             for (var validator : validators) {
               LOGGER.info("------ Start validate: " + validator.getClass().getSimpleName());
               validationResultMessages.addAll(validator.validate(cityModelView));
+              LOGGER.info("------ Finished validate: " + validator.getClass().getSimpleName());
             }
 
             return null;
@@ -288,7 +290,7 @@ public class ValidationController implements Initializable {
                 }
 
                 polygonViews
-                    .stream().filter(p -> elementError.getPolygonId().equals(p.getGMLID()))
+                    .stream().filter(p -> Objects.equals(elementError.getPolygonId(), p.getGMLID()))
                     .forEach(polygon -> {
                     var copiedPolygon = (Polygon) polygon.getOriginal().copy(new DeepCopyBuilder());
                     var mesh = geometryFactory.createTriangleMesh(List.of(geometryFactory.createPolygon(copiedPolygon)));
