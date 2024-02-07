@@ -1,6 +1,5 @@
 package org.plateau.citygmleditor.converters;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -13,9 +12,6 @@ import java.util.UUID;
 
 import javax.vecmath.Point2f;
 
-import org.citygml4j.builder.jaxb.CityGMLBuilder;
-import org.citygml4j.builder.jaxb.CityGMLBuilderException;
-import org.citygml4j.builder.jaxb.CityGMLBuilderFactory;
 import org.citygml4j.model.citygml.appearance.Appearance;
 import org.citygml4j.model.citygml.appearance.AppearanceMember;
 import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
@@ -31,7 +27,6 @@ import org.citygml4j.model.citygml.building.OuterCeilingSurface;
 import org.citygml4j.model.citygml.building.RoofSurface;
 import org.citygml4j.model.citygml.building.WallSurface;
 import org.citygml4j.model.citygml.core.CityModel;
-import org.citygml4j.model.gml.feature.AbstractFeature;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurfaceProperty;
 import org.citygml4j.model.gml.geometry.complexes.CompositeSurface;
@@ -46,11 +41,6 @@ import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.citygml4j.model.gml.geometry.primitives.Solid;
 import org.citygml4j.model.gml.geometry.primitives.SolidProperty;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
-import org.citygml4j.model.module.citygml.CityGMLVersion;
-import org.citygml4j.model.module.citygml.CoreModule;
-import org.citygml4j.xml.io.CityGMLOutputFactory;
-import org.citygml4j.xml.io.writer.CityGMLWriteException;
-import org.citygml4j.xml.io.writer.CityModelWriter;
 import org.locationtech.jts.algorithm.Orientation;
 import org.plateau.citygmleditor.citymodel.AppearanceView;
 import org.plateau.citygmleditor.citymodel.BuildingView;
@@ -415,7 +405,7 @@ public abstract class AbstractLodConverter {
                 }
             }
         }
-        //System.out.println(String.format("minDistance:%f", minDistance));
+
         return nearPolygon;
     }
 
@@ -510,8 +500,6 @@ public abstract class AbstractLodConverter {
         _compositeSurface.addSurfaceMember(new SurfaceProperty(polygon));
     }
 
-    //private static boolean isDebug = false;
-
     private void applyLOD2Surface(Polygon polygon, TriangleModel groundTriangle, ParameterizedTexture texture, org.locationtech.jts.geom.Polygon jtsPolygon) {
         // lod2Solid
         // 保持しておいたTriangleModelを取得する
@@ -527,10 +515,6 @@ public abstract class AbstractLodConverter {
             return;
         }
 
-        // if (jtsPolygon.getExteriorRing().getCoordinates().length == 12 && jtsPolygon.getNumInteriorRing() == 1) {
-        //     isDebug = true;
-        // }
-
         TexCoordList texCoordList = new TexCoordList();
         var textureCoordinates = createTextureCoordinates(polygon.getExterior().getRing(), texture, jtsPolygon.getExteriorRing(), userDataList);
         if (textureCoordinates != null) {
@@ -542,7 +526,6 @@ public abstract class AbstractLodConverter {
                 texCoordList.addTextureCoordinates(interiorTextureCoordinates);
             }
         }
-        //isDebug = false;
 
         TextureAssociation textureAssociation = new TextureAssociation(texCoordList);
         textureAssociation.setUri(String.format("#%s", polygon.getId()));
@@ -550,12 +533,6 @@ public abstract class AbstractLodConverter {
     }
 
     private TextureCoordinates createTextureCoordinates(AbstractRing linearRing, ParameterizedTexture texture, org.locationtech.jts.geom.LinearRing jtsLinearRing, List<TriangleModel> userDataList) {
-        // if (isDebug) {
-        //     System.out.println("linearRing");
-        //     for (var coordinate : jtsLinearRing.getCoordinates()) {
-        //         System.out.println(String.format("%f,%f,%f", coordinate.x, coordinate.y, coordinate.z));
-        //     }
-        // }
         List<Double> textureCoordinatesList = new ArrayList<Double>();
         for (var coordinate : jtsLinearRing.getCoordinates()) {
             var found = false;
@@ -596,13 +573,6 @@ public abstract class AbstractLodConverter {
                 System.out.println(String.format("minDistance:%f", minDistance));
             }
         }
-
-        // if (isDebug) {
-        //     System.out.println("textureCoordinatesList");
-        //     for (var i = 0; i < textureCoordinatesList.size(); i += 2) {
-        //         System.out.println(String.format("%f,%f", textureCoordinatesList.get(i), textureCoordinatesList.get(i + 1)));
-        //     }
-        // }
 
         // 全ての座標が (0, 1) の場合はテクスチャがないため、TextureAssociationを追加しない
         var any = false;
@@ -757,19 +727,6 @@ public abstract class AbstractLodConverter {
         }
 
         return new CityObjectMemberFactory(_cityModelView).createBuilding(building);
-    }
-
-    private void dump(AbstractFeature feature, String name) throws CityGMLBuilderException, CityGMLWriteException {
-        CityGMLBuilder builder = CityGMLBuilderFactory.defaults().build();
-        CityGMLOutputFactory out = builder.createCityGMLOutputFactory();
-        CityModelWriter writer = out.createCityModelWriter(new File(String.format("E:\\Temp\\export\\gml\\udx\\bldg\\%s.gml", name)));
-		writer.setPrefixes(CityGMLVersion.v2_0_0);
-		writer.setDefaultNamespace(CoreModule.v2_0_0);
-		writer.setSchemaLocations(CityGMLVersion.v2_0_0);
-		writer.setIndentString("  ");
-		writer.writeStartDocument();
-        writer.writeFeatureMember(feature);
-		writer.close();
     }
 
     abstract protected void initialize(String fileUrl) throws Exception;
