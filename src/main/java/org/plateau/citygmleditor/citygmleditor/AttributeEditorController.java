@@ -11,6 +11,7 @@ import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import org.citygml4j.model.citygml.ade.generic.ADEGenericElement;
 import org.plateau.citygmleditor.citymodel.UroAttributeInfo;
+import org.plateau.citygmleditor.citymodel.CodeSpaceAttributeInfo;
 import org.plateau.citygmleditor.citymodel.AttributeItem;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.validation.AttributeValidator;
@@ -63,6 +64,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import java.io.IOException;
+import javafx.scene.control.Tooltip;
+import org.plateau.citygmleditor.citymodel.CodeSpaceValue;
 
 public class AttributeEditorController implements Initializable {
     public TreeTableView<AttributeItem> attributeTreeTable;
@@ -143,6 +146,29 @@ public class AttributeEditorController implements Initializable {
                             setStyle("");
                         }
                     }
+
+                    if (item != null) {
+                        // ツールチップ用のテキストを構築
+                        StringBuilder tooltipText = new StringBuilder();
+                        if (item.uomProperty().getValue() != null
+                                && !item.uomProperty().getValue().isEmpty()) {
+                            tooltipText.append("UOM: ").append(item.uomProperty().getValue());
+                        }
+                        if (item.codeSpaceProperty().getValue() != null
+                                && !item.codeSpaceProperty().getValue().isEmpty()) {
+                            tooltipText.append("codeSpace: ").append(item.codeSpaceProperty().getValue());
+                        }
+                        // ツールチップを設定
+                        if (tooltipText.length() > 0) {
+                            Tooltip tooltip = new Tooltip(tooltipText.toString());
+                            setTooltip(tooltip);
+                        } else {
+                            setTooltip(null);
+                        }
+                    } else {
+                        setTooltip(null);
+                    }
+
                 }
             };
             // 空白部分をクリックした際にアイテムの選択状態をクリアにする処理
@@ -177,11 +203,11 @@ public class AttributeEditorController implements Initializable {
                 selectedBuilding = feature.getGMLObject();
                 featureID.setText("地物ID：" + selectedBuilding.getId());
                 featureType.setText("地物型：建築物（Buildings）");
-                var root = new TreeItem<>(new AttributeItem("", ""));
+                var root = new TreeItem<>(new AttributeItem("", "", "", ""));
                 {
                     var attribute = new AttributeItem(
                             "measuredHeight",
-                            Double.toString(selectedBuilding.getMeasuredHeight().getValue()));
+                            Double.toString(selectedBuilding.getMeasuredHeight().getValue()), "", "");
                     attribute.valueProperty().addListener((observable, oldValue, newValue) -> {
                         selectedBuilding.getMeasuredHeight().setValue(Double.parseDouble(newValue));
                     });
@@ -200,10 +226,10 @@ public class AttributeEditorController implements Initializable {
         keyColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("key"));
         valueColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
 
-        valueColumn.setCellFactory(
-                TextFieldTreeTableCell.forTreeTableColumn());
+        valueColumn.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
 
         valueColumn.setOnEditCommit(event -> {
+
             TreeItem<AttributeItem> editedItem = event.getRowValue();
             AttributeItem attributeItem = editedItem.getValue();
             AttributeItem parentAttributeItem = editedItem.getParent().getValue();
@@ -246,7 +272,8 @@ public class AttributeEditorController implements Initializable {
         var firstChild = node.getFirstChild();
         String nodeTagName = ((Element) node).getTagName().toLowerCase();
         String parentNodeTagName = "";
-
+        String uom = ((Element) node).getAttribute("uom");
+        String codeSpace = ((Element) node).getAttribute("codeSpace");
         if (parentNode != null)
             parentNodeTagName = ((Element) parentNode).getTagName().toLowerCase();
 
@@ -254,7 +281,13 @@ public class AttributeEditorController implements Initializable {
             if (parentNode != null && nodeTagName.equals(parentNodeTagName))
                 return;
             // 子の内容を属性値として登録して再帰処理を終了
-            var attribute = new AttributeItem(node.getNodeName(), firstChild.getNodeValue());
+            AttributeItem attribute;
+            if (uom == "") {
+                attribute = new AttributeItem(node.getNodeName(), firstChild.getNodeValue(), uom, codeSpace);
+            } else {
+                attribute = new AttributeItem(node.getNodeName() + "  uom(" + uom + ")", firstChild.getNodeValue(), uom,
+                        codeSpace);
+            }
             attribute.valueProperty().addListener((observable, oldValue, newValue) -> {
                 firstChild.setNodeValue(newValue);
             });
@@ -264,7 +297,7 @@ public class AttributeEditorController implements Initializable {
         }
 
         var item = new TreeItem<>(
-                new AttributeItem(node.getNodeName(), "", false));
+                new AttributeItem(node.getNodeName(), "", uom, codeSpace, false));
         item.setExpanded(true);
 
         // XMLの子要素を再帰的に追加
@@ -497,7 +530,7 @@ public class AttributeEditorController implements Initializable {
                     newElement.setTextContent("NULL");
 
                     if (type.matches("gml:CodeType")) {
-                        inputCodeSpace(newElement);
+                        inputCodeSpace(doc, newElement);
                     } else if (type.matches("gml:MeasureType") | type.matches("gml:LengthType")
                             | type.matches("gml::MeasureOrNullListType")) {
                         inputUom(newElement);
@@ -576,7 +609,6 @@ public class AttributeEditorController implements Initializable {
         addingAttributeController.setList(attributeLists);
         // // メニュー内の要素をダブルクリックで要素を追加
         addingAttributeController.setItemSelectedCallback(selectedItem -> {
-
             String selectedItemName = selectedItem.getSelectedItem();
             int selectedItemndex = selectedItem.getSelectedIndex();
             addAttribute(childList, selectedAttributeKeyName, "uro:" + selectedItemName,
@@ -702,29 +734,60 @@ public class AttributeEditorController implements Initializable {
     }
 
     /**
-     * CodeSpace
+     * inputCodeSpace
      * CodeSpace属性を入力させ、属性として格納する
+     *
+     * @param doc     現在選択している地物のDocument
+     * @param element 追加予定のElement
      */
-    private void inputCodeSpace(Element element) {
+    private void inputCodeSpace(org.w3c.dom.Document doc, Element element) {
         String datasetPath = CityGMLEditorApp.getDatasetPath();
-        String codeListPath = datasetPath + "\\codelists";
-        Stage pStage = new Stage();
+        String codeListDirPath = datasetPath + "\\codelists";
+        Stage codeTypeStage = new Stage();
+        final Stage valueStage = new Stage();
         ListView<String> listView = new ListView<>();
-        File folder = new File(codeListPath);
+        File folder = new File(codeListDirPath);
+        // final CodeSpaceValueMenuController codeSpaceValueMenuController = null;
+        Parent root = null;
+        FXMLLoader loader = null;
 
         // フォルダ内のファイル名をリストビューに追加
         for (File file : Objects.requireNonNull(folder.listFiles())) {
             listView.getItems().add(file.getName());
         }
+        try {
+            loader = new FXMLLoader(getClass().getResource("fxml/codeSpace-Menu.fxml"));
+            root = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        final CodeSpaceValueMenuController codeSpaceValueMenuController = loader.getController();
+        final Parent finalRoot = root; // root を final にする
+        CodeSpaceAttributeInfo codeSpaceAttributeInfo = new CodeSpaceAttributeInfo();
 
         // リストビューのアイテムがダブルクリックされた場合の処理
         listView.setOnMouseClicked((MouseEvent event) -> {
             if (event.getClickCount() == 2) {
                 String selectedFile = listView.getSelectionModel().getSelectedItem();
+                String codeListPath = codeListDirPath + "\\" + selectedFile;
                 element.setAttribute("codeSpace", "../../codelists/" + selectedFile);
+                codeSpaceAttributeInfo.readCodeType(codeListPath);
+                codeSpaceValueMenuController.setCodeType(codeSpaceAttributeInfo.getCodeTypeDocument());
+                valueStage.setScene(new Scene(finalRoot));
+                valueStage.show();
+
                 // リストビューを閉じる
-                pStage.close();
+                codeTypeStage.close();
             }
+        });
+
+        // codeSpaceValueMenuControllerで表示されるメニューにおいて、選択行為がされたら呼び出される
+        codeSpaceValueMenuController.setItemSelectedCallback(selectedItem -> {
+            String name = selectedItem.nameProperty().getValue();
+            element.setTextContent(name);
+            // リストビューを閉じる
+            valueStage.close();
+            refreshListView();
         });
 
         // 配置
@@ -733,11 +796,11 @@ public class AttributeEditorController implements Initializable {
         vbRoot.setSpacing(20);
         vbRoot.getChildren().addAll(listView);
 
-        pStage.setTitle("codeSpaceの選択");
-        pStage.setWidth(500);
-        pStage.setHeight(300);
-        pStage.setScene(new Scene(vbRoot));
-        pStage.show();
+        codeTypeStage.setTitle("codeSpaceの選択");
+        codeTypeStage.setWidth(500);
+        codeTypeStage.setHeight(300);
+        codeTypeStage.setScene(new Scene(vbRoot));
+        codeTypeStage.show();
     }
 
     /**

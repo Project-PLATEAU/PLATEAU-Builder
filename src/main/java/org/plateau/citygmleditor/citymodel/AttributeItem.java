@@ -6,6 +6,8 @@ import javafx.beans.property.StringProperty;
 public class AttributeItem {
     private StringProperty key;
     private StringProperty value;
+    private StringProperty uom;
+    private StringProperty codeSpace;
     private boolean isEditable;
 
     public StringProperty keyProperty() {
@@ -16,6 +18,14 @@ public class AttributeItem {
         return value;
     }
 
+    public StringProperty uomProperty() {
+        return uom;
+    }
+
+    public StringProperty codeSpaceProperty() {
+        return codeSpace;
+    }
+
     public boolean isEditable() {
         return isEditable;
     }
@@ -24,15 +34,19 @@ public class AttributeItem {
         isEditable = editable;
     }
 
-    public AttributeItem(String key, String value) {
+    public AttributeItem(String key, String value, String uom, String codeSpace) {
         this.key = new SimpleStringProperty(key);
         this.value = new SimpleStringProperty(value);
+        this.uom = new SimpleStringProperty(uom);
+        this.codeSpace = new SimpleStringProperty(codeSpace);
         this.isEditable = true;
     }
 
-    public AttributeItem(String key, String value, boolean isEditable) {
+    public AttributeItem(String key, String value, String uom, String codeSpace, boolean isEditable) {
         this.key = new SimpleStringProperty(key);
         this.value = new SimpleStringProperty(value);
+        this.uom = new SimpleStringProperty(uom);
+        this.codeSpace = new SimpleStringProperty(codeSpace);
         this.isEditable = isEditable;
     }
 
