@@ -9,6 +9,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -278,25 +279,27 @@ public class ValidationController implements Initializable {
             .lookupAll("#" + elementError.getBuildingId())
             .forEach(node -> {
 
-                // Highlight Lod1Solid Building
-//                ((BuildingView) node).getLOD1Solid().setMaterial(new PhongMaterial(Color.RED));
+                List<PolygonView> polygonViews = new ArrayList<>();
+                if (((BuildingView) node).getLOD1Solid() != null) {
+                    polygonViews.addAll(((BuildingView) node).getLOD1Solid().getPolygons());
+                }
+                if (((BuildingView) node).getLOD2Solid() != null) {
+                    polygonViews.addAll(((BuildingView) node).getLOD2Solid().getPolygons());
+                }
 
-                // Highlight Lod2Solid's error polygon
-                // Find error polygon by gmlId
-                // Create meshView and add to group
-                ((BuildingView) node).getLOD2Solid().getPolygons()
-                    .stream().filter(p -> p.getGMLID().equals(elementError.getPolygonId()))
-                    .forEach(polygon-> {
-                        var copiedPolygon = (Polygon) polygon.getOriginal().copy(new DeepCopyBuilder());
-                        var mesh = geometryFactory.createTriangleMesh(List.of(geometryFactory.createPolygon(copiedPolygon)));
-                        var meshView = new MeshView(mesh);
-                        meshView.setMesh(mesh);
-                        meshView.setMaterial(material);
-                        meshView.setDrawMode(DrawMode.FILL);
-                        meshView.setOpacity(0.3);
-                        meshView.setViewOrder(-2);
-                        group.getChildren().add(meshView);
-                    });
+                polygonViews
+                    .stream().filter(p -> elementError.getPolygonId().equals(p.getGMLID()))
+                    .forEach(polygon -> {
+                    var copiedPolygon = (Polygon) polygon.getOriginal().copy(new DeepCopyBuilder());
+                    var mesh = geometryFactory.createTriangleMesh(List.of(geometryFactory.createPolygon(copiedPolygon)));
+                    var meshView = new MeshView(mesh);
+                    meshView.setMesh(mesh);
+                    meshView.setMaterial(material);
+                    meshView.setDrawMode(DrawMode.FILL);
+//                    meshView.setOpacity(0.3);
+                    meshView.setViewOrder(-2);
+                    group.getChildren().add(meshView);
+                });
             });
     }
 
