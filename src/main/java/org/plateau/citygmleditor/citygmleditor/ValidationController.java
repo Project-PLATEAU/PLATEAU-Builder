@@ -8,13 +8,25 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Group;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.DrawMode;
+import javafx.scene.shape.MeshView;
+import org.citygml4j.builder.copy.DeepCopyBuilder;
+import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.citymodel.factory.CustomGeometryFactory;
+import org.plateau.citygmleditor.citymodel.factory.GeometryFactory;
+import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
+import org.plateau.citygmleditor.control.FeatureSelection;
 import org.plateau.citygmleditor.modelstandard.Standard;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
@@ -30,6 +42,7 @@ import java.util.ResourceBundle;
 
 import static org.plateau.citygmleditor.constant.StandardID.*;
 import static org.plateau.citygmleditor.validation.AppConst.VALIDATION_CONFIG_PATH_DEFAULT;
+
 
 public class ValidationController implements Initializable {
     @FXML
@@ -252,15 +265,38 @@ public class ValidationController implements Initializable {
     }
 
     private void highlightError(GmlElementError elementError) {
+        var geometryFactory = new CustomGeometryFactory( World.getActiveInstance().getCityModel());
+        var material = new PhongMaterial();
+        WritableImage image = new WritableImage(1, 1);
+        PixelWriter writer = image.getPixelWriter();
+        writer.setColor(0, 0, Color.RED);
+        material.setSelfIlluminationMap(image);
+
+        Group group = (Group) World.getRoot3D();
+
         World.getActiveInstance().getCityModel()
             .lookupAll("#" + elementError.getBuildingId())
             .forEach(node -> {
-                ((BuildingView) node).getLOD1Solid().setMaterial(new PhongMaterial(Color.RED));
-                ((BuildingView) node).getLOD2Solid().getSurfaceTypeView().setMaterial(new PhongMaterial(Color.RED));
-                ((BuildingView) node).getLOD2Solid().getMeshView().setMaterial(new PhongMaterial(Color.RED));
 
-                // TODO check LOD2SolidView highlight, now only highlight bottom surface
-                // TODO highlight solid and polygon
+                // Highlight Lod1Solid Building
+//                ((BuildingView) node).getLOD1Solid().setMaterial(new PhongMaterial(Color.RED));
+
+                // Highlight Lod2Solid's error polygon
+                // Find error polygon by gmlId
+                // Create meshView and add to group
+                ((BuildingView) node).getLOD2Solid().getPolygons()
+                    .stream().filter(p -> p.getGMLID().equals(elementError.getPolygonId()))
+                    .forEach(polygon-> {
+                        var copiedPolygon = (Polygon) polygon.getOriginal().copy(new DeepCopyBuilder());
+                        var mesh = geometryFactory.createTriangleMesh(List.of(geometryFactory.createPolygon(copiedPolygon)));
+                        var meshView = new MeshView(mesh);
+                        meshView.setMesh(mesh);
+                        meshView.setMaterial(material);
+                        meshView.setDrawMode(DrawMode.FILL);
+                        meshView.setOpacity(0.3);
+                        meshView.setViewOrder(-2);
+                        group.getChildren().add(meshView);
+                    });
             });
     }
 
