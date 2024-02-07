@@ -47,8 +47,8 @@ public class L12LogicalConsistencyValidator implements IValidator {
             elementErrors.add(new GmlElementError(buildingID, null, null, tagLOD23s.toString(), "LOD23", 0));
 
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
-                            MessageFormat.format(MessageError.ERR_L12_001,
-                            buildingInvalid.toString(MessageError.ERR_L12_002_1, MessageError.ERR_L12_002_2)), elementErrors));
+                            buildingInvalid.toString(MessageError.ERR_L12_002_1, MessageError.ERR_L12_002_2),
+                    elementErrors));
         }
 
         return messages;
