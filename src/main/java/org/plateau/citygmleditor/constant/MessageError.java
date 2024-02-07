@@ -37,7 +37,6 @@ public interface MessageError {
     String ERR_L11_002 = "L11: 地物\"{0}\":";
     String ERR_L11_002_1 = "\n<gml:Polygon gml:id=\"{0}\">に同一平面上にない座標値が存在します。";
     String ERR_L11_003 = "L11: Building have (bldg:Building gml:id={0} LinearRing = {1}) is valid";
-    String ERR_L12_001 = "L12: Building have {0} is invalid";
     String ERR_L12_002_1 = "L12: 地物\"{0}\":\n" +
             "次の座標値が許容誤差0.03m以外の同一平面インスタンスが存在します";
     String ERR_L12_002_2 = "\n<gml:Polygon gml:id=\"{0}\">";
