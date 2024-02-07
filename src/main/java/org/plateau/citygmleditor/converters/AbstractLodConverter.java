@@ -561,7 +561,7 @@ public abstract class AbstractLodConverter {
             var found = false;
             for (var triangleModel : userDataList) {
                 if (found) break;
-                for (var i = 0; i < 3. ; i++) {
+                for (var i = 0; i < 3; i++) {
                     if (found) break;
                     var vertex = triangleModel.getVertex(i);
                     if (coordinate.x == vertex.x && coordinate.y == vertex.y && coordinate.z == vertex.z) {
@@ -579,7 +579,7 @@ public abstract class AbstractLodConverter {
                 var minDistance = Double.MAX_VALUE;
                 Point2f minDistanceUv = null;
                 for (var triangleModel : userDataList) {
-                    for (var i = 0; i < 3. ; i++) {
+                    for (var i = 0; i < 3; i++) {
                         var vertex = triangleModel.getVertex(i);
                         var vertexCoord = new org.locationtech.jts.geom.Coordinate(vertex.x, vertex.y, vertex.z);
                         var distance = vertexCoord.distance(coordinate);
