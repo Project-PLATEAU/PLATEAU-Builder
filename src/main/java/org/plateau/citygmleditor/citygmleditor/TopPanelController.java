@@ -13,7 +13,7 @@ import java.nio.file.Path;
 
 public class TopPanelController {
     public void importGml(ActionEvent actionEvent) {
-        var files = FileChooserService.showOpenDialog("*.gml", SessionManager.GML_FILE_PATH_PROPERTY);
+        var files = FileChooserService.showMultipleOpenDialog("*.gml", SessionManager.GML_FILE_PATH_PROPERTY);
 
         if (files == null)
             return;

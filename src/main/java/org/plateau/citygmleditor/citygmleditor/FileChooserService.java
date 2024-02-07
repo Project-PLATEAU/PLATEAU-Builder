@@ -16,17 +16,30 @@ public class FileChooserService {
      * @param sessionPropertyKey 前回選択したファイルの情報をセッションに保存する際のキー
      * @return 選択されたファイル
      */
-    public static List<File> showOpenDialog(String extensions, String sessionPropertyKey) {
+    public static File showOpenDialog(String extensions, String sessionPropertyKey) {
         var sessionProperties = SessionManager.getSessionManager().getProperties();
-
-        FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", extensions));
-        chooser.setTitle("ファイルを選択してください");
-
         File initialDirectory = getFilePropertyFromSession(sessionPropertyKey, sessionProperties);
+        var chooser = createChooser(extensions, initialDirectory);
 
-        if (initialDirectory != null && initialDirectory.isDirectory())
-            chooser.setInitialDirectory(initialDirectory);
+        var file = chooser.showOpenDialog(CityGMLEditorApp.getWindow());
+
+        if (file != null) {
+            sessionProperties.setProperty(sessionPropertyKey, file.getParent());
+        }
+
+        return file;
+    }
+
+    /**
+     * 複数入力ファイルをエクスプローラから指定します。
+     * @param extensions 拡張子
+     * @param sessionPropertyKey 前回選択したファイルの情報をセッションに保存する際のキー
+     * @return 選択されたファイル
+     */
+    public static List<File> showMultipleOpenDialog(String extensions, String sessionPropertyKey) {
+        var sessionProperties = SessionManager.getSessionManager().getProperties();
+        File initialDirectory = getFilePropertyFromSession(sessionPropertyKey, sessionProperties);
+        var chooser = createChooser(extensions, initialDirectory);
 
         var files = chooser.showOpenMultipleDialog(CityGMLEditorApp.getWindow());
 
@@ -43,5 +56,16 @@ public class FileChooserService {
             return null;
         }
         return new File(initialDirectoryPath);
+    }
+
+    private static FileChooser createChooser(String extensions, File initialDirectory) {
+        FileChooser chooser = new FileChooser();
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", extensions));
+        chooser.setTitle("ファイルを選択してください");
+
+        if (initialDirectory != null && initialDirectory.isDirectory())
+            chooser.setInitialDirectory(initialDirectory);
+
+        return chooser;
     }
 }
