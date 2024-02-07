@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Group;
 import javax.swing.plaf.synth.Region;
 import javafx.scene.SubScene;
@@ -21,7 +23,8 @@ public class World {
     private GeoReference geoReference;
     private List<CityModelView> cityModel;
     private Material defaultMaterial;
-    private String epsgCode;
+    private StringProperty epsgCode = new SimpleStringProperty();
+    private StringProperty originProperty = new SimpleStringProperty();
 
     public World() {
         defaultMaterial = new PhongMaterial(Color.WHITE);
@@ -50,6 +53,7 @@ public class World {
 
     public void setGeoReference(GeoReference geoReference) {
         this.geoReference = geoReference;
+        originProperty.set(String.format("(%f, %f, %f)", geoReference.getOrigin().x, geoReference.getOrigin().y, geoReference.getOrigin().z));
     }
 
     public List<CityModelView> getCityModels() {
@@ -65,11 +69,19 @@ public class World {
         this.cityModel.add(cityModel);
     }
 
-    public String getEPSGCode() {
+    public StringProperty getEPSGCodeProperty() {
         return epsgCode;
     }
 
+    public String getEPSGCode() {
+        return epsgCode.get();
+    }
+
     public void setEPSGCode(String epsgCode) {
-        this.epsgCode = epsgCode;
+        this.epsgCode.set(epsgCode);
+    }
+
+    public StringProperty getOriginProperty() {
+        return originProperty;
     }
 }
