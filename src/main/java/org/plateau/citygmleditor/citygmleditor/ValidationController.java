@@ -2,12 +2,12 @@ package org.plateau.citygmleditor.citygmleditor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.logging.Logger;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -15,7 +15,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
-import org.plateau.citygmleditor.control.FeatureSelection;
 import org.plateau.citygmleditor.modelstandard.Standard;
 import org.plateau.citygmleditor.utils.CollectionUtil;
 import org.plateau.citygmleditor.utils.XmlUtil;
@@ -43,6 +42,7 @@ public class ValidationController implements Initializable {
     TextField pathJsonFile;
 
     private static String JSON_PATH_CONFIG = VALIDATION_CONFIG_PATH_DEFAULT;
+    private static Logger LOGGER = Logger.getLogger(ValidationController.class.getName());
 
     private List<ValidationResultMessage> validationResultMessages;
 
@@ -97,6 +97,7 @@ public class ValidationController implements Initializable {
 
             List<IValidator> validators = loadValidators(JSON_PATH_CONFIG);
             for (var validator : validators) {
+              LOGGER.info("------ Start validate: " + validator.getClass().getSimpleName());
               validationResultMessages.addAll(validator.validate(cityModelView));
             }
 
