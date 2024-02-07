@@ -10,17 +10,18 @@ import org.citygml4j.xml.io.writer.CityGMLWriteException;
 import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.utils.FileUtils;
-
+import org.plateau.citygmleditor.world.World;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.List;
 
 public class CityGmlDatasetExporter {
-    public void export(CityModelView cityModelView) {
-        if (cityModelView == null || cityModelView.getGmlObject() == null)
+    public void export(List<CityModelView> cityModelViews) {
+        if (cityModelViews == null || cityModelViews.isEmpty() || cityModelViews.get(0).getGmlObject() == null)
             return;
 
         String rootDirName;// エクスポート先のルートフォルダの名前
@@ -31,7 +32,7 @@ public class CityGmlDatasetExporter {
         TextInputDialog textDialog;
         String headerText = "■フォルダ名は以下形式で設定してください。 (3D 都市モデル標準製品仕様書 第 3.0 版に基づく)\n[都市コード]_[都市名英名]_[提供者区分]_[整備年度]_citygml_[更新回数]_[オプション]_[op(オープンデータ)]";
 
-        var gmlPath = cityModelView.getGmlPath();
+        var gmlPath = cityModelViews.get(0).getGmlPath();
         var importGmlPathComponents = gmlPath.split("\\\\");
         var sourceRootDirPath = Paths.get(gmlPath).getParent().getParent().getParent();
 
@@ -67,24 +68,26 @@ public class CityGmlDatasetExporter {
                 } catch (IOException e) {
                     System.out.println(e);
                 }
-
-                try {
-                    // CityGMLのエクスポート
-                    GmlExporter.export(
-                            Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" +
-                                            udxDirName + "/"
-                                            + bldgDirName
-                                            + "/" + importGmlPathComponents[importGmlPathComponents.length - 1])
-                                    .toString(),
-                            cityModelView.getGmlObject(),
-                            cityModelView.getSchemaHandler());
-                    // Appearanceのエクスポート
-                    TextureExporter.export(
-                            selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" + udxDirName + "/"
-                                    + bldgDirName,
-                            cityModelView);
-                } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
-                    throw new RuntimeException(e);
+                for (var cityModelView : cityModelViews) {
+                    var path = cityModelView.getGmlPath().split("\\\\");
+                    try {
+                        // CityGMLのエクスポート
+                        GmlExporter.export(
+                                Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" +
+                                                udxDirName + "/"
+                                                + bldgDirName
+                                                + "/" + path[path.length - 1])
+                                        .toString(),
+                                cityModelView.getGmlObject(),
+                                cityModelView.getSchemaHandler());
+                        // Appearanceのエクスポート
+                        TextureExporter.export(
+                                selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" + udxDirName + "/"
+                                        + bldgDirName,
+                                cityModelView);
+                    } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 // エクスポート後にフォルダを開く
                 try {

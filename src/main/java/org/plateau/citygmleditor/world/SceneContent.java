@@ -81,5 +81,19 @@ public class SceneContent {
         this.autoScalingGroup = CityGMLEditorApp.getAutoScalingGroup();
         this.camera = CityGMLEditorApp.getCamera();
         this.root3D = World.getRoot3D();
+        createDebugGrid();
+    }
+    
+    public void createDebugGrid(){
+        Group root = new Group();
+        int gridSize = 100;
+        double gridSpacing = 50.0;
+        for (int i = -gridSize / 2; i <= gridSize / 2; i++) {
+            double position = i * gridSpacing;
+            javafx.scene.shape.Line lineX = new javafx.scene.shape.Line(position, -gridSize * gridSpacing / 2, position, gridSize * gridSpacing / 2);
+            javafx.scene.shape.Line lineY = new javafx.scene.shape.Line(-gridSize * gridSpacing / 2, position, gridSize * gridSpacing / 2, position);
+            root.getChildren().addAll(lineX, lineY);
+        }
+        World.getRoot3D().getChildren().add(root);
     }
 }

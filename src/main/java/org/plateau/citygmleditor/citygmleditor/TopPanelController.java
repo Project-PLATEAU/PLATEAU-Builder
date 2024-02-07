@@ -13,18 +13,25 @@ import java.nio.file.Path;
 
 public class TopPanelController {
     public void importGml(ActionEvent actionEvent) {
-        var file = FileChooserService.showOpenDialog("*.gml", SessionManager.GML_FILE_PATH_PROPERTY);
+        var files = FileChooserService.showOpenDialog("*.gml", SessionManager.GML_FILE_PATH_PROPERTY);
 
-        if (file == null)
+        if (files == null)
             return;
 
-        CoordinateDialogController.createCoorinateDialog(file);
+        String epsgCode = World.getActiveInstance().getEPSGCode();
+        
+        if (epsgCode == null || epsgCode.isEmpty()) {
+            CoordinateDialogController.createCoorinateDialog(files);
+        }
+        else {
+            LoadGMLDialogController.createLoadGMLDialog(files);
+        }
     }
 
     public void exportDataset(ActionEvent event) {
-        var cityModel = World.getActiveInstance().getCityModel();
+        var cityModels = World.getActiveInstance().getCityModels();
         var datasetExporter = new CityGmlDatasetExporter();
-        datasetExporter.export(cityModel);
+        datasetExporter.export(cityModels);
     }
 
     public void openValidationWindow(ActionEvent event) throws IOException {

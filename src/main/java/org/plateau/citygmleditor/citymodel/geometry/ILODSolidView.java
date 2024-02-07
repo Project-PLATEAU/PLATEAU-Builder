@@ -9,9 +9,10 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
-
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import org.plateau.citygmleditor.world.World;
@@ -93,7 +94,13 @@ public interface ILODSolidView {
      * @return
      */
     default public List<String> getTexturePaths() {
-        var cityModelView = World.getActiveInstance().getCityModel();
+        var parentNode = this.getParent();
+        while (parentNode != null) {
+            if (parentNode instanceof CityModelView)
+                break;
+            parentNode = parentNode.getParent();
+        }
+        var cityModelView = (CityModelView)parentNode;
         var ret = new ArrayList<String>();
         for (var polygon : getPolygons()) {
             if (polygon.getSurfaceData() == null)
@@ -106,5 +113,4 @@ public interface ILODSolidView {
         }
         return ret;
     }
-
 }

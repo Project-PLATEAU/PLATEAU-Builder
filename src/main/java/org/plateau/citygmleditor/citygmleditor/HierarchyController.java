@@ -219,6 +219,11 @@ public class HierarchyController implements Initializable {
             node.getChildren().add(convertedCityModel);
 
             CityGMLEditorApp.getSceneContent().setContent(node);
+
+            // 位置合わせ
+            var id = lodSolidView.getParent().getId();
+            AutoGeometryAligner.GeometryAlign(convertedCityModel, id);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -3,15 +3,18 @@ package org.plateau.citygmleditor.citygmleditor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import org.plateau.citygmleditor.importers.gml.GmlImporter;
+import org.plateau.citygmleditor.world.World;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
@@ -25,7 +28,7 @@ import org.plateau.citygmleditor.world.World;
 public class CoordinateDialogController implements Initializable {
     private Stage root;
 
-    private File droppedFile;
+    private List<File> gmlFiles;
 
     @FXML
     private ComboBox<CoordinateCodesEnum> comboboxCoordinateCodes;
@@ -74,8 +77,8 @@ public class CoordinateDialogController implements Initializable {
      * 読み込むGMLファイルを設定
      * @param file
      */
-    public void setFile(File file) {
-        droppedFile = file;
+    public void setFiles(List<File> files) {
+        gmlFiles = files;
     }
 
     /**
@@ -91,10 +94,19 @@ public class CoordinateDialogController implements Initializable {
         String code = buffer.toString();
 
         try {
-            Node root = GmlImporter.loadGml(droppedFile.toString(), code);
+            Node root = null;
+            for (var gmlFile : gmlFiles) {
+                if (root == null) {
+                    root = GmlImporter.loadGml(gmlFile.toString(), code, true);
+                }
+                else {
+                    var newroot = GmlImporter.loadGml(gmlFile.toString(), code, false);
+                    ((Group)root).getChildren().add(((Group) newroot).getChildren().get(0));
+                }
+            }
             CityGMLEditorApp.getSceneContent().setContent(root);
 
-            var datasetPath = Paths.get(World.getActiveInstance().getCityModel().getGmlPath()).getParent().getParent()
+            var datasetPath = Paths.get(World.getActiveInstance().getCityModels().get(0).getGmlPath()).getParent().getParent()
                     .getParent();
             // TODO: gmlから参照されるschemaで設定
             String uroSchemasPath = datasetPath + "\\schemas\\iur\\uro\\2.0\\urbanObject.xsd";
@@ -128,16 +140,16 @@ public class CoordinateDialogController implements Initializable {
     /**
      * 座標系選択ダイアログ表示
      * 
-     * @param file
+     * @param files
      */
-    public static void createCoorinateDialog(File file) {
+    public static void createCoorinateDialog(List<File> files) {
         try {
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             FXMLLoader loader = new FXMLLoader(CoordinateDialogController.class.getResource("fxml/coordinate-dialog.fxml"));
             stage.setScene(new Scene(loader.load()));
             var controller = (CoordinateDialogController) loader.getController();
-            controller.setFile(file);
+            controller.setFiles(files);
             controller.setRoot(stage);
             stage.showAndWait();
         } catch (IOException e) {
