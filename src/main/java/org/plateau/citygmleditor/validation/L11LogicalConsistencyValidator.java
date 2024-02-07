@@ -93,7 +93,7 @@ public class L11LogicalConsistencyValidator implements IValidator {
             buildingInvalid.setBuildingID(buildingID);
             buildingInvalid.setLodInvalids(lodInvalids);
 
-            GmlElementError gmlElementError = new GmlElementError(buildingID, null, null, lodInvalids.toString(), "LOD1", 0);
+            GmlElementError gmlElementError = new GmlElementError(buildingID, null, "", lodInvalids.toString(), "LOD1", 0);
 
             messages.add(new ValidationResultMessage(ValidationResultMessageType.Error,
                     buildingInvalid.toString(MessageError.ERR_L11_002, MessageError.ERR_L11_002_1), List.of(gmlElementError)));
