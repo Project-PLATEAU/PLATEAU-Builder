@@ -7,7 +7,7 @@ import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 
 public class CityObjectMemberFactory extends CityGMLFactory {
-    protected CityObjectMemberFactory(CityModelView target) {
+    public CityObjectMemberFactory(CityModelView target) {
         super(target);
     }
 

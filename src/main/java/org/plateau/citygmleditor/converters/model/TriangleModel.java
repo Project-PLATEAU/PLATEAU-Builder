@@ -8,8 +8,6 @@ import javafx.collections.ObservableFloatArray;
 import javafx.scene.shape.ObservableFaceArray;
 
 public class TriangleModel {
-    private int[] _vertexIndices = new int[3];
-    private int[] _uvIndices = new int[3];
     private Point3f[] _vertices = new Point3f[3];
     private Point2f[] _uvs = new Point2f[3];
     private Vector3f _normal = new Vector3f();
@@ -22,12 +20,26 @@ public class TriangleModel {
         initNormal();
     }
 
+    public TriangleModel(int[] faces, int startIndex, float[] vertices, float[] uvs) {
+        for (var i = 0; i < 3; i++) {
+            var vertexIndex = faces[startIndex + i * 2];
+            var uvIndex = faces[startIndex + i * 2 + 1];
+            _vertices[i] = new Point3f(vertices[vertexIndex * 3], vertices[vertexIndex * 3 + 1], vertices[vertexIndex * 3 + 2]);
+            if (uvs != null) {
+                _uvs[i] = new Point2f(uvs[uvIndex * 2], uvs[uvIndex * 2 + 1]);
+            } else {
+                _uvs[i] = new Point2f(0, 1);
+            }
+        }
+        initNormal();
+    }
+
     public TriangleModel(ObservableFaceArray faces, int startIndex, ObservableFloatArray vertices, ObservableFloatArray uvs) {
-        for (var i = 0  ; i < 3; i++) {
-            _vertexIndices[i] = faces.get(startIndex + i * 2);
-            _uvIndices[i] = faces.get(startIndex + i * 2 + 1);
-            _vertices[i] = new Point3f(vertices.get(_vertexIndices[i] * 3), vertices.get(_vertexIndices[i] * 3 + 1), vertices.get(_vertexIndices[i] * 3 + 2));
-            _uvs[i] = new Point2f(uvs.get(_uvIndices[i] * 2), 1 - uvs.get(_uvIndices[i] * 2 + 1));
+        for (var i = 0; i < 3; i++) {
+            var vertexIndex = faces.get(startIndex + i * 2);
+            var uvIndex = faces.get(startIndex + i * 2 + 1);
+            _vertices[i] = new Point3f(vertices.get(vertexIndex * 3), vertices.get(vertexIndex * 3 + 1), vertices.get(vertexIndex * 3 + 2));
+            _uvs[i] = new Point2f(uvs.get(uvIndex * 2), 1 - uvs.get(uvIndex * 2 + 1));
         }
 
         initNormal();
@@ -43,7 +55,8 @@ public class TriangleModel {
     }
 
     public boolean isValid() {
-        return !_vertices[0].equals(_vertices[1]) && !_vertices[1].equals(_vertices[2]) && !_vertices[2].equals(_vertices[0]);
+        return !_vertices[0].equals(_vertices[1]) && !_vertices[1].equals(_vertices[2]) && !_vertices[2].equals(_vertices[0])
+            && !Float.isNaN(_normal.x) && !Float.isNaN(_normal.y) && !Float.isNaN(_normal.z);
     }
 
     public Point3f[] getVertices() {

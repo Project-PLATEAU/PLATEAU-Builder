@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 
 public class AppearanceFactory extends CityGMLFactory {
 
-    protected AppearanceFactory(CityModelView target) {
+    public AppearanceFactory(CityModelView target) {
         super(target);
     }
 
