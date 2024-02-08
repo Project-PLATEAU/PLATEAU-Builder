@@ -36,6 +36,7 @@
                     <items>
                         <MenuItem fx:id="exportGltfMenu" mnemonicParsing="false" onAction="#exportGltf" text="Export gLTF..." />
                         <MenuItem fx:id="exportObjMenu" mnemonicParsing="false" onAction="#exportObj" text="Export OBJ..." />
+                        <MenuItem fx:id="importGltfMenu" mnemonicParsing="false" onAction="#importGltf" text="Import gLTF..." />
                         <MenuItem fx:id="importObjMenu" mnemonicParsing="false" onAction="#importObj" text="Import OBJ..." />
                     </items>
                 </ContextMenu>

@@ -22,9 +22,8 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.TriangleMesh;
 
 public class Obj2LodConverter extends AbstractLodConverter {
-    private ObjImporter _objImporter;
 
-    private String _meshKey;
+    private ObjImporter _objImporter;
 
     public Obj2LodConverter(CityModelView cityModelView, ILODSolidView lodSolidView) {
         super(cityModelView, lodSolidView);
@@ -36,51 +35,61 @@ public class Obj2LodConverter extends AbstractLodConverter {
         if (meshKeys.size() == 0) {
             throw new IllegalArgumentException("No mesh found in the file.");
         }
-        if (meshKeys.size() > 1) {
-            throw new IllegalArgumentException("Multiple meshes found in the file.");
-        }
-
-        _meshKey = meshKeys.iterator().next();
     }
 
-    @Override protected ParameterizedTexture createParameterizedTexture() throws IOException, URISyntaxException {
+    @Override protected Map<String, ParameterizedTexture> createParameterizedTextures() throws IOException, URISyntaxException {
         Map<String, ParameterizedTexture> textureMap = new HashMap<>();
-        Material material = _objImporter.getMaterial(_meshKey);
-
-        return createOrGetParameterizedTexture(_meshKey, material, textureMap);
-    }
-
-    @Override protected List<TriangleModel> createTriangleModels() {
-        TriangleMesh triangleMesh = _objImporter.getMesh(_meshKey);
-        var faces = triangleMesh.getFaces();
-        var vertices = triangleMesh.getPoints();
-        var coords = triangleMesh.getTexCoords();
-        List<TriangleModel> triangleModels = new LinkedList<>();
-        for (var i = 0; i < faces.size(); i += 6) {
-            var triangleModel = new TriangleModel(faces, i, vertices, coords);
-
-            // 不正な三角形は除外する
-            if (triangleModel.isValid()) {
-                triangleModels.add(triangleModel);
-            }
+        var meshKeys = _objImporter.getMeshes();
+        for(var meshKey : meshKeys) {
+            Material material = _objImporter.getMaterial(meshKey);
+            if (textureMap.containsKey(meshKey)) continue;
+            ParameterizedTexture parameterizedTexture = createParameterizedTexture(meshKey, material);
+            if (parameterizedTexture == null) continue;
+            textureMap.put(meshKey, parameterizedTexture);
         }
 
-        return triangleModels;
+        return textureMap;
     }
 
-    @Override protected TriangleModel getGroundTriangle(List<TriangleModel> triangleModels) {
+    @Override protected Map<String, List<TriangleModel>> createTriangleModelsMap() {
+        Map<String, List<TriangleModel>> triangleModelsMap = new HashMap<>();
+        var meshKeys = _objImporter.getMeshes();
+        for(var meshKey : meshKeys) {
+            TriangleMesh triangleMesh = _objImporter.getMesh(meshKey);
+            var faces = triangleMesh.getFaces();
+            var vertices = triangleMesh.getPoints();
+            var coords = triangleMesh.getTexCoords();
+            List<TriangleModel> triangleModels = new LinkedList<>();
+            for (var i = 0; i < faces.size(); i += 6) {
+                var triangleModel = new TriangleModel(faces, i, vertices, coords);
+
+                // 不正な三角形は除外する
+                if (triangleModel.isValid()) {
+                    triangleModels.add(triangleModel);
+                }
+            }
+            triangleModelsMap.put(meshKey, triangleModels);
+        }
+
+        return triangleModelsMap;
+    }
+
+    @Override protected TriangleModel getGroundTriangle(Map<String, List<TriangleModel>> triangleModelsMap) {
         TriangleModel groundTriangle = null;
         var groundBaseTriangle = TriangleModel.CreateGroundTriangle();
-        for (var triangleModel : triangleModels) {
-            // 地面の基準になる三角形を特定する
-            // 基準となる三角形の平面との角度が180±5度以下のもののうち、最もZ座標が小さいものを採用する(GroundSurfaceの法線は地面の方を向いている)
-            double angle = Math.toDegrees(groundBaseTriangle.getNormal().angle(triangleModel.getNormal()));
-            if (angle >= 175 && angle <= 185) {
-                if (groundTriangle == null) {
-                    groundTriangle = triangleModel;
-                } else {
-                    if (triangleModel.getMinZ() < groundTriangle.getMinZ()) {
+
+        // 地面の基準になる三角形を特定する
+        // 基準となる三角形の平面との角度が180±5度以下のもののうち、最もZ座標が小さいものを採用する(GroundSurfaceの法線は地面の方を向いている)
+        for (var triangleModels : triangleModelsMap.values()) {
+            for (var triangleModel : triangleModels) {
+                double angle = Math.toDegrees(groundBaseTriangle.getNormal().angle(triangleModel.getNormal()));
+                if (angle >= 175 && angle <= 185) {
+                    if (groundTriangle == null) {
                         groundTriangle = triangleModel;
+                    } else {
+                        if (triangleModel.getMinZ() < groundTriangle.getMinZ()) {
+                            groundTriangle = triangleModel;
+                        }
                     }
                 }
             }
@@ -89,12 +98,15 @@ public class Obj2LodConverter extends AbstractLodConverter {
         return groundTriangle;
     }
 
-    private ParameterizedTexture createOrGetParameterizedTexture(String materialName, Material material, Map<String, ParameterizedTexture> textureMap) throws IOException, URISyntaxException {
-        if (textureMap.containsKey(materialName)) return textureMap.get(materialName);
+    private ParameterizedTexture createParameterizedTexture(String materialName, Material material) throws IOException, URISyntaxException {
         if (!(material instanceof PhongMaterial)) return null;
         PhongMaterial phongMaterial = (PhongMaterial) material;
 
         var image = phongMaterial.getDiffuseMap();
+        if (image == null)  {
+            return null;
+        }
+
         var path = Paths.get(new URL(image.getUrl()).toURI());
         var fileName = path.getFileName().toString();
         var gmlFileName = Paths.get(getCityModelView().getGmlPath()).getFileName().toString();
@@ -110,7 +122,6 @@ public class Obj2LodConverter extends AbstractLodConverter {
         ParameterizedTexture parameterizedTexture = new ParameterizedTexture();
         parameterizedTexture.setImageURI(texturePath.toString());
         parameterizedTexture.setMimeType(new Code(Files.probeContentType(path)));
-        textureMap.put(materialName, parameterizedTexture);
 
         return parameterizedTexture;
     }

@@ -59,4 +59,9 @@ public class CityModelView extends Parent {
         this.cityObjectMembers.add(cityObjectMember);
         this.getChildren().add(cityObjectMember);
     }
+
+    public void removeCityObjectMember(BuildingView cityObjectMember) {
+        this.cityObjectMembers.remove(cityObjectMember);
+        this.getChildren().remove(cityObjectMember);
+    }
 }
