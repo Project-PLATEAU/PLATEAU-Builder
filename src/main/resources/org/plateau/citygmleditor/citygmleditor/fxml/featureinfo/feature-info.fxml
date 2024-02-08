@@ -1,38 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
-
-<?import javafx.scene.text.Text?>
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
-
 <?import javafx.scene.control.Accordion?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            minHeight="0.0" minWidth="0.0" prefWidth="278.0"
-            fx:controller="org.plateau.citygmleditor.fxml.featureinfo.FeatureInfoController">
+<AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="278.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.fxml.featureinfo.FeatureInfoController">
     <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <padding>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
         </padding>
         <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物情報">
             <font>
-                <Font size="16.0" />
+                <Font size="14.0" />
             </font>
         </Text>
         <VBox prefWidth="100.0" spacing="5.0">
             <children>
                 <HBox prefWidth="200.0">
                     <children>
-                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物ID">
-                            <HBox.margin>
-                                <Insets right="50.0" />
-                            </HBox.margin>
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                        </Text>
-                        <Text fx:id="featureIDText" fill="WHITE" layoutX="10.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="gml:id" />
+                        <Text fx:id="featureIDText" fill="WHITE" layoutX="10.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="地物ID" />
                     </children>
                     <VBox.margin>
                         <Insets />
@@ -40,15 +31,7 @@
                 </HBox>
                 <HBox maxWidth="1.7976931348623157E308" prefWidth="200.0">
                     <children>
-                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="地物型">
-                            <HBox.margin>
-                                <Insets right="50.0" />
-                            </HBox.margin>
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                        </Text>
-                        <Text fx:id="featureTypeText" fill="WHITE" layoutX="10.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="地物型(Building)" />
+                        <Text fx:id="featureTypeText" fill="WHITE" layoutX="10.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="地物型" />
                     </children>
                     <padding>
                         <Insets bottom="5.0" />
@@ -67,4 +50,7 @@
             </panes>
         </Accordion>
     </VBox>
+    <stylesheets>
+        <URL value="@../../viewer.css" />
+    </stylesheets>
 </AnchorPane>

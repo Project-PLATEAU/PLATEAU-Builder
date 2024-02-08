@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?import java.net.URL?>
 <?scenebuilder-stylesheet viewer.css?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -45,4 +45,7 @@
             </Tab>
         </TabPane>
     </VBox>
+    <stylesheets>
+        <URL value="@../viewer.css" />
+    </stylesheets>
 </AnchorPane>
