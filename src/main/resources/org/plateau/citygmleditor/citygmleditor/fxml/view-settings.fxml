@@ -31,7 +31,7 @@
                         <padding>
                             <Insets left="100.0" />
                         </padding>
-                        <CheckBox fx:id="showAxisCheckBox" mnemonicParsing="false" text="軸の表示" />
+                        <CheckBox fx:id="showGridCheckBox" mnemonicParsing="false" text="グリッドの表示" />
                     </HBox>
                     <HBox prefWidth="200.0">
                         <VBox.margin>
