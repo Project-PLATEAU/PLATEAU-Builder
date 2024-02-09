@@ -1,20 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/17.0.2-ea"
-            xmlns:fx="http://javafx.com/fxml/1"
-            prefHeight="700.0" prefWidth="600.0"
-            fx:controller="org.plateau.citygmleditor.citygmleditor.ValidationController">
-    <Button layoutX="20.0" layoutY="35.0" mnemonicParsing="false" onAction="#execute" text="実行"/>
-    <ScrollPane prefHeight="600.0" prefWidth="500.0"
-                AnchorPane.topAnchor="60.0" AnchorPane.bottomAnchor="10.0"
-                AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
-        <content>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
-                <VBox fx:id="resultTextContainer" prefHeight="600.0" prefWidth="500.0"/>
-            </AnchorPane>
-        </content>
-    </ScrollPane>
+<AnchorPane prefHeight="700.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.ValidationController">
+   <VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="700.0" prefWidth="600.0" spacing="10.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="10.0">
+      <children>
+         <HBox alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" spacing="10.0">
+            <children>
+               <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="品質検査パラメータ">
+                  <HBox.margin>
+                     <Insets left="50.0" />
+                  </HBox.margin>
+                  <font>
+                     <Font size="14.0" />
+                  </font>
+               </Text>
+               <TextField prefWidth="200.0" />
+               <Button mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" text="参照">
+                  <font>
+                     <Font size="14.0" />
+                  </font>
+                  <padding>
+                     <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
+                  </padding>
+               </Button>
+            </children>
+            <padding>
+               <Insets right="70.0" top="20.0" />
+            </padding>
+         </HBox>
+         <HBox alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" spacing="10.0">
+            <children>
+               <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="出力先">
+                  <HBox.margin>
+                     <Insets left="50.0" />
+                  </HBox.margin>
+                  <font>
+                     <Font size="14.0" />
+                  </font>
+               </Text>
+               <TextField prefWidth="200.0" />
+               <Button mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" text="参照">
+                  <font>
+                     <Font size="14.0" />
+                  </font>
+                  <padding>
+                     <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
+                  </padding>
+               </Button>
+            </children>
+            <padding>
+               <Insets bottom="20.0" right="70.0" />
+            </padding>
+         </HBox>
+          <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#execute" text="実行">
+            <padding>
+               <Insets bottom="10.0" left="50.0" right="50.0" top="10.0" />
+            </padding>
+         </Button>
+          <ScrollPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="600.0" prefWidth="500.0">
+              <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
+                      <VBox fx:id="resultTextContainer" prefHeight="600.0" prefWidth="500.0" />
+                  </AnchorPane>
+              </content>
+          </ScrollPane>
+      </children>
+   </VBox>
+   <stylesheets>
+      <URL value="@../viewer.css" />
+   </stylesheets>
 </AnchorPane>

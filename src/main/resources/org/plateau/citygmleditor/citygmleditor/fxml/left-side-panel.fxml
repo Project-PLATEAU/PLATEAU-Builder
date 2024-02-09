@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.URL?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:id="leftSidePanel"
-            minHeight="450.0" minWidth="250.0" prefWidth="300.0">
-   <fx:include source="hierarchy.fxml" />
+<AnchorPane fx:id="leftSidePanel" maxHeight="1.7976931348623157E308" minWidth="250.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <fx:include maxHeight="1.7976931348623157E308" source="hierarchy.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+   <stylesheets>
+      <URL value="@../viewer.css" />
+   </stylesheets>
 </AnchorPane>
