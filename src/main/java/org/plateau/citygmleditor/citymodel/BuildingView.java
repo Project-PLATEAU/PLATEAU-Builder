@@ -24,6 +24,10 @@ public class BuildingView extends Parent {
 
     private List<BuildingInstallationView> buildingInstallationViews = new ArrayList<>();
 
+    private List<LOD1SolidView> buildingPartLod1Solid = new ArrayList<>();
+    private List<LOD2SolidView> buildingPartLod2Solid = new ArrayList<>();
+    private List<LOD3SolidView> buildingPartLod3Solid = new ArrayList<>();
+
     public BuildingView(AbstractBuilding gmlObject) {
         this.gmlObject = gmlObject;
 
@@ -112,6 +116,32 @@ public class BuildingView extends Parent {
         buildingInstallationView.getTransformManipulator().updateOrigin();
     }
 
+    public void addBuildingPart(LOD1SolidView lodSolidView) {
+        if (lodSolidView == null)
+            return;
+
+        this.buildingPartLod1Solid.add(lodSolidView);
+        this.getChildren().add(lodSolidView);
+        lodSolidView.getTransformManipulator().updateOrigin();
+    }
+
+    public void addBuildingPart(LOD2SolidView lodSolidView) {
+        if (lodSolidView == null)
+            return;
+
+        this.buildingPartLod2Solid.add(lodSolidView);
+        this.getChildren().add(lodSolidView);
+        lodSolidView.getTransformManipulator().updateOrigin();
+    }
+
+    public void addBuildingPart(LOD3SolidView lodSolidView) {
+        if (lodSolidView == null)
+            return;
+
+        this.buildingPartLod3Solid.add(lodSolidView);
+        this.getChildren().add(lodSolidView);
+        lodSolidView.getTransformManipulator().updateOrigin();
+    }
     public Envelope getEnvelope() {
         return this.gmlObject.getBoundedBy().getEnvelope();
     }
