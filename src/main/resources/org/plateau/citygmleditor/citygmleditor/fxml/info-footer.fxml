@@ -4,11 +4,15 @@
 <?import javafx.scene.layout.HBox?>
 
 
-<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.fxml.InfoFooterController">
-   <children>
-      <Label text="参照座標系：" />
-      <Label fx:id="epsgCodeValue" layoutX="10.0" layoutY="10.0" text="EPSG:****" />
-      <Label layoutX="10.0" layoutY="10.0" text="オフセット：" />
-      <Label fx:id="offsetValue" layoutX="154.0" layoutY="10.0" text="(x, y, z)" />
-   </children>
+<HBox prefWidth="400.0" spacing="10" alignment="CENTER"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.plateau.citygmleditor.fxml.InfoFooterController">
+   <HBox>
+      <Label text="参照座標系："/>
+      <Label fx:id="epsgCodeValue" text="EPSG:****"/>
+   </HBox>
+   <HBox>
+      <Label text="オフセット："/>
+      <Label fx:id="offsetValue" text="(x, y, z)"/>
+   </HBox>
 </HBox>
