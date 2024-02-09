@@ -60,7 +60,6 @@ public class GmlImporter {
                 var max = new GeoCoordinate(upperCorner);
                 var center = min.add(max).divide(2);
                 world.setGeoReference(new GeoReference(center, epsgCode));
-                world.setEPSGCode(epsgCode);
             }
             var cityModelFactory = new CityModelFactory();
             var cityModel = cityModelFactory.createCityModel((CityModel) citygml, fileUrl, in.getSchemaHandler());
@@ -83,7 +82,7 @@ public class GmlImporter {
         var world = World.getActiveInstance();
         var city = world.getCityModels().get(0);
 
-        var cityRoot = GmlImporter.loadGml(fileUrl.toString(), world.getEPSGCode(), false);
+        var cityRoot = GmlImporter.loadGml(fileUrl.toString(), world.getGeoReference().getEPSGCode(), false);
         var newCity = (CityModelView) ((Group)cityRoot).getChildren().get(0);
 
         // View追加

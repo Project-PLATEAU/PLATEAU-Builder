@@ -18,9 +18,9 @@ public class TopPanelController {
         if (files == null)
             return;
 
-        String epsgCode = World.getActiveInstance().getEPSGCode();
-        
-        if (epsgCode == null || epsgCode.isEmpty()) {
+        if (World.getActiveInstance().getGeoReference() == null || World.getActiveInstance()
+                .getGeoReference().getEPSGCode() == null || World.getActiveInstance()
+                        .getGeoReference().getEPSGCode().isEmpty()) {
             CoordinateDialogController.createCoorinateDialog(files);
         }
         else {

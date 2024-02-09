@@ -86,9 +86,9 @@ public class MainController implements Initializable {
                     }
                 }
                 if (supportedFile != null) {
-                    String epsgCode = World.getActiveInstance().getEPSGCode();
-                    
-                    if (epsgCode == null || epsgCode.isEmpty()) {
+                    if (World.getActiveInstance().getGeoReference() == null || World
+                            .getActiveInstance().getGeoReference().getEPSGCode() == null || World
+                                .getActiveInstance().getGeoReference().getEPSGCode().isEmpty()) {
                         Platform.runLater(() -> CoordinateDialogController.createCoorinateDialog(files));
                     }
                     else {

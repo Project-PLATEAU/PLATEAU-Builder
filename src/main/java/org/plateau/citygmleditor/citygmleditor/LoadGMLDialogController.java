@@ -50,7 +50,7 @@ public class LoadGMLDialogController {
         try {
             var root = CityGMLEditorApp.getSceneContent().getContent();
             for (var gmlFile : gmlFiles) {
-                var newroot = GmlImporter.loadGml(gmlFile.toString(), World.getActiveInstance().getEPSGCode(), false);
+                var newroot = GmlImporter.loadGml(gmlFile.toString(), World.getActiveInstance().getGeoReference().getEPSGCode(), false);
                 ((Group) root).getChildren().add(((Group) newroot).getChildren().get(0));
                 // ツリー更新のため一度変更する
                 CityGMLEditorApp.getSceneContent().setContent(newroot);
