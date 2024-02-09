@@ -42,9 +42,15 @@ public class CityObjectMemberFactory extends CityGMLFactory {
          // </bldg:outerBuildingInstallation>
         for (var outerBuildingInstallation : gmlObject.getOuterBuildingInstallation()) {
             var geometryFactory = new GeometryFactory(getTarget());
-            var buildingInstallationView = geometryFactory.cretateBuildingInstallationView(outerBuildingInstallation.getObject());
-            if (buildingInstallationView != null) {
-                building.addBuildingInstallationView(buildingInstallationView);
+            var buildingInstallationViewLOD2 = geometryFactory.cretateBuildingInstallationView(outerBuildingInstallation.getObject(), 2);
+            var buildingInstallationViewLOD3 = geometryFactory.cretateBuildingInstallationView(outerBuildingInstallation.getObject(), 3);
+            if (buildingInstallationViewLOD2 != null) {
+                buildingInstallationViewLOD2.setLOD(2);
+                building.addBuildingInstallationView(buildingInstallationViewLOD2);
+            }
+            if (buildingInstallationViewLOD3 != null) {
+                buildingInstallationViewLOD3.setLOD(3);
+                building.addBuildingInstallationView(buildingInstallationViewLOD3);
             }
         }
 

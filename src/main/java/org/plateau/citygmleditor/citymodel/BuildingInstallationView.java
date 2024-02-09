@@ -19,6 +19,7 @@ public class BuildingInstallationView extends MeshView implements ILODSolidView 
     private VertexBuffer vertexBuffer = new VertexBuffer();
     private TexCoordBuffer texCoordBuffer = new TexCoordBuffer();
     private TransformManipulator transformManipulator = new TransformManipulator(this);
+    private int lod;
 
     public BuildingInstallationView(BuildingInstallation gmlObject, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
         this.gmlObject = gmlObject;
@@ -91,5 +92,13 @@ public class BuildingInstallationView extends MeshView implements ILODSolidView 
             vertexBuffer.addVertex(vertex);
         }
         setVertexBuffer(vertexBuffer);
+    }
+    
+    public int getLOD() {
+        return lod;
+    }
+
+    public void setLOD(int lod) {
+        this.lod = lod;
     }
 }

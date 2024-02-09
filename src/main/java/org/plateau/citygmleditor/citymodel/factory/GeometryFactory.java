@@ -28,14 +28,15 @@ public class GeometryFactory extends CityGMLFactory {
         super(target);
     }
 
-    public BuildingInstallationView cretateBuildingInstallationView(BuildingInstallation gmlObject) {
-        if (gmlObject.getLod3Geometry() == null)
+    public BuildingInstallationView cretateBuildingInstallationView(BuildingInstallation gmlObject, int lod) {
+        var lodGeometry = lod == 2 ? gmlObject.getLod2Geometry() : gmlObject.getLod3Geometry();
+        if (lodGeometry == null)
             return null;
 
         var buildingInstallationView = new BuildingInstallationView(gmlObject, vertexBuffer, texCoordBuffer);
 
-        var geometry = new GeometryView(gmlObject.getLod3Geometry().getGeometry());
-        var multiSurface = (MultiSurface) gmlObject.getLod3Geometry().getGeometry();
+        var geometry = new GeometryView(lodGeometry.getGeometry());
+        var multiSurface = (MultiSurface) lodGeometry.getGeometry();
         var polygons = new ArrayList<PolygonView>();
         for (var surfaceMember : multiSurface.getSurfaceMember()) {
             var polygon = (Polygon) surfaceMember.getSurface();
