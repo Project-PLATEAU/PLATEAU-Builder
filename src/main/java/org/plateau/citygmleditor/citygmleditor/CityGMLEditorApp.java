@@ -55,7 +55,7 @@ import org.w3c.dom.*;
 public class CityGMLEditorApp extends Application {
     private static Scene scene;
     private static Camera camera;
-    private static AxisGizmo axisGizmo;
+    private static CoordinateGrid coordinateGrid;
     private static Light light;
     private static SceneContent sceneContent;
     private static AntiAliasing antiAliasing;
@@ -72,8 +72,8 @@ public class CityGMLEditorApp extends Application {
         return camera;
     }
 
-    public static AxisGizmo getAxisGizmo() {
-        return axisGizmo;
+    public static CoordinateGrid getCoordinateGrid() {
+        return coordinateGrid;
     }
 
     public static Light getLight() {
@@ -140,7 +140,7 @@ public class CityGMLEditorApp extends Application {
         antiAliasing.setSceneContent();
         camera.setSceneContent();
 
-        axisGizmo = new AxisGizmo();
+        coordinateGrid = new CoordinateGrid();
 
         World.getRoot3D().getChildren().add(camera.getCameraXform());
         World.getRoot3D().getChildren().add(autoScalingGroups);
