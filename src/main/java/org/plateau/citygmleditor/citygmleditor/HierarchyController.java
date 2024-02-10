@@ -19,6 +19,7 @@ import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.converters.Gltf2LodConverter;
 import org.plateau.citygmleditor.converters.Obj2LodConverter;
+import org.plateau.citygmleditor.exporters.ExportTypeEnum;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
 import org.plateau.citygmleditor.world.*;
@@ -86,8 +87,8 @@ public class HierarchyController implements Initializable {
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
                 if (selectedItem != null) {
                     var item = selectedItem.valueProperty().get();
-                    exportGltfMenu.setDisable(!(item instanceof ILODSolidView));
-                    exportObjMenu.setDisable(!(item instanceof ILODSolidView));
+                    exportGltfMenu.setDisable(!(item instanceof BuildingView));
+                    exportObjMenu.setDisable(!(item instanceof BuildingView));
                 }
             }
             if (t.getButton() == MouseButton.PRIMARY && t.getClickCount() == 2) {
@@ -136,27 +137,25 @@ public class HierarchyController implements Initializable {
      * @param actionEvent the event
      */
     public void exportGltf(ActionEvent actionEvent) {
-        FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("gLTF", "*.gltf", "*.glb")
-        );
-        chooser.setTitle("Export gLTF");
-        File newFile = chooser.showSaveDialog(hierarchyTreeTable.getScene().getWindow());
-        if (newFile == null)
-            return;
-
         TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
         if (selectedItem == null)
             return;
 
         var item = selectedItem.valueProperty().get();
-        if (!(item instanceof ILODSolidView))
+        if (!(item instanceof BuildingView))
             return;
 
-        ILODSolidView solid = (ILODSolidView)item;
-        BuildingView building = (BuildingView)solid.getParent();
+        BuildingView building = (BuildingView)item;
         try {
-            new GltfExporter().export(newFile.toString(), solid, building.getId());
+            var controller = ThreeDimensionsExportDialogController.create(building, ExportTypeEnum.GLTF);
+            if (!controller.getDialogResult())
+                return;
+
+            var fileUrl = controller.getFileUrl();
+            var solid = controller.getLodSolidView();
+            var option = controller.getConvertOption();
+            new GltfExporter().export(fileUrl, solid, building.getId(), option);
+            java.awt.Desktop.getDesktop().open(new File(fileUrl).getParentFile());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -167,27 +166,25 @@ public class HierarchyController implements Initializable {
      * @param actionEvent the event
      */
     public void exportObj(ActionEvent actionEvent) {
-        FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("OBJ", "*.obj")
-        );
-        chooser.setTitle("Export OBJ");
-        File newFile = chooser.showSaveDialog(hierarchyTreeTable.getScene().getWindow());
-        if (newFile == null)
-            return;
-
         TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
         if (selectedItem == null)
             return;
 
         var item = selectedItem.valueProperty().get();
-        if (!(item instanceof ILODSolidView))
+        if (!(item instanceof BuildingView))
             return;
 
-        ILODSolidView solid = (ILODSolidView)item;
-        BuildingView building = (BuildingView)solid.getParent();
+        BuildingView building = (BuildingView)item;
         try {
-            new ObjExporter().export(newFile.toString(), solid, building.getId());
+            var controller = ThreeDimensionsExportDialogController.create(building, ExportTypeEnum.OBJ);
+            if (!controller.getDialogResult())
+                return;
+
+            var fileUrl = controller.getFileUrl();
+            var solid = controller.getLodSolidView();
+            var option = controller.getConvertOption();
+            new ObjExporter().export(fileUrl, solid, building.getId(), option);
+            java.awt.Desktop.getDesktop().open(new File(fileUrl).getParentFile());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
         }
