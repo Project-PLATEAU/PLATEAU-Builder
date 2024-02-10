@@ -124,7 +124,6 @@ public class GeometryFactory extends CityGMLFactory {
             var desiredTexCoordSize = ringVertexBuffer.getVertexCount() * 2;
             if (texCoords.length > desiredTexCoordSize) {
                 texCoords = Arrays.copyOf(texCoords, desiredTexCoordSize);
-                System.out.print("TexCoord size of " + linearRing.getGMLID() + " is greater than vertex size. TexCoords will be truncated.\n");
             } else {
                 var copiedTexCoords = new float[desiredTexCoordSize];
                 System.arraycopy(texCoords, 0, copiedTexCoords, 0, desiredTexCoordSize);
