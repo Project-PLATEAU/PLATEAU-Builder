@@ -11,7 +11,6 @@ import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.shape.MeshView;
-import javafx.stage.FileChooser;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.BuildingInstallationView;
@@ -19,7 +18,6 @@ import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.converters.Gltf2LodConverter;
 import org.plateau.citygmleditor.converters.Obj2LodConverter;
-import org.plateau.citygmleditor.exporters.ExportTypeEnum;
 import org.plateau.citygmleditor.exporters.GltfExporter;
 import org.plateau.citygmleditor.exporters.ObjExporter;
 import org.plateau.citygmleditor.world.*;
@@ -89,6 +87,8 @@ public class HierarchyController implements Initializable {
                     var item = selectedItem.valueProperty().get();
                     exportGltfMenu.setDisable(!(item instanceof BuildingView));
                     exportObjMenu.setDisable(!(item instanceof BuildingView));
+                    importGltfMenu.setDisable(!(item instanceof BuildingView));
+                    importObjMenu.setDisable(!(item instanceof BuildingView));
                 }
             }
             if (t.getButton() == MouseButton.PRIMARY && t.getClickCount() == 2) {
@@ -147,13 +147,13 @@ public class HierarchyController implements Initializable {
 
         BuildingView building = (BuildingView)item;
         try {
-            var controller = ThreeDimensionsExportDialogController.create(building, ExportTypeEnum.GLTF);
+            var controller = ThreeDimensionsExportDialogController.create(building, ThreeDimensionsModelEnum.GLTF);
             if (!controller.getDialogResult())
                 return;
 
             var fileUrl = controller.getFileUrl();
             var solid = controller.getLodSolidView();
-            var option = controller.getConvertOption();
+            var option = controller.getExportOption();
             new GltfExporter().export(fileUrl, solid, building.getId(), option);
             java.awt.Desktop.getDesktop().open(new File(fileUrl).getParentFile());
         } catch (Exception ex) {
@@ -176,13 +176,13 @@ public class HierarchyController implements Initializable {
 
         BuildingView building = (BuildingView)item;
         try {
-            var controller = ThreeDimensionsExportDialogController.create(building, ExportTypeEnum.OBJ);
+            var controller = ThreeDimensionsExportDialogController.create(building, ThreeDimensionsModelEnum.OBJ);
             if (!controller.getDialogResult())
                 return;
 
             var fileUrl = controller.getFileUrl();
             var solid = controller.getLodSolidView();
-            var option = controller.getConvertOption();
+            var option = controller.getExportOption();
             new ObjExporter().export(fileUrl, solid, building.getId(), option);
             java.awt.Desktop.getDesktop().open(new File(fileUrl).getParentFile());
         } catch (Exception ex) {
@@ -191,75 +191,62 @@ public class HierarchyController implements Initializable {
     }
 
     public void importGltf(ActionEvent actionEvent) {
-        var file = FileChooserService.showOpenDialog("*.gltf", SessionManager.GLTF_FILE_PATH_PROPERTY);
-
-        if (file == null)
-            return;
-
-        var content = (Group)sceneContent.getContent();
-        var cityModelNode = content.getChildren().get(0);
-        if (cityModelNode == null)
-            return;
-
-        var cityModelView = (CityModelView)cityModelNode;
         TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
         if (selectedItem == null)
             return;
 
         var item = selectedItem.valueProperty().get();
-        if (!(item instanceof ILODSolidView))
+        if (!(item instanceof BuildingView))
             return;
 
-        ILODSolidView lodSolidView = (ILODSolidView)item;
+        BuildingView building = (BuildingView)item;
+        CityModelView cityModelView = (CityModelView)building.getParent();
         try {
-            var convertedCityModel = new Gltf2LodConverter(cityModelView, lodSolidView).convert(file.toString());
-            var node = new Group();
-            node.setId(content.getId());
-            node.getChildren().add(convertedCityModel);
+            ThreeDimensionsImportDialogController controller = ThreeDimensionsImportDialogController.create(building, ThreeDimensionsModelEnum.GLTF);
+            if (!controller.getDialogResult())
+                return;
 
-            CityGMLEditorApp.getSceneContent().setContent(node);
+            var fileUrl = controller.getFileUrl();
+            var solid = controller.getLodSolidView();
+            var option = controller.getConvertOption();
+            var convertedCityModel = new Gltf2LodConverter(cityModelView, solid, option).convert(fileUrl);
 
-            // 位置合わせ
-            var id = lodSolidView.getParent().getId();
-            AutoGeometryAligner.GeometryAlign(convertedCityModel, id);
+            if (!option.isUseGeoReference()) {
+                // 位置合わせ
+                var id = solid.getParent().getId();
+                AutoGeometryAligner.GeometryAlign(convertedCityModel, id);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     public void importObj(ActionEvent actionEvent) {
-        var file = FileChooserService.showOpenDialog("*.obj", SessionManager.OBJ_FILE_PATH_PROPERTY);
-
-        if (file == null)
-            return;
-
-        var content = (Group)sceneContent.getContent();
-        var cityModelNode = content.getChildren().get(0);
-        if (cityModelNode == null)
-            return;
-
-        var cityModelView = (CityModelView)cityModelNode;
         TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
         if (selectedItem == null)
             return;
 
         var item = selectedItem.valueProperty().get();
-        if (!(item instanceof ILODSolidView))
+        if (!(item instanceof BuildingView))
             return;
 
-        ILODSolidView lodSolidView = (ILODSolidView)item;
+        BuildingView building = (BuildingView)item;
+        CityModelView cityModelView = (CityModelView)building.getParent();
         try {
-            var convertedCityModel = new Obj2LodConverter(cityModelView, lodSolidView).convert(file.toString());
-            var node = new Group();
-            node.setId(content.getId());
-            node.getChildren().add(convertedCityModel);
+            ThreeDimensionsImportDialogController controller = ThreeDimensionsImportDialogController.create(building, ThreeDimensionsModelEnum.GLTF);
+            if (!controller.getDialogResult())
+                return;
 
-            CityGMLEditorApp.getSceneContent().setContent(node);
+            var fileUrl = controller.getFileUrl();
+            var solid = controller.getLodSolidView();
+            var option = controller.getConvertOption();
+            var convertedCityModel = new Obj2LodConverter(cityModelView, solid, option).convert(fileUrl);
 
-            // 位置合わせ
-            var id = lodSolidView.getParent().getId();
-            AutoGeometryAligner.GeometryAlign(convertedCityModel, id);
-
+            if (!option.isUseGeoReference()) {
+                // 位置合わせ
+                var id = solid.getParent().getId();
+                AutoGeometryAligner.GeometryAlign(convertedCityModel, id);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -16,7 +16,6 @@ import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 
 import javafx.scene.paint.PhongMaterial;
 import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
-import org.plateau.citygmleditor.converters.model.ConvertOption;
 
 /**
  * A class for exporting a {@link ILODSolidView} to a OBJ file
@@ -29,9 +28,9 @@ public class ObjExporter {
      * @param fileUrl the file url
      * @param lodSolid the {@link ILODSolidView}
      * @param buildingId the building id
-     * @param convertOption the convertOption
+     * @param exportOption the exportOption
      */
-    public void export(String fileUrl, ILODSolidView lodSolid, String buildingId, ConvertOption convertOption) {
+    public void export(String fileUrl, ILODSolidView lodSolid, String buildingId, ExportOption exportOption) {
         ObjectModel objectModel = createObjectModel(buildingId, lodSolid);
 
         File file = new File(fileUrl);
@@ -45,7 +44,7 @@ public class ObjExporter {
             writer.write(String.format("g %s\r\n", objectModel.getName()));
             writer.write(String.format("usemtl %s\r\n", objectModel.getMaterial().getName()));
 
-            var offset = convertOption.getOffset();
+            var offset = exportOption.getOffset();
             var vertices = objectModel.getVertices();
             for (int i = 0; i < vertices.length; i += 3) {
                 writer.write(String.format("v %f %f %f\r\n", vertices[i] + offset.x, vertices[i + 1] + offset.y, vertices[i + 2] + offset.z));

@@ -41,8 +41,8 @@ public class Gltf2LodConverter extends AbstractLodConverter {
 
     private GltfModel _gltfModel;
 
-    public Gltf2LodConverter(CityModelView cityModelView, ILODSolidView lodSolidView) {
-        super(cityModelView, lodSolidView);
+    public Gltf2LodConverter(CityModelView cityModelView, ILODSolidView lodSolidView, ConvertOption convertOption) {
+        super(cityModelView, lodSolidView, convertOption);
     }
 
     @Override protected void initialize(String fileUrl) throws IOException, URISyntaxException {

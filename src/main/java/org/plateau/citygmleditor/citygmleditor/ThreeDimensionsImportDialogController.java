@@ -1,6 +1,5 @@
 package org.plateau.citygmleditor.citygmleditor;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -8,8 +7,8 @@ import java.util.ResourceBundle;
 
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
-import org.plateau.citygmleditor.exporters.ExportOption;
-import org.plateau.citygmleditor.exporters.ExportOptionBuilder;
+import org.plateau.citygmleditor.converters.ConvertOption;
+import org.plateau.citygmleditor.converters.ConvertOptionBuilder;
 import org.plateau.citygmleditor.utils3d.geom.Vec3d;
 import org.plateau.citygmleditor.world.World;
 
@@ -22,11 +21,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
+import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class ThreeDimensionsExportDialogController implements Initializable {
+public class ThreeDimensionsImportDialogController implements Initializable {
     private Stage root;
 
     private BuildingView buildingView;
@@ -35,8 +34,8 @@ public class ThreeDimensionsExportDialogController implements Initializable {
 
     private ILODSolidView lodSolidView;
 
-    private ExportOption exportOption;
-    
+    private ConvertOption convertOption;
+
     private boolean dialogResult;
 
     private ThreeDimensionsModelEnum modelType;
@@ -46,6 +45,9 @@ public class ThreeDimensionsExportDialogController implements Initializable {
 
     @FXML
     private ComboBox<String> comboBoxLod;
+
+    @FXML
+    private TextField textFieldWallThreshold;
 
     @FXML
     private Label labelGeoReference;
@@ -58,6 +60,12 @@ public class ThreeDimensionsExportDialogController implements Initializable {
 
     @FXML
     private TextField textFieldTop;
+
+    @FXML
+    private Pane paneUseGeoReference;
+
+    @FXML
+    private Pane paneAuto;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -121,11 +129,11 @@ public class ThreeDimensionsExportDialogController implements Initializable {
     }
 
     /**
-     * ExportOptionを取得
+     * ConvertOptionを取得
      * @return
      */
-    public ExportOption getExportOption() {
-        return exportOption;
+    public ConvertOption getConvertOption() {
+        return convertOption;
     }
 
     /**
@@ -141,14 +149,8 @@ public class ThreeDimensionsExportDialogController implements Initializable {
      * @param actionEvent
      */
     public void onSelectFile(ActionEvent actionEvent) {
-        var type = modelType == ThreeDimensionsModelEnum.OBJ ? "OBJ" : "gLTF";
         var extensions = modelType == ThreeDimensionsModelEnum.OBJ ? new String[] {"*.obj"} : new String[] {"*.gltf", "*.glb"};
-        FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter(type, extensions)
-        );
-        chooser.setTitle(String.format("Export %s", type));
-        File file = chooser.showSaveDialog(this.root.getOwner());
+        var file = FileChooserService.showOpenDialog(SessionManager.GLTF_FILE_PATH_PROPERTY, extensions);
         if (file == null) {
             return;
         }
@@ -176,16 +178,33 @@ public class ThreeDimensionsExportDialogController implements Initializable {
         }
         this.fileUrl = textFieldFile.getText();
 
-        var origin = World.getActiveInstance().getGeoReference().getOrigin();
-        this.exportOption = new ExportOptionBuilder()
+        var optionBuilder = new ConvertOptionBuilder().wallThreshold(Double.parseDouble(textFieldWallThreshold.getText()));
+        if (paneUseGeoReference.isVisible()) {
+            var origin = World.getActiveInstance().getGeoReference().getOrigin();
+            optionBuilder
+                .useGeoReference(true)
                 .offset(new Vec3d(
-                        origin.x - Double.parseDouble(textFieldEast.getText()),
-                        origin.y - Double.parseDouble(textFieldNorth.getText()),
-                        origin.z - Double.parseDouble(textFieldTop.getText())))
-                .build();
+                    origin.x - Double.parseDouble(textFieldEast.getText()),
+                    origin.y - Double.parseDouble(textFieldNorth.getText()),
+                    origin.z - Double.parseDouble(textFieldTop.getText())));
+        } else {
+            optionBuilder.useGeoReference(false);
+        }
+
+        this.convertOption = optionBuilder.build();
         this.dialogResult = true;
 
         root.close();
+    }
+
+    public void onUseGeoReference(ActionEvent actionEvent) {
+        paneUseGeoReference.visibleProperty().set(true);
+        paneAuto.visibleProperty().set(false);
+    }
+
+    public void onAuto(ActionEvent actionEvent) {
+        paneUseGeoReference.visibleProperty().set(false);
+        paneAuto.visibleProperty().set(true);
     }
 
     /**
@@ -193,13 +212,13 @@ public class ThreeDimensionsExportDialogController implements Initializable {
      * 
      * @param buildingView
      */
-    public static ThreeDimensionsExportDialogController create(BuildingView buildingView, ThreeDimensionsModelEnum modelType) {
+    public static ThreeDimensionsImportDialogController create(BuildingView buildingView, ThreeDimensionsModelEnum modelType) {
         try {
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
-            FXMLLoader loader = new FXMLLoader(ThreeDimensionsExportDialogController.class.getResource("fxml/3d-export-dialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(ThreeDimensionsImportDialogController.class.getResource("fxml/3d-import-dialog.fxml"));
             stage.setScene(new Scene(loader.load()));
-            var controller = (ThreeDimensionsExportDialogController) loader.getController();
+            var controller = (ThreeDimensionsImportDialogController) loader.getController();
             controller.setRoot(stage);
             controller.setBuildingView(buildingView);
             controller.setModelType(modelType);

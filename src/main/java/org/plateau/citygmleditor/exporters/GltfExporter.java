@@ -30,7 +30,7 @@ import de.javagl.jgltf.model.io.GltfModelWriter;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
 import javafx.scene.paint.PhongMaterial;
 import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
-import org.plateau.citygmleditor.converters.model.ConvertOption;
+import org.plateau.citygmleditor.converters.ConvertOption;
 import org.plateau.citygmleditor.utils3d.geom.Vec2f;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 
@@ -48,17 +48,17 @@ public class GltfExporter {
         defaultMaterialModel.setName("defaultMaterialModel");
     }
 
-    private ConvertOption convertOption;
+    private ExportOption exportOption;
 
     /**
      * Export the {@link ILODSolidView} to a gLTF file
      * @param fileUrl the file url
      * @param lodSolid the {@link ILODSolidView}
      * @param buildingId the building id
-     * @param convertOption the convertOption
+     * @param exportOption the exportOption
      */
-    public void export(String fileUrl, ILODSolidView lodSolid, String buildingId, ConvertOption convertOption) {
-        this.convertOption = convertOption;
+    public void export(String fileUrl, ILODSolidView lodSolid, String buildingId, ExportOption exportOption) {
+        this.exportOption = exportOption;
         DefaultSceneModel sceneModel = null;
         if (lodSolid instanceof LOD1SolidView) {
             sceneModel = createSceneModel((LOD1SolidView) lodSolid, buildingId);
@@ -159,7 +159,7 @@ public class GltfExporter {
         meshPrimitiveBuilder.setIntIndicesAsShort(IntBuffer.wrap(faces));
 
         // 右手系Y-up
-        var offset = convertOption.getOffset();
+        var offset = exportOption.getOffset();
         var positions = new float[vertexList.size() * 3];
         for (int i = 0; i < vertexList.size(); i++) {
             var vertex = vertexList.get(i);
