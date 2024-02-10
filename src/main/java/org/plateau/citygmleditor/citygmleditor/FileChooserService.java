@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.citygmleditor;
 
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -11,7 +12,7 @@ import java.util.Properties;
  */
 public class FileChooserService {
     /**
-     * 入力ファイルをエクスプローラから指定します。
+     * ファイルをエクスプローラから指定します。
      * @param extensions 拡張子
      * @param sessionPropertyKey 前回選択したファイルの情報をセッションに保存する際のキー
      * @return 選択されたファイル
@@ -31,7 +32,26 @@ public class FileChooserService {
     }
 
     /**
-     * 複数入力ファイルをエクスプローラから指定します。
+     * ディレクトリをエクスプローラから指定します。
+     * @return 選択されたディレクトリ
+     */
+    public static File showDirectoryDialog(String initialDirectory) {
+        var chooser = createDirectoryChooser(new File(initialDirectory));
+        return chooser.showDialog(CityGMLEditorApp.getWindow());
+    }
+
+    /**
+     * ファイルをエクスプローラから指定します。
+     * @param extensions 拡張子
+     * @return 選択されたファイル
+     */
+    public static File showOpenDialogWithoutSession(String extensions, String initialDirectory) {
+        var chooser = createChooser(extensions, new File(initialDirectory));
+        return chooser.showOpenDialog(CityGMLEditorApp.getWindow());
+    }
+
+    /**
+     * 複数ファイルをエクスプローラから指定します。
      * @param extensions 拡張子
      * @param sessionPropertyKey 前回選択したファイルの情報をセッションに保存する際のキー
      * @return 選択されたファイル
@@ -62,6 +82,16 @@ public class FileChooserService {
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", extensions));
         chooser.setTitle("ファイルを選択してください");
+
+        if (initialDirectory != null && initialDirectory.isDirectory())
+            chooser.setInitialDirectory(initialDirectory);
+
+        return chooser;
+    }
+
+    private static DirectoryChooser createDirectoryChooser(File initialDirectory) {
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("フォルダを選択してください");
 
         if (initialDirectory != null && initialDirectory.isDirectory())
             chooser.setInitialDirectory(initialDirectory);
