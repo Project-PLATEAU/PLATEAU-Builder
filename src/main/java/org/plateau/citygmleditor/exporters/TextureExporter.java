@@ -67,7 +67,20 @@ public class TextureExporter {
             var textureImage = SwingFXUtils.fromFXImage(diffuseMap, null);
             try {
                 File exportPath = new File(folderPath + "/" + appearanceList.get(count));
-                ImageIO.write(textureImage, "jpg", exportPath);
+                // 最後の '\' 以降を抽出
+                String fileName = exportPath.getAbsolutePath()
+                        .substring(exportPath.getAbsolutePath().lastIndexOf("\\") + 1);
+                // '.' 以降（ファイルの拡張子）を抽出
+                String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+                if (extension.matches("jpg") || extension.matches("jpeg")) {
+                    ImageIO.write(textureImage, "jpg", exportPath);
+                } else if (extension.matches("png")) {
+                    ImageIO.write(textureImage, "png", exportPath);
+                } else {
+                    System.out.println(fileName);
+                    ImageIO.write(textureImage, "png", exportPath);
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
