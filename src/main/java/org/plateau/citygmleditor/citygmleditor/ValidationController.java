@@ -3,8 +3,11 @@ package org.plateau.citygmleditor.citygmleditor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.awt.*;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -38,25 +41,24 @@ import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
 import org.plateau.citygmleditor.fxml.validation.ValidationLogListItemController;
 import org.plateau.citygmleditor.modelstandard.Standard;
 import org.plateau.citygmleditor.utils.CollectionUtil;
-import org.plateau.citygmleditor.utils.XmlUtil;
 import org.plateau.citygmleditor.validation.*;
 import org.plateau.citygmleditor.world.World;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import static org.plateau.citygmleditor.constant.StandardID.*;
-
+import static org.plateau.citygmleditor.validation.AppConst.DATE_TIME_FORMAT;
 
 public class ValidationController implements Initializable {
     @FXML
     VBox rootContainer;
     @FXML
     TextField parameterFilePathText;
+    @FXML
+    TextField logDestinationPathText;
     @FXML
     VBox resultTextContainer;
     @FXML
@@ -65,15 +67,23 @@ public class ValidationController implements Initializable {
     private final ToggleGroup toggleGroup = new ToggleGroup();
 
     private static final StringProperty parameterFilePath = new SimpleStringProperty();
+    private static final StringProperty logDestinationDirectoryPath = new SimpleStringProperty();
     private static Logger LOGGER = Logger.getLogger(ValidationController.class.getName());
 
     private List<ValidationResultMessage> validationResultMessages;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // パラメータファイル選択UI
+        var defaultParameterFilePath = getDefaultParameterFilePath();
+        if (!new File(defaultParameterFilePath).exists())
+            writeTemplateParameterResource(defaultParameterFilePath);
         parameterFilePathText.setText(getDefaultParameterFilePath());
         parameterFilePath.bind(parameterFilePathText.textProperty());
-        parameterFilePathText.setText(parameterFilePath.get());
+
+        // ログ出力先選択UI
+        logDestinationPathText.setText(getDefaultLogDestinationPath());
+        logDestinationDirectoryPath.bind(logDestinationPathText.textProperty());
 
         messageTextArea.prefWidthProperty().bind(rootContainer.widthProperty());
 
@@ -152,16 +162,10 @@ public class ValidationController implements Initializable {
         };
     }
 
-    private int getIndexLoadingMessage() {
-        return resultTextContainer.getChildren().size();
-    }
-
     private EventHandler<WorkerStateEvent> validateFinishedHandler() {
         return event -> {
-            int indexValidating = getIndexLoadingMessage();
             var errorCount = 0;
             var warningCount = 0;
-            List<String> errorMessages = new ArrayList<>();
             for (var message : validationResultMessages) {
                 switch (message.getType()) {
                     case Error:
@@ -177,9 +181,8 @@ public class ValidationController implements Initializable {
             showMessage(new ValidationResultMessage(
                 ValidationResultMessageType.Info, countResultMessage
             ));
-            errorMessages.add(countResultMessage);
             try {
-                XmlUtil.writeErrorMessageInFile(errorMessages);
+                writeValidationLogToFile(logDestinationDirectoryPath.get(), validationResultMessages);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -211,6 +214,15 @@ public class ValidationController implements Initializable {
             return;
 
         parameterFilePathText.setText(file.getAbsolutePath());
+    }
+
+    public void onClickLogDestinationSelectButton() {
+        var file = FileChooserService.showDirectoryDialog(getDefaultLogDestinationPath());
+
+        if (file == null)
+            return;
+
+        logDestinationPathText.setText(file.getAbsolutePath());
     }
 
     private List<IValidator> loadValidators(String path) throws IOException {
@@ -340,11 +352,58 @@ public class ValidationController implements Initializable {
         }
     }
 
-    private static String getDefaultParameterFilePath() {
-        var parameterResourceURL = CityGMLEditorApp.class.getResource("validation-params.json");
-        if (parameterResourceURL == null)
-            return "";
+    private static void writeTemplateParameterResource(String path) {
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
 
-        return new File(parameterResourceURL.getPath()).getPath();
+        try {
+            try {
+                var fileName = AppConst.VALIDATION_PARAM_FILE_NAME;
+                inputStream = CityGMLEditorApp.class.getResourceAsStream(fileName);
+                if (inputStream == null)
+                    throw new Exception("Cannot get resource \"" + fileName + "\" from Jar file.");
+
+                int readBytes;
+                byte[] buffer = new byte[4096];
+                outputStream = new FileOutputStream(path);
+                while ((readBytes = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, readBytes);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                inputStream.close();
+                outputStream.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String getDefaultParameterFilePath() {
+        return Paths.get(AppConst.VALIDATION_PARAM_FILE_NAME).toAbsolutePath().toString();
+    }
+
+    private static String getDefaultLogDestinationPath() {
+        return Paths.get(AppConst.VALIDATION_LOG_DESTINATION_DIRECTORY).toAbsolutePath().toString();
+    }
+
+    private static void writeValidationLogToFile(String directoryPath, List<ValidationResultMessage> messages) throws IOException {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+        LocalDateTime now = LocalDateTime.now();
+
+        Path directory = Path.of(directoryPath);
+        if (!Files.exists(directory)) {
+            Files.createDirectory(directory);
+        }
+
+        var fileName = String.format("validation-%s.txt", dtf.format(now));
+        var filePath = Paths.get(directoryPath, fileName).toString();
+
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), StandardCharsets.UTF_8));
+        for (var message : messages) {
+            bw.write(message.getMessage() + "\n");
+        }
+        bw.close();
     }
 }

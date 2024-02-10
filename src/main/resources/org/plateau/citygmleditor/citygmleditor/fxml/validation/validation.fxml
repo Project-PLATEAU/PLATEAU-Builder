@@ -35,16 +35,16 @@
          </HBox>
          <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" spacing="10.0">
             <children>
-               <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="出力先">
+               <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ログ出力先">
                   <HBox.margin>
-                     <Insets left="50.0" right="64.0" />
+                     <Insets left="50.0" right="44.0" />
                   </HBox.margin>
                   <font>
                      <Font size="14.0" />
                   </font>
                </Text>
-               <TextField prefWidth="200.0" HBox.hgrow="ALWAYS" />
-               <Button mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" text="参照">
+               <TextField fx:id="logDestinationPathText" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+               <Button mnemonicParsing="false" onAction="#onClickLogDestinationSelectButton" prefHeight="50.0" prefWidth="70.0" text="参照">
                   <font>
                      <Font size="14.0" />
                   </font>

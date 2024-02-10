@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.citygmleditor;
 
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -28,6 +29,15 @@ public class FileChooserService {
         }
 
         return file;
+    }
+
+    /**
+     * ディレクトリをエクスプローラから指定します。
+     * @return 選択されたディレクトリ
+     */
+    public static File showDirectoryDialog(String initialDirectory) {
+        var chooser = createDirectoryChooser(new File(initialDirectory));
+        return chooser.showDialog(CityGMLEditorApp.getWindow());
     }
 
     /**
@@ -72,6 +82,16 @@ public class FileChooserService {
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", extensions));
         chooser.setTitle("ファイルを選択してください");
+
+        if (initialDirectory != null && initialDirectory.isDirectory())
+            chooser.setInitialDirectory(initialDirectory);
+
+        return chooser;
+    }
+
+    private static DirectoryChooser createDirectoryChooser(File initialDirectory) {
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("フォルダを選択してください");
 
         if (initialDirectory != null && initialDirectory.isDirectory())
             chooser.setInitialDirectory(initialDirectory);

@@ -23,10 +23,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import static org.plateau.citygmleditor.validation.AppConst.DATE_TIME_FORMAT;
-import static org.plateau.citygmleditor.validation.AppConst.PATH_FOLDER;
-
-
 public class XmlUtil {
 
   public static Logger logger = Logger.getLogger(XmlUtil.class.getName());
@@ -202,23 +198,6 @@ public class XmlUtil {
       }
       recursiveFindAttributeContent(childNode, resultList, attribute);
     }
-  }
-
-  public static void writeErrorMessageInFile(List<String> messages) throws IOException {
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
-    LocalDateTime now = LocalDateTime.now();
-
-    if (!Files.exists(Path.of(PATH_FOLDER))) {
-      Files.createDirectory(Path.of(PATH_FOLDER));
-    }
-
-    String filePath = String.format("%serror%s.txt", PATH_FOLDER, dtf.format(now));
-
-    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), StandardCharsets.UTF_8));
-    for (String message : messages) {
-      bw.write(message + "\n");
-    }
-    bw.close();
   }
 
   public static List<Node> findAllNodeByTag(Node node, String tagName) {
