@@ -10,53 +10,68 @@ import javafx.scene.input.MouseEvent;
 import java.util.List;
 import java.util.function.Consumer;
 import javafx.scene.control.MultipleSelectionModel;
+import org.plateau.citygmleditor.citymodel.AttributeValue;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.SelectionModel;
 
 public class AddingAttributeController {
 
     @FXML
-    private ListView<String> attributeListView;
+    private TableView<AttributeValue> attributeTableView;
+    @FXML
+    private TableColumn<AttributeValue, String> name;
+    @FXML
+    private TableColumn<AttributeValue, String> description;
+
     @FXML
     private TextField searchField;
 
-    private final ObservableList<String> allAttributes = FXCollections.observableArrayList();
-    private Consumer<MultipleSelectionModel<String>> onItemSelected;
+    private final ObservableList<AttributeValue> allAttributes = FXCollections.observableArrayList();
+    private Consumer<SelectionModel<AttributeValue>> onItemSelected;
 
     public void initialize() {
+        name.setCellValueFactory(new PropertyValueFactory<>("name"));
+        description.setCellValueFactory(new PropertyValueFactory<>("description"));
         // 検索フィールドのリスナーを設定
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterList(newValue));
     }
 
     // コールバックを設定するメソッド
-    public void setItemSelectedCallback(Consumer<MultipleSelectionModel<String>> onItemSelected) {
+    public void setItemSelectedCallback(Consumer<SelectionModel<AttributeValue>> onItemSelected) {
         this.onItemSelected = onItemSelected;
     }
 
-    public void setList(List<String> list) {
+    public void setList(List<AttributeValue> list) {
         allAttributes.setAll(list);
+        attributeTableView.setItems(allAttributes); // TableViewにアイテムを設定
         filterList(""); // 初期表示時に全ての項目を表示
     }
 
     private void filterList(String filter) {
         if (filter == null || filter.trim().isEmpty()) {
-            attributeListView.setItems(allAttributes);
+            attributeTableView.setItems(allAttributes);
         } else {
-            ObservableList<String> filteredList = FXCollections.observableArrayList();
-            for (String attribute : allAttributes) {
-                if (attribute.toLowerCase().contains(filter.toLowerCase())) {
+            ObservableList<AttributeValue> filteredList = FXCollections.observableArrayList();
+            for (AttributeValue attribute : allAttributes) {
+                if (attribute.nameProperty().getValue().toLowerCase().contains(filter.toLowerCase())) {
                     filteredList.add(attribute);
                 }
             }
-            attributeListView.setItems(filteredList);
+            attributeTableView.setItems(filteredList);
         }
     }
 
     @FXML
     private void handleMouseClick(MouseEvent event) {
         if (event.getClickCount() == 2) {
-            MultipleSelectionModel<String> selectedItem = attributeListView.getSelectionModel();
+            // TableViewの選択モデルを取得
+            SelectionModel<AttributeValue> selectionModel = attributeTableView.getSelectionModel();
 
-            if (selectedItem != null && onItemSelected != null) {
-                onItemSelected.accept(selectedItem);
+            if (selectionModel != null && onItemSelected != null) {
+                // コンシューマに選択モデルを渡す
+                onItemSelected.accept(selectionModel);
             }
         }
     }

@@ -66,6 +66,7 @@ import javafx.scene.Scene;
 import java.io.IOException;
 import javafx.scene.control.Tooltip;
 import org.plateau.citygmleditor.citymodel.CodeSpaceValue;
+import org.plateau.citygmleditor.citymodel.AttributeValue;
 
 public class AttributeEditorController implements Initializable {
     public TreeTableView<AttributeItem> attributeTreeTable;
@@ -601,15 +602,14 @@ public class AttributeEditorController implements Initializable {
             return null;
         }
 
-        List<String> attributeLists = new ArrayList<>();
+        List<AttributeValue> attributeLists = new ArrayList<>();
         for (ArrayList<String> attribute : attributeList) {
-            // listView.getItems().add(attribute.get(0));
-            attributeLists.add(attribute.get(0));
+            attributeLists.add(new AttributeValue(attribute.get(0), attribute.get(2)));
         }
         addingAttributeController.setList(attributeLists);
         // // メニュー内の要素をダブルクリックで要素を追加
         addingAttributeController.setItemSelectedCallback(selectedItem -> {
-            String selectedItemName = selectedItem.getSelectedItem();
+            String selectedItemName = selectedItem.getSelectedItem().nameProperty().getValue();
             int selectedItemndex = selectedItem.getSelectedIndex();
             addAttribute(childList, selectedAttributeKeyName, "uro:" + selectedItemName,
                     attributeList.get(selectedItemndex).get(1), attributeList);
@@ -655,26 +655,23 @@ public class AttributeEditorController implements Initializable {
             Node rootNode = uroAttributeDocument.getDocumentElement();
             Element targetElement = (Element) rootNode;
             NodeList elementNodeList = rootNode.getChildNodes();
-
             for (int i = 0; i < elementNodeList.getLength(); i++) {
                 Node node = elementNodeList.item(i);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     targetElement = (Element) node;
                     // すでに追加済みのアイテムは除く
-                    if (!treeViewRootItemList.contains("uro:" + targetElement.getAttribute("name"))) {
-                        ArrayList<String> attributeSet = new ArrayList<String>();
-                        attributeSet.add(targetElement.getAttribute("name"));
-                        attributeSet.add(targetElement.getAttribute("type"));
-
-                        Node childNode = node.getChildNodes().item(0);
-                        Element childElement = (Element) childNode;
-                        if (childElement != null) {
-                            attributeSet.add(childElement.getAttribute("name"));
-                        } else {
-                            attributeSet.add(null);
-                        }
-                        attributeList.add(attributeSet);
-                    }
+                    ArrayList<String> attributeSet = new ArrayList<String>();
+                    attributeSet.add(targetElement.getAttribute("name"));
+                    attributeSet.add(targetElement.getAttribute("type"));
+                    attributeSet.add(targetElement.getAttribute("annotation"));
+                    Node childNode = node.getChildNodes().item(0);
+                    Element childElement = (Element) childNode;
+                    // if (childElement != null) {
+                    // attributeSet.add(childElement.getAttribute("name"));
+                    // } else {
+                    // attributeSet.add(null);
+                    // }
+                    attributeList.add(attributeSet);
                 }
             }
         } else {
@@ -723,7 +720,7 @@ public class AttributeEditorController implements Initializable {
                             ArrayList<String> attributeSet = new ArrayList<>();
                             attributeSet.add(element.getAttribute("name"));
                             attributeSet.add(element.getAttribute("type"));
-                            attributeSet.add(element.getAttribute("minOccurs"));
+                            attributeSet.add(element.getAttribute("annotation"));
                             attributeList.add(attributeSet);
                         }
                     }
@@ -935,7 +932,10 @@ public class AttributeEditorController implements Initializable {
         String indentString = new String(new char[indent]).replace("\0", "    ");
 
         // ノードの基本情報を表示
-        System.out.println(indentString + "Node Name: " + node.getNodeName() + ", Type: " + node.getNodeType());
+        System.out.println(
+                indentString + "Node Name: " + ((Element) node).getAttribute("name") + ", Type: "
+                        + ((Element) node).getAttribute("type")
+                        + ", annotation: " + ((Element) node).getAttribute("annotation"));
         // 子ノードがある場合は再帰的に表示
         if (node.hasChildNodes()) {
             NodeList children = node.getChildNodes();

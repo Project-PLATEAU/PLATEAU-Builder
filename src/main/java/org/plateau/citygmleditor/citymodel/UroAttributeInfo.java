@@ -52,6 +52,9 @@ public class UroAttributeInfo {
                 if (((Element) parentNode).getTagName() == "xs:schema" && element.getAttribute("abstract") != "true") {
                     // 最上位の属性をノードとして格納
                     Node importedNode = uroDocument.importNode(element, false);
+                    Element importedElement = (Element) importedNode;
+                    String annotation = getAnnotation(importedNode);
+                    importedElement.setAttribute("annotation", annotation);
                     rootElement.appendChild(importedNode);
                     NodeList complexTypeNodeList = document.getElementsByTagName("xs:complexType");
                     traverseComplexType(complexTypeNodeList, element.getAttribute("type").substring(4),
@@ -116,7 +119,10 @@ public class UroAttributeInfo {
                         // System.out.println("element.getAttribute(\"name\"):" +
                         // element.getAttribute("name"));
                         Node importedNode = uroDocument.importNode(elementNode, false);
-                        parentElement.appendChild(importedNode);
+                        String annotation = getAnnotation(elementNode);
+                        Element importedElement = (Element) importedNode;
+                        parentElement.setAttribute("annotation", annotation);
+                        parentElement.appendChild(importedElement);
                         traverseComplexType(complexTypeNodeList, elementType, (Element) importedNode);
                     }
                 }
@@ -136,10 +142,31 @@ public class UroAttributeInfo {
                 }
                 if (element.getAttribute("name") != "") {
                     Node importedNode = uroDocument.importNode(elementNode, false);
-                    parentElement.appendChild(importedNode);
+                    Element importedElement = (Element) importedNode;
+                    String annotation = getAnnotation(elementNode);
+                    importedElement.setAttribute("annotation", annotation);
+                    parentElement.appendChild(importedElement);
                 }
             }
         }
+
+    }
+
+    private String getAnnotation(Node node) {
+        // 子ノードを取得
+        NodeList childNodes = node.getChildNodes();
+        Node child = childNodes.item(1);
+        // 子ノードがElementの場合、そのタグ名をチェック
+        if (child instanceof Element) {
+            Element childElement = (Element) child;
+            if (childElement.getTagName().equals("xs:annotation")) {
+                child = child.getChildNodes().item(1).getChildNodes().item(0);
+                String value = child.getNodeValue();
+                return value;
+            }
+        }
+        // <xs:documentation>要素が見つからなかった場合はfalseを返す
+        return "null";
 
     }
 
@@ -165,15 +192,10 @@ public class UroAttributeInfo {
                 String nodeNameLowerCase = nodeName.toLowerCase();
                 String abstractInfo = element.getAttribute("abstract");
 
-                if (nodeNameSet.contains(nodeNameLowerCase)) {
-                    // 既に小文字で同じ名前のノードが存在する場合は、大文字で始まるノードを削除対象に
-                    if (Character.isUpperCase(nodeName.charAt(0))) {
-                        removeNodeList.add(childNode);
-                    }
-                } else {
-                    nodeNameSet.add(nodeNameLowerCase);
+                // 大文字で始まるノードを削除対象に
+                if (Character.isUpperCase(nodeName.charAt(0))) {
+                    removeNodeList.add(childNode);
                 }
-
                 // abstract="true"属性を持つノードを削除対象に
                 if (abstractInfo.equals("true")) {
                     removeNodeList.add(childNode);
@@ -209,7 +231,8 @@ public class UroAttributeInfo {
             Element element = (Element) node;
             // ノードの情報を表示
             System.out.println(indent + "Tag Name: " + element.getTagName() + "   Node Name: "
-                    + element.getAttribute("name") + "   Parent TagName: " + element.getParentNode());
+                    + element.getAttribute("name") + "___" + element.getAttribute("annotation") + "   Parent TagName: "
+                    + element.getParentNode());
 
             // 子ノードがあれば、それぞれに対してこのメソッドを再帰的に呼び出す
             NodeList childNodes = node.getChildNodes();
