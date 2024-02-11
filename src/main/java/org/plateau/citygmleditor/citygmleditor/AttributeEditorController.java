@@ -89,6 +89,7 @@ public class AttributeEditorController implements Initializable {
         // コンテキストメニュー
         ContextMenu contextMenu = new ContextMenu();
         MenuItem addItem = new MenuItem("追加");
+        MenuItem editItem = new MenuItem("編集");
         MenuItem deleteItem = new MenuItem("削除");
         // 削除ボタン押下時の挙動
         deleteItem.setOnAction(event -> {
@@ -103,7 +104,6 @@ public class AttributeEditorController implements Initializable {
                 int parentIndex = attributeTreeTable.getRoot().getChildren().indexOf(parentItem);
                 // 選択されたアイテムのインデックスを親の子リストから取得
                 int selectedIndex = parentItem.getChildren().indexOf(selectedItem);
-                System.out.println(parentIndex + "____" + selectedIndex);
                 // 削除処理
                 removeAttribute(
                         (ChildList<ADEComponent>) selectedBuilding.getGenericApplicationPropertyOfAbstractBuilding(),
@@ -129,7 +129,25 @@ public class AttributeEditorController implements Initializable {
             }
         });
 
-        contextMenu.getItems().addAll(addItem, deleteItem);
+        // 編集ボタン押下時の挙動
+        editItem.setOnAction(event -> {
+            TreeItem<AttributeItem> selectedItem = attributeTreeTable.getSelectionModel().getSelectedItem();
+            if (selectedItem != null && selectedItem.getParent() != null) {
+                // 選択状態のアイテム名を取得
+                String selectedAttributeKeyName = selectedItem.getValue().keyProperty().get();
+                // 親のTreeItemを取得し、アイテム名を取得
+                TreeItem<AttributeItem> parentItem = selectedItem.getParent();
+                String parentAttributeKeyName = parentItem.getValue().keyProperty().get();
+                // 親のインデックスを取得
+                int parentIndex = attributeTreeTable.getRoot().getChildren().indexOf(parentItem);
+                // 選択されたアイテムのインデックスを親の子リストから取得
+                int selectedIndex = parentItem.getChildren().indexOf(selectedItem);
+                editAttribute(
+                        (ChildList<ADEComponent>) selectedBuilding.getGenericApplicationPropertyOfAbstractBuilding(),
+                        selectedAttributeKeyName, parentAttributeKeyName, parentIndex, selectedIndex);
+            }
+        });
+        contextMenu.getItems().addAll(addItem, editItem, deleteItem);
 
         // TreeViewの各行に対する処理
         attributeTreeTable.setRowFactory(treeView -> {
@@ -157,10 +175,13 @@ public class AttributeEditorController implements Initializable {
                         StringBuilder tooltipText = new StringBuilder();
                         if (item.uomProperty().getValue() != null
                                 && !item.uomProperty().getValue().isEmpty()) {
-                            tooltipText.append("UOM: ").append(item.uomProperty().getValue());
+                            tooltipText.append("uom: ").append(item.uomProperty().getValue());
                         }
                         if (item.codeSpaceProperty().getValue() != null
                                 && !item.codeSpaceProperty().getValue().isEmpty()) {
+                            if (tooltipText == null) {
+                                tooltipText.append("\n");
+                            }
                             tooltipText.append("codeSpace: ").append(item.codeSpaceProperty().getValue());
                         }
                         // ツールチップを設定
@@ -287,12 +308,13 @@ public class AttributeEditorController implements Initializable {
                 return;
             // 子の内容を属性値として登録して再帰処理を終了
             AttributeItem attribute;
-            if (uom == "") {
-                attribute = new AttributeItem(node.getNodeName(), firstChild.getNodeValue(), uom, codeSpace);
-            } else {
-                attribute = new AttributeItem(node.getNodeName() + "  uom(" + uom + ")", firstChild.getNodeValue(), uom,
-                        codeSpace);
-            }
+            // if (uom == "") {
+            attribute = new AttributeItem(node.getNodeName(), firstChild.getNodeValue(), uom, codeSpace);
+            // } else {
+            // attribute = new AttributeItem(node.getNodeName() + " uom(" + uom + ")",
+            // firstChild.getNodeValue(), uom,
+            // codeSpace);
+            // }
             attribute.valueProperty().addListener((observable, oldValue, newValue) -> {
                 firstChild.setNodeValue(newValue);
             });
@@ -431,7 +453,7 @@ public class AttributeEditorController implements Initializable {
         NodeList nodeList = rootNode.getChildNodes();
         Element baseElement = null;
 
-        // 削除対象の基準となる親要素を取得
+        // 確認対象の基準となる親要素を取得
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -509,18 +531,80 @@ public class AttributeEditorController implements Initializable {
             attributeLists.add(new AttributeValue(attribute.get(0), attribute.get(2)));
         }
         addingAttributeController.setList(attributeLists);
+
         // // メニュー内の要素をダブルクリックで要素を追加
         addingAttributeController.setItemSelectedCallback(selectedItem -> {
             String selectedItemName = selectedItem.getSelectedItem().nameProperty().getValue();
             int selectedItemndex = selectedItem.getSelectedIndex();
-            addAttribute(childList, selectedAttributeKeyName, "uro:" + selectedItemName,
-                    attributeList.get(selectedItemndex).get(1), attributeList);
+
+            //
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/add-attribute-form.fxml"));
+                Parent formRoot = loader.load();
+                InputAttributeFormController inputAttributeFormController = loader.getController();
+                inputAttributeFormController.initialize(childList, selectedAttributeKeyName, "uro:" + selectedItemName,
+                        attributeList.get(selectedItemndex).get(1), attributeList, uroAttributeDocument);
+                // 新しいウィンドウ（ステージ）の設定
+                Stage stage = new Stage();
+                stage.setTitle("属性の追加");
+                stage.setScene(new Scene(formRoot));
+                // ボタンが押されたことを検知するコールバックを設定
+                inputAttributeFormController.setOnAddButtonPressedCallback(() -> {
+                    stage.close();
+                    refreshListView();
+                    // 必要に応じて他の処理を実行
+                });
+                // ウィンドウを表示
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             pStage.close();
         });
 
         pStage.setScene(new Scene(root));
         pStage.show();
         return attributeList;
+    }
+
+    private void editAttribute(ChildList<ADEComponent> childList, String selectedItemName, String parentItemName,
+            int parentIndex,
+            int selectedIndex) {
+        if (parentIndex == -1) {
+            // アラートを作成
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("編集エラー");
+            alert.setHeaderText(null);
+            alert.getDialogPane().getStylesheets().add(getClass().getResource("viewer.css").toExternalForm());
+            alert.getDialogPane().getStyleClass().add("alert");
+            alert.setContentText("編集可能な対象ではありません。");
+            // アラートを表示
+            alert.showAndWait();
+            return;
+        }
+        try {
+            ArrayList<ArrayList<String>> attributeList = getUroList("uro:" + selectedItemName);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/add-attribute-form.fxml"));
+            Parent formRoot = loader.load();
+            InputAttributeFormController inputAttributeFormController = loader.getController();
+            inputAttributeFormController.initialize(childList, "uro:" + selectedItemName,
+                    getType(selectedItemName, parentItemName), parentIndex, selectedIndex);
+            // 新しいウィンドウ（ステージ）の設定
+            Stage stage = new Stage();
+            stage.setTitle("属性の編集");
+            stage.setScene(new Scene(formRoot));
+            // ボタンが押されたことを検知するコールバックを設定
+            inputAttributeFormController.setOnAddButtonPressedCallback(() -> {
+                stage.close();
+                refreshListView();
+                // 必要に応じて他の処理を実行
+            });
+            // ウィンドウを表示
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -630,159 +714,6 @@ public class AttributeEditorController implements Initializable {
             }
         }
         return attributeList;
-    }
-
-    /**
-     * inputCodeSpace
-     * CodeSpace属性を入力させ、属性として格納する
-     *
-     * @param doc     現在選択している地物のDocument
-     * @param element 追加予定のElement
-     */
-    private void inputCodeSpace(org.w3c.dom.Document doc, Element element) {
-        String datasetPath = CityGMLEditorApp.getDatasetPath();
-        String codeListDirPath = datasetPath + "\\codelists";
-        Stage codeTypeStage = new Stage();
-        final Stage valueStage = new Stage();
-        ListView<String> listView = new ListView<>();
-        File folder = new File(codeListDirPath);
-        // final CodeSpaceValueMenuController codeSpaceValueMenuController = null;
-        Parent root = null;
-        FXMLLoader loader = null;
-
-        // フォルダ内のファイル名をリストビューに追加
-        for (File file : Objects.requireNonNull(folder.listFiles())) {
-            listView.getItems().add(file.getName());
-        }
-        try {
-            loader = new FXMLLoader(getClass().getResource("fxml/codeSpace-Menu.fxml"));
-            root = loader.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        final CodeSpaceValueMenuController codeSpaceValueMenuController = loader.getController();
-        final Parent finalRoot = root; // root を final にする
-        CodeSpaceAttributeInfo codeSpaceAttributeInfo = new CodeSpaceAttributeInfo();
-
-        // リストビューのアイテムがダブルクリックされた場合の処理
-        listView.setOnMouseClicked((MouseEvent event) -> {
-            if (event.getClickCount() == 2) {
-                String selectedFile = listView.getSelectionModel().getSelectedItem();
-                String codeListPath = codeListDirPath + "\\" + selectedFile;
-                element.setAttribute("codeSpace", "../../codelists/" + selectedFile);
-                codeSpaceAttributeInfo.readCodeType(codeListPath);
-                codeSpaceValueMenuController.setCodeType(codeSpaceAttributeInfo.getCodeTypeDocument());
-                valueStage.setScene(new Scene(finalRoot));
-                valueStage.show();
-
-                // リストビューを閉じる
-                codeTypeStage.close();
-            }
-        });
-
-        // codeSpaceValueMenuControllerで表示されるメニューにおいて、選択行為がされたら呼び出される
-        codeSpaceValueMenuController.setItemSelectedCallback(selectedItem -> {
-            String name = selectedItem.nameProperty().getValue();
-            element.setTextContent(name);
-            // リストビューを閉じる
-            valueStage.close();
-            refreshListView();
-        });
-
-        // 配置
-        VBox vbRoot = new VBox();
-        vbRoot.setAlignment(Pos.CENTER);
-        vbRoot.setSpacing(20);
-        vbRoot.getChildren().addAll(listView);
-
-        codeTypeStage.setTitle("codeSpaceの選択");
-        codeTypeStage.setWidth(500);
-        codeTypeStage.setHeight(300);
-        codeTypeStage.setScene(new Scene(vbRoot));
-        codeTypeStage.show();
-    }
-
-    /**
-     * inputUom
-     * Uom属性を入力させ、属性として格納する
-     */
-    private void inputUom(Element element) {
-        // テキスト入力ダイアログの作成
-        TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("uom属性入力フォーム");
-        dialog.setHeaderText("原則：長さの単位は m,面積の単位は m2,時間の単位は hour");
-        dialog.setContentText("uom:");
-
-        // ダイアログを表示し、結果を取得
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(uomValue -> {
-            element.setAttribute("uom", uomValue);
-        });
-    }
-
-    /**
-     * sortElement
-     * 要素をソートしてモデル情報に反映する
-     *
-     * @param childList           選択中の地物のNodeList
-     * @param parentAttributeName ソート対象要素の親の名前
-     * @param attributeList       パースしたuro要素の情報一覧（ソートの基準となる）
-     */
-    private void sortElement(ChildList<ADEComponent> childList, String parentAttributeName,
-            ArrayList<ArrayList<String>> attributeList) {
-        NodeList targetNodeList = null;
-        ArrayList<String> nameOrder = new ArrayList<>();
-        Element parentElement = null;
-
-        // 名前のリストの作成
-        for (ArrayList<String> attribute : attributeList) {
-            if (!attribute.isEmpty()) {
-                // 各リストの最初の要素をnameOrderに追加
-                nameOrder.add("uro:" + attribute.get(0));
-            }
-        }
-
-        // ソート対象のNodeListの取得
-        for (int i = 0; i < childList.size(); i++) {
-            var adeComponent = childList.get(i);
-            var adeElement = (ADEGenericElement) adeComponent;
-            Element element = (Element) adeElement.getContent();
-
-            // 親要素を見つけたら新要素を追加
-            if (element.getTagName().equals(parentAttributeName)) {
-                parentElement = element;
-                targetNodeList = element.getChildNodes();
-                Node childNode = targetNodeList.item(0);
-                Element childElement = (Element) childNode;
-                if (childElement.getTagName().toLowerCase().equals(element.getTagName().toLowerCase())) {
-                    targetNodeList = childNode.getChildNodes();
-                    parentElement = childElement;
-                }
-            }
-        }
-
-        // NodeListをArrayListに変換
-        ArrayList<Node> sortedNodes = new ArrayList<>();
-        if (targetNodeList != null) {
-            for (int i = 0; i < targetNodeList.getLength(); i++) {
-                sortedNodes.add(targetNodeList.item(i));
-            }
-            // ソート
-            Collections.sort(sortedNodes, new Comparator<Node>() {
-                @Override
-                public int compare(Node node1, Node node2) {
-                    int index1 = nameOrder.indexOf(node1.getNodeName());
-                    int index2 = nameOrder.indexOf(node2.getNodeName());
-                    // nameOrderに含まれていない要素はリストの最後に配置
-                    index1 = index1 == -1 ? Integer.MAX_VALUE : index1;
-                    index2 = index2 == -1 ? Integer.MAX_VALUE : index2;
-                    return Integer.compare(index1, index2);
-                }
-            });
-
-            clearNodeChildren((Node) parentElement);
-            setNewNodeChildren((Node) parentElement, sortedNodes);
-        }
     }
 
     /**
