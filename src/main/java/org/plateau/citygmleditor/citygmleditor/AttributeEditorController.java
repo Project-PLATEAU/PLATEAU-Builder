@@ -90,7 +90,6 @@ public class AttributeEditorController implements Initializable {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem addItem = new MenuItem("追加");
         MenuItem deleteItem = new MenuItem("削除");
-
         // 削除ボタン押下時の挙動
         deleteItem.setOnAction(event -> {
             TreeItem<AttributeItem> selectedItem = attributeTreeTable.getSelectionModel().getSelectedItem();
@@ -100,10 +99,15 @@ public class AttributeEditorController implements Initializable {
                 // 親のTreeItemを取得し、アイテム名を取得
                 TreeItem<AttributeItem> parentItem = selectedItem.getParent();
                 String parentAttributeKeyName = parentItem.getValue().keyProperty().get();
+                // 親のインデックスを取得
+                int parentIndex = attributeTreeTable.getRoot().getChildren().indexOf(parentItem);
+                // 選択されたアイテムのインデックスを親の子リストから取得
+                int selectedIndex = parentItem.getChildren().indexOf(selectedItem);
+                System.out.println(parentIndex + "____" + selectedIndex);
                 // 削除処理
                 removeAttribute(
                         (ChildList<ADEComponent>) selectedBuilding.getGenericApplicationPropertyOfAbstractBuilding(),
-                        selectedAttributeKeyName, parentAttributeKeyName);
+                        selectedAttributeKeyName, parentAttributeKeyName, parentIndex, selectedIndex);
             }
         });
 
@@ -327,12 +331,14 @@ public class AttributeEditorController implements Initializable {
      * removeAttribute
      * 対象の要素を削除する
      *
-     * @param childList                    確認対象の要素
+     * @param childList                    確認対象
      * @param deleteAttributeKeyName       削除対象の要素の名前
      * @param deleteAttributeParentKeyName 削除対象の親要素の名前（ツリービュー上）
+     * @param parentIndex                  親要素のindex(ツリービュー上)
+     * @param index                        要素のindex(ツリービュー上)
      */
     private void removeAttribute(ChildList<ADEComponent> childList, String deleteAttributeKeyName,
-            String deleteAttributeParentKeyName) {
+            String deleteAttributeParentKeyName, int parentIndex, int index) {
         if (deleteAttributeParentKeyName != null) {
             // 削除可能な対象かを確認
             if (!isDeletable(deleteAttributeKeyName, deleteAttributeParentKeyName)) {
@@ -350,47 +356,22 @@ public class AttributeEditorController implements Initializable {
             }
         }
         for (int i = 0; i < childList.size(); i++) {
-            var adeComponent = childList.get(i);
-            var adeElement = (ADEGenericElement) adeComponent;
-            Node node = adeElement.getContent();
-            String nodeTagName = ((Element) node).getTagName();
-            // 第一階層の要素が削除対象である場合、削除
-            if (nodeTagName.equals(deleteAttributeKeyName)) {
-                childList.remove(i);
+            if (parentIndex == -1) {
+                childList.remove(index - 1);
+                refreshListView();
+                return;
+            } else {
+                var adeComponent = childList.get(parentIndex - 1);
+                var adeElement = (ADEGenericElement) adeComponent;
+                Node content = adeElement.getContent();
+                Node parentNode = content.getChildNodes().item(0);
+                Node removeNode = parentNode.getChildNodes().item(index);
+                parentNode.removeChild(removeNode);
                 refreshListView();
                 return;
             }
-            // 再帰的に削除対象の要素を探し、削除
-            traverseAndRemoveAttribute(node, deleteAttributeKeyName);
         }
         refreshListView();
-    }
-
-    /**
-     * traverseAndRemoveAttribute
-     * 親メソッドから与えられたノードの子要素を探索し、削除する
-     *
-     * @param node                   確認対象のノード群
-     * @param deleteAttributeKeyName 削除対象の要素の名前
-     */
-    private void traverseAndRemoveAttribute(Node node, String deleteAttributeKeyName) {
-        var childNodes = node.getChildNodes();
-        var firstChild = node.getFirstChild();
-        if (childNodes.getLength() == 1 && firstChild instanceof CharacterData)
-            return;
-        for (int i = 0; i < childNodes.getLength(); ++i) {
-            var childNode = childNodes.item(i);
-
-            // ここでの文字列要素はタブ・改行なので飛ばす
-            if (childNode instanceof CharacterData)
-                continue;
-            // Node xmlNode = ((Node) childNode);
-            String tagName = ((Element) childNode).getTagName();
-            if (tagName.equals(deleteAttributeKeyName)) {
-                node.removeChild(childNode);
-            }
-            traverseAndRemoveAttribute(childNode, deleteAttributeKeyName);
-        }
     }
 
     /**
@@ -473,85 +454,6 @@ public class AttributeEditorController implements Initializable {
             }
         }
         return null;
-    }
-
-    /**
-     * addAttribute
-     * 要素の追加を行う
-     *
-     * @param childList           選択中の地物の要素リスト
-     * @param parentAttributeName 選択中のリストビューのアイテム名
-     * @param addAttributeName    追加する要素の名前
-     * @param type                追加する要素が持つタイプ
-     * @param attributeList       パースしたuro要素の情報一覧
-     */
-    private void addAttribute(ChildList<ADEComponent> childList, String parentAttributeName,
-            String addAttributeName, String type, ArrayList<ArrayList<String>> attributeList) {
-        String namespaceURI = uroAttributeDocument.getDocumentElement().getAttribute("xmlns:uro");
-        if (parentAttributeName == null) {
-            var adeComponent = childList.get(0);
-            var adeElement = (ADEGenericElement) adeComponent;
-            Node node = adeElement.getContent();
-            Element element = (Element) node;
-            org.w3c.dom.Document doc = node.getOwnerDocument();
-
-            if (addAttributeName != null) {
-                Element newElement = doc.createElementNS(namespaceURI, addAttributeName);
-                ADEGenericElement newAdelement = new ADEGenericElement(newElement);
-                childList.add(childList.size(), (ADEComponent) newAdelement);
-
-                // 型要素があるかどうかを確認し、あれば追加
-                for (int i = 0; i < attributeList.size(); i++) {
-                    if (!attributeList.get(i).isEmpty() && attributeList.get(i).get(2) != null) {
-                        if (("uro:" + attributeList.get(i).get(2).toLowerCase())
-                                .matches(addAttributeName.toLowerCase())) {
-                            Node parentNode = newAdelement.getContent();
-                            Element newChildElement = doc.createElementNS(namespaceURI,
-                                    "uro:" + attributeList.get(i).get(2));
-                            parentNode.appendChild(newChildElement);
-                        }
-                    }
-                }
-            }
-        } else {
-            for (int i = 0; i < childList.size(); i++) {
-                var adeComponent = childList.get(i);
-                var adeElement = (ADEGenericElement) adeComponent;
-                Node node = adeElement.getContent();
-                Element element = (Element) node;
-                String nodeTagName = element.getTagName();
-
-                // 親要素を見つけたら新要素を追加
-                if (nodeTagName.equals(parentAttributeName)) {
-                    NodeList childNodeList = node.getChildNodes();
-                    Node childNode = childNodeList.item(0);
-                    nodeTagName = nodeTagName.toLowerCase();
-                    org.w3c.dom.Document doc = element.getOwnerDocument();
-                    Element newElement = doc.createElementNS(namespaceURI, addAttributeName);
-                    newElement.setTextContent("NULL");
-
-                    if (type.matches("gml:CodeType")) {
-                        inputCodeSpace(doc, newElement);
-                    } else if (type.matches("gml:MeasureType") | type.matches("gml:LengthType")
-                            | type.matches("gml::MeasureOrNullListType")) {
-                        inputUom(newElement);
-                    }
-
-                    if (childNode != null) {
-                        if (nodeTagName.matches(((Element) childNode).getTagName().toLowerCase())) {
-                            childNode.appendChild(newElement);
-                        } else {
-                            node.appendChild(newElement);
-                        }
-                    } else {
-                        node.appendChild(newElement);
-                    }
-                }
-            }
-        }
-        // 要素をソート
-        sortElement(childList, parentAttributeName, attributeList);
-        refreshListView();
     }
 
     /**
