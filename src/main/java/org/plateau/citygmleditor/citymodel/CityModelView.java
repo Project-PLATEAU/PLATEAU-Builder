@@ -39,6 +39,10 @@ public class CityModelView extends Parent {
         this.rgbTextureAppearance = appearance;
     }
 
+    public void addRGBTextureAppearances(AppearanceView appearance) {
+        this.rgbTextureAppearance.addSurfaceData(appearance.getSurfaceData());
+    }
+
     public String getGmlPath() {
         return gmlPath;
     }
@@ -54,5 +58,10 @@ public class CityModelView extends Parent {
     public void addCityObjectMember(BuildingView cityObjectMember) {
         this.cityObjectMembers.add(cityObjectMember);
         this.getChildren().add(cityObjectMember);
+    }
+
+    public void removeCityObjectMember(BuildingView cityObjectMember) {
+        this.cityObjectMembers.remove(cityObjectMember);
+        this.getChildren().remove(cityObjectMember);
     }
 }

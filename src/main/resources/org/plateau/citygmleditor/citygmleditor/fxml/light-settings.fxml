@@ -1,209 +1,143 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.plateau.citygmleditor.citygmleditor.LightSettingsController"
-            minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-    <VBox spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <padding>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-        </padding>
-        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ライト">
-            <font>
-                <Font size="16.0"/>
-            </font>
-        </Text>
-        <Accordion>
-            <panes>
-                <TitledPane animated="false" expanded="false" prefHeight="120.0"
-                            text="アンビエント">
-                    <VBox maxWidth="1.7976931348623157E308" prefHeight="180.0"
-                          spacing="10.0">
-                        <padding>
-                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                        </padding>
-                        <HBox prefWidth="200.0">
-                            <VBox.margin>
-                                <Insets/>
-                            </VBox.margin>
-                            <padding>
-                                <Insets left="100.0"/>
-                            </padding>
-                            <CheckBox fx:id="ambientEnableCheckbox"
-                                      mnemonicParsing="false" text="有効"/>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT">
-                            <ColorPicker fx:id="ambientColorPicker"
-                                         prefWidth="120.0"/>
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="背景色"/>
-                        </HBox>
-                    </VBox>
-                </TitledPane>
-                <TitledPane animated="false" expanded="false" prefHeight="200.0"
-                            text="ライト１(カメラ)">
-                    <VBox spacing="10.0">
-                        <padding>
-                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                        </padding>
-                        <HBox maxWidth="1.7976931348623157E308">
-                            <padding>
-                                <Insets left="100.0"/>
-                            </padding>
-                            <CheckBox fx:id="light1EnabledCheckBox"
-                                      mnemonicParsing="false" text="有効"/>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT"
-                              maxWidth="1.7976931348623157E308" minHeight="30.0"
-                              prefHeight="100.0" spacing="5.0">
-                            <ColorPicker id="ambientColorPicker"
-                                         fx:id="light1ColorPicker"
-                                         prefWidth="120.0"/>
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="ライトカラー"/>
-                        </HBox>
-                        <HBox prefHeight="100.0" prefWidth="200.0">
-                            <padding>
-                                <Insets left="100.0"/>
-                            </padding>
-                            <CheckBox fx:id="light1followCameraCheckBox"
-                                      mnemonicParsing="false"
-                                      text="Lock to Camera"/>
-                        </HBox>
-                        <HBox alignment="CENTER" minHeight="30.0" spacing="10.0">
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="X"/>
-                            <Slider fx:id="light1x" majorTickUnit="20.0"
-                                    maxWidth="1.7976931348623157E308"
-                                    min="-100.0" minorTickCount="5"
-                                    prefWidth="250.0" showTickLabels="true"
-                            />
-                        </HBox>
-                        <HBox minHeight="30.0" spacing="10.0">
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="Y"/>
-                            <Slider fx:id="light1y" majorTickUnit="20.0"
-                                    min="-100.0" minorTickCount="5"
-                                    prefWidth="250.0" showTickLabels="true"
-                            />
-                        </HBox>
-                        <HBox minHeight="30.0" spacing="10.0">
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="Z"/>
-                            <Slider fx:id="light1z" majorTickUnit="20.0"
-                                    min="-100.0" minorTickCount="5"
-                                    prefWidth="250.0" showTickLabels="true"
-                            />
-                        </HBox>
-                    </VBox>
-                </TitledPane>
-                <TitledPane animated="false" prefHeight="180.0" text="ライト2">
-                    <VBox spacing="10.0">
-                        <padding>
-                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                        </padding>
-                        <HBox maxWidth="1.7976931348623157E308">
-                            <padding>
-                                <Insets left="100.0"/>
-                            </padding>
-                            <CheckBox fx:id="light2EnabledCheckBox"
-                                      mnemonicParsing="false" text="有効"/>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT"
-                              maxWidth="1.7976931348623157E308" minHeight="30.0"
-                              prefHeight="100.0" spacing="5.0">
-                            <ColorPicker id="ambientColorPicker"
-                                         fx:id="light2ColorPicker"
-                                         prefWidth="120.0"/>
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="ライトカラー"/>
-                        </HBox>
-                        <HBox alignment="CENTER" minHeight="30.0" spacing="10.0">
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="X"/>
-                            <Slider fx:id="light2x" majorTickUnit="20.0"
-                                    maxWidth="1.7976931348623157E308"
-                                    min="-100.0" minorTickCount="5"
-                                    prefWidth="250.0" showTickLabels="true"
-                            />
-                        </HBox>
-                        <HBox minHeight="30.0" spacing="10.0">
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="Y"/>
-                            <Slider fx:id="light2y" majorTickUnit="20.0"
-                                    min="-100.0" minorTickCount="5"
-                                    prefWidth="250.0" showTickLabels="true"
-                            />
-                        </HBox>
-                        <HBox minHeight="30.0" spacing="10.0">
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="Z"/>
-                            <Slider fx:id="light2z" majorTickUnit="20.0"
-                                    min="-100.0" minorTickCount="5"
-                                    prefWidth="250.0" showTickLabels="true"
-                            />
-                        </HBox>
-                    </VBox>
-                </TitledPane>
-                <TitledPane animated="false" prefHeight="180.0" text="ライト3">
-                    <VBox spacing="10.0">
-                        <padding>
-                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                        </padding>
-                        <HBox maxWidth="1.7976931348623157E308">
-                            <padding>
-                                <Insets left="100.0"/>
-                            </padding>
-                            <CheckBox fx:id="light3EnabledCheckBox"
-                                      mnemonicParsing="false" text="有効"/>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT"
-                              maxWidth="1.7976931348623157E308" minHeight="30.0"
-                              prefHeight="100.0" spacing="5.0">
-                            <ColorPicker id="ambientColorPicker"
-                                         fx:id="light3ColorPicker"
-                                         prefWidth="120.0"/>
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="ライトカラー"/>
-                        </HBox>
-                        <HBox alignment="CENTER" minHeight="30.0" spacing="10.0">
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="X"/>
-                            <Slider fx:id="light3x" majorTickUnit="20.0"
-                                    maxWidth="1.7976931348623157E308"
-                                    min="-100.0" minorTickCount="5"
-                                    prefWidth="250.0" showTickLabels="true"
-                            />
-                        </HBox>
-                        <HBox minHeight="30.0" spacing="10.0">
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="Y"/>
-                            <Slider fx:id="light3y" majorTickUnit="20.0"
-                                    min="-100.0" minorTickCount="5"
-                                    prefWidth="250.0" showTickLabels="true"
-                            />
-                        </HBox>
-                        <HBox minHeight="30.0" spacing="10.0">
-                            <Text fill="WHITE" strokeType="OUTSIDE"
-                                  strokeWidth="0.0" text="Z"/>
-                            <Slider fx:id="light3z" majorTickUnit="20.0"
-                                    min="-100.0" minorTickCount="5"
-                                    prefWidth="250.0" showTickLabels="true"
-                            />
-                        </HBox>
-                    </VBox>
-                </TitledPane>
-            </panes>
-        </Accordion>
-    </VBox>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.LightSettingsController">
+     <VBox spacing="5.0">
+         <padding>
+             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+         <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ライト">
+             <font>
+                 <Font size="16.0" />
+             </font>
+         </Text>
+         <Accordion maxWidth="1.7976931348623157E308">
+             <panes>
+                 <TitledPane animated="false" expanded="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="アンビエント">
+                     <VBox fx:id="tabContentsArea" prefHeight="180.0" spacing="10.0">
+                         <padding>
+                             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                         </padding>
+                         <HBox prefWidth="200.0">
+                             <VBox.margin>
+                                 <Insets />
+                             </VBox.margin>
+                             <padding>
+                                 <Insets left="100.0" />
+                             </padding>
+                             <CheckBox fx:id="ambientEnableCheckbox" mnemonicParsing="false" text="有効" />
+                         </HBox>
+                         <HBox alignment="CENTER_LEFT">
+                             <ColorPicker fx:id="ambientColorPicker" prefWidth="120.0" />
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="背景色" />
+                         </HBox>
+                     </VBox>
+                 </TitledPane>
+                 <TitledPane fx:id="tabContentsArea" animated="false" expanded="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="ライト１(カメラ)">
+                     <VBox fx:id="tabContentsArea" spacing="10.0">
+                         <padding>
+                             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                         </padding>
+                         <HBox>
+                             <padding>
+                                 <Insets left="100.0" />
+                             </padding>
+                             <CheckBox fx:id="light1EnabledCheckBox" mnemonicParsing="false" text="有効" />
+                         </HBox>
+                         <HBox alignment="CENTER_LEFT" minHeight="30.0" prefHeight="100.0" spacing="5.0">
+                             <ColorPicker id="ambientColorPicker" fx:id="light1ColorPicker" prefWidth="120.0" />
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ライトカラー" />
+                         </HBox>
+                         <HBox prefHeight="100.0" prefWidth="200.0">
+                             <padding>
+                                 <Insets left="100.0" />
+                             </padding>
+                             <CheckBox fx:id="light1followCameraCheckBox" mnemonicParsing="false" text="Lock to Camera" />
+                         </HBox>
+                         <HBox alignment="CENTER" minHeight="30.0" spacing="10.0">
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="X" />
+                             <Slider fx:id="light1x" majorTickUnit="20.0" maxWidth="1.7976931348623157E308" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" />
+                         </HBox>
+                         <HBox minHeight="30.0" spacing="10.0">
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Y" />
+                             <Slider fx:id="light1y" majorTickUnit="20.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" />
+                         </HBox>
+                         <HBox minHeight="30.0" spacing="10.0">
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Z" />
+                             <Slider fx:id="light1z" majorTickUnit="20.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" />
+                         </HBox>
+                     </VBox>
+                 </TitledPane>
+                 <TitledPane fx:id="tabContentsArea" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="ライト2">
+                     <VBox fx:id="tabContentsArea" spacing="10.0">
+                         <padding>
+                             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                         </padding>
+                         <HBox maxWidth="1.7976931348623157E308">
+                             <padding>
+                                 <Insets left="100.0" />
+                             </padding>
+                             <CheckBox fx:id="light2EnabledCheckBox" mnemonicParsing="false" text="有効" />
+                         </HBox>
+                         <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" minHeight="30.0" prefHeight="100.0" spacing="5.0">
+                             <ColorPicker id="ambientColorPicker" fx:id="light2ColorPicker" prefWidth="120.0" />
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ライトカラー" />
+                         </HBox>
+                         <HBox alignment="CENTER" minHeight="30.0" spacing="10.0">
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="X" />
+                             <Slider fx:id="light2x" majorTickUnit="20.0" maxWidth="1.7976931348623157E308" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" />
+                         </HBox>
+                         <HBox minHeight="30.0" spacing="10.0">
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Y" />
+                             <Slider fx:id="light2y" majorTickUnit="20.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" />
+                         </HBox>
+                         <HBox minHeight="30.0" spacing="10.0">
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Z" />
+                             <Slider fx:id="light2z" majorTickUnit="20.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" />
+                         </HBox>
+                     </VBox>
+                 </TitledPane>
+                 <TitledPane fx:id="tabContentsArea" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="ライト3">
+                     <VBox fx:id="tabContentsArea" spacing="10.0">
+                         <padding>
+                             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                         </padding>
+                         <HBox>
+                             <padding>
+                                 <Insets left="100.0" />
+                             </padding>
+                             <CheckBox fx:id="light3EnabledCheckBox" mnemonicParsing="false" text="有効" />
+                         </HBox>
+                         <HBox alignment="CENTER_LEFT" minHeight="30.0" prefHeight="100.0" spacing="5.0">
+                             <ColorPicker id="ambientColorPicker" fx:id="light3ColorPicker" prefWidth="120.0" />
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ライトカラー" />
+                         </HBox>
+                         <HBox alignment="CENTER" minHeight="30.0" spacing="10.0">
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="X" />
+                             <Slider fx:id="light3x" majorTickUnit="20.0" maxWidth="1.7976931348623157E308" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" />
+                         </HBox>
+                         <HBox minHeight="30.0" spacing="10.0">
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Y" />
+                             <Slider fx:id="light3y" majorTickUnit="20.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" />
+                         </HBox>
+                         <HBox minHeight="30.0" spacing="10.0">
+                             <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Z" />
+                             <Slider fx:id="light3z" majorTickUnit="20.0" min="-100.0" minorTickCount="5" prefWidth="250.0" showTickLabels="true" />
+                         </HBox>
+                     </VBox>
+                 </TitledPane>
+             </panes>
+         </Accordion>
+     </VBox>
 </AnchorPane>

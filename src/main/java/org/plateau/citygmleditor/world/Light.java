@@ -30,7 +30,6 @@ public class Light {
     private PointLight light1 = new PointLight(Color.WHITE);
     private PointLight light2 = new PointLight(Color.ANTIQUEWHITE);
     private PointLight light3 = new PointLight(Color.ALICEBLUE);
-    private AutoScalingGroup autoScalingGroup;
     private Group root3D;
 
     private SimpleBooleanProperty ambientLightEnabled = new SimpleBooleanProperty(false) {
@@ -142,7 +141,6 @@ public class Light {
     }
 
     public Light() {
-        this.autoScalingGroup = CityGMLEditorApp.getAutoScalingGroup();
         this.root3D = World.getRoot3D();
     }
 }

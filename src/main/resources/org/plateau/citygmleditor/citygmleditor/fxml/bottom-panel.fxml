@@ -8,6 +8,7 @@
 <HBox id="statusBar" fx:id="statusBar" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="600.0" styleClass="bottom" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
     <Label fx:id="status" text="Label" />
     <Pane maxWidth="1.7976931348623157E308" prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
+    <fx:include source="info-footer.fxml" />
     <fx:include source="fps.fxml" />
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

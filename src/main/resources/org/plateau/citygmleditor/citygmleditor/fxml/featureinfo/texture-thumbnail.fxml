@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+
+<TitledPane fx:id="titledPane" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="テクスチャ" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.TextureThumbnailController">
+    <VBox fx:id="tabContentsArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+        <TilePane fx:id="tilePane" hgap="10" minHeight="150.0" prefColumns="3" style="-fx-padding: 10;" vgap="10">
+            <!-- Placeholder images -->
+        </TilePane>
+    </VBox>
+    <stylesheets>
+        <URL value="@../../viewer.css" />
+    </stylesheets>
+</TitledPane>
