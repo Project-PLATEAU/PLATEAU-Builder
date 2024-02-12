@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.URL?>
 <?import javafx.scene.layout.BorderPane?>
 
-<?import java.net.URL?>
-<BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.MainController">
+<BorderPane prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.MainController">
    <top>
        <fx:include source="top-panel.fxml" />
    </top>
@@ -11,7 +11,7 @@
        <fx:include source="right-side-panel.fxml" />
    </right>
    <left>
-       <fx:include source="left-side-panel.fxml" />
+       <fx:include maxHeight="1.7976931348623157E308" source="left-side-panel.fxml" />
    </left>
    <bottom>
        <fx:include source="bottom-panel.fxml" />

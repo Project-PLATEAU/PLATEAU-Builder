@@ -83,6 +83,19 @@ public class SurfaceTypeEditorController implements Initializable {
                     break;
                 }
             }
+            updateToggle();
         }));
+    }
+
+    private void updateToggle() {
+        if (section == null || view == null)
+            return;
+
+        for (var toggle : toggleGroup.getToggles()) {
+            if (toggle.getUserData() == view.getSurfaceType(section)) {
+                toggleGroup.selectToggle(toggle);
+                break;
+            }
+        }
     }
 }
