@@ -29,22 +29,13 @@
                         <padding>
                             <Insets left="100.0" />
                         </padding>
-                        <CheckBox fx:id="showGridCheckBox" mnemonicParsing="false" text="グリッドの表示" />
-                    </HBox>
-                    <HBox prefWidth="200.0">
-                        <VBox.margin>
-                            <Insets />
-                        </VBox.margin>
-                        <padding>
-                            <Insets left="100.0" />
-                        </padding>
-                        <CheckBox fx:id="yUpCheckBox" mnemonicParsing="false" selected="true" text="YUP" />
+                        <CheckBox fx:id="showGridCheckBox" selected="true" mnemonicParsing="false" text="グリッドの表示" />
                     </HBox>
                     <HBox layoutX="20.0" layoutY="80.0" prefWidth="200.0">
                         <padding>
                             <Insets left="100.0" />
                         </padding>
-                        <CheckBox fx:id="msaaCheckBox" mnemonicParsing="false" text="MSAAアンチエリアシング" />
+                        <CheckBox fx:id="msaaCheckBox" selected="true" mnemonicParsing="false" text="MSAAアンチエリアシング" />
                     </HBox>
                     <HBox alignment="CENTER_LEFT" layoutX="20.0" layoutY="108.0" minHeight="30.0" prefHeight="0.0" spacing="5.0">
                         <ColorPicker fx:id="backgroundColorPicker" prefWidth="120.0" />

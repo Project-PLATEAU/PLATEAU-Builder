@@ -59,7 +59,6 @@ public class CityGMLEditorApp extends Application {
     private static Light light;
     private static SceneContent sceneContent;
     private static AntiAliasing antiAliasing;
-    private static AutoScalingGroup autoScalingGroups;
     private static CityModelViewMode cityModelViewMode;
     private static UroAttributeInfo uroAttributeInfo;
     private static String datasetPath;
@@ -96,9 +95,6 @@ public class CityGMLEditorApp extends Application {
         return antiAliasing;
     }
 
-    public static AutoScalingGroup getAutoScalingGroup() {
-        return autoScalingGroups;
-    }
 
     public static FeatureSelection getFeatureSellection() {
         return selection;
@@ -131,19 +127,16 @@ public class CityGMLEditorApp extends Application {
         uroAttributeInfo = new UroAttributeInfo();
 
         World.setActiveInstance(new World(), new Group());
-        autoScalingGroups = new AutoScalingGroup(2);
         light = new Light();
         antiAliasing = new AntiAliasing();
         camera = new Camera();
         sceneContent = new SceneContent();
 
         antiAliasing.setSceneContent();
-        camera.setSceneContent();
 
         coordinateGrid = new CoordinateGrid();
 
-        World.getRoot3D().getChildren().add(camera.getCameraXform());
-        World.getRoot3D().getChildren().add(autoScalingGroups);
+        World.getActiveInstance().setCamera(camera);
 
         sceneContent.rebuildSubScene();
 

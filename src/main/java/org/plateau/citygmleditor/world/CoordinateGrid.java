@@ -4,12 +4,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import org.plateau.citygmleditor.citygmleditor.AutoScalingGroup;
 import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 
 public class CoordinateGrid {
     private Group grid;
-    private AutoScalingGroup autoScalingGroup;
 
     private SimpleBooleanProperty showGrid = new SimpleBooleanProperty(true) {
         @Override
@@ -18,9 +16,9 @@ public class CoordinateGrid {
                 if (grid == null) {
                     createGrid();
                 }
-                autoScalingGroup.getChildren().add(grid);
+                World.getRoot3D().getChildren().add(grid);
             } else if (grid != null) {
-                autoScalingGroup.getChildren().remove(grid);
+                World.getRoot3D().getChildren().remove(grid);
             }
         }
     };
@@ -57,9 +55,5 @@ public class CoordinateGrid {
             }
             grid.getChildren().addAll(lineX, lineY);
         }
-    }
-
-    public CoordinateGrid() {
-        this.autoScalingGroup = CityGMLEditorApp.getAutoScalingGroup();
     }
 }

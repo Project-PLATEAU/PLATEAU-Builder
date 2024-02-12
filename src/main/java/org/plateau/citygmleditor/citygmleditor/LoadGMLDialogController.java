@@ -48,14 +48,15 @@ public class LoadGMLDialogController {
      */
     public void onAddGML(ActionEvent actionEvent) {
         try {
-            var root = CityGMLEditorApp.getSceneContent().getContent();
+            var world = World.getActiveInstance();
+            var root = world.getCityModelGroup();
             for (var gmlFile : gmlFiles) {
                 var newroot = GmlImporter.loadGml(gmlFile.toString(), World.getActiveInstance().getGeoReference().getEPSGCode(), false);
                 ((Group) root).getChildren().add(((Group) newroot).getChildren().get(0));
                 // ツリー更新のため一度変更する
-                CityGMLEditorApp.getSceneContent().setContent(newroot);
+                world.setCityModelGroup(root);
             }
-            CityGMLEditorApp.getSceneContent().setContent(root);
+            world.setCityModelGroup(root);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -65,7 +66,7 @@ public class LoadGMLDialogController {
     /**
      * 座標系選択ダイアログ表示
      * 
-     * @param file
+     * @param files
      */
     public static void createLoadGMLDialog(List<File> files) {
         try {
