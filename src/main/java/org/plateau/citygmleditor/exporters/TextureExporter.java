@@ -44,6 +44,8 @@ public class TextureExporter {
 
         // テクスチャのエクスポート
         AppearanceView tempAppearance = cityModel.getRGBTextureAppearance();
+        if(tempAppearance == null)
+            return;
         ArrayList<SurfaceDataView> tempSurfaceDatas = tempAppearance.getSurfaceData();
         String appearanceDirName = "";
         int count = 0;

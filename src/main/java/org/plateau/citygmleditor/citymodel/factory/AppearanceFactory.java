@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.citymodel.factory;
 
+import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.paint.PhongMaterial;
 import org.citygml4j.model.citygml.CityGMLClass;
@@ -14,7 +15,7 @@ import java.nio.file.Paths;
 
 public class AppearanceFactory extends CityGMLFactory {
 
-    protected AppearanceFactory(CityModelView target) {
+    public AppearanceFactory(CityModelView target) {
         super(target);
     }
 
@@ -41,13 +42,12 @@ public class AppearanceFactory extends CityGMLFactory {
 
         // サイズが大きすぎるテクスチャがあると極端にパフォーマンス落ちるためリサイズ
         // TODO: 元の解像度で表示
-        var image = new Image(imageAbsolutePath.toString(), 256, 256, true, false);
+        var image = new Image(imageAbsolutePath.toUri().toString(), 256, 256, true, false);
         var material = new PhongMaterial();
         material.setDiffuseMap(image);
 
         var surfaceData = new SurfaceDataView(parameterizedTexture);
         surfaceData.setMaterial(material);
-
         for (var target : parameterizedTexture.getTarget()) {
             if (target.getTextureParameterization().getCityGMLClass() == CityGMLClass.TEX_COORD_LIST) {
                 var textureParameter = (TexCoordList) target.getTextureParameterization();

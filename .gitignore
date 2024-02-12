@@ -10,4 +10,7 @@ nbproject
 target
 
 # セッションプロパティの保存先
-/CityGMLEditor_session.properties
+/*.properties
+
+# 自動生成される入出力ファイル
+/validation-*

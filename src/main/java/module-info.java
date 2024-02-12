@@ -17,41 +17,81 @@ module CityGMLEditor {
     requires transitive java.xml.bind;
     requires transitive com.sun.xml.xsom;
     requires j3d.core.utils;
-	requires jgltf.model;
+    requires org.apache.commons.lang3;
+    requires org.locationtech.jts;
+    requires jgltf.model;
     requires jgltf.model.builder;
     requires jgltf.impl.v1;
     requires jgltf.impl.v2;
     requires com.fasterxml.jackson.core;
+    requires com.sun.xml.fastinfoset;
     requires commons.math3;
-    requires org.locationtech.jts;
     requires proj4j;
+    requires vecmath;
+    requires com.sun.xml.bind;
     requires xercesImpl;
+    requires com.fasterxml.jackson.databind;
+    requires org.apache.commons.io;
 
     provides Importer with
             ObjOrPolyObjImporter;
 
     exports org.plateau.citygmleditor.importers;
     exports org.plateau.citygmleditor.importers.obj;
+    exports org.plateau.citygmleditor.constant;
 
-    exports org.plateau.citygmleditor;
-    opens org.plateau.citygmleditor to javafx.fxml, javafx.graphics;
+    opens org.plateau.citygmleditor.constant;
+
+    exports org.plateau.citygmleditor.modelstandard;
     exports org.plateau.citygmleditor.citygmleditor;
+
     opens org.plateau.citygmleditor.citygmleditor to javafx.fxml, javafx.graphics;
+
     exports org.plateau.citygmleditor.geometry;
+
     opens org.plateau.citygmleditor.geometry to javafx.fxml, javafx.graphics;
+
     exports org.plateau.citygmleditor.importers.gml;
+
     opens org.plateau.citygmleditor.importers.gml to javafx.fxml, javafx.graphics;
+
     exports org.plateau.citygmleditor.validation;
     exports org.plateau.citygmleditor.citymodel;
+
     opens org.plateau.citygmleditor.citymodel to javafx.fxml, javafx.graphics;
+
     exports org.plateau.citygmleditor.citymodel.geometry;
+
     opens org.plateau.citygmleditor.citymodel.geometry to javafx.fxml, javafx.graphics;
+
     exports org.plateau.citygmleditor.utils3d.geom;
+
     opens org.plateau.citygmleditor.utils3d.geom to javafx.fxml, javafx.graphics;
+
     exports org.plateau.citygmleditor.utils3d.polygonmesh;
+
     opens org.plateau.citygmleditor.utils3d.polygonmesh to javafx.fxml, javafx.graphics;
+
     exports org.plateau.citygmleditor.fxml;
+
     opens org.plateau.citygmleditor.fxml to javafx.fxml, javafx.graphics;
+
+    exports org.plateau.citygmleditor.fxml.featureinfo;
+
+    opens org.plateau.citygmleditor.fxml.featureinfo to javafx.fxml, javafx.graphics;
+
+    exports org.plateau.citygmleditor.fxml.validation;
+
+    opens org.plateau.citygmleditor.fxml.validation to javafx.fxml, javafx.graphics;
+
+    exports org.plateau.citygmleditor.control;
+
+    opens org.plateau.citygmleditor.control to javafx.fxml, javafx.graphics;
+
+    exports org.plateau.citygmleditor.world;
+
+    opens org.plateau.citygmleditor.world to javafx.fxml, javafx.graphics;
+    opens org.plateau.citygmleditor.validation;
 
     uses Importer;
 }
