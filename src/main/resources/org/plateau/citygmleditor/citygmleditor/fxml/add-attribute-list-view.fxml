@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.plateau.citygmleditor.citygmleditor.AddAttributeListViewController">
+<VBox fx:id="addingAttributeMenu" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.AddingAttributeMenuController">
     <!-- 検索ボックス -->
-    <TextField fx:id="searchField" promptText="Search" />
+    <TextField fx:id="searchField" promptText="Search"/>
     
-    <!-- ListView -->
-    <ListView fx:id="attributeListView" />
+    <!-- TableView -->
+    <TableView fx:id="attributeTableView" onMouseClicked="#handleMouseClick">
+        <columns>
+            <TableColumn fx:id="name" text="name" />
+            <TableColumn fx:id="description" text="description" />
+        </columns>
+    </TableView>
 </VBox>
