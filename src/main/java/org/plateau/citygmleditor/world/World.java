@@ -1,12 +1,8 @@
 package org.plateau.citygmleditor.world;
 
-import java.util.List;
-import java.util.ArrayList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;
 import javax.swing.plaf.synth.Region;
 import javafx.scene.SubScene;
@@ -20,19 +16,9 @@ import org.plateau.citygmleditor.geometry.GeoReference;
 public class World {
     private static World activeInstance;
     private static Group root3D;
-    private ObjectProperty<Group> cityModelGroup = new SimpleObjectProperty<>();
-    {
-        cityModelGroup.addListener((observable, oldValue, newValue) -> {
-            newValue.setViewOrder(10);
-            root3D.getChildren().remove(oldValue);
-            root3D.getChildren().add(newValue);
-        });
-    }
-
-    private ObjectProperty<GeoReference> geoReference = new SimpleObjectProperty<>();
-    private List<CityModelView> cityModel;
+    private GeoReference geoReference;
+    private CityModelView cityModel;
     private Material defaultMaterial;
-    private Camera camera;
 
     public World() {
         defaultMaterial = new PhongMaterial(Color.WHITE);
@@ -52,10 +38,6 @@ public class World {
     }
 
     public GeoReference getGeoReference() {
-        return geoReference.get();
-    }
-
-    public ObjectProperty<GeoReference> getGeoReferenceProperty() {
         return geoReference;
     }
 
@@ -64,40 +46,14 @@ public class World {
     }
 
     public void setGeoReference(GeoReference geoReference) {
-        this.geoReference.set(geoReference);
+        this.geoReference = geoReference;
     }
 
-    public List<CityModelView> getCityModels() {
+    public CityModelView getCityModel() {
         return cityModel;
     }
 
     public void setCityModel(CityModelView cityModel) {
-        this.cityModel = new ArrayList<CityModelView>();
-        this.cityModel.add(cityModel);
-    }
-
-    public void addCityModel(CityModelView cityModel) {
-        this.cityModel.add(cityModel);
-    }
-
-    public Camera getCamera() {
-        return camera;
-    }
-
-    public void setCamera(Camera camera) {
-        this.camera = camera;
-        root3D.getChildren().add(camera.getRoot());
-    }
-
-    public Group getCityModelGroup() {
-        return cityModelGroup.get();
-    }
-
-    public ObjectProperty<Group> cityModelGroupProperty() {
-        return cityModelGroup;
-    }
-
-    public void setCityModelGroup(Group cityModelGroup) {
-        this.cityModelGroup.set(cityModelGroup);
+        this.cityModel = cityModel;
     }
 }

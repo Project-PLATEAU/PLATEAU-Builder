@@ -1,9 +1,5 @@
 package org.plateau.citygmleditor.exporters;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import org.citygml4j.CityGMLContext;
 import org.citygml4j.ade.iur.UrbanRevitalizationADEContext;
 import org.citygml4j.builder.copy.CopyBuilder;
@@ -22,39 +18,11 @@ import org.citygml4j.xml.io.writer.CityGMLWriteException;
 import org.citygml4j.xml.io.writer.CityGMLWriter;
 import org.citygml4j.xml.io.writer.FeatureWriteMode;
 import org.citygml4j.xml.schema.SchemaHandler;
-import org.plateau.citygmleditor.citymodel.helpers.SchemaHelper;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Objects;
 
 public class GmlExporter {
-
-    public static void export(String fileUrl, CityModel cityModel, SchemaHandler schemaHandler)
-        throws ADEException, CityGMLBuilderException, CityGMLWriteException {
-        OutputStream outputStream = null;
-        try {
-            var file = new File(fileUrl);
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            }
-            outputStream = new FileOutputStream(file);
-            export(outputStream, cityModel, schemaHandler);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
-
-    public static void export(OutputStream outputStream, CityModel cityModel, SchemaHandler schemaHandler) throws ADEException, CityGMLBuilderException, CityGMLWriteException {
+    public static void export(String fileUrl, CityModel cityModel, SchemaHandler schemaHandler) throws ADEException, CityGMLBuilderException, CityGMLWriteException {
         CityGMLContext context = CityGMLContext.getInstance();
 
         if (!context.hasADEContexts())
@@ -73,26 +41,17 @@ public class GmlExporter {
 
         //out.setProperty(CityGMLOutputFactory.EXCLUDE_FROM_SPLITTING, ADEComponent.class);
 
-        CityGMLWriter writer = out.createCityGMLWriter(outputStream, "utf-8");
+        CityGMLWriter writer = out.createCityGMLWriter(new File(fileUrl), "utf-8");
 
         writer.setPrefixes(moduleContext);
-
-        var uroSchemaURI = SchemaHelper.getUroSchemaURI(schemaHandler);
-        var uroSchemaLocation = SchemaHelper.getUroSchemaLocation(schemaHandler);
-
-        if (uroSchemaURI != null)
-            writer.setPrefix("uro", uroSchemaURI);
-
+        writer.setPrefix("uro", "https://www.geospatial.jp/iur/uro/2.0");
         writer.setPrefix("core", "http://www.opengis.net/citygml/2.0");
         writer.setWriteXMLDecl(true);
 
         //writer.setDefaultNamespace(moduleContext.getModule(CityGMLModuleType.CORE));
 
-        writer.setSchemaLocations(moduleContext);
         // Schema locations
-        if (uroSchemaLocation != null)
-            writer.setSchemaLocation(uroSchemaURI, uroSchemaLocation);
-
+        writer.setSchemaLocation("https://www.geospatial.jp/iur/uro/2.0", "../../schemas/iur/uro/2.0/urbanObject.xsd");
         writer.setSchemaLocation("http://www.opengis.net/citygml/2.0", "http://schemas.opengis.net/citygml/2.0/cityGMLBase.xsd");
         writer.setSchemaLocation("http://www.opengis.net/citygml/landuse/2.0", "http://schemas.opengis.net/citygml/landuse/2.0/landUse.xsd");
         writer.setSchemaLocation("http://www.opengis.net/citygml/building/2.0", "http://schemas.opengis.net/citygml/building/2.0/building.xsd");

@@ -12,7 +12,6 @@ import org.plateau.citygmleditor.citymodel.geometry.LOD3SolidView;
 import org.plateau.citygmleditor.control.BuildingSurfaceTypeView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class BuildingView extends Parent {
@@ -46,15 +45,6 @@ public class BuildingView extends Parent {
                 continue;
 
             ((Node)solid).setVisible(lod == i);
-        }
-    }
-
-    public ILODSolidView getSolid(int lod) {
-        switch (lod) {
-            case 1: return lod1Solid;
-            case 2: return lod2Solid;
-            case 3: return lod3Solid;
-            default: return null;
         }
     }
 
@@ -114,19 +104,5 @@ public class BuildingView extends Parent {
 
     public Envelope getEnvelope() {
         return this.gmlObject.getBoundedBy().getEnvelope();
-    }
-
-    public List<String> getTexturePaths() {
-        var paths = new HashSet<String>();
-        if (lod2Solid != null) {
-            paths.addAll(lod2Solid.getTexturePaths());
-        }
-        if (lod3Solid != null) {
-            paths.addAll(lod3Solid.getTexturePaths());
-        }
-        for (var buildingInstallationView : buildingInstallationViews) {
-            paths.addAll(buildingInstallationView.getTexturePaths());
-        }
-        return new ArrayList<String>(paths);
     }
 }

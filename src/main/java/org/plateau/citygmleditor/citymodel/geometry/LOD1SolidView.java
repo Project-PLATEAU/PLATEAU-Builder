@@ -2,7 +2,6 @@ package org.plateau.citygmleditor.citymodel.geometry;
 
 import java.util.ArrayList;
 
-import javafx.scene.shape.Mesh;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.citygml4j.model.gml.geometry.primitives.Solid;
 
@@ -60,16 +59,6 @@ public class LOD1SolidView extends MeshView implements ILODSolidView {
     @Override
     public TransformManipulator getTransformManipulator() {
         return transformManipulator;
-    }
-
-    @Override
-    public MeshView getMeshView() {
-        return this;
-    }
-
-    @Override
-    public Mesh getTotalMesh() {
-        return getMesh();
     }
 
     @Override

@@ -1,13 +1,8 @@
 package org.plateau.citygmleditor.validation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ValidationResultMessage {
     private ValidationResultMessageType type;
     private String message = "";
-
-    private List<GmlElementError> elementErrors = new ArrayList<>();
 
     ValidationResultMessage() {
     }
@@ -15,13 +10,6 @@ public class ValidationResultMessage {
     public ValidationResultMessage(ValidationResultMessageType type, String message) {
         this.type = type;
         this.message = message;
-    }
-
-    public ValidationResultMessage(ValidationResultMessageType type, String message,
-        List<GmlElementError> elementErrors) {
-        this.type = type;
-        this.message = message;
-        this.elementErrors = elementErrors;
     }
 
     public ValidationResultMessageType getType() {
@@ -38,13 +26,5 @@ public class ValidationResultMessage {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public List<GmlElementError> getElementErrors() {
-        return elementErrors;
-    }
-
-    public void setElementErrors(List<GmlElementError> elementErrors) {
-        this.elementErrors = elementErrors;
     }
 }
