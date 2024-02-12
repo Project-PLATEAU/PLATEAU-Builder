@@ -16,7 +16,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.SelectionModel;
 
-public class AddingAttributeController {
+public class AddingAttributeMenuController {
 
     @FXML
     private TableView<AttributeValue> attributeTableView;
@@ -43,6 +43,12 @@ public class AddingAttributeController {
         this.onItemSelected = onItemSelected;
     }
 
+    /**
+     * setList
+     * 表示するリストを初期化
+     *
+     * @param list 表示したい要素
+     */
     public void setList(List<AttributeValue> list) {
         allAttributes.setAll(list);
         attributeTableView.setItems(allAttributes); // TableViewにアイテムを設定
@@ -68,7 +74,6 @@ public class AddingAttributeController {
         if (event.getClickCount() == 2) {
             // TableViewの選択モデルを取得
             SelectionModel<AttributeValue> selectionModel = attributeTableView.getSelectionModel();
-
             if (selectionModel != null && onItemSelected != null) {
                 // コンシューマに選択モデルを渡す
                 onItemSelected.accept(selectionModel);

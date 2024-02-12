@@ -37,7 +37,7 @@ import java.util.Comparator;
 public class InputAttributeFormController {
 
     @FXML
-    private Label name; // 名前ラベル（使用されていないため、可能であれば具体的な使用方法を検討）
+    private Label name;// 要素名の入力ラベル
 
     @FXML
     private TextField codeSpaceField; // CodeSpaceの入力フィールド
@@ -47,21 +47,18 @@ public class InputAttributeFormController {
 
     @FXML
     private TextField valueField; // 属性値の入力フィールド
-    @FXML
-    private VBox codeSpaceVbox;
 
     @FXML
-    private VBox uomVbox;
+    private VBox codeSpaceVbox; // codeSpaceのVBox
     @FXML
-    private VBox valueVbox;
-
+    private VBox uomVbox; // uomのVBox
     @FXML
-    private Label purposeLabel;
+    private VBox valueVbox; // 属性値のVBox
 
     private ChildList<ADEComponent> childList;
     private String parentAttributeName;
     private String addAttributeName;
-    private String type;
+    private String addAttributeType;
     private ArrayList<ArrayList<String>> attributeList;
     private org.w3c.dom.Document uroAttributeDocument;
     private String codeSpacePath;
@@ -71,19 +68,31 @@ public class InputAttributeFormController {
     private boolean addFlag = false;
     private int parentIndex;
     private int selectedIndex;
+    private ArrayList<ArrayList<String>> requiredChildAttributeList;
 
-    public void initialize(ChildList<ADEComponent> childList, String addAttributeName, String type, int parentIndex,
+    /**
+     * initialize（編集）
+     * inputフォームを動作するために必要な値やフォーム自体の初期化を実施
+     *
+     * @param childList        地物情報のリスト
+     * @param addAttributeName 追加する属性の名前
+     * @param type             追加する属性のタイプ
+     * @param parentIndex      ツリービュー上で選択した属性の親のインデックス
+     * @param selectedIndex    ツリービュー上で選択した属性のインデックス
+     * 
+     */
+    public void initialize(ChildList<ADEComponent> childList, String addAttributeName, String addAttributeType,
+            int parentIndex,
             int selectedIndex) {
         editFlag = true;
         name.setText(name.getText() + addAttributeName);
-        purposeLabel.setText("属性の編集");
         this.childList = childList;
         this.addAttributeName = addAttributeName;
-        this.type = type;
+        this.addAttributeType = addAttributeType;
         this.parentIndex = parentIndex;
         this.selectedIndex = selectedIndex;
 
-        if (type.matches("gml:CodeType")) {
+        if (addAttributeType.matches("gml:CodeType")) {
             // setCodeSpaceField(value);
             String oldCodeSpace = getCodeSpace(childList, parentIndex, selectedIndex);
             setCodeSpaceField(oldCodeSpace.substring(oldCodeSpace.lastIndexOf("/") + 1));
@@ -91,10 +100,9 @@ public class InputAttributeFormController {
             codeSpaceVbox.setManaged(false);
             codeSpaceVbox.setVisible(false);
         }
-        if (type.matches("gml:MeasureType") | type.matches("gml:LengthType")
-                | type.matches("gml::MeasureOrNullListType")) {
+        if (addAttributeType.matches("gml:MeasureType") | addAttributeType.matches("gml:LengthType")
+                | addAttributeType.matches("gml::MeasureOrNullListType")) {
             getUom(childList, parentIndex, selectedIndex);
-            // setUomField(value);
         } else {
             uomVbox.setManaged(false);
             uomVbox.setVisible(false);
@@ -103,25 +111,41 @@ public class InputAttributeFormController {
         setValueField(value);
     }
 
+    /**
+     * initialize（追加）
+     * inputフォームを動作するために必要な値やフォーム自体の初期化を実施
+     *
+     * @param childList                  地物情報のリスト
+     * @param parentAttributeName        ツリービュー上で選択した属性の親の名前
+     * @param addAttributeName           追加する属性の名前
+     * @param addAttributeType           追加する属性のタイプ
+     * @param attributeList              追加する属性の名前
+     * @param uroAttributeDocument       uroの情報を格納しているドキュメント
+     * @param requiredChildAttributeList 追加が必須となっている子属性のリスト
+     * @param parentIndex                ツリービュー上で選択した属性の親のインデックス
+     * @param selectedIndex              ツリービュー上で選択した属性のインデックス
+     */
     public void initialize(ChildList<ADEComponent> childList, String parentAttributeName,
-            String addAttributeName, String type, ArrayList<ArrayList<String>> attributeList,
-            org.w3c.dom.Document uroAttributeDocument) {
+            String addAttributeName, String addAttributeType, ArrayList<ArrayList<String>> attributeList,
+            org.w3c.dom.Document uroAttributeDocument, ArrayList<ArrayList<String>> requiredChildAttributeList,
+            int parentIndex, int selectedIndex) {
         addFlag = true;
         name.setText(name.getText() + addAttributeName);
-        purposeLabel.setText("属性の追加");
         this.childList = childList;
         this.parentAttributeName = parentAttributeName;
         this.addAttributeName = addAttributeName;
-        this.type = type;
+        this.addAttributeType = addAttributeType;
         this.attributeList = attributeList;
         this.uroAttributeDocument = uroAttributeDocument;
-
-        if (!type.matches("gml:CodeType")) {
+        this.requiredChildAttributeList = requiredChildAttributeList;
+        this.parentIndex = parentIndex;
+        this.selectedIndex = selectedIndex;
+        if (!addAttributeType.matches("gml:CodeType")) {
             codeSpaceVbox.setManaged(false);
             codeSpaceVbox.setVisible(false);
         }
-        if (!type.matches("gml:MeasureType") & !type.matches("gml:LengthType")
-                & !type.matches("gml::MeasureOrNullListType")) {
+        if (!addAttributeType.matches("gml:MeasureType") & !addAttributeType.matches("gml:LengthType")
+                & !addAttributeType.matches("gml::MeasureOrNullListType")) {
             uomVbox.setManaged(false);
             uomVbox.setVisible(false);
         }
@@ -194,7 +218,6 @@ public class InputAttributeFormController {
         } else {
             value = parentNode.getChildNodes().item(0).getNodeValue();
         }
-
         return value;
     }
 
@@ -208,10 +231,10 @@ public class InputAttributeFormController {
 
         if (targetNode instanceof Element) {
             Element targetElement = (Element) targetNode;
-            if (codeSpace != null) {
+            if (codeSpace != "") {
                 targetElement.setAttribute("codeSpace", "../../codelists/" + codeSpace);
             }
-            if (uom != null) {
+            if (uom != "") {
                 targetElement.setAttribute("uom", uom);
             }
             targetElement.setTextContent(value);
@@ -250,6 +273,9 @@ public class InputAttributeFormController {
         // ここで取得した値を使用して、データの追加や更新を行います
         if (addFlag) {
             addAttribute(value, codeSpace, uom);
+            if (requiredChildAttributeList != null && requiredChildAttributeList.size() != 0) {
+                showMultipleAttributesForm(requiredChildAttributeList);
+            }
         } else if (editFlag) {
             editAttribute(childList, parentIndex, selectedIndex, codeSpace, uom, value);
         }
@@ -261,89 +287,71 @@ public class InputAttributeFormController {
     /**
      * inputCodeSpace
      * CodeSpace属性を入力させ、属性として格納する
-     *
-     * @param doc     現在選択している地物のDocument
-     * @param element 追加予定のElement
      */
     private void inputCodeSpace() {
         String datasetPath = CityGMLEditorApp.getDatasetPath();
         String codeListDirPath = datasetPath + "\\codelists";
         Stage codeTypeStage = new Stage();
         final Stage valueStage = new Stage();
-        ListView<String> listView = new ListView<>();
         File folder = new File(codeListDirPath);
-        // final CodeSpaceValueMenuController codeSpaceValueMenuController = null;
-        Parent root = null;
-        FXMLLoader loader = null;
-
-        // フォルダ内のファイル名をリストビューに追加
-        for (File file : Objects.requireNonNull(folder.listFiles())) {
-            listView.getItems().add(file.getName());
-        }
+        Parent valueRoot = null;
+        FXMLLoader valueLoader = null;
+        CodeTypeMenuController codeTypeMenuController = null;
         try {
-            loader = new FXMLLoader(getClass().getResource("fxml/codeSpace-Menu.fxml"));
-            root = loader.load();
+            FXMLLoader typeLoader = new FXMLLoader(getClass().getResource("fxml/codeSpace-Type-Menu.fxml"));
+            Parent typeRoot = typeLoader.load();
+            codeTypeMenuController = typeLoader.getController();
+            codeTypeMenuController.setList(folder);
+            codeTypeStage.setTitle("CodeSpaceの選択");
+            codeTypeStage.setScene(new Scene(typeRoot));
+            codeTypeStage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        final CodeSpaceValueMenuController codeSpaceValueMenuController = loader.getController();
-        final Parent finalRoot = root; // root を final にする
+
+        try {
+            valueLoader = new FXMLLoader(getClass().getResource("fxml/codeSpace-Value-Menu.fxml"));
+            valueRoot = valueLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        final CodeSpaceValueMenuController codeSpaceValueMenuController = valueLoader.getController();
+        final Parent finalValueRoot = valueRoot; // root を final にする
         CodeSpaceAttributeInfo codeSpaceAttributeInfo = new CodeSpaceAttributeInfo();
+        codeTypeMenuController.setOnSelectCallback(selectedCodeSpace -> {
+            String selectedFile = selectedCodeSpace;
+            String codeListPath = codeListDirPath + "\\" + selectedFile;
+            setCodeSpaceField(selectedFile);
+            codeSpacePath = "../../codelists/" + selectedFile;
+            codeSpaceAttributeInfo.readCodeType(codeListPath);
+            codeSpaceValueMenuController.setCodeType(codeSpaceAttributeInfo.getCodeTypeDocument());
+            valueStage.setScene(new Scene(finalValueRoot));
+            valueStage.show();
 
-        // リストビューのアイテムがダブルクリックされた場合の処理
-        listView.setOnMouseClicked((MouseEvent event) -> {
-            if (event.getClickCount() == 2) {
-                String selectedFile = listView.getSelectionModel().getSelectedItem();
-                String codeListPath = codeListDirPath + "\\" + selectedFile;
-                setCodeSpaceField(selectedFile);
-                // element.setAttribute("codeSpace", "../../codelists/" + selectedFile);
-                codeSpacePath = "../../codelists/" + selectedFile;
-                codeSpaceAttributeInfo.readCodeType(codeListPath);
-                codeSpaceValueMenuController.setCodeType(codeSpaceAttributeInfo.getCodeTypeDocument());
-                valueStage.setScene(new Scene(finalRoot));
-                valueStage.show();
-
-                // リストビューを閉じる
-                codeTypeStage.close();
-            }
+            // リストビューを閉じる
+            codeTypeStage.close();
         });
 
         // codeSpaceValueMenuControllerで表示されるメニューにおいて、選択行為がされたら呼び出される
         codeSpaceValueMenuController.setItemSelectedCallback(selectedItem -> {
             String name = selectedItem.nameProperty().getValue();
             setValueField(name);
-            // element.setTextContent(name);
             // リストビューを閉じる
             valueStage.close();
-            // refreshListView();
         });
-
-        // 配置
-        VBox vbRoot = new VBox();
-        vbRoot.setAlignment(Pos.CENTER);
-        vbRoot.setSpacing(20);
-        vbRoot.getChildren().addAll(listView);
-
-        codeTypeStage.setTitle("codeSpaceの選択");
-        codeTypeStage.setWidth(500);
-        codeTypeStage.setHeight(300);
-        codeTypeStage.setScene(new Scene(vbRoot));
-        codeTypeStage.show();
     }
 
     /**
      * addAttribute
      * 要素の追加を行う
      *
-     * @param childList           選択中の地物の要素リスト
-     * @param parentAttributeName 選択中のリストビューのアイテム名
-     * @param addAttributeName    追加する要素の名前
-     * @param type                追加する要素が持つタイプ
-     * @param attributeList       パースしたuro要素の情報一覧
+     * @param value     属性値入力フォーム上の値
+     * @param codeSpace codeSpace入力フォーム上の値
+     * @param uom       uom入力フォーム上の値
      */
     private void addAttribute(String value, String codeSpace, String uom) {
         String namespaceURI = uroAttributeDocument.getDocumentElement().getAttribute("xmlns:uro");
-        if (parentAttributeName == null) {
+        if (parentIndex == -2) {
             var adeComponent = childList.get(0);
             var adeElement = (ADEGenericElement) adeComponent;
             Node node = adeElement.getContent();
@@ -357,51 +365,47 @@ public class InputAttributeFormController {
 
                 // 型要素があるかどうかを確認し、あれば追加
                 for (int i = 0; i < attributeList.size(); i++) {
-                    if (!attributeList.get(i).isEmpty() && attributeList.get(i).get(2) != null) {
-                        if (("uro:" + attributeList.get(i).get(2).toLowerCase())
+                    if (!attributeList.get(i).isEmpty() && attributeList.get(i).get(3) != null) {
+                        if (("uro:" + attributeList.get(i).get(3).toLowerCase())
                                 .matches(addAttributeName.toLowerCase())) {
                             Node parentNode = newAdelement.getContent();
                             Element newChildElement = doc.createElementNS(namespaceURI,
-                                    "uro:" + attributeList.get(i).get(2));
+                                    "uro:" + attributeList.get(i).get(3));
                             parentNode.appendChild(newChildElement);
                         }
                     }
                 }
             }
         } else {
-            for (int i = 0; i < childList.size(); i++) {
-                var adeComponent = childList.get(i);
-                var adeElement = (ADEGenericElement) adeComponent;
-                Node node = adeElement.getContent();
-                Element element = (Element) node;
-                String nodeTagName = element.getTagName();
+            var adeComponent = childList.get(selectedIndex - 1);
+            var adeElement = (ADEGenericElement) adeComponent;
+            Node node = adeElement.getContent();
+            Element element = (Element) node;
 
-                // 親要素を見つけたら新要素を追加
-                if (nodeTagName.equals(parentAttributeName)) {
-                    NodeList childNodeList = node.getChildNodes();
-                    Node childNode = childNodeList.item(0);
-                    nodeTagName = nodeTagName.toLowerCase();
-                    org.w3c.dom.Document doc = element.getOwnerDocument();
-                    Element newElement = doc.createElementNS(namespaceURI, addAttributeName);
-                    newElement.setTextContent(value);
+            org.w3c.dom.Document doc = node.getOwnerDocument();
+            String nodeTagName = element.getTagName().toLowerCase();
+            NodeList childNodeList = node.getChildNodes();
+            Node childNode = childNodeList.item(0);
+            Element newElement = doc.createElementNS(namespaceURI, addAttributeName);
+            newElement.setTextContent(value);
 
-                    if (codeSpace != null) {
-                        newElement.setAttribute("codeSpace", codeSpacePath);
-                    } else if (uom != null) {
-                        newElement.setAttribute("uom", uom);
-                    }
-
-                    if (childNode != null) {
-                        if (nodeTagName.matches(((Element) childNode).getTagName().toLowerCase())) {
-                            childNode.appendChild(newElement);
-                        } else {
-                            node.appendChild(newElement);
-                        }
-                    } else {
-                        node.appendChild(newElement);
-                    }
-                }
+            if (codeSpacePath != "") {
+                newElement.setAttribute("codeSpace", codeSpacePath);
             }
+            if (uom != "") {
+                newElement.setAttribute("uom", uom);
+            }
+
+            if (childNode != null) {
+                if (nodeTagName.matches(((Element) childNode).getTagName().toLowerCase())) {
+                    childNode.appendChild(newElement);
+                } else {
+                    node.appendChild(newElement);
+                }
+            } else {
+                node.appendChild(newElement);
+            }
+
         }
         // 要素をソート
         sortElement(childList, parentAttributeName, attributeList);
@@ -492,6 +496,26 @@ public class InputAttributeFormController {
     private void setNewNodeChildren(Node node, ArrayList<Node> childNodes) {
         for (int i = 0; i < childNodes.size(); i++) {
             node.appendChild(childNodes.get(i));
+        }
+    }
+
+    private void showMultipleAttributesForm(ArrayList<ArrayList<String>> requiredChildAttributeList) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/multiple-attributes-form.fxml"));
+            Parent root = loader.load();
+            MultipleAttributesFormController controller = loader.getController();
+            controller.loadAttributeForms(requiredChildAttributeList, childList, uroAttributeDocument,
+                    addAttributeName, attributeList, childList.size());
+            Stage stage = new Stage();
+            stage.setTitle("必須属性の入力");
+            stage.setScene(new Scene(root));
+            stage.show();
+            // ウィンドウを閉じるリクエストがあったときのイベントハンドラを設定
+            stage.setOnHidden(event -> {
+                onAddButtonPressed.run();
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

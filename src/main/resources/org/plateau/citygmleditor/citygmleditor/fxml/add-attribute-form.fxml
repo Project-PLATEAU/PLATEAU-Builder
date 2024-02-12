@@ -8,7 +8,7 @@
     <padding>
         <Insets top="20" right="20" bottom="20" left="20" />
     </padding>
-    <Label fx:id="purposeLabel" />
+
     <Label fx:id="name" text="要素名："/>
     <VBox  fx:id="codeSpaceVbox">
         <Label  text="■ CodeSpaceの入力"/>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ListView?>
+
+<VBox fx:controller="org.plateau.citygmleditor.citygmleditor.CodeTypeMenuController" xmlns:fx="http://javafx.com/fxml">
+    <ListView fx:id="codeTypeListView" />
+</VBox>

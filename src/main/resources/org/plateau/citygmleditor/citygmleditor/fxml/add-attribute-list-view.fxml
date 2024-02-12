@@ -4,7 +4,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="addingAttributeMenu" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.AddingAttributeController">
+<VBox fx:id="addingAttributeMenu" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.AddingAttributeMenuController">
     <!-- 検索ボックス -->
     <TextField fx:id="searchField" promptText="Search"/>
     

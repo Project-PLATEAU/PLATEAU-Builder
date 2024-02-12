@@ -118,14 +118,20 @@ public class AttributeEditorController implements Initializable {
                 // 未選択状態時
                 showListView(
                         (ChildList<ADEComponent>) selectedBuilding.getGenericApplicationPropertyOfAbstractBuilding(),
-                        null);
+                        null, -2, -2);
             } else if (selectedItem != null && selectedItem.getParent() != null) {
                 // アイテム選択時
+                TreeItem<AttributeItem> parentItem = selectedItem.getParent();
+                String parentAttributeKeyName = parentItem.getValue().keyProperty().get();
+                // 親のインデックスを取得
+                Integer parentIndex = attributeTreeTable.getRoot().getChildren().indexOf(parentItem);
                 String selectedAttributeKeyName = selectedItem.getValue().keyProperty().get();
+                // 選択されたアイテムのインデックスを親の子リストから取得
+                int selectedIndex = parentItem.getChildren().indexOf(selectedItem);
                 // 追加可能な属性一覧のメニューを出し、要素を追加
                 showListView(
                         (ChildList<ADEComponent>) selectedBuilding.getGenericApplicationPropertyOfAbstractBuilding(),
-                        selectedAttributeKeyName);
+                        selectedAttributeKeyName, parentIndex, selectedIndex);
             }
         });
 
@@ -497,22 +503,22 @@ public class AttributeEditorController implements Initializable {
      * @return メニューに表示させる要素リスト
      */
     private ArrayList<ArrayList<String>> showListView(ChildList<ADEComponent> childList,
-            String selectedAttributeKeyName) {
-        AddingAttributeController addingAttributeController = null;
+            String selectedAttributeKeyName, int parentIndex, int selectedIndex) {
+        AddingAttributeMenuController addingAttributeMenuController = null;
         Parent root = null;
         Stage pStage = new Stage();
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/add-attribute-list-view.fxml"));
             root = loader.load();
-            addingAttributeController = loader.getController();
+            addingAttributeMenuController = loader.getController();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        ArrayList<ArrayList<String>> attributeList = getUroList(selectedAttributeKeyName);
-        if (attributeList.size() == 0) {
+        ArrayList<ArrayList<String>> addAttributeList = getUroList(selectedAttributeKeyName, false);
+        if (addAttributeList.size() == 0) {
             // アラートを作成
             Alert alert = new Alert(AlertType.WARNING);
             alert.setTitle("追加エラー");
@@ -527,24 +533,25 @@ public class AttributeEditorController implements Initializable {
         }
 
         List<AttributeValue> attributeLists = new ArrayList<>();
-        for (ArrayList<String> attribute : attributeList) {
+        for (ArrayList<String> attribute : addAttributeList) {
             attributeLists.add(new AttributeValue(attribute.get(0), attribute.get(2)));
         }
-        addingAttributeController.setList(attributeLists);
+        addingAttributeMenuController.setList(attributeLists);
 
         // // メニュー内の要素をダブルクリックで要素を追加
-        addingAttributeController.setItemSelectedCallback(selectedItem -> {
+        addingAttributeMenuController.setItemSelectedCallback(selectedItem -> {
             String selectedItemName = selectedItem.getSelectedItem().nameProperty().getValue();
-            int selectedItemndex = selectedItem.getSelectedIndex();
+            int selectedItemIndex = selectedItem.getSelectedIndex();
 
-            //
+            ArrayList<ArrayList<String>> requiredChildAttributeList = getUroList("uro:" + selectedItemName, true);
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/add-attribute-form.fxml"));
                 Parent formRoot = loader.load();
                 InputAttributeFormController inputAttributeFormController = loader.getController();
                 inputAttributeFormController.initialize(childList, selectedAttributeKeyName, "uro:" + selectedItemName,
-                        attributeList.get(selectedItemndex).get(1), attributeList, uroAttributeDocument);
-                // 新しいウィンドウ（ステージ）の設定
+                        addAttributeList.get(selectedItemIndex).get(1), addAttributeList, uroAttributeDocument,
+                        requiredChildAttributeList, parentIndex, selectedIndex);
+
                 Stage stage = new Stage();
                 stage.setTitle("属性の追加");
                 stage.setScene(new Scene(formRoot));
@@ -552,7 +559,6 @@ public class AttributeEditorController implements Initializable {
                 inputAttributeFormController.setOnAddButtonPressedCallback(() -> {
                     stage.close();
                     refreshListView();
-                    // 必要に応じて他の処理を実行
                 });
                 // ウィンドウを表示
                 stage.show();
@@ -565,7 +571,7 @@ public class AttributeEditorController implements Initializable {
 
         pStage.setScene(new Scene(root));
         pStage.show();
-        return attributeList;
+        return addAttributeList;
     }
 
     private void editAttribute(ChildList<ADEComponent> childList, String selectedItemName, String parentItemName,
@@ -584,7 +590,6 @@ public class AttributeEditorController implements Initializable {
             return;
         }
         try {
-            ArrayList<ArrayList<String>> attributeList = getUroList("uro:" + selectedItemName);
             FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/add-attribute-form.fxml"));
             Parent formRoot = loader.load();
             InputAttributeFormController inputAttributeFormController = loader.getController();
@@ -612,9 +617,10 @@ public class AttributeEditorController implements Initializable {
      * 追加メニューの一覧に乗せるUro要素の一覧を返す
      *
      * @param targetName 地物情報のリスト
+     * @param required   追加が必須となっている要素のみを抽出するかどうかを表すflag
      * @return メニューに表示させる要素リスト
      */
-    private ArrayList<ArrayList<String>> getUroList(String targetName) {
+    private ArrayList<ArrayList<String>> getUroList(String targetName, boolean required) {
         ArrayList<ArrayList<String>> attributeList = new ArrayList<ArrayList<String>>();
         ArrayList<String> treeViewRootItemList = new ArrayList<String>();
         ArrayList<String> treeViewChildItemList = new ArrayList<String>();
@@ -635,7 +641,6 @@ public class AttributeEditorController implements Initializable {
             }
         }
         if (targetName == null) {
-            // Root要素の追加
             // Uro要素の取得
             uroAttributeDocument = CityGMLEditorApp.getUroAttributeDocument();
             Node rootNode = uroAttributeDocument.getDocumentElement();
@@ -652,11 +657,12 @@ public class AttributeEditorController implements Initializable {
                     attributeSet.add(targetElement.getAttribute("annotation"));
                     Node childNode = node.getChildNodes().item(0);
                     Element childElement = (Element) childNode;
-                    // if (childElement != null) {
-                    // attributeSet.add(childElement.getAttribute("name"));
-                    // } else {
-                    // attributeSet.add(null);
-                    // }
+                    if (childElement != null) {
+                        attributeSet.add(childElement.getAttribute("name"));
+                    } else {
+                        attributeSet.add(null);
+                    }
+
                     attributeList.add(attributeSet);
                 }
             }
@@ -704,10 +710,20 @@ public class AttributeEditorController implements Initializable {
                         }
                         if (count < max) {
                             ArrayList<String> attributeSet = new ArrayList<>();
-                            attributeSet.add(element.getAttribute("name"));
-                            attributeSet.add(element.getAttribute("type"));
-                            attributeSet.add(element.getAttribute("annotation"));
-                            attributeList.add(attributeSet);
+                            if (required) {
+                                if (element.getAttribute("minOccurs") == ""
+                                        || Integer.parseInt(element.getAttribute("minOccurs")) > 0) {
+                                    attributeSet.add(element.getAttribute("name"));
+                                    attributeSet.add(element.getAttribute("type"));
+                                    attributeSet.add(element.getAttribute("annotation"));
+                                    attributeList.add(attributeSet);
+                                }
+                            } else {
+                                attributeSet.add(element.getAttribute("name"));
+                                attributeSet.add(element.getAttribute("type"));
+                                attributeSet.add(element.getAttribute("annotation"));
+                                attributeList.add(attributeSet);
+                            }
                         }
                     }
                 }
@@ -730,12 +746,12 @@ public class AttributeEditorController implements Initializable {
      * setNewNodeChildren
      * 新しいNodeListをNodeに格納する
      *
-     * @param node       親ノード
-     * @param childNodes 追加したいノード
+     * @param node     親ノード
+     * @param newNodes 追加したいノード
      */
-    private void setNewNodeChildren(Node node, ArrayList<Node> childNodes) {
-        for (int i = 0; i < childNodes.size(); i++) {
-            node.appendChild(childNodes.get(i));
+    private void setNewNodeChildren(Node node, ArrayList<Node> newNodes) {
+        for (int i = 0; i < newNodes.size(); i++) {
+            node.appendChild(newNodes.get(i));
         }
     }
 
