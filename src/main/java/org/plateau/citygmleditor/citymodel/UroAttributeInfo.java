@@ -28,7 +28,7 @@ public class UroAttributeInfo {
             // XMLファイルをパース
             var fileStream = new FileInputStream(path);
             var inputSource = new InputSource(fileStream);
-            parser.parse(path);
+            parser.parse(inputSource);
             // ドキュメントオブジェクトを取得
             document = parser.getDocument();
             // 新しいXMLドキュメントを作成
