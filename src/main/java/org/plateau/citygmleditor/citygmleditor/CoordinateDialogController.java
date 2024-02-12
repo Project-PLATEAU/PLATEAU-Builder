@@ -77,7 +77,7 @@ public class CoordinateDialogController implements Initializable {
 
     /**
      * 読み込むGMLファイルを設定
-     * @param file
+     * @param files
      */
     public void setFiles(List<File> files) {
         gmlFiles = files;
@@ -106,11 +106,11 @@ public class CoordinateDialogController implements Initializable {
                     ((Group)root).getChildren().add(((Group) newroot).getChildren().get(0));
                 }
             }
-            CityGMLEditorApp.getSceneContent().setContent(root);
+            World.getActiveInstance().setCityModelGroup((Group)root);
+            //CityGMLEditorApp.getSceneContent().setContent(root);
 
             var datasetPath = Paths.get(World.getActiveInstance().getCityModels().get(0).getGmlPath()).getParent().getParent()
                     .getParent();
-            // TODO: gmlから参照されるschemaで設定
             var cityModelView = World.getActiveInstance().getCityModels().get(0);
             var schemaHandler = cityModelView.getSchemaHandler();
             var uroSchemaLocation = SchemaHelper.getUroSchemaLocation(schemaHandler);

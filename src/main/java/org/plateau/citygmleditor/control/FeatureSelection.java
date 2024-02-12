@@ -3,7 +3,9 @@ package org.plateau.citygmleditor.control;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
+import javafx.scene.control.TreeItem;
 import javafx.scene.image.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
@@ -60,14 +62,26 @@ public class FeatureSelection {
 
     public void registerClickEvent(Scene scene) {
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+            if (!event.isPrimaryButtonDown())
+                return;
+
+            if (event.getClickCount() == 2) {
+                if (active.get() != null) {
+                    World.getActiveInstance().getCamera().focus(active.get().getLOD1Solid());
+                }
+                event.consume();
+
+                return;
+            }
+
             PickResult pickResult = event.getPickResult();
             var newSelectedMesh = pickResult.getIntersectedNode();
             var feature = getBuilding(newSelectedMesh);
 
+            clear();
+
             if (feature == null)
                 return;
-
-            clear();
 
             var viewMode = CityGMLEditorApp.getCityModelViewMode();
 

@@ -59,6 +59,7 @@ public class GmlImporter {
                 var upperCorner = envelope.getUpperCorner().toList3d();
                 var max = new GeoCoordinate(upperCorner);
                 var center = min.add(max).divide(2);
+                center.alt = 0;
                 world.setGeoReference(new GeoReference(center, epsgCode));
             }
             var cityModelFactory = new CityModelFactory();

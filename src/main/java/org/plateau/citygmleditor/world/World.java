@@ -20,9 +20,19 @@ import org.plateau.citygmleditor.geometry.GeoReference;
 public class World {
     private static World activeInstance;
     private static Group root3D;
+    private ObjectProperty<Group> cityModelGroup = new SimpleObjectProperty<>();
+    {
+        cityModelGroup.addListener((observable, oldValue, newValue) -> {
+            newValue.setViewOrder(10);
+            root3D.getChildren().remove(oldValue);
+            root3D.getChildren().add(newValue);
+        });
+    }
+
     private ObjectProperty<GeoReference> geoReference = new SimpleObjectProperty<>();
     private List<CityModelView> cityModel;
     private Material defaultMaterial;
+    private Camera camera;
 
     public World() {
         defaultMaterial = new PhongMaterial(Color.WHITE);
@@ -68,5 +78,26 @@ public class World {
 
     public void addCityModel(CityModelView cityModel) {
         this.cityModel.add(cityModel);
+    }
+
+    public Camera getCamera() {
+        return camera;
+    }
+
+    public void setCamera(Camera camera) {
+        this.camera = camera;
+        root3D.getChildren().add(camera.getRoot());
+    }
+
+    public Group getCityModelGroup() {
+        return cityModelGroup.get();
+    }
+
+    public ObjectProperty<Group> cityModelGroupProperty() {
+        return cityModelGroup;
+    }
+
+    public void setCityModelGroup(Group cityModelGroup) {
+        this.cityModelGroup.set(cityModelGroup);
     }
 }

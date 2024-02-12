@@ -89,7 +89,6 @@ public class ToolbarController implements Initializable {
                     gizmoModel.attachManipulator(((ILODSolidView)building).getTransformManipulator());
                 }
                 if (gizmoModel.isGizmoDragging(result.getIntersectedNode())) {
-                    CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(true);
                     gizmoModel.setCurrentGizmo(result.getIntersectedNode());
                     vecIni = unprojectDirection(event.getSceneX(), event.getSceneY(), sceneContent.getSubScene().getWidth(), sceneContent.getSubScene().getHeight());
                     distance = result.getIntersectedDistance();
@@ -111,7 +110,6 @@ public class ToolbarController implements Initializable {
         }
         else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
             mouseDragging = false;
-            CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(false);
 
             gizmoModel.fixTransform();
         }

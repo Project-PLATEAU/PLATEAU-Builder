@@ -30,7 +30,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HierarchyController implements Initializable {
-    private final SceneContent sceneContent = CityGMLEditorApp.getSceneContent();
     public TreeTableView<Node> hierarchyTreeTable;
     public TreeTableColumn<Node, String> nodeColumn;
     public TreeTableColumn<Node, String> idColumn;
@@ -41,16 +40,18 @@ public class HierarchyController implements Initializable {
     public MenuItem importGltfMenu;
     public MenuItem importObjMenu;
 
+    private boolean syncingTreeTable = false;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         hierarchyTreeTable.rootProperty().bind(new ObjectBinding<TreeItem<Node>>() {
             {
-                bind(sceneContent.contentProperty());
+                bind(World.getActiveInstance().cityModelGroupProperty());
             }
 
             @Override
             protected TreeItem<Node> computeValue() {
-                Node content3D = sceneContent.getContent();
+                Node content3D = World.getActiveInstance().getCityModelGroup();
                 if (content3D != null) {
                     return new HierarchyController.TreeItemImpl(content3D);
                 } else {
@@ -60,14 +61,27 @@ public class HierarchyController implements Initializable {
         });
 
         CityGMLEditorApp.getFeatureSellection().getActiveFeatureProperty().addListener(observable -> {
-            BuildingView activeFeature = CityGMLEditorApp.getFeatureSellection().getActive();
-            if (activeFeature == null)
+            if (syncingTreeTable)
                 return;
 
-            TreeItem<Node> activeItem = findTreeItem(activeFeature);
-            if (activeItem != null && activeItem != hierarchyTreeTable.getFocusModel().getFocusedItem()) {
-                hierarchyTreeTable.getSelectionModel().select(activeItem);
-                hierarchyTreeTable.scrollTo(hierarchyTreeTable.getRow(activeItem));
+            syncingTreeTable = true;
+
+            try {
+                BuildingView activeFeature = CityGMLEditorApp.getFeatureSellection().getActive();
+                if (activeFeature == null) {
+                    if (hierarchyTreeTable.getSelectionModel().getSelectedItem() != null)
+                        hierarchyTreeTable.getSelectionModel().clearSelection();
+                    return;
+                }
+
+                TreeItem<Node> activeItem = findTreeItem(activeFeature);
+                if (activeItem != null && activeItem != hierarchyTreeTable.getFocusModel().getFocusedItem()) {
+                    expandTreeViewItem(activeItem);
+                    hierarchyTreeTable.getSelectionModel().select(activeItem);
+                    hierarchyTreeTable.scrollTo(hierarchyTreeTable.getRow(activeItem));
+                }
+            } finally {
+                syncingTreeTable = false;
             }
         });
 
@@ -91,7 +105,11 @@ public class HierarchyController implements Initializable {
                 }
             }
             if (t.getButton() == MouseButton.PRIMARY && t.getClickCount() == 2) {
-                // TODO: フォーカス
+                TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
+                if (selectedItem != null && selectedItem.valueProperty().get() instanceof BuildingView) {
+                    var building = (BuildingView)selectedItem.valueProperty().get();
+                    World.getActiveInstance().getCamera().focus(building.getLOD1Solid());
+                }
                 t.consume();
             }
         });
@@ -199,7 +217,7 @@ public class HierarchyController implements Initializable {
         if (file == null)
             return;
 
-        var content = (Group)sceneContent.getContent();
+        var content = (Group)World.getActiveInstance().getCityModelGroup();
         var cityModelNode = content.getChildren().get(0);
         if (cityModelNode == null)
             return;
@@ -220,7 +238,8 @@ public class HierarchyController implements Initializable {
             node.setId(content.getId());
             node.getChildren().add(convertedCityModel);
 
-            CityGMLEditorApp.getSceneContent().setContent(node);
+            //CityGMLEditorApp.getSceneContent().setContent(node);
+            World.getActiveInstance().setCityModelGroup(node);
 
             // 位置合わせ
             var id = lodSolidView.getParent().getId();
@@ -236,7 +255,7 @@ public class HierarchyController implements Initializable {
         if (file == null)
             return;
 
-        var content = (Group)sceneContent.getContent();
+        var content = (Group)World.getActiveInstance().getCityModelGroup();
         var cityModelNode = content.getChildren().get(0);
         if (cityModelNode == null)
             return;
@@ -257,7 +276,7 @@ public class HierarchyController implements Initializable {
             node.setId(content.getId());
             node.getChildren().add(convertedCityModel);
 
-            CityGMLEditorApp.getSceneContent().setContent(node);
+            World.getActiveInstance().setCityModelGroup(node);
 
             // 位置合わせ
             var id = lodSolidView.getParent().getId();
@@ -265,6 +284,13 @@ public class HierarchyController implements Initializable {
 
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void expandTreeViewItem(TreeItem<?> item) {
+        if (item != null && item.getParent() != null) {
+            item.getParent().setExpanded(true);
+            expandTreeViewItem(item.getParent());
         }
     }
 
@@ -281,16 +307,6 @@ public class HierarchyController implements Initializable {
                     getChildren().add(new HierarchyController.TreeItemImpl(n));
                 }
             }
-            node.setOnMouseClicked(t -> {
-                TreeItem<Node> parent = getParent();
-                while (parent != null) {
-                    parent.setExpanded(true);
-                    parent = parent.getParent();
-                }
-                hierarchyTreeTable.getSelectionModel().select(HierarchyController.TreeItemImpl.this);
-                hierarchyTreeTable.scrollTo(hierarchyTreeTable.getSelectionModel().getSelectedIndex());
-                t.consume();
-            });
         }
     }
 }
