@@ -63,8 +63,7 @@ public class SurfaceTypeEditorController implements Initializable {
         var featureSelection = CityGMLEditorApp.getFeatureSellection();
         featureSelection.getActiveFeatureProperty().addListener(((observable, oldValue, newValue) -> {
             if (newValue != null) {
-
-                if (newValue == null || newValue.getLOD2Solid() == null) {
+                if (newValue.getLOD2Solid() == null) {
                     view = null;
                     return;
                 }

@@ -20,7 +20,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
 import org.w3c.dom.Attr;
-
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -28,7 +27,6 @@ import java.util.concurrent.Flow.Subscriber;
 
 import javax.swing.text.Document;
 import javax.swing.text.ElementIterator;
-
 
 import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
@@ -69,6 +67,34 @@ import javafx.scene.control.Tooltip;
 import org.plateau.citygmleditor.citymodel.CodeSpaceValue;
 import org.plateau.citygmleditor.citymodel.AttributeValue;
 
+import javafx.scene.control.ListView;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeTableRow;
+import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.citygml4j.model.common.child.ChildList;
+
+import java.util.Objects;
+import java.util.Optional;
+
+import org.citygml4j.model.citygml.ade.ADEComponent;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.function.Consumer;
+
+import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.control.TextInputDialog;
+import javafx.beans.property.ObjectProperty;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+
 public class AttributeEditorController implements Initializable {
     public TreeTableView<AttributeItem> attributeTreeTable;
     public TreeTableColumn<AttributeItem, String> keyColumn;
@@ -76,12 +102,6 @@ public class AttributeEditorController implements Initializable {
     private AbstractBuilding selectedBuilding;
     private org.w3c.dom.Document uroAttributeDocument;
     private ObjectProperty<BuildingView> activeFeatureProperty;
-    @FXML
-    private TitledPane titledPane;
-    // @FXML
-    // private Label featureID;
-    // @FXML
-    // private Label featureType;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -288,7 +308,13 @@ public class AttributeEditorController implements Initializable {
                 attributeItem.valueProperty().set(event.getOldValue());
                 attributeTreeTable.refresh();
             }
+        });
 
+    }
+
+    public void onClickAddButton() {
+        showRootAttributeAdditionPanel();
+    }
 
     private void showRootAttributeAdditionPanel() {
         Consumer<AddAttributeListViewController> onAdd = (AddAttributeListViewController attributeAdditionPanel) -> {
@@ -314,7 +340,7 @@ public class AttributeEditorController implements Initializable {
             // attributeAdditionPanel.getAttributeList());
         };
 
-
+        AddAttributeListViewController.createModal(selectedItem, false, onAdd);
     }
 
     private static void addADEPropertyToTree(AbstractBuilding selectedBuilding, TreeItem<AttributeItem> root) {

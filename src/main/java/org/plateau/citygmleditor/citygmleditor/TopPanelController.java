@@ -34,7 +34,6 @@ public class TopPanelController {
             CoordinateDialogController.createCoorinateDialog(files);
         } else {
             LoadGMLDialogController.createLoadGMLDialog(files);
-
         }
     }
 
