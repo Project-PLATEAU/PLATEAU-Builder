@@ -1,6 +1,8 @@
 package org.plateau.citygmleditor.citygmleditor;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.plateau.citygmleditor.importers.Importer3D;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.BoundingBox;
@@ -9,9 +11,12 @@ import javafx.scene.DepthTest;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
+import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
@@ -29,18 +34,30 @@ public class GizmoModel extends Parent {
 
     private ControlMode controlMode;
 
-    private Node moveXGizmo;
-    private Node moveYGizmo;
-    private Node moveZGizmo;
+    private Node moveXGizmoHandle;
+    private Node moveYGizmoHandle;
+    private Node moveZGizmoHandle;
 
-    private Node rotationXGizmo;
-    private Node rotationYGizmo;
-    private Node rotationZGizmo;
+    private Node rotationXGizmoHandle;
+    private Node rotationYGizmoHandle;
+    private Node rotationZGizmoHandle;
     
-    private Node scaleXGizmo;
-    private Node scaleYGizmo;
-    private Node scaleZGizmo;
+    private Node scaleXGizmoHandle;
+    private Node scaleYGizmoHandle;
+    private Node scaleZGizmoHandle;
 
+    private Node moveXGizmoView;
+    private Node moveYGizmoView;
+    private Node moveZGizmoView;
+
+    private Node rotationXGizmoView;
+    private Node rotationYGizmoView;
+    private Node rotationZGizmoView;
+
+    private Node scaleXGizmoView;
+    private Node scaleYGizmoView;
+    private Node scaleZGizmoView;
+    
     private Group moveGizmo;
     private Group rotationGizmo;
     private Group scaleGizmo;
@@ -50,7 +67,7 @@ public class GizmoModel extends Parent {
     private Node currentGizmo;
 
     // private Box debugBoundingBox;
-    
+
     /**
      * コンストラクタ
      */
@@ -60,34 +77,107 @@ public class GizmoModel extends Parent {
         rotationGizmo = new Group();
         scaleGizmo = new Group();
         try{
-            moveXGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveX.obj").toExternalForm());
-            moveYGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveY.obj").toExternalForm());
-            moveZGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveZ.obj").toExternalForm());
-            rotationXGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateX.obj").toExternalForm());
-            rotationYGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateY.obj").toExternalForm());
-            rotationZGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateZ.obj").toExternalForm());
-            scaleXGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleX.obj").toExternalForm());
-            scaleYGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleY.obj").toExternalForm());
-            scaleZGizmo = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleZ.obj").toExternalForm());
+            moveXGizmoHandle = new Cylinder(20,240);
+            moveYGizmoHandle = new Cylinder(20, 240);
+            moveZGizmoHandle = new Cylinder(20, 240);
+            rotationXGizmoHandle = new Cylinder(260, 20);
+            rotationYGizmoHandle = new Cylinder(260, 20);
+            rotationZGizmoHandle = new Cylinder(260, 20);
+            scaleXGizmoHandle = new Cylinder(20, 240);
+            scaleYGizmoHandle = new Cylinder(20, 240);
+            scaleZGizmoHandle = new Cylinder(20, 240);
             
-            moveXGizmo.setDepthTest(DepthTest.DISABLE);
-            moveYGizmo.setDepthTest(DepthTest.DISABLE);
-            moveZGizmo.setDepthTest(DepthTest.DISABLE);
-            rotationXGizmo.setDepthTest(DepthTest.DISABLE);
-            rotationYGizmo.setDepthTest(DepthTest.DISABLE);
-            rotationZGizmo.setDepthTest(DepthTest.DISABLE);
-            scaleXGizmo.setDepthTest(DepthTest.DISABLE);
-            scaleYGizmo.setDepthTest(DepthTest.DISABLE);
-            scaleZGizmo.setDepthTest(DepthTest.DISABLE);
+            moveXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveX.obj").toExternalForm());
+            moveYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveY.obj").toExternalForm());
+            moveZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveZ.obj").toExternalForm());
+            rotationXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateX.obj").toExternalForm());
+            rotationYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateY.obj").toExternalForm());
+            rotationZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateZ.obj").toExternalForm());
+            scaleXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleX.obj").toExternalForm());
+            scaleYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleY.obj").toExternalForm());
+            scaleZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleZ.obj").toExternalForm());
+            
+            setMaterialColor(moveXGizmoView);
+            setMaterialColor(moveYGizmoView);
+            setMaterialColor(moveZGizmoView);
+            setMaterialColor(rotationXGizmoView);
+            setMaterialColor(rotationYGizmoView);
+            setMaterialColor(rotationZGizmoView);
+            setMaterialColor(scaleXGizmoView);
+            setMaterialColor(scaleYGizmoView);
+            setMaterialColor(scaleZGizmoView);
+
+            PhongMaterial transparentMaterial = new PhongMaterial();
+            transparentMaterial.setDiffuseColor(Color.rgb(0, 0, 0, 0)); // ディフューズカラー（基本色）
+            transparentMaterial.setSpecularColor(Color.rgb(0, 0, 0, 0)); // スペキュラカラー（光の反射）
+            transparentMaterial.setSpecularPower(0);
+
+            ((Cylinder) moveXGizmoHandle).setMaterial(transparentMaterial);
+            ((Cylinder) moveYGizmoHandle).setMaterial(transparentMaterial);
+            ((Cylinder) moveZGizmoHandle).setMaterial(transparentMaterial);
+            ((Cylinder) rotationXGizmoHandle).setMaterial(transparentMaterial);
+            ((Cylinder) rotationYGizmoHandle).setMaterial(transparentMaterial);
+            ((Cylinder) rotationZGizmoHandle).setMaterial(transparentMaterial);
+            ((Cylinder) scaleXGizmoHandle).setMaterial(transparentMaterial);
+            ((Cylinder) scaleYGizmoHandle).setMaterial(transparentMaterial);
+            ((Cylinder) scaleZGizmoHandle).setMaterial(transparentMaterial);
+
+            moveXGizmoHandle.setRotationAxis(Rotate.X_AXIS);
+            moveXGizmoHandle.setRotate(90);
+            moveXGizmoHandle.setTranslateZ(-120);
+            moveZGizmoHandle.setTranslateY(120);
+            moveYGizmoHandle.setRotationAxis(Rotate.Z_AXIS);
+            moveYGizmoHandle.setRotate(90);
+            moveYGizmoHandle.setTranslateX(-120);
+
+            rotationXGizmoHandle.setRotationAxis(Rotate.X_AXIS);
+            rotationXGizmoHandle.setRotate(90);
+            rotationYGizmoHandle.setRotationAxis(Rotate.Z_AXIS);
+            rotationYGizmoHandle.setRotate(90);
+
+            scaleXGizmoHandle.setRotationAxis(Rotate.X_AXIS);
+            scaleXGizmoHandle.setRotate(90);
+            scaleXGizmoHandle.setTranslateZ(-120);
+            scaleZGizmoHandle.setTranslateY(120);
+            scaleYGizmoHandle.setRotationAxis(Rotate.Z_AXIS);
+            scaleYGizmoHandle.setRotate(90);
+            scaleYGizmoHandle.setTranslateX(-120);
+
+            moveXGizmoHandle.setDepthTest(DepthTest.DISABLE);
+            moveYGizmoHandle.setDepthTest(DepthTest.DISABLE);
+            moveZGizmoHandle.setDepthTest(DepthTest.DISABLE);
+            rotationXGizmoHandle.setDepthTest(DepthTest.DISABLE);
+            rotationYGizmoHandle.setDepthTest(DepthTest.DISABLE);
+            rotationZGizmoHandle.setDepthTest(DepthTest.DISABLE);
+            scaleXGizmoHandle.setDepthTest(DepthTest.DISABLE);
+            scaleYGizmoHandle.setDepthTest(DepthTest.DISABLE);
+            scaleZGizmoHandle.setDepthTest(DepthTest.DISABLE);
+
+            moveXGizmoView.setDepthTest(DepthTest.DISABLE);
+            moveYGizmoView.setDepthTest(DepthTest.DISABLE);
+            moveZGizmoView.setDepthTest(DepthTest.DISABLE);
+            rotationXGizmoView.setDepthTest(DepthTest.DISABLE);
+            rotationYGizmoView.setDepthTest(DepthTest.DISABLE);
+            rotationZGizmoView.setDepthTest(DepthTest.DISABLE);
+            scaleXGizmoView.setDepthTest(DepthTest.DISABLE);
+            scaleYGizmoView.setDepthTest(DepthTest.DISABLE);
+            scaleZGizmoView.setDepthTest(DepthTest.DISABLE);
 
             // Z回転以外は無効
-            rotationXGizmo.setVisible(false);
-            rotationYGizmo.setVisible(false);
+            rotationXGizmoHandle.setVisible(false);
+            rotationYGizmoHandle.setVisible(false);
 
-            moveGizmo.getChildren().addAll(moveXGizmo, moveYGizmo, moveZGizmo);
-            rotationGizmo.getChildren().addAll(rotationXGizmo, rotationYGizmo, rotationZGizmo);
-            scaleGizmo.getChildren().addAll(scaleXGizmo, scaleYGizmo, scaleZGizmo);
+            rotationXGizmoView.setVisible(false);
+            rotationYGizmoView.setVisible(false);
+
+            moveGizmo.getChildren().addAll(moveXGizmoHandle, moveYGizmoHandle, moveZGizmoHandle);
+            rotationGizmo.getChildren().addAll(rotationXGizmoHandle, rotationYGizmoHandle, rotationZGizmoHandle);
+            scaleGizmo.getChildren().addAll(scaleXGizmoHandle, scaleYGizmoHandle, scaleZGizmoHandle);
             
+            moveGizmo.getChildren().addAll(moveXGizmoView, moveYGizmoView, moveZGizmoView);
+            rotationGizmo.getChildren().addAll(rotationXGizmoView, rotationYGizmoView, rotationZGizmoView);
+            scaleGizmo.getChildren().addAll(scaleXGizmoView, scaleYGizmoView, scaleZGizmoView);
+
             // モデル回転方向補正
             var rot1 = new Rotate(90.0d, Rotate.X_AXIS);
             var rot2 = new Rotate(-90.0d, Rotate.Y_AXIS);
@@ -133,6 +223,30 @@ public class GizmoModel extends Parent {
         animationTimer.start();
     }
     
+    private List<MeshView> findMeshViews(Node node) {
+        List<MeshView> meshViews = new ArrayList<>();
+        if (node instanceof MeshView) {
+            meshViews.add((MeshView) node);
+        } else if (node instanceof Group) {
+            Group group = (Group) node;
+            for (Node child : group.getChildren()) {
+                meshViews.addAll(findMeshViews(child));
+            }
+        }
+        return meshViews;
+    }
+
+    private void setMaterialColor(Node node) {
+        for (var meshView : findMeshViews(node)) {
+            PhongMaterial material = (PhongMaterial)meshView.getMaterial();
+            var color = material.getDiffuseColor();
+            WritableImage image = new WritableImage(1, 1);
+            PixelWriter writer = image.getPixelWriter();
+            writer.setColor(0, 0, new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getOpacity()));
+            material.setSelfIlluminationMap(image);
+        }
+    }
+
     public Point3D localToScene(Node node, Point3D pt) {
         Point3D res = node.localToParentTransformProperty().get().transform(pt);
         if (node.getParent() != null) {
@@ -259,13 +373,18 @@ public class GizmoModel extends Parent {
      * @param delta
      */
     public void updateTransform(Point3D delta) {
-        // System.out.println("delta:" + delta);
-
         // 建物の座標変換情報を操作値をもとに更新
         Transform worldToLocalTransform = new Rotate(manipulator.getRotation().getX(), Rotate.X_AXIS);
         worldToLocalTransform = worldToLocalTransform.createConcatenation(new Rotate(manipulator.getRotation().getY(), Rotate.Y_AXIS));
         worldToLocalTransform = worldToLocalTransform.createConcatenation(new Rotate(manipulator.getRotation().getZ(), Rotate.Z_AXIS));
         
+        // 逆変換行列を取得
+        try{
+            worldToLocalTransform = worldToLocalTransform.createInverse();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         var pivot = manipulator.getOrigin();
         
         // 移動ギズモ
@@ -273,26 +392,22 @@ public class GizmoModel extends Parent {
             double transformFactorX = 0;
             double transformFactorY = 0;
             double transformFactorZ = 0;
-            if (isNodeInTree(currentGizmo, moveXGizmo)) {
-                var axisVector = worldToLocalTransform.transform(Rotate.X_AXIS).normalize();
-                var projectionMagnitude = delta.dotProduct(axisVector);
-                var projection = axisVector.multiply(projectionMagnitude);
-                transformFactorX = projection.getX();
+            if (isNodeInTree(currentGizmo, moveXGizmoHandle) || isNodeInTree(currentGizmo, moveXGizmoView)) {
+                // 逆変換行列を使用してワールド座標系からローカル座標系へ変換
+                var localdelta = worldToLocalTransform.transform(delta);
+                transformFactorX = localdelta.getX();
             }
-            if (isNodeInTree(currentGizmo, moveYGizmo)) {
-                var axisVector = worldToLocalTransform.transform(Rotate.Y_AXIS).normalize();
-                var projectionMagnitude = delta.dotProduct(axisVector);
-                var projection = axisVector.multiply(projectionMagnitude);
-                transformFactorY = projection.getY();
+            if (isNodeInTree(currentGizmo, moveYGizmoHandle) || isNodeInTree(currentGizmo, moveYGizmoView)) {
+                // 逆変換行列を使用してワールド座標系からローカル座標系へ変換
+                var localdelta = worldToLocalTransform.transform(delta);
+                transformFactorY = localdelta.getY();
             }
-            if (isNodeInTree(currentGizmo, moveZGizmo)) {
-                var axisVector = worldToLocalTransform.transform(Rotate.Z_AXIS).normalize();
-                var projectionMagnitude = delta.dotProduct(axisVector);
-                var projection = axisVector.multiply(projectionMagnitude);
-                transformFactorZ = projection.getZ();
+            if (isNodeInTree(currentGizmo, moveZGizmoHandle) || isNodeInTree(currentGizmo, moveZGizmoView)) {
+                // 逆変換行列を使用してワールド座標系からローカル座標系へ変換
+                var localdelta = worldToLocalTransform.transform(delta);
+                transformFactorZ = localdelta.getZ();
             }
             manipulator.setLocation(new Point3D(manipulator.getLocation().getX() + transformFactorX, manipulator.getLocation().getY() + transformFactorY, manipulator.getLocation().getZ() + transformFactorZ));
-            
             manipulator.addTransformCache(new Translate(transformFactorX, transformFactorY, transformFactorZ));
         }
         // 回転ギズモ
@@ -301,31 +416,27 @@ public class GizmoModel extends Parent {
             double rotateFactorY = 0;
             double rotateFactorZ = 0;
             var rotate = new Rotate();
-            if (isNodeInTree(currentGizmo, rotationXGizmo)) {
-                var axisVector = worldToLocalTransform.transform(Rotate.X_AXIS).normalize();
-                var projectionMagnitude = delta.dotProduct(axisVector);
-                var projection = axisVector.multiply(projectionMagnitude);
-                rotateFactorX = projection.getX();
+            if (isNodeInTree(currentGizmo, rotationXGizmoHandle) || isNodeInTree(currentGizmo, rotationXGizmoView)) {
+                // 逆変換行列を使用してワールド座標系からローカル座標系へ変換
+                var localdelta = worldToLocalTransform.transform(delta);
+                rotateFactorX = localdelta.getX();
 
-                rotate = new Rotate(projection.getX(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.X_AXIS);
+                rotate = new Rotate(rotateFactorX, pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.X_AXIS);
             }
-            if (isNodeInTree(currentGizmo, rotationYGizmo)) {
-                var axisVector = worldToLocalTransform.transform(Rotate.Y_AXIS).normalize();
-                var projectionMagnitude = delta.dotProduct(axisVector);
-                var projection = axisVector.multiply(projectionMagnitude);
-                rotateFactorY = projection.getY();
+            if (isNodeInTree(currentGizmo, rotationYGizmoHandle) || isNodeInTree(currentGizmo, rotationYGizmoView)) {
+                // 逆変換行列を使用してワールド座標系からローカル座標系へ変換
+                var localdelta = worldToLocalTransform.transform(delta);
+                rotateFactorY = localdelta.getY();
 
-                rotate = new Rotate(projection.getY(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Y_AXIS);
+                rotate = new Rotate(rotateFactorY, pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Y_AXIS);
             }
-            if (isNodeInTree(currentGizmo, rotationZGizmo)) {
-                var axisVector = worldToLocalTransform.transform(Rotate.Z_AXIS).normalize();
-                var projectionMagnitude = delta.dotProduct(axisVector);
-                var projection = axisVector.multiply(projectionMagnitude);
+            if (isNodeInTree(currentGizmo, rotationZGizmoHandle) || isNodeInTree(currentGizmo, rotationZGizmoView)) {
                 // Z回転以外は無効
-                projection = new Point3D(0, 0, delta.getX());
-                rotateFactorZ = projection.getZ();
+                // 逆変換行列を使用してワールド座標系からローカル座標系へ変換
+                var localdelta = worldToLocalTransform.transform(delta);
+                rotateFactorZ = localdelta.getX();
 
-                rotate = new Rotate(projection.getZ(), pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS);
+                rotate = new Rotate(rotateFactorZ, pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS);
             }
             manipulator.setRotation(new Point3D(manipulator.getRotation().getX() + rotateFactorX, manipulator.getRotation().getY() + rotateFactorY, manipulator.getRotation().getZ() + rotateFactorZ));
             
@@ -336,23 +447,20 @@ public class GizmoModel extends Parent {
             double scalingFactorX = 0;
             double scalingFactorY = 0;
             double scalingFactorZ = 0;
-            if (isNodeInTree(currentGizmo, scaleXGizmo)) {
-                var axisVector = worldToLocalTransform.transform(Rotate.X_AXIS).normalize();
-                var projectionMagnitude = delta.dotProduct(axisVector);
-                var projection = axisVector.multiply(projectionMagnitude);
-                scalingFactorX = projection.getX() / 100.0;
+            if (isNodeInTree(currentGizmo, scaleXGizmoHandle) || isNodeInTree(currentGizmo, scaleXGizmoView)) {
+                // 逆変換行列を使用してワールド座標系からローカル座標系へ変換
+                var localdelta = worldToLocalTransform.transform(delta);
+                scalingFactorX = localdelta.getX() / 100.0;
             }
-            if (isNodeInTree(currentGizmo, scaleYGizmo)) {
-                var axisVector = worldToLocalTransform.transform(Rotate.Y_AXIS).normalize();
-                var projectionMagnitude = delta.dotProduct(axisVector);
-                var projection = axisVector.multiply(projectionMagnitude);
-                scalingFactorY = projection.getY() / 100.0;
+            if (isNodeInTree(currentGizmo, scaleYGizmoHandle) || isNodeInTree(currentGizmo, scaleYGizmoView)) {
+                // 逆変換行列を使用してワールド座標系からローカル座標系へ変換
+                var localdelta = worldToLocalTransform.transform(delta);
+                scalingFactorY = localdelta.getY() / 100.0;
             }
-            if (isNodeInTree(currentGizmo, scaleZGizmo)) {
-                var axisVector = worldToLocalTransform.transform(Rotate.Z_AXIS).normalize();
-                var projectionMagnitude = delta.dotProduct(axisVector);
-                var projection = axisVector.multiply(projectionMagnitude);
-                scalingFactorZ = projection.getZ() / 100.0;
+            if (isNodeInTree(currentGizmo, scaleZGizmoHandle) || isNodeInTree(currentGizmo, scaleZGizmoView)) {
+                // 逆変換行列を使用してワールド座標系からローカル座標系へ変換
+                var localdelta = worldToLocalTransform.transform(delta);
+                scalingFactorZ = localdelta.getZ() / 100.0;
             }
             manipulator.setScale(new Point3D(manipulator.getScale().getX() + scalingFactorX, manipulator.getScale().getY() + scalingFactorY, manipulator.getScale().getZ() + scalingFactorZ));
             // スケールは別途で毎回適用

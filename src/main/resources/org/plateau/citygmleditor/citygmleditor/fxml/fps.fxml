@@ -37,6 +37,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <?scenebuilder-classpath-element ../../../../../../../build/classes?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="10.0" fx:controller="org.plateau.citygmleditor.FPSLabelController">
+<VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="10.0" fx:controller="org.plateau.citygmleditor.fxml.FPSLabelController">
   <Label fx:id="fpsLabel" text="FPS: " />
 </VBox>

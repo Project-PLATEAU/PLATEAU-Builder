@@ -45,7 +45,7 @@ import javafx.scene.Group;
 import javafx.stage.Window;
 import org.plateau.citygmleditor.control.CityModelViewMode;
 import org.plateau.citygmleditor.world.*;
-import org.plateau.citygmleditor.FeatureSelection;
+import org.plateau.citygmleditor.control.FeatureSelection;
 import org.plateau.citygmleditor.citymodel.*;
 import org.w3c.dom.*;
 
@@ -55,11 +55,10 @@ import org.w3c.dom.*;
 public class CityGMLEditorApp extends Application {
     private static Scene scene;
     private static Camera camera;
-    private static AxisGizmo axisGizmo;
+    private static CoordinateGrid coordinateGrid;
     private static Light light;
     private static SceneContent sceneContent;
     private static AntiAliasing antiAliasing;
-    private static AutoScalingGroup autoScalingGroups;
     private static CityModelViewMode cityModelViewMode;
     private static UroAttributeInfo uroAttributeInfo;
     private static String datasetPath;
@@ -72,8 +71,8 @@ public class CityGMLEditorApp extends Application {
         return camera;
     }
 
-    public static AxisGizmo getAxisGizmo() {
-        return axisGizmo;
+    public static CoordinateGrid getCoordinateGrid() {
+        return coordinateGrid;
     }
 
     public static Light getLight() {
@@ -94,10 +93,6 @@ public class CityGMLEditorApp extends Application {
 
     public static AntiAliasing getAntiAliasing() {
         return antiAliasing;
-    }
-
-    public static AutoScalingGroup getAutoScalingGroup() {
-        return autoScalingGroups;
     }
 
     public static FeatureSelection getFeatureSellection() {
@@ -131,33 +126,32 @@ public class CityGMLEditorApp extends Application {
         uroAttributeInfo = new UroAttributeInfo();
 
         World.setActiveInstance(new World(), new Group());
-        autoScalingGroups = new AutoScalingGroup(2);
         light = new Light();
         antiAliasing = new AntiAliasing();
         camera = new Camera();
         sceneContent = new SceneContent();
 
         antiAliasing.setSceneContent();
-        camera.setSceneContent();
 
-        axisGizmo = new AxisGizmo();
-        selection = new FeatureSelection();
+        coordinateGrid = new CoordinateGrid();
 
-        World.getRoot3D().getChildren().add(camera.getCameraXform());
-        World.getRoot3D().getChildren().add(autoScalingGroups);
+        World.getActiveInstance().setCamera(camera);
 
         sceneContent.rebuildSubScene();
 
         cityModelViewMode = new CityModelViewMode();
 
+        selection = new FeatureSelection();
+
+        // UI, Controller初期化
         scene = new Scene(
                 FXMLLoader.<Parent>load(Objects.requireNonNull(CityGMLEditorApp.class.getResource("fxml/main.fxml"))),
                 1024, 600, true);
 
+        selection.registerClickEvent(scene);
+
         stage.setScene(scene);
         stage.show();
-
-        selection.registerClickEvent(scene);
 
         // アプリ終了時にセッションを保存
         stage.setOnCloseRequest(event -> sessionManager.saveSession());

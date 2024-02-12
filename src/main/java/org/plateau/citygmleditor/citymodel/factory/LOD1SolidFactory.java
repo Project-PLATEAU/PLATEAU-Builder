@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.citymodel.factory;
 
+import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.geometry.complexes.CompositeSurface;
 import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.citygml4j.model.gml.geometry.primitives.Solid;
@@ -18,8 +19,12 @@ public class LOD1SolidFactory extends GeometryFactory {
         super(target);
     }
 
-    public LOD1SolidView createLOD1Solid(Solid gmlObject) {
-        var exterior = gmlObject.getExterior();
+    public LOD1SolidView createLOD1Solid(AbstractBuilding gmlObject) {
+        if (gmlObject.getLod1Solid() == null)
+            return null;
+
+        var solid = (Solid)gmlObject.getLod1Solid().getObject();
+        var exterior = solid.getExterior();
         var compositeSurface = (CompositeSurface) exterior.getObject();
 
         List<SurfaceProperty> surfaceMember = compositeSurface.getSurfaceMember();
@@ -37,12 +42,12 @@ public class LOD1SolidFactory extends GeometryFactory {
 
         var mesh = createTriangleMesh(polygons);
 
-        var solid = new LOD1SolidView(gmlObject, vertexBuffer, texCoordBuffer);
-        solid.setPolygons(polygons);
-        solid.setMesh(mesh);
-        solid.setMaterial(World.getActiveInstance().getDefaultMaterial());
+        var solidView = new LOD1SolidView(solid, vertexBuffer, texCoordBuffer);
+        solidView.setPolygons(polygons);
+        solidView.setMesh(mesh);
+        solidView.setMaterial(World.getActiveInstance().getDefaultMaterial());
 
-        return solid;
+        return solidView;
     }
 
 }
