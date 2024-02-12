@@ -29,13 +29,6 @@ public class TopPanelController {
             return;
 
         try {
-            Node root = GmlImporter.loadGml(file.toString());
-            CityGMLEditorApp.getSceneContent().setContent(root);
-            var datasetPath = Paths.get(World.getActiveInstance().getCityModel().getGmlPath()).getParent().getParent()
-                    .getParent();
-            String uroSchemasPath = datasetPath + "\\schemas\\iur\\uro\\2.0\\urbanObject.xsd";
-            CityGMLEditorApp.setDatasetPath(datasetPath.toString());
-            CityGMLEditorApp.settingUroAttributeInfo(uroSchemasPath);
             if (World.getActiveInstance().getGeoReference() == null || World.getActiveInstance()
                     .getGeoReference().getEPSGCode() == null || World.getActiveInstance()
                             .getGeoReference().getEPSGCode().isEmpty()) {
