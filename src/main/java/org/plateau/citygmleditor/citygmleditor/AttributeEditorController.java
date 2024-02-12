@@ -77,10 +77,10 @@ public class AttributeEditorController implements Initializable {
     private ObjectProperty<BuildingView> activeFeatureProperty;
     @FXML
     private TitledPane titledPane;
-    @FXML
-    private Label featureID;
-    @FXML
-    private Label featureType;
+    // @FXML
+    // private Label featureID;
+    // @FXML
+    // private Label featureType;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -233,8 +233,8 @@ public class AttributeEditorController implements Initializable {
                 if (feature == null)
                     return null;
                 selectedBuilding = feature.getGMLObject();
-                featureID.setText("地物ID：" + selectedBuilding.getId());
-                featureType.setText("地物型：建築物（Buildings）");
+                // featureID.setText("地物ID：" + selectedBuilding.getId());
+                // featureType.setText("地物型：建築物（Buildings）");
                 var root = new TreeItem<>(new AttributeItem("", "", "", ""));
                 {
                     var attribute = new AttributeItem(
