@@ -24,6 +24,7 @@ public class UroAttributeInfo {
         try {
             // DOMパーサのインスタンスを作成
             DOMParser parser = new DOMParser();
+
             // XMLファイルをパース
             var fileStream = new FileInputStream(path);
             var inputSource = new InputSource(fileStream);
