@@ -31,13 +31,88 @@
  */
 package org.plateau.citygmleditor.utils;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.awt.FileDialog;
+import java.awt.Frame;
+import java.awt.event.FocusEvent;
 
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import org.citygml4j.builder.jaxb.CityGMLBuilderException;
+import org.citygml4j.model.citygml.ade.ADEException;
+import org.citygml4j.xml.io.writer.CityGMLWriteException;
+import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.exporters.GmlExporter;
+import org.plateau.citygmleditor.exporters.TextureExporter;
+import org.plateau.citygmleditor.importers.gml.GmlImporter;
+import org.plateau.citygmleditor.world.World;
+
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.geometry.Bounds;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Label;
+import javafx.scene.control.SplitMenuButton;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.Region;
+import javafx.scene.shape.Box;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
+import javafx.stage.FileChooser;
+import javafx.util.Duration;
+import org.plateau.citygmleditor.importers.Importer3D;
+import org.plateau.citygmleditor.importers.gltf.GltfImporter;
+
+import org.plateau.citygmleditor.importers.Importer3D;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.FieldPosition;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.StyledEditorKit;
+
+import javafx.stage.DirectoryChooser;
+import javafx.geometry.BoundingBox;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.ButtonType;
+import java.nio.file.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import org.plateau.citygmleditor.world.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.awt.Desktop;
 
 /**
  * Class for file operations
@@ -59,8 +134,6 @@ public class FileUtils {
                     try {
                         Files.copy(path, destinationPath.resolve(sourcePath.relativize(path)),
                                 StandardCopyOption.REPLACE_EXISTING);
-                    } catch (DirectoryNotEmptyException ignored) {
-                        // DirectoryNotEmptyExceptionで失敗したフォルダは再帰的に処理されるためスキップ
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

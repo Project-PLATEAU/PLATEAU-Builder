@@ -63,7 +63,7 @@ public class SurfaceTypeEditorController implements Initializable {
         var featureSelection = CityGMLEditorApp.getFeatureSellection();
         featureSelection.getActiveFeatureProperty().addListener(((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                if (newValue == null || newValue.getLOD2Solid() == null) {
+                if (newValue.getLOD2Solid() == null) {
                     view = null;
                     return;
                 }
@@ -73,19 +73,16 @@ public class SurfaceTypeEditorController implements Initializable {
 
         featureSelection.getSurfacePolygonSectionProperty().addListener(((observable, oldValue, newValue) -> {
             section = newValue;
-            updateToggle();
-        }));
-    }
 
-    private void updateToggle() {
-        if (section == null || view == null)
-            return;
+            if (section == null)
+                return;
 
-        for (var toggle : toggleGroup.getToggles()) {
-            if (toggle.getUserData() == view.getSurfaceType(section)) {
-                toggleGroup.selectToggle(toggle);
-                break;
+            for (var toggle : toggleGroup.getToggles()) {
+                if ((CityGMLClass) toggle.getUserData() == view.getSurfaceType(section)) {
+                    toggleGroup.selectToggle(toggle);
+                    break;
+                }
             }
-        }
+        }));
     }
 }

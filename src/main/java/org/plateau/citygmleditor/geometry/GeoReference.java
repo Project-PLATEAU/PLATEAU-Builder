@@ -3,23 +3,20 @@ package org.plateau.citygmleditor.geometry;
 import org.osgeo.proj4j.*;
 import org.plateau.citygmleditor.utils3d.geom.Vec3d;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 
 public class GeoReference {
     private final CoordinateTransform projectTransform;
     private final CoordinateTransform unprojectTransform;
     private final Vec3d origin;
-    private StringProperty epsgCode = new SimpleStringProperty();
 
-    public GeoReference(GeoCoordinate origin, String epsgCode) {
+    public GeoReference(GeoCoordinate origin) {
         // CRSの定義
         CRSFactory crsFactory = new CRSFactory();
         // GMLでのSRCはEPSG:4326（緯度経度座標、高さは扱わないためEPSG:6697とほぼ同義）
         CoordinateReferenceSystem wgs84 = crsFactory.createFromName("EPSG:4326");
         // TODO: 座標系選択
         // 投影後のSRCはEPSG:2451（平面直角座標9系）
-        CoordinateReferenceSystem jpr = crsFactory.createFromName(epsgCode);
+        CoordinateReferenceSystem jpr = crsFactory.createFromName("EPSG:2451");
 
         // 座標変換のセットアップ
         CoordinateTransformFactory ctFactory = new CoordinateTransformFactory();
@@ -30,7 +27,6 @@ public class GeoReference {
         var originXY = new ProjCoordinate();
         projectTransform.transform(originCoord, originXY);
         this.origin = new Vec3d(originXY.x, originXY.y, origin.alt);
-        setEPSGCode(epsgCode);
     }
 
     /**
@@ -73,23 +69,5 @@ public class GeoReference {
      */
     public Vec3d getOrigin() {
         return origin;
-    }
-    
-    public StringProperty getEPSGCodeProperty() {
-        return epsgCode;
-    }
-
-    /**
-     * 空間座標系（EPSGコード）を取得
-     */
-    public String getEPSGCode() {
-        return epsgCode.get();
-    }
-
-    /**
-     * 空間座標系（EPSGコード）を設定
-     */
-    public void setEPSGCode(String epsgCode) {
-        this.epsgCode.set(epsgCode);
     }
 }

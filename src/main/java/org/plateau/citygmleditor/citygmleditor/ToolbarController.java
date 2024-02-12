@@ -39,13 +39,6 @@ public class ToolbarController implements Initializable {
         World.getRoot3D().getChildren().add(gizmoModel);
 
         initializeLODToggle();
-
-        var activeFeatureProperty = CityGMLEditorApp.getFeatureSellection().getSelectElementProperty();
-        activeFeatureProperty.addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                gizmoModel.attachManipulator(((ILODSolidView) newValue).getTransformManipulator());
-            }
-        });
     }
     
     /**
@@ -82,36 +75,58 @@ public class ToolbarController implements Initializable {
 
     private final EventHandler<MouseEvent> mouseEventHandler = event -> {
         if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-            if (event.isPrimaryButtonDown() && !mouseDragging) {
+            if (event.isPrimaryButtonDown()) {
                 var result = event.getPickResult();
                 var building = findLODSolidView(result.getIntersectedNode());
                 if (building != null) {
                     gizmoModel.attachManipulator(((ILODSolidView)building).getTransformManipulator());
                 }
                 if (gizmoModel.isGizmoDragging(result.getIntersectedNode())) {
+                    CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(true);
                     gizmoModel.setCurrentGizmo(result.getIntersectedNode());
-                    vecIni = unprojectDirection(event.getSceneX(), event.getSceneY(), sceneContent.getSubScene().getWidth(), sceneContent.getSubScene().getHeight());
-                    distance = result.getIntersectedDistance();
                     mouseDragging = true;
+                    return;
                 }
             }
         }
         else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-            if (event.isPrimaryButtonDown() && mouseDragging) {
-                var result = event.getPickResult();
-                double mousePosX = event.getSceneX();
-                double mousePosY = event.getSceneY();
-                Point3D vecPos = unprojectDirection(mousePosX, mousePosY, sceneContent.getSubScene().getWidth(), sceneContent.getSubScene().getHeight());
-                Point3D delta = vecPos.subtract(vecIni).multiply(distance);
-                gizmoModel.updateTransform(delta);
-                vecIni= vecPos;
-                distance=result.getIntersectedDistance();
+            var result = event.getPickResult();
+            if(gizmoModel.isGizmoDragging(result.getIntersectedNode())) 
+            {
+                if (event.isPrimaryButtonDown()) {
+                    vecIni = unprojectDirection(event.getSceneX(), event.getSceneY(), sceneContent.getSubScene().getWidth(), sceneContent.getSubScene().getHeight());//scene.getWidth(),scene.getHeight());
+                    distance = result.getIntersectedDistance();
+                }
             }
         }
         else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
             mouseDragging = false;
+            CityGMLEditorApp.getCamera().setHookingMousePrimaryButtonEvent(false);
 
             gizmoModel.fixTransform();
+        }
+
+        if (mouseDragging) {
+            var result = event.getPickResult();
+            
+            double modifier = 0.5;
+
+            if (event.isControlDown()) {
+                modifier = 0.1;
+            }
+            if (event.isShiftDown()) {
+                modifier = 10.0;
+            }
+
+            double mousePosX = event.getSceneX();
+            double mousePosY = event.getSceneY();
+
+            Point3D vecPos = unprojectDirection(mousePosX, mousePosY, sceneContent.getSubScene().getWidth(), sceneContent.getSubScene().getHeight());
+            Point3D delta = vecPos.subtract(vecIni).multiply(distance);
+            delta = new Point3D(delta.getX() * modifier, delta.getY() * modifier, delta.getZ() * modifier);
+            gizmoModel.updateTransform(delta);
+            vecIni= vecPos;
+            distance=result.getIntersectedDistance();
         }
     };
     
