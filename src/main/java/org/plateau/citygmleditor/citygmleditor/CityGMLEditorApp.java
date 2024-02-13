@@ -148,7 +148,7 @@ public class CityGMLEditorApp extends Application {
                 FXMLLoader.<Parent>load(Objects.requireNonNull(CityGMLEditorApp.class.getResource("fxml/main.fxml"))),
                 1024, 600, true);
 
-        selection.registerClickEvent(scene);
+        selection.registerClickEvent(sceneContent.getSubScene());
 
         stage.setScene(scene);
         stage.show();

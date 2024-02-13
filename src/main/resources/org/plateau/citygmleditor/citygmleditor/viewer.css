@@ -92,7 +92,7 @@
     /* tree-table-cell needs slightly different padding to make the text sit at
     the right height for the arrow */
     -fx-padding: 0.25em 0.166667em 0.083em 0.166667em; /* 3 2 1 2 , plus border adds 1px */
-    -fx-background-color: #515151;
+    -fx-background-color: null;
     -fx-border-color: #646464;
     -fx-cell-size: 1.0em; /* 24 */
     -fx-text-fill: -fx-text-background-color;
@@ -140,21 +140,75 @@
 .tree-table-view *.scroll-bar:vertical *.decrement-arrow {
     -fx-background-color: null;
 }
-.scroll-bar:vertical {
-    -fx-opacity: 0;
-    -fx-padding:-7;
-}
+.tree-table-view .scroll-bar * {
+     -fx-min-width: 0;
+     -fx-pref-width: 0;
+     -fx-max-width: 0;
+
+     -fx-min-height: 0;
+     -fx-pref-height: 0;
+     -fx-max-height: 0;
+ }
+
 .text-input {
   -fx-background-color: linear-gradient(to bottom, derive(-fx-text-box-border, -10%), -fx-text-box-border),
     linear-gradient(from 0px 0px to 0px 5px, derive(-fx-control-inner-background, -9%), -fx-control-inner-background);
   -fx-background-insets: 0, 1;
   -fx-background-radius: 3, 2;
   -fx-control-inner-background: #333333;
+   -fx-prompt-text-fill:grey;
 }
+.text-field{
+    -fx-border-width: 1;
+    -fx-border-color: #646464;
+}
+/* standard cell */
+.list-cell,
+.tree-cell {
+    -fx-background: -fx-control-inner-background;
+    -fx-background-color: -fx-background;
+    -fx-text-fill: -fx-text-background-color;
+}
+/* Selected rows */
+.list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected,
+.tree-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:selected,
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:selected,
+.tree-table-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-table-row-cell:filled:selected,
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell .table-cell:selected,
+.tree-table-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-table-row-cell .tree-table-cell:selected {
+    -fx-background: #0078D7;
+    -fx-table-cell-border-color: derive(-fx-selection-bar, 20%);
+}
+
+.SurfaceButton {
+    -fx-text-fill: black;
+    -fx-base: transparent;
+    -fx-background: transparent;
+    -fx-focus-color: #0078D7;
+    -fx-border-color: transparent;
+    -fx-effect: null;
+}
+
+
 /*******************************************************************************
  * Custom ID Settings                                                          *
  ******************************************************************************/
+#list{
+	-fx-border-style      : solid inside;  /* 枠線のスタイル   */
+	-fx-border-color      : #515151;           /* 枠線の色         */
+	-fx-border-width      : 1;             /* 枠線の太さ       */
+	-fx-background-radius : 2px;          /* 背景の角丸み */
+	-fx-border-radius     : 2px;          /* 枠線の角丸み */
+	-fx-background-color: rgba(0,0,0,0.5);
+}
+#attributeListView{
+	-fx-border-style      : solid inside;  /* 枠線のスタイル   */
+	-fx-border-color      : #F3F3F4;           /* 枠線の色         */
+	-fx-border-width      : 1;             /* 枠線の太さ       */
+	-fx-background-radius : 2px;          /* 背景の角丸み */
+	-fx-border-radius     : 2px;          /* 枠線の角丸み */
 
+}
 #rightSidePanel{
     -fx-border-color: #5c5c5c;
     -fx-border-width: 0 0 0 1;
