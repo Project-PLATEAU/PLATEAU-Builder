@@ -16,6 +16,7 @@ import org.citygml4j.model.citygml.appearance.TexCoordList;
 import org.citygml4j.model.citygml.appearance.TextureAssociation;
 import org.citygml4j.model.citygml.appearance.TextureCoordinates;
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
+import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
 import org.citygml4j.model.citygml.building.Building;
 import org.citygml4j.model.citygml.building.GroundSurface;
@@ -552,9 +553,9 @@ public abstract class AbstractLodConverter {
     private void replaceLod1Solid(CityModel cityModel) {
         // lod2Solid
         BuildingView buildingView = (BuildingView)_lodSolidView.getParent();
-        Building original = (Building)buildingView.getGMLObject();
+        var original = buildingView.getGMLObject();
 
-        Building building = null;
+        AbstractBuilding building = null;
         for (CityObjectMember cityObjectMember : cityModel.getCityObjectMember()) {
             AbstractCityObject cityObject = cityObjectMember.getCityObject();
             if (cityObject.getCityGMLClass() != CityGMLClass.BUILDING) continue;
@@ -563,6 +564,14 @@ public abstract class AbstractLodConverter {
             if (original.getId().equals(b.getId())) {
                 building = b;
                 break;
+            }
+
+            for (var consistsOfBuildingPart : b.getConsistsOfBuildingPart()) {
+                var b2 = consistsOfBuildingPart.getBuildingPart();
+                if (original.getId().equals(b2.getId())) {
+                    building = b2;
+                    break;
+                }
             }
         }
 
@@ -575,9 +584,9 @@ public abstract class AbstractLodConverter {
     private void replaceLod2Solid(CityModel cityModel) {
         // lod2Solid
         BuildingView buildingView = (BuildingView)_lodSolidView.getParent();
-        Building original = (Building)buildingView.getGMLObject();
+        var original = buildingView.getGMLObject();
 
-        Building building = null;
+        AbstractBuilding building = null;
         for (CityObjectMember cityObjectMember : cityModel.getCityObjectMember()) {
             AbstractCityObject cityObject = cityObjectMember.getCityObject();
             if (cityObject.getCityGMLClass() != CityGMLClass.BUILDING) continue;
@@ -586,6 +595,14 @@ public abstract class AbstractLodConverter {
             if (original.getId().equals(b.getId())) {
                 building = b;
                 break;
+            }
+
+            for (var consistsOfBuildingPart : b.getConsistsOfBuildingPart()) {
+                var b2 = consistsOfBuildingPart.getBuildingPart();
+                if (original.getId().equals(b2.getId())) {
+                    building = b2;
+                    break;
+                }
             }
         }
 

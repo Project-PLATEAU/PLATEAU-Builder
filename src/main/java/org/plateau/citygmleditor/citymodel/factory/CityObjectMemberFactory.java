@@ -55,22 +55,9 @@ public class CityObjectMemberFactory extends CityGMLFactory {
         }
 
         // <bldg:consistsOfBuildingPart>
-        for (var buildingPart : gmlObject.getConsistsOfBuildingPart()) {
-            
-            var partlod1SolidFactory = new LOD1SolidFactory(getTarget());
-            var partlod1Solid = partlod1SolidFactory.createLOD1Solid(buildingPart.getBuildingPart());
-            if (partlod1Solid != null)
-                building.addBuildingPart(partlod1Solid);
-                
-            var partlod2SolidFactory = new LOD2SolidFactory(getTarget());
-            var partlod2Solid = partlod2SolidFactory.createLOD2Solid(buildingPart.getBuildingPart());
-            if (partlod2Solid != null)
-                building.addBuildingPart(partlod2Solid);
-                
-            var partlod3SolidFactory = new LOD3SolidFactory(getTarget());
-            var partlod3Solid = partlod3SolidFactory.createLOD3Solid(buildingPart.getBuildingPart());
-            if (partlod3Solid != null)
-                building.addBuildingPart(partlod3Solid);
+        for (var consistsOfBuildingPart : gmlObject.getConsistsOfBuildingPart()) {
+            var buildingPart = createBuilding(consistsOfBuildingPart.getBuildingPart());
+            building.addBuildingPart(buildingPart);
         }
 
         building.toggleLODView(CityGMLEditorApp.getCityModelViewMode().getLOD());

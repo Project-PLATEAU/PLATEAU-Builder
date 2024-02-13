@@ -24,10 +24,6 @@ public class BuildingView extends Parent {
 
     private List<BuildingInstallationView> buildingInstallationViews = new ArrayList<>();
 
-    private List<LOD1SolidView> buildingPartLod1Solid = new ArrayList<>();
-    private List<LOD2SolidView> buildingPartLod2Solid = new ArrayList<>();
-    private List<LOD3SolidView> buildingPartLod3Solid = new ArrayList<>();
-
     public BuildingView(AbstractBuilding gmlObject) {
         this.gmlObject = gmlObject;
 
@@ -55,17 +51,6 @@ public class BuildingView extends Parent {
         // BuildingInstallation
         for (var buildingInstallationView : buildingInstallationViews) {
             buildingInstallationView.setVisible(buildingInstallationView.getLOD() == lod);
-        }
-
-        // BuildingPart
-        List<List<? extends ILODSolidView>> allPart = new ArrayList<>();
-        allPart.add(buildingPartLod1Solid);
-        allPart.add(buildingPartLod2Solid);
-        allPart.add(buildingPartLod3Solid);
-        for (int i = 0; i < 3; i++) {
-            for (var buildingPart : allPart.get(i)) {
-                ((Node) buildingPart).setVisible(lod == (i + 1));
-            }
         }
     }
 
@@ -132,32 +117,13 @@ public class BuildingView extends Parent {
         buildingInstallationView.getTransformManipulator().updateOrigin();
     }
 
-    public void addBuildingPart(LOD1SolidView lodSolidView) {
-        if (lodSolidView == null)
+    public void addBuildingPart(BuildingView buildingPart) {
+        if (buildingPart == null)
             return;
 
-        this.buildingPartLod1Solid.add(lodSolidView);
-        this.getChildren().add(lodSolidView);
-        lodSolidView.getTransformManipulator().updateOrigin();
+        this.getChildren().add(buildingPart);
     }
-
-    public void addBuildingPart(LOD2SolidView lodSolidView) {
-        if (lodSolidView == null)
-            return;
-
-        this.buildingPartLod2Solid.add(lodSolidView);
-        this.getChildren().add(lodSolidView);
-        lodSolidView.getTransformManipulator().updateOrigin();
-    }
-
-    public void addBuildingPart(LOD3SolidView lodSolidView) {
-        if (lodSolidView == null)
-            return;
-
-        this.buildingPartLod3Solid.add(lodSolidView);
-        this.getChildren().add(lodSolidView);
-        lodSolidView.getTransformManipulator().updateOrigin();
-    }
+    
     public Envelope getEnvelope() {
         return this.gmlObject.getBoundedBy().getEnvelope();
     }
