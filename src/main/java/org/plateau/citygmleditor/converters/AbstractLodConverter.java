@@ -70,13 +70,16 @@ public abstract class AbstractLodConverter {
 
     private GeoReference _geoReference;
 
+    private ConvertOption _convertOption;
+
     private ArrayList<AbstractBoundarySurface> _boundedBy = new ArrayList<AbstractBoundarySurface>();
 
     private CompositeSurface _compositeSurface = new CompositeSurface();
 
-    public AbstractLodConverter(CityModelView cityModelView, ILODSolidView lodSolidView) {
+    public AbstractLodConverter(CityModelView cityModelView, ILODSolidView lodSolidView, ConvertOption convertOption) {
         _cityModelView = cityModelView;
         _lodSolidView = lodSolidView;
+        _convertOption = convertOption;
         _buildingView = (BuildingView)lodSolidView.getParent();
         _appearanceView = cityModelView.getRGBTextureAppearance();
         _cityModel = (CityModel) cityModelView.getGmlObject();
@@ -595,9 +598,10 @@ public abstract class AbstractLodConverter {
     private LinearRing createLinearRing(org.locationtech.jts.geom.LinearRing jtsLinearRing, boolean isCreateId) {
         DirectPositionList directPositionList = new DirectPositionList();
         var geoReference = getGeoReference();
+        var offset = _convertOption.getOffset();
         for (var i = 0; i < jtsLinearRing.getNumPoints(); i++) {
             var coordinate = jtsLinearRing.getCoordinateN(i);
-            var geoCoordinate = geoReference.unproject(new Vec3f((float)coordinate.x, (float)coordinate.y, (float)coordinate.z));
+            var geoCoordinate = geoReference.unproject(new Vec3f((float)(coordinate.x + offset.x), (float)(coordinate.y + offset.y), (float)(coordinate.z + offset.z)));
             directPositionList.addValue(geoCoordinate.lat);
             directPositionList.addValue(geoCoordinate.lon);
             directPositionList.addValue(geoCoordinate.alt);
@@ -616,7 +620,7 @@ public abstract class AbstractLodConverter {
         AbstractBoundarySurface boundarySurface = null;
 
         // 90度を基準に±何度までを壁とするかの閾値
-        double threshold = 80;
+        double threshold = _convertOption.getWallThreshold();
 
         // 閾値を使ってSurfaceの種類を決定する
         double angle = Math.toDegrees(groundTriangle.getNormal().angle(triangle.getNormal()));

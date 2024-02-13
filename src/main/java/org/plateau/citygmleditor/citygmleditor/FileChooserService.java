@@ -13,14 +13,14 @@ import java.util.Properties;
 public class FileChooserService {
     /**
      * ファイルをエクスプローラから指定します。
-     * @param extensions 拡張子
      * @param sessionPropertyKey 前回選択したファイルの情報をセッションに保存する際のキー
+     * @param extensions 拡張子
      * @return 選択されたファイル
      */
-    public static File showOpenDialog(String extensions, String sessionPropertyKey) {
+    public static File showOpenDialog(String sessionPropertyKey, String... extensions) {
         var sessionProperties = SessionManager.getSessionManager().getProperties();
         File initialDirectory = getFilePropertyFromSession(sessionPropertyKey, sessionProperties);
-        var chooser = createChooser(extensions, initialDirectory);
+        var chooser = createChooser(initialDirectory, extensions);
 
         var file = chooser.showOpenDialog(CityGMLEditorApp.getWindow());
 
@@ -45,8 +45,8 @@ public class FileChooserService {
      * @param extensions 拡張子
      * @return 選択されたファイル
      */
-    public static File showOpenDialogWithoutSession(String extensions, String initialDirectory) {
-        var chooser = createChooser(extensions, new File(initialDirectory));
+    public static File showOpenDialogWithoutSession(String initialDirectory, String... extensions) {
+        var chooser = createChooser(new File(initialDirectory), extensions);
         return chooser.showOpenDialog(CityGMLEditorApp.getWindow());
     }
 
@@ -56,10 +56,10 @@ public class FileChooserService {
      * @param sessionPropertyKey 前回選択したファイルの情報をセッションに保存する際のキー
      * @return 選択されたファイル
      */
-    public static List<File> showMultipleOpenDialog(String extensions, String sessionPropertyKey) {
+    public static List<File> showMultipleOpenDialog(String sessionPropertyKey, String... extensions) {
         var sessionProperties = SessionManager.getSessionManager().getProperties();
         File initialDirectory = getFilePropertyFromSession(sessionPropertyKey, sessionProperties);
-        var chooser = createChooser(extensions, initialDirectory);
+        var chooser = createChooser(initialDirectory, extensions);
 
         var files = chooser.showOpenMultipleDialog(CityGMLEditorApp.getWindow());
 
@@ -78,7 +78,7 @@ public class FileChooserService {
         return new File(initialDirectoryPath);
     }
 
-    private static FileChooser createChooser(String extensions, File initialDirectory) {
+    private static FileChooser createChooser(File initialDirectory, String... extensions) {
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Supported files", extensions));
         chooser.setTitle("ファイルを選択してください");

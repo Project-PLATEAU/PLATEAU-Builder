@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane style="-fx-background-color: #515151;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.ThreeDimensionsExportDialogController">
+   <children>
+      <Pane layoutX="-28.0" prefHeight="319.0" prefWidth="381.0">
+         <children>
+            <Label layoutX="39.0" layoutY="14.0" text="出力先" />
+            <TextField fx:id="textFieldFile" layoutX="166.0" layoutY="10.0" />
+            <Button layoutX="318.0" layoutY="10.0" mnemonicParsing="false" onAction="#onSelectFile" text="..." />
+            <Label layoutX="41.0" layoutY="47.0" text="LOD" />
+            <ComboBox fx:id="comboBoxLod" layoutX="166.0" layoutY="43.0" prefWidth="150.0" />
+            <Label layoutX="39.0" layoutY="86.0" text="参照座標系" />
+            <Label fx:id="labelGeoReference" layoutX="167.0" layoutY="86.0" text="EPSG" />
+            <Label layoutX="41.0" layoutY="127.0" text="基準点位置" />
+            <Label layoutX="113.0" layoutY="127.0" text="東(m)" />
+            <Label layoutX="113.0" layoutY="159.0" text="北(m)" />
+            <Label layoutX="113.0" layoutY="189.0" text="上(m)" />
+            <TextField fx:id="textFieldEast" layoutX="167.0" layoutY="123.0" />
+            <TextField fx:id="textFieldNorth" layoutX="167.0" layoutY="155.0" />
+            <TextField fx:id="textFieldTop" layoutX="167.0" layoutY="185.0" />
+            <Button layoutX="249.0" layoutY="250.0" mnemonicParsing="false" onAction="#onSubmit" text="エクスポート" />
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>
