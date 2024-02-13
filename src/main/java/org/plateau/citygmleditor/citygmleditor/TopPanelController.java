@@ -4,22 +4,12 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.citygml4j.builder.jaxb.CityGMLBuilderException;
-import org.citygml4j.model.citygml.ade.ADEException;
-import org.citygml4j.xml.io.writer.CityGMLWriteException;
-import org.plateau.citygmleditor.citymodel.CityModelView;
-import org.plateau.citygmleditor.exporters.GmlExporter;
-import org.plateau.citygmleditor.exporters.TextureExporter;
-import org.plateau.citygmleditor.importers.gml.GmlImporter;
 import org.plateau.citygmleditor.exporters.CityGmlDatasetExporter;
 import org.plateau.citygmleditor.world.World;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Optional;
-import javafx.scene.layout.VBox;
 
 public class TopPanelController {
     public void importGml(ActionEvent actionEvent) {
@@ -28,17 +18,13 @@ public class TopPanelController {
         if (files == null)
             return;
 
-        try {
-            if (World.getActiveInstance().getGeoReference() == null || World.getActiveInstance()
-                    .getGeoReference().getEPSGCode() == null || World.getActiveInstance()
-                            .getGeoReference().getEPSGCode().isEmpty()) {
-                CoordinateDialogController.createCoorinateDialog(files);
-            } else {
-                LoadGMLDialogController.createLoadGMLDialog(files);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-
+        if (World.getActiveInstance().getGeoReference() == null || World.getActiveInstance()
+                .getGeoReference().getEPSGCode() == null || World.getActiveInstance()
+                        .getGeoReference().getEPSGCode().isEmpty()) {
+            CoordinateDialogController.createCoorinateDialog(files);
+        }
+        else {
+            LoadGMLDialogController.createLoadGMLDialog(files);
         }
     }
 

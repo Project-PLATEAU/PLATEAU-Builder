@@ -7,10 +7,9 @@ import javax.swing.text.html.StyleSheet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.*;
-import java.io.FileInputStream;
 import org.xml.sax.InputSource;
-import java.util.ArrayList;
-import java.util.HashSet;
+
+import java.io.FileInputStream;
 
 public class UroAttributeInfo {
     NodeList nodeListElement;
@@ -24,7 +23,6 @@ public class UroAttributeInfo {
         try {
             // DOMパーサのインスタンスを作成
             DOMParser parser = new DOMParser();
-
             // XMLファイルをパース
             var fileStream = new FileInputStream(path);
             var inputSource = new InputSource(fileStream);
@@ -52,9 +50,6 @@ public class UroAttributeInfo {
                 if (((Element) parentNode).getTagName() == "xs:schema" && element.getAttribute("abstract") != "true") {
                     // 最上位の属性をノードとして格納
                     Node importedNode = uroDocument.importNode(element, false);
-                    Element importedElement = (Element) importedNode;
-                    String annotation = getAnnotation(importedNode);
-                    importedElement.setAttribute("annotation", annotation);
                     rootElement.appendChild(importedNode);
                     NodeList complexTypeNodeList = document.getElementsByTagName("xs:complexType");
                     traverseComplexType(complexTypeNodeList, element.getAttribute("type").substring(4),
@@ -116,13 +111,8 @@ public class UroAttributeInfo {
                     elementType = element.getAttribute("type").substring(4);
                     NodeList complexTypeNodeList = document.getElementsByTagName("xs:complexType");
                     if (element.getAttribute("name") != "") {
-                        // System.out.println("element.getAttribute(\"name\"):" +
-                        // element.getAttribute("name"));
                         Node importedNode = uroDocument.importNode(elementNode, false);
-                        String annotation = getAnnotation(elementNode);
-                        Element importedElement = (Element) importedNode;
-                        parentElement.setAttribute("annotation", annotation);
-                        parentElement.appendChild(importedElement);
+                        parentElement.appendChild(importedNode);
                         traverseComplexType(complexTypeNodeList, elementType, (Element) importedNode);
                     }
                 }
@@ -142,72 +132,27 @@ public class UroAttributeInfo {
                 }
                 if (element.getAttribute("name") != "") {
                     Node importedNode = uroDocument.importNode(elementNode, false);
-                    Element importedElement = (Element) importedNode;
-                    String annotation = getAnnotation(elementNode);
-                    importedElement.setAttribute("annotation", annotation);
-                    parentElement.appendChild(importedElement);
+                    parentElement.appendChild(importedNode);
                 }
             }
         }
 
     }
 
-    private String getAnnotation(Node node) {
-        // 子ノードを取得
-        NodeList childNodes = node.getChildNodes();
-        Node child = childNodes.item(1);
-        // 子ノードがElementの場合、そのタグ名をチェック
-        if (child instanceof Element) {
-            Element childElement = (Element) child;
-            if (childElement.getTagName().equals("xs:annotation")) {
-                child = child.getChildNodes().item(1).getChildNodes().item(0);
-                String value = child.getNodeValue();
-                return value;
-            }
-        }
-        // <xs:documentation>要素が見つからなかった場合はfalseを返す
-        return "null";
+    // ノードを表示するメソッド
+    private static void printNode(Node node, int depth) {
+        if (node.getNodeType() == Node.ELEMENT_NODE) {
+            // インデント用の空白を生成
+            String indent = new String(new char[depth * 2]).replace("\0", " ");
+            Element element = (Element) node;
+            // ノードの情報を表示
+            System.out.println(indent + "Tag Name: " + element.getTagName() + "   Node Name: "
+                    + element.getAttribute("name") + "   Parent TagName: " + element.getParentNode());
 
-    }
-
-    /**
-     * removeExtraItems
-     * 追加可能な要素リストから不要な要素を削除
-     * 
-     * @param パースしたuroの要素リスト
-     */
-    private void removeExtraItems(Node node) {
-        NodeList childNodes = node.getChildNodes();
-        ArrayList<Node> removeNodeList = new ArrayList<>();
-
-        // 重複チェック用のセット
-        HashSet<String> nodeNameSet = new HashSet<>();
-
-        // 重複をチェックし、条件に合致するノードを削除対象リストに追加
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node childNode = childNodes.item(i);
-            if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element element = (Element) childNode;
-                String nodeName = element.getAttribute("name");
-                String nodeNameLowerCase = nodeName.toLowerCase();
-                String abstractInfo = element.getAttribute("abstract");
-
-                // 大文字で始まるノードを削除対象に
-                if (Character.isUpperCase(nodeName.charAt(0))) {
-                    removeNodeList.add(childNode);
-                }
-                // abstract="true"属性を持つノードを削除対象に
-                if (abstractInfo.equals("true")) {
-                    removeNodeList.add(childNode);
-                }
-            }
-        }
-
-        // 削除対象のノードを削除
-        for (Node n : removeNodeList) {
-            // 親ノードがこのノードを持っているか確認
-            if (n.getParentNode() == node) {
-                node.removeChild(n);
+            // 子ノードがあれば、それぞれに対してこのメソッドを再帰的に呼び出す
+            NodeList childNodes = node.getChildNodes();
+            for (int i = 0; i < childNodes.getLength(); i++) {
+                printNode(childNodes.item(i), depth + 1);
             }
         }
     }
@@ -219,26 +164,6 @@ public class UroAttributeInfo {
      * @return パースしたuroの要素リスト
      */
     public Document getUroAttributeDocument() {
-        removeExtraItems(uroDocument.getDocumentElement());
         return uroDocument;
-    }
-
-    // ノードを表示するメソッド
-    private static void printNode(Node node, int depth) {
-        if (node.getNodeType() == Node.ELEMENT_NODE) {
-            // インデント用の空白を生成
-            String indent = new String(new char[depth * 2]).replace("\0", " ");
-            Element element = (Element) node;
-            // ノードの情報を表示
-            System.out.println(indent + "Tag Name: " + element.getTagName() + "   Node Name: "
-                    + element.getAttribute("name") + "___" + element.getAttribute("annotation") + "   Parent TagName: "
-                    + element.getParentNode());
-
-            // 子ノードがあれば、それぞれに対してこのメソッドを再帰的に呼び出す
-            NodeList childNodes = node.getChildNodes();
-            for (int i = 0; i < childNodes.getLength(); i++) {
-                printNode(childNodes.item(i), depth + 1);
-            }
-        }
     }
 }
