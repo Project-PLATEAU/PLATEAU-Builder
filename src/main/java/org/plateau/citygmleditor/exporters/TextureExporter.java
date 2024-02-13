@@ -26,10 +26,6 @@ public class TextureExporter {
         // ImageURIの取得
         List<String> appearanceList = new ArrayList<>();
         org.citygml4j.model.citygml.core.CityModel gmlObject = cityModel.getGmlObject();
-        // appearanceがない場合は終了
-        if (gmlObject.getAppearanceMember().size() == 0) {
-            return;
-        }
         for (var appearanceMember : gmlObject.getAppearanceMember()) {
             var surfaceDataMembers = appearanceMember.getAppearance().getSurfaceDataMember();
             for (var surfaceData : surfaceDataMembers) {
@@ -55,7 +51,7 @@ public class TextureExporter {
                 var filePathComponents = appearanceList.get(0).split("/");
                 appearanceDirName = filePathComponents[0];
                 try {
-                    if (new File(folderPath + "/" + appearanceDirName).exists()) {
+                    if(new File(folderPath + "/" + appearanceDirName).exists()){
                         FileUtils.deleteDirectory(Paths.get(folderPath + "/" + appearanceDirName));
                     }
                     Files.createDirectory(Paths.get(folderPath + "/" + appearanceDirName));
@@ -69,20 +65,7 @@ public class TextureExporter {
             var textureImage = SwingFXUtils.fromFXImage(diffuseMap, null);
             try {
                 File exportPath = new File(folderPath + "/" + appearanceList.get(count));
-                // 最後の '\' 以降を抽出
-                String fileName = exportPath.getAbsolutePath()
-                        .substring(exportPath.getAbsolutePath().lastIndexOf("\\") + 1);
-                // '.' 以降（ファイルの拡張子）を抽出
-                String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-                if (extension.matches("jpg") || extension.matches("jpeg")) {
-                    ImageIO.write(textureImage, "jpg", exportPath);
-                } else if (extension.matches("png")) {
-                    ImageIO.write(textureImage, "png", exportPath);
-                } else {
-                    System.out.println(fileName);
-                    ImageIO.write(textureImage, "png", exportPath);
-                }
-
+                ImageIO.write(textureImage, "jpg", exportPath);
             } catch (IOException e) {
                 e.printStackTrace();
             }

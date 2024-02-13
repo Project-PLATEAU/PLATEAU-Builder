@@ -95,6 +95,7 @@ public class CityGMLEditorApp extends Application {
         return antiAliasing;
     }
 
+
     public static FeatureSelection getFeatureSellection() {
         return selection;
     }
