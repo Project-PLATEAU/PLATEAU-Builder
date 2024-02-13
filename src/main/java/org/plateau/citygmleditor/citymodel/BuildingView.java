@@ -49,7 +49,23 @@ public class BuildingView extends Parent {
             if (solid == null)
                 continue;
 
-            ((Node)solid).setVisible(lod == i);
+            ((Node) solid).setVisible(lod == i);
+        }
+        
+        // BuildingInstallation
+        for (var buildingInstallationView : buildingInstallationViews) {
+            buildingInstallationView.setVisible(buildingInstallationView.getLOD() == lod);
+        }
+
+        // BuildingPart
+        List<List<? extends ILODSolidView>> allPart = new ArrayList<>();
+        allPart.add(buildingPartLod1Solid);
+        allPart.add(buildingPartLod2Solid);
+        allPart.add(buildingPartLod3Solid);
+        for (int i = 0; i < 3; i++) {
+            for (var buildingPart : allPart.get(i)) {
+                ((Node) buildingPart).setVisible(lod == (i + 1));
+            }
         }
     }
 
