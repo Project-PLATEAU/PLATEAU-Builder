@@ -18,9 +18,11 @@ import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.DepthTest;
 import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
@@ -32,6 +34,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
+import javafx.stage.Stage;
 import org.citygml4j.builder.copy.DeepCopyBuilder;
 import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.plateau.citygmleditor.citymodel.BuildingView;
@@ -71,9 +74,12 @@ public class ValidationController implements Initializable {
     private static Logger LOGGER = Logger.getLogger(ValidationController.class.getName());
 
     private List<ValidationResultMessage> validationResultMessages;
+    private final Group highLightGroup = new Group();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        World.getRoot3D().getChildren().add(highLightGroup);
+
         // パラメータファイル選択UI
         var defaultParameterFilePath = getDefaultParameterFilePath();
         if (!new File(defaultParameterFilePath).exists())
@@ -89,11 +95,6 @@ public class ValidationController implements Initializable {
 
         toggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
             var message = (ValidationResultMessage)newValue.getUserData();
-            if (message.getElementErrors().isEmpty())
-                return;
-
-            activeBuildingElement(message.getElementErrors().get(0));
-
             messageTextArea.setText(message.getMessage());
             switch (message.getType()) {
                 case Info:
@@ -105,7 +106,31 @@ public class ValidationController implements Initializable {
                     messageTextArea.setStyle("-fx-text-fill: red;");
                     break;
             }
+
+            if (message.getElementErrors().isEmpty())
+                return;
+
+            activeBuildingElement(message.getElementErrors().get(0));
         });
+    }
+
+    public static void openWindow() {
+        Stage newWindow = new Stage();
+        newWindow.setTitle("品質検査");
+        FXMLLoader loader = new FXMLLoader(ValidationController.class.getResource("fxml/validation/validation.fxml"));
+        try {
+            newWindow.setScene(new Scene(loader.load()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        var controller = (ValidationController)loader.getController();
+        newWindow.setOnCloseRequest(event -> {
+            controller.clearHighLight();
+        });
+
+        newWindow.showAndWait();
     }
 
     private void showMessage(ValidationResultMessage message) {
@@ -300,14 +325,16 @@ public class ValidationController implements Initializable {
         elementErrors.forEach(this::highlightError);
     }
 
+    public void clearHighLight() {
+        highLightGroup.getChildren().clear();
+    }
+
     private void highlightError(GmlElementError elementError) {
         var material = new PhongMaterial();
         WritableImage image = new WritableImage(1, 1);
         PixelWriter writer = image.getPixelWriter();
         writer.setColor(0, 0, Color.RED);
         material.setSelfIlluminationMap(image);
-
-        Group group = (Group) World.getRoot3D();
 
         for (var cityModelView : World.getActiveInstance().getCityModels()) {
             var geometryFactory = new CustomGeometryFactory(cityModelView);
@@ -333,7 +360,7 @@ public class ValidationController implements Initializable {
                                     meshView.setDrawMode(DrawMode.LINE);
                                     meshView.setCullFace(CullFace.NONE);
                                     meshView.setDepthTest(DepthTest.DISABLE);
-                                    group.getChildren().add(meshView);
+                                    highLightGroup.getChildren().add(meshView);
                                 });
                     });
         }

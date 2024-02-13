@@ -34,12 +34,8 @@ public class TopPanelController {
         datasetExporter.export(cityModels);
     }
 
-    public void openValidationWindow(ActionEvent event) throws IOException {
-        Stage newWindow = new Stage();
-        newWindow.setTitle("品質検査");
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/validation/validation.fxml"));
-        newWindow.setScene(new Scene(loader.load()));
-        newWindow.showAndWait();
+    public void openValidationWindow() {
+        ValidationController.openWindow();
     }
 
     // フォルダコピーメソッド(udx以下は無視)
