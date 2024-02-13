@@ -1,6 +1,12 @@
-# PLATEAU CityGML Editor
-- CityGML編集ツール
-- [3DViewer](https://github.com/chirontt/3DViewer)をベースとして作成(←あとで消す)
+# [WIP]CityGML編集ツール
+(適当な画像入れる)
+
+## 1. 概要
+本リポジトリでは、Project PLATEAUにおける都市デジタルツイン実現に向けた研究開発及び実証調査業務の一部であるcm23-08「CityGML編集ツールの開発」について、その成果物である「CityGML編集ツール」のソースコードを公開しています。
+「CityGML編集ツール」は、PLATEAU標準仕様に準拠したCityGMLデータの編集または品質検査を行うためのシステムです。
+
+## 2. 「CityGML編集ツール」について
+
 
 ## 動作環境
 - Windows 10, 11
