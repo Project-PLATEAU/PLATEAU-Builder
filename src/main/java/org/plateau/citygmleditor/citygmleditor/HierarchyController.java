@@ -300,8 +300,8 @@ public class HierarchyController implements Initializable {
             super(node);
             if (node instanceof Parent) {
                 for (Node n : ((Parent) node).getChildrenUnmodifiable()) {
-                    if (n instanceof MeshView) {
-                        if (!(n instanceof LOD1SolidView) && !(n instanceof BuildingInstallationView))
+                    if (n instanceof MeshView || n instanceof ILODSolidView) {
+                        if (!(n instanceof BuildingInstallationView))
                             continue;
                     }
                     getChildren().add(new HierarchyController.TreeItemImpl(n));
