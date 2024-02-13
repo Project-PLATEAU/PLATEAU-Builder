@@ -3,6 +3,7 @@ package org.plateau.citygmleditor.control;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
+import javafx.scene.SubScene;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.*;
 import javafx.scene.input.MouseButton;
@@ -60,7 +61,7 @@ public class FeatureSelection {
         return activeSection;
     }
 
-    public void registerClickEvent(Scene scene) {
+    public void registerClickEvent(SubScene scene) {
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
             if (!event.isPrimaryButtonDown())
                 return;

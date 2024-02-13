@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="addingAttributeMenu" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.AddingAttributeMenuController">
+<VBox style="-fx-background-color: #444444;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="org.plateau.citygmleditor.citygmleditor.AddAttributeListViewController">
     <!-- 検索ボックス -->
-    <TextField fx:id="searchField" promptText="Search"/>
+    <TextField fx:id="searchField" promptText="Search">
+      <VBox.margin>
+         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+      </VBox.margin></TextField>
     
-    <!-- TableView -->
-    <TableView fx:id="attributeTableView" onMouseClicked="#handleMouseClick">
-        <columns>
-            <TableColumn fx:id="name" text="name" />
-            <TableColumn fx:id="description" text="description" />
-        </columns>
-    </TableView>
+    <!-- ListView -->
+    <ListView fx:id="attributeListView" maxHeight="1.7976931348623157E308" style="-fx-background-color: #444444;">
+      <VBox.margin>
+         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+      </VBox.margin></ListView>
+    <stylesheets>
+        <URL value="@../viewer.css" />
+    </stylesheets>
 </VBox>
