@@ -14,7 +14,8 @@
         <Label  text="■ CodeSpaceの入力"/>
         <HBox fx:id="codeSpaceHbox" spacing="10">
             <TextField fx:id="codeSpaceField" promptText="CodeSpace"/>
-            <Button text="CodeSpace選択…" onAction="#handleSelectCodeSpace"/>
+            <Button text="CodeSpaceの選択" onAction="#handleSelectCodeSpace"/>
+            <Button text="値の変更" onAction="#handleSelectCodeSpaceValue"/>
         </HBox>
     </VBox>
     <VBox fx:id="uomVbox" >

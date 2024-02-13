@@ -95,6 +95,7 @@ public class InputAttributeFormController {
         if (addAttributeType.matches("gml:CodeType")) {
             // setCodeSpaceField(value);
             String oldCodeSpace = getCodeSpace(childList, parentIndex, selectedIndex);
+            valueField.setDisable(true);
             setCodeSpaceField(oldCodeSpace.substring(oldCodeSpace.lastIndexOf("/") + 1));
         } else {
             codeSpaceVbox.setManaged(false);
@@ -140,7 +141,9 @@ public class InputAttributeFormController {
         this.requiredChildAttributeList = requiredChildAttributeList;
         this.parentIndex = parentIndex;
         this.selectedIndex = selectedIndex;
-        if (!addAttributeType.matches("gml:CodeType")) {
+        if (addAttributeType.matches("gml:CodeType")) {
+            valueField.setDisable(true);
+        } else {
             codeSpaceVbox.setManaged(false);
             codeSpaceVbox.setVisible(false);
         }
@@ -257,6 +260,12 @@ public class InputAttributeFormController {
         inputCodeSpace();
     }
 
+    // CodeSpace選択ボタンのイベントハンドラ
+    @FXML
+    private void handleSelectCodeSpaceValue(ActionEvent event) {
+        changeCodeSpaceValue();
+    }
+
     // キャンセルボタンのイベントハンドラ
     @FXML
     private void handleCancel(ActionEvent event) {
@@ -331,6 +340,42 @@ public class InputAttributeFormController {
             // リストビューを閉じる
             codeTypeStage.close();
         });
+
+        // codeSpaceValueMenuControllerで表示されるメニューにおいて、選択行為がされたら呼び出される
+        codeSpaceValueMenuController.setItemSelectedCallback(selectedItem -> {
+            String name = selectedItem.nameProperty().getValue();
+            setValueField(name);
+            // リストビューを閉じる
+            valueStage.close();
+        });
+    }
+
+    /**
+     * changeCodeSpaceValue
+     * CodeSpaceの値を変更する
+     */
+    private void changeCodeSpaceValue() {
+        String datasetPath = CityGMLEditorApp.getDatasetPath();
+        String codeListDirPath = datasetPath + "\\codelists";
+        final Stage valueStage = new Stage();
+        Parent valueRoot = null;
+        FXMLLoader valueLoader = null;
+        String codeSpaceValue = codeSpaceField.getText();
+
+        try {
+            valueLoader = new FXMLLoader(getClass().getResource("fxml/codeSpace-Value-Menu.fxml"));
+            valueRoot = valueLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        final CodeSpaceValueMenuController codeSpaceValueMenuController = valueLoader.getController();
+        final Parent finalValueRoot = valueRoot; // root を final にする
+        CodeSpaceAttributeInfo codeSpaceAttributeInfo = new CodeSpaceAttributeInfo();
+        codeSpacePath = codeListDirPath + "\\" + codeSpaceValue;
+        codeSpaceAttributeInfo.readCodeType(codeSpacePath);
+        codeSpaceValueMenuController.setCodeType(codeSpaceAttributeInfo.getCodeTypeDocument());
+        valueStage.setScene(new Scene(finalValueRoot));
+        valueStage.show();
 
         // codeSpaceValueMenuControllerで表示されるメニューにおいて、選択行為がされたら呼び出される
         codeSpaceValueMenuController.setItemSelectedCallback(selectedItem -> {
