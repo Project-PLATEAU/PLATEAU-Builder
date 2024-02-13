@@ -40,8 +40,23 @@
 - PLATEAU標準に準拠したファイル群（コードリスト・メタデータなど）を生成します。
 
 ## 5. 利用技術
+| 種別 | 名称 | バージョン | 詳細 |
+| --- | --- | --- | --- |
+|プログラミング言語|[java](https://www.java.com/ja/)||プログラミング言語。本ツールは全てjavaで実装する。|
+|フレームワーク|[javafx](https://openjfx.io/)||javaのGUIフレームワーク|
+|ライブラリ|[citygml4j](https://github.com/citygml4j/citygml4j)||citygml読み込み・書き出しのためのライブラリ|
+||[iur-ade-citygml4j](https://github.com/citygml4j/iur-ade-citygml4j)||citygml4jのiUR向け拡張ライブラリ|
+||[java3D](https://www.oracle.com/java/technologies/javase/java-3d.html)||3Dレンダリングライブラリ。3Dレンダリング自体はjavafxで行うため、CityGMLの頂点データのポリゴンメッシュ化のみに利用する。|
+||[JglTF](https://github.com/javagl/JglTF)||glTF読み込みライブラリ|
 
 ## 6. 動作環境
+| 項目 | 最小動作環境 | 推奨動作環境 |
+| --- | --- | --- |
+|OS|||
+|CPU|||
+|メモリ|||
+|ディスプレイ解像度|||
+|ネットワーク|||
 
 ## 7. 本リポジトリのフォルダ構成
 
