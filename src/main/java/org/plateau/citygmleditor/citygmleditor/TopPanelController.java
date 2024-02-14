@@ -23,7 +23,7 @@ import javafx.scene.layout.VBox;
 
 public class TopPanelController {
     public void importGml(ActionEvent actionEvent) {
-        var files = FileChooserService.showMultipleOpenDialog("*.gml", SessionManager.GML_FILE_PATH_PROPERTY);
+        var files = FileChooserService.showMultipleOpenDialog(SessionManager.GML_FILE_PATH_PROPERTY, "*.gml");
 
         if (files == null)
             return;

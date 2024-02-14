@@ -233,7 +233,7 @@ public class ValidationController implements Initializable {
 
     public void onClickParameterFileSelectButton() {
         var defaultParameterFileFolder = Paths.get(getDefaultParameterFilePath()).getParent().toString();
-        var file = FileChooserService.showOpenDialogWithoutSession("*.json", defaultParameterFileFolder);
+        var file = FileChooserService.showOpenDialogWithoutSession(defaultParameterFileFolder, "*.json");
 
         if (file == null)
             return;
