@@ -33,6 +33,10 @@ CityGMLインポートを行います。ボタン押下後に「2-2.CityGMLイ�
 
 ![image](../resources/HowToUse/panel.png)
 
+||操作説明|イメージ|
+|---|---|---|
+|①|マウスポインタによって地物を選択できます|![image](../resources/HowToUse/panel①.png)|
+|②|矢印をマウスで掴み移動させることで、地物を直線移動できます|![image](../resources/HowToUse/panel②.png)|
 
 
 ### ⑥地物詳細エリア
