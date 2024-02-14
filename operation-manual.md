@@ -11,11 +11,13 @@
 ## 2-1. トップ画面
 本ツールの実行ファイルを実行すると、以下の画面が表示されます。
 
-（キャプチャ）
+![image](https://github.com/Synesthesias/PLATEAU-CityGML-Editor/assets/20107036/7d401e13-ec5d-4806-a0f4-64d681b9f593)
+
 
 CityGMLデータのインポートを行うと、以下のような表示内容になります。
 
-（キャプチャ）
+![スクリーンショット 2024-02-14 161128](https://github.com/Synesthesias/PLATEAU-CityGML-Editor/assets/20107036/59cd38d7-de71-4cec-8765-6837beaba84e)
+
 
 ### ①CityGMLインポートボタン
 CityGMLインポートを行います。ボタン押下後に「2-2.CityGMLインポート画面」へ移動します。
@@ -25,10 +27,15 @@ CityGMLインポートを行います。ボタン押下後に「2-2.CityGMLイ�
 品質検査を行います。ボタン押下後に「2-4.品質検査画面」へ移動します。
 ### ④地物一覧エリア
 インポートしたデータの地物一覧を表示します。
-
 ### ⑤3Dビューエリア
+インポートしたデータを3Dで描画します。
+また、上部のメニューボタンを切り替えることで、マウス操作によって地物を移動・回転したり、描画するLODを変更できます。
+
+![スクリーンショット 2024-02-14 162827](https://github.com/Synesthesias/PLATEAU-CityGML-Editor/assets/20107036/0b2ac71f-4cf0-4f84-ba5d-c34e7d9e708c)
+
+
+
 ### ⑥地物詳細エリア
-### ⑦設定エリア
 
 ## 2-2. CityGMLインポート画面
 
