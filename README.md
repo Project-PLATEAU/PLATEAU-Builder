@@ -1,5 +1,5 @@
 # [WIP]CityGML編集ツール
-![image](./README_resources/概観.png)
+![スクリーンショット 2024-02-14 171551](https://github.com/Synesthesias/PLATEAU-CityGML-Editor/assets/20107036/707d9f43-aca8-463c-a575-214ee7e4319a)
 
 
 ## 1. 概要
