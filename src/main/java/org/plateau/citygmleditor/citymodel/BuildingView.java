@@ -45,7 +45,17 @@ public class BuildingView extends Parent {
             if (solid == null)
                 continue;
 
-            ((Node)solid).setVisible(lod == i);
+            ((Node) solid).setVisible(lod == i);
+        }
+        
+        // BuildingInstallation
+        for (var buildingInstallationView : buildingInstallationViews) {
+            for (int i = 2; i <= 3; i++) {
+                var geometryView = buildingInstallationView.getGeometryView(i);
+                if (geometryView != null) {
+                    geometryView.setVisible(i == lod);
+                }
+            }
         }
     }
 
@@ -109,9 +119,15 @@ public class BuildingView extends Parent {
 
         this.buildingInstallationViews.add(buildingInstallationView);
         this.getChildren().add(buildingInstallationView);
-        buildingInstallationView.getTransformManipulator().updateOrigin();
     }
 
+    public void addBuildingPart(BuildingView buildingPart) {
+        if (buildingPart == null)
+            return;
+
+        this.getChildren().add(buildingPart);
+    }
+    
     public Envelope getEnvelope() {
         return this.gmlObject.getBoundedBy().getEnvelope();
     }
@@ -125,7 +141,12 @@ public class BuildingView extends Parent {
             paths.addAll(lod3Solid.getTexturePaths());
         }
         for (var buildingInstallationView : buildingInstallationViews) {
-            paths.addAll(buildingInstallationView.getTexturePaths());
+            for (int i = 2; i <= 3; i++) {
+                var geometryView = buildingInstallationView.getGeometryView(i);
+                if (geometryView != null) {
+                    paths.addAll(geometryView.getTexturePaths());
+                }
+            }
         }
         return new ArrayList<String>(paths);
     }

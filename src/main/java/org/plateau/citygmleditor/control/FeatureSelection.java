@@ -14,6 +14,7 @@ import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.world.World;
 
 import org.plateau.citygmleditor.citymodel.BuildingView;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
@@ -157,6 +158,10 @@ public class FeatureSelection {
     
     public void setSelectElement(Node node) {
         selectElement.set(node);
+
+        if (node instanceof ILODSolidView) {
+            outLine.setMesh(((ILODSolidView) node).getTotalMesh());
+        }
     }
 
     public Node getSelectElement() {

@@ -3,6 +3,8 @@ package org.plateau.citygmleditor.citymodel.factory;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
+import org.citygml4j.model.gml.geometry.AbstractGeometry;
+import org.citygml4j.model.gml.geometry.GeometryProperty;
 import org.citygml4j.model.citygml.building.BuildingInstallation;
 import org.citygml4j.model.gml.geometry.primitives.LinearRing;
 import org.citygml4j.model.gml.geometry.primitives.Polygon;
@@ -29,13 +31,30 @@ public class GeometryFactory extends CityGMLFactory {
     }
 
     public BuildingInstallationView cretateBuildingInstallationView(BuildingInstallation gmlObject) {
-        if (gmlObject.getLod3Geometry() == null)
+        var buildingInstallationView = new BuildingInstallationView(gmlObject);
+
+        var lod2Geometry = createGeometryView(gmlObject.getLod2Geometry());
+        if (lod2Geometry != null) {
+            buildingInstallationView.setGeometryView(2, lod2Geometry);
+            lod2Geometry.getTransformManipulator().updateOrigin();
+        }
+        
+        var lod3Geometry = createGeometryView(gmlObject.getLod3Geometry());
+        if (lod3Geometry != null) {
+            buildingInstallationView.setGeometryView(3, lod3Geometry);
+            lod3Geometry.getTransformManipulator().updateOrigin();
+        }
+
+        return buildingInstallationView;
+    }
+    
+    public GeometryView createGeometryView(GeometryProperty<? extends AbstractGeometry> gmlGeometry) {
+        if (gmlGeometry == null)
             return null;
-
-        var buildingInstallationView = new BuildingInstallationView(gmlObject, vertexBuffer, texCoordBuffer);
-
-        var geometry = new GeometryView(gmlObject.getLod3Geometry().getGeometry());
-        var multiSurface = (MultiSurface) gmlObject.getLod3Geometry().getGeometry();
+        if(gmlGeometry.getGeometry() == null)
+            return null;
+            
+        var multiSurface = (MultiSurface) gmlGeometry.getGeometry();
         var polygons = new ArrayList<PolygonView>();
         for (var surfaceMember : multiSurface.getSurfaceMember()) {
             var polygon = (Polygon) surfaceMember.getSurface();
@@ -44,10 +63,11 @@ public class GeometryFactory extends CityGMLFactory {
             var polygonObject = createPolygon(polygon);
             polygons.add(polygonObject);
         }
+        var geometry = new GeometryView(gmlGeometry.getGeometry(), vertexBuffer, texCoordBuffer);
         geometry.setPolygons(polygons);
-        buildingInstallationView.setMesh(createTriangleMesh(polygons));
-        buildingInstallationView.setGeometryView(geometry);
-        return buildingInstallationView;
+        geometry.setMesh(createTriangleMesh(polygons));
+        geometry.setMaterial(World.getActiveInstance().getDefaultMaterial());
+        return geometry;
     }
 
     protected PolygonView createPolygon(Polygon gmlObject) {

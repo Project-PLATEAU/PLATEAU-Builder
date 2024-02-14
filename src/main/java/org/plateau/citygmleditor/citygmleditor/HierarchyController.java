@@ -15,6 +15,7 @@ import javafx.stage.FileChooser;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.BuildingInstallationView;
+import org.plateau.citygmleditor.citymodel.geometry.GeometryView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.converters.Gltf2LodConverter;
@@ -285,7 +286,7 @@ public class HierarchyController implements Initializable {
             if (node instanceof Parent) {
                 for (Node n : ((Parent) node).getChildrenUnmodifiable()) {
                     if (n instanceof MeshView || n instanceof ILODSolidView) {
-                        if (!(n instanceof BuildingInstallationView))
+                        if (!(n instanceof GeometryView))
                             continue;
                     }
                     getChildren().add(new HierarchyController.TreeItemImpl(n));
