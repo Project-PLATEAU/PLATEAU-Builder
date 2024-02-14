@@ -20,19 +20,18 @@ import javafx.scene.layout.VBox;
 import javafx.geometry.Pos;
 import javafx.scene.input.MouseEvent;
 import org.w3c.dom.Element;
-import java.util.Objects;
+
+import java.util.*;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.event.ActionEvent;
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.common.child.ChildList;
-import java.util.ArrayList;
 import org.w3c.dom.Node;
 import org.citygml4j.model.citygml.ade.generic.ADEGenericElement;
 import org.w3c.dom.NodeList;
-import java.util.Collections;
-import java.util.Comparator;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tab;
 import org.w3c.dom.Document;
@@ -43,7 +42,11 @@ public class MultipleAttributesFormController {
     @FXML
     private TabPane tabPane;
 
+    private List<InputAttributeFormController> controllers = new ArrayList<>();
+
     public void initialize() {
+        tabPane.getTabs().clear();
+
         // TabPaneのタブリストにリスナーを追加
         tabPane.getTabs().addListener((ListChangeListener<Tab>) change -> {
             // タブリストの変更を監視
@@ -67,6 +70,8 @@ public class MultipleAttributesFormController {
                 formController.initialize(childList, parentAttributeName, "uro:" + attribute.get(0), attribute.get(1),
                         attributeList,
                         uroAttributeDocument, null, parentIndex, parentIndex);
+                formController.hideButtons();
+                controllers.add(formController);
                 // 必要に応じてコントローラにデータを設定
                 // formController.setData(...);
 
@@ -74,7 +79,6 @@ public class MultipleAttributesFormController {
                 tabPane.getTabs().add(tab); // タブをTabPaneに追加
                 formController.setOnAddButtonPressedCallback(() -> {
                     removeTabByName(attribute.get(0));
-
                 });
             } catch (IOException e) {
                 e.printStackTrace();
@@ -97,8 +101,19 @@ public class MultipleAttributesFormController {
     }
 
     private void closeWindow() {
-
         Stage stage = (Stage) tabPane.getScene().getWindow();
         stage.close();
+    }
+
+    @FXML
+    private void handleAdd() {
+        for (var controller : controllers) {
+            controller.requestAdd();
+        }
+    }
+
+    @FXML
+    private void handleCancel() {
+        closeWindow();
     }
 }

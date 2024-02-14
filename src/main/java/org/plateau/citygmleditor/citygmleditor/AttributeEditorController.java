@@ -317,30 +317,20 @@ public class AttributeEditorController implements Initializable {
     }
 
     private void showRootAttributeAdditionPanel() {
-        Consumer<AddAttributeListViewController> onAdd = (AddAttributeListViewController attributeAdditionPanel) -> {
-            // addAttribute(
-            // attributeAdditionPanel.getSelectedTagName(),
-            // null,
-            // attributeAdditionPanel.getAttributeList().get(attributeAdditionPanel.getSelectedIndex()).get(1),
-            // attributeAdditionPanel.getAttributeList());
-        };
+        showListView(
+                (ChildList<ADEComponent>) selectedBuilding.getGenericApplicationPropertyOfAbstractBuilding(),
+                null, -2, -2);
 
-        // 未選択もしくはルート選択状態時
-        AddAttributeListViewController.createModal(attributeTreeTable.getRoot(), true, onAdd);
-    }
-
-    private void showAttributeAdditionPanel() {
-        TreeItem<AttributeItem> selectedItem = attributeTreeTable.getSelectionModel().getSelectedItem();
-
-        Consumer<AddAttributeListViewController> onAdd = (AddAttributeListViewController attributeAdditionPanel) -> {
-            // addAttribute(
-            // attributeAdditionPanel.getSelectedTagName(),
-            // selectedItem.getValue().keyProperty().get(),
-            // attributeAdditionPanel.getAttributeList().get(attributeAdditionPanel.getSelectedIndex()).get(1),
-            // attributeAdditionPanel.getAttributeList());
-        };
-
-        AddAttributeListViewController.createModal(selectedItem, false, onAdd);
+//        Consumer<AddAttributeListViewController> onAdd = (AddAttributeListViewController attributeAdditionPanel) -> {
+//            // addAttribute(
+//            // attributeAdditionPanel.getSelectedTagName(),
+//            // null,
+//            // attributeAdditionPanel.getAttributeList().get(attributeAdditionPanel.getSelectedIndex()).get(1),
+//            // attributeAdditionPanel.getAttributeList());
+//        };
+//
+//        // 未選択もしくはルート選択状態時
+//        AddAttributeListViewController.createModal(attributeTreeTable.getRoot(), true, onAdd);
     }
 
     private static void addADEPropertyToTree(AbstractBuilding selectedBuilding, TreeItem<AttributeItem> root) {
@@ -558,6 +548,7 @@ public class AttributeEditorController implements Initializable {
         AddingAttributeMenuController addingAttributeMenuController = null;
         Parent root = null;
         Stage pStage = new Stage();
+        pStage.setAlwaysOnTop(true);
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/add-attribute-list-view.fxml"));
@@ -599,11 +590,9 @@ public class AttributeEditorController implements Initializable {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/add-attribute-form.fxml"));
                 Parent formRoot = loader.load();
                 InputAttributeFormController inputAttributeFormController = loader.getController();
-                inputAttributeFormController.initialize(childList, selectedAttributeKeyName, "uro:" + selectedItemName,
-                        addAttributeList.get(selectedItemIndex).get(1), addAttributeList, uroAttributeDocument,
-                        requiredChildAttributeList, parentIndex, selectedIndex);
 
                 Stage stage = new Stage();
+                stage.setAlwaysOnTop(true);
                 stage.setTitle("属性の追加");
                 stage.setScene(new Scene(formRoot));
                 // ボタンが押されたことを検知するコールバックを設定
@@ -611,8 +600,15 @@ public class AttributeEditorController implements Initializable {
                     stage.close();
                     refreshListView();
                 });
+                inputAttributeFormController.setOnCancelButtonPressedCallback(() -> {
+                    stage.close();
+                });
                 // ウィンドウを表示
                 stage.show();
+
+                inputAttributeFormController.initialize(childList, selectedAttributeKeyName, "uro:" + selectedItemName,
+                        addAttributeList.get(selectedItemIndex).get(1), addAttributeList, uroAttributeDocument,
+                        requiredChildAttributeList, parentIndex, selectedIndex);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -648,6 +644,7 @@ public class AttributeEditorController implements Initializable {
                     getType(selectedItemName, parentItemName), parentIndex, selectedIndex);
             // 新しいウィンドウ（ステージ）の設定
             Stage stage = new Stage();
+            stage.setAlwaysOnTop(true);
             stage.setTitle("属性の編集");
             stage.setScene(new Scene(formRoot));
             // ボタンが押されたことを検知するコールバックを設定
@@ -656,6 +653,10 @@ public class AttributeEditorController implements Initializable {
                 refreshListView();
                 // 必要に応じて他の処理を実行
             });
+            inputAttributeFormController.setOnCancelButtonPressedCallback(() -> {
+                stage.close();
+            });
+
             // ウィンドウを表示
             stage.show();
         } catch (IOException e) {

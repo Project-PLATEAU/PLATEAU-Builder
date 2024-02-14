@@ -37,6 +37,10 @@ import java.util.Comparator;
 public class InputAttributeFormController {
 
     @FXML
+    private Button cancelButton;
+    @FXML
+    private Button addButton;
+    @FXML
     private Label name;// 要素名の入力ラベル
 
     @FXML
@@ -64,6 +68,7 @@ public class InputAttributeFormController {
     private String codeSpacePath;
 
     private Runnable onAddButtonPressed;
+    private Runnable onCancelButtonPressed;
     private boolean editFlag = false;
     private boolean addFlag = false;
     private int parentIndex;
@@ -76,7 +81,6 @@ public class InputAttributeFormController {
      *
      * @param childList        地物情報のリスト
      * @param addAttributeName 追加する属性の名前
-     * @param type             追加する属性のタイプ
      * @param parentIndex      ツリービュー上で選択した属性の親のインデックス
      * @param selectedIndex    ツリービュー上で選択した属性のインデックス
      * 
@@ -156,6 +160,20 @@ public class InputAttributeFormController {
             valueVbox.setManaged(false);
             valueVbox.setVisible(false);
         }
+
+        // 親要素の場合は強制的に即時追加（ウィンドウの表示をスキップするため）
+        if (requiredChildAttributeList != null && !requiredChildAttributeList.isEmpty()) {
+            handleAdd();
+        }
+    }
+
+    public void requestAdd() {
+        handleAdd();
+    }
+
+    public void hideButtons() {
+        addButton.setVisible(false);
+        cancelButton.setVisible(false);
     }
 
     private void setCodeSpaceField(String value) {
@@ -172,6 +190,10 @@ public class InputAttributeFormController {
 
     public void setOnAddButtonPressedCallback(Runnable callback) {
         this.onAddButtonPressed = callback;
+    }
+
+    public void setOnCancelButtonPressedCallback(Runnable callback) {
+        this.onCancelButtonPressed = callback;
     }
 
     private String getUom(ChildList<ADEComponent> childList, int parentIndex, int index) {
@@ -268,13 +290,15 @@ public class InputAttributeFormController {
 
     // キャンセルボタンのイベントハンドラ
     @FXML
-    private void handleCancel(ActionEvent event) {
-        // キャンセル処理（例：フォームのクリア、ウィンドウのクローズなど）
+    private void handleCancel() {
+        if (onCancelButtonPressed != null) {
+            onCancelButtonPressed.run();
+        }
     }
 
     // 追加ボタンのイベントハンドラ
     @FXML
-    private void handleAdd(ActionEvent event) {
+    private void handleAdd() {
         // 属性の追加処理（例：入力値の検証、データの保存など）
         String codeSpace = codeSpaceField.getText();
         String uom = uomField.getText();
@@ -301,7 +325,9 @@ public class InputAttributeFormController {
         String datasetPath = CityGMLEditorApp.getDatasetPath();
         String codeListDirPath = datasetPath + "\\codelists";
         Stage codeTypeStage = new Stage();
+        codeTypeStage.setAlwaysOnTop(true);
         final Stage valueStage = new Stage();
+        valueStage.setAlwaysOnTop(true);
         File folder = new File(codeListDirPath);
         Parent valueRoot = null;
         FXMLLoader valueLoader = null;
@@ -358,6 +384,7 @@ public class InputAttributeFormController {
         String datasetPath = CityGMLEditorApp.getDatasetPath();
         String codeListDirPath = datasetPath + "\\codelists";
         final Stage valueStage = new Stage();
+        valueStage.setAlwaysOnTop(true);
         Parent valueRoot = null;
         FXMLLoader valueLoader = null;
         String codeSpaceValue = codeSpaceField.getText();
@@ -552,6 +579,7 @@ public class InputAttributeFormController {
             controller.loadAttributeForms(requiredChildAttributeList, childList, uroAttributeDocument,
                     addAttributeName, attributeList, childList.size());
             Stage stage = new Stage();
+            stage.setAlwaysOnTop(true);
             stage.setTitle("必須属性の入力");
             stage.setScene(new Scene(root));
             stage.show();

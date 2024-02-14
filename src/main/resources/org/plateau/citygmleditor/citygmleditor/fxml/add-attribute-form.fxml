@@ -28,8 +28,8 @@
        <TextField fx:id="valueField" promptText="属性値"/>
     </VBox>
     <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button text="キャンセル" onAction="#handleCancel"/>
-        <Button text="追加" onAction="#handleAdd"/>
+        <Button fx:id="cancelButton" text="キャンセル" onAction="#handleCancel"/>
+        <Button fx:id="addButton" text="追加" onAction="#handleAdd"/>
     </HBox>
 
 </VBox>

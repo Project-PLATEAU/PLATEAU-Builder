@@ -33,7 +33,7 @@ public class CodeSpaceAttributeInfo {
             // XMLファイルをパース
             var fileStream = new FileInputStream(path);
             var inputSource = new InputSource(fileStream);
-            parser.parse(path);
+            parser.parse(inputSource);
 
             // ドキュメントオブジェクトを取得
             sourceDocument = parser.getDocument();

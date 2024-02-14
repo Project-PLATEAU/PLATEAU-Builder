@@ -3,9 +3,25 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.BorderPane?>
 
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tab?>
+
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.MultipleAttributesFormController">
     <center>
-        <TabPane fx:id="tabPane">
-        </TabPane>
+        <VBox spacing="10">
+            <TabPane fx:id="tabPane" style="-fx-background-color: ffffff">
+                <Tab text="dummy">
+                    <Text text="dummy" />
+                </Tab>
+            </TabPane>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text="キャンセル" onAction="#handleCancel"/>
+                <Button text="追加" onAction="#handleAdd"/>
+            </HBox>
+        </VBox>
     </center>
 </BorderPane>
