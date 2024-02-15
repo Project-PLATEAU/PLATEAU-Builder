@@ -1,4 +1,4 @@
-# [WIP]操作マニュアル
+# 操作マニュアル
 
 ## 1. 本書について
 本書では、CityGML編集ツール（以下「本ツール」という）の画面・使い方・扱うデータについて記載しています。
@@ -156,8 +156,11 @@ CityGMLデータのインポートを行うと、トップ画面-3Dビューエ�
 属性がCodeType型の場合、以下の手順でCodeSpaceと値を入力します。
 
 1. 「CodeSpaceの選択」を押下し、一覧からCodeListのXMLファイルを選択します。
+
 ![image](../resources/HowToUse/attribute_edit_code2.png)
+
 2. 一覧からCodeTypeの値を選択します。
+
 ![image](../resources/HowToUse/attribute_edit_code3.png)
 
 #### MeasureTypeの編集
@@ -210,18 +213,26 @@ CityGMLデータのインポートを行うと、トップ画面-3Dビューエ�
 面編集パネルでは以下の手順で各地物のポリゴンを追加・削除できます。
 
 1. 3Dビューから編集したい地物を選択します。
+
 ![image](../resources/HowToUse/feature_polygon_edit_select.png)
+
 2. 編集ボタンを押した後、追加・削除したいポリゴンを3Dビュー上で選択します。
+
 ![image](../resources/HowToUse/feature_polygon_edit.png)
+
 3. 決定ボタンを押すと変更が適用されます。
 
 #### 開口部編集
 開口部編集パネルでは以下の手順で各地物の開口部を編集できます。
 
 1. 3Dビューから編集したい地物を選択します。
+
 ![image](../resources/HowToUse/feature_opening_select.png)
+
 2. 編集ボタンを押した後、追加・削除したい開口部を3Dビュー上で選択します。
+
 ![image](../resources/HowToUse/feature_opening_edit.png)
+
 3. 決定ボタンを押すと変更が適用されます。
 
 適用後に地物型が以下のように変換されます。
@@ -245,8 +256,11 @@ CityGMLデータのインポートを行うと、トップ画面-3Dビューエ�
 編集した3D都市モデルは以下の手順でCityGMLのデータセットとしてエクスポート出来ます。
 1. トップ画面から書き出しボタンを押下します。
 2. データセットのフォルダ名を入力します。
+
 ![image](../resources/HowToUse/citygml_export.png)
+
 3. 出力フォルダを選択し、開くボタンを押下します。
+
 ![image](../resources/HowToUse/citygml_export②.png)
 
 エクスポートが完了するとエクスポート先のフォルダが開きます。
