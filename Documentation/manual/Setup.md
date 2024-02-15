@@ -31,7 +31,7 @@ git clone https://github.com/Synesthesias/PLATEAU-CityGML-Editor
 ```
 
 ### 実行
-PLATEAU-CityGML-Editorフォルダ内で以下を実行
+PLATEAU-CityGML-Editorフォルダ内で以下を実行します。
 ```
 gradle run
 ```
