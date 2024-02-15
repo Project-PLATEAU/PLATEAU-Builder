@@ -324,51 +324,6 @@ public class GizmoModel extends Parent {
     }
 
     /**
-     * スナップによるギズモ操作
-     * @param index
-     * @param value
-     */
-    public void snapTransform(int index, double value) {
-        double moveX = index == 0 ? value : 0;
-        double moveY = index == 1 ? value : 0;
-        double moveZ = index == 2 ? value : 0;
-        double rotateX = index == 3 ? value : 0;
-        double rotateY = index == 4 ? value : 0;
-        double rotateZ = index == 5 ? value : 0;
-        double scaleX = index == 6 ? value : 0;
-        double scaleY = index == 7 ? value : 0;
-        double scaleZ = index == 8 ? value : 0;
-        
-        var pivot = manipulator.getOrigin();
-
-        manipulator.setLocation(new Point3D(moveX, moveY, moveZ));
-        manipulator.addTransformCache(new Translate(moveX, moveY, moveZ));
-        
-        manipulator.setRotation(new Point3D(rotateX, rotateY, rotateZ));
-        Transform rotate = new Rotate();
-        rotate = rotate.createConcatenation(new Rotate(rotateX, pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.X_AXIS));
-        rotate = rotate.createConcatenation(new Rotate(rotateY, pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Y_AXIS));
-        rotate = rotate.createConcatenation(new Rotate(rotateZ, pivot.getX(), pivot.getY(), pivot.getZ(), Rotate.Z_AXIS));
-        manipulator.addTransformCache(rotate);
-
-        manipulator.setScale(new Point3D(manipulator.getScale().getX() + scaleX, manipulator.getScale().getY() + scaleY, manipulator.getScale().getZ() + scaleZ));
-
-        // 建物の座標変換を初期化
-        manipulator.getSolidView().getTransforms().clear();
-        // 建物の座標変換情報から建物の座標変換を作成
-        manipulator.getSolidView().getTransforms().add(manipulator.getTransformCache());
-        // スケールを適用
-        manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
-
-        // ギズモの座標変換を初期化
-        getTransforms().clear();
-        // 建物の座標変換情報からギズモの座標変換を作成
-        getTransforms().add(manipulator.getTransformCache());
-        // ギズモの位置を建物のPivotに合わせて座標変換
-        getTransforms().add(new Translate(manipulator.getOrigin().getX(), manipulator.getOrigin().getY(), manipulator.getOrigin().getZ()));
-    }
-
-    /**
      * マウス操作によるギズモ操作
      * @param delta
      */
@@ -407,8 +362,11 @@ public class GizmoModel extends Parent {
                 var localdelta = worldToLocalTransform.transform(delta);
                 transformFactorZ = localdelta.getZ();
             }
-            manipulator.setLocation(new Point3D(manipulator.getLocation().getX() + transformFactorX, manipulator.getLocation().getY() + transformFactorY, manipulator.getLocation().getZ() + transformFactorZ));
             manipulator.addTransformCache(new Translate(transformFactorX, transformFactorY, transformFactorZ));
+            
+            var pivotNew = manipulator.getTransformCache().transform(pivot);
+            var offset = pivotNew.subtract(pivot);
+            manipulator.setLocation(offset);
         }
         // 回転ギズモ
         else if (isNodeInTree(currentGizmo, rotationGizmo)) {

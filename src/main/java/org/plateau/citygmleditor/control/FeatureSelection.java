@@ -14,6 +14,7 @@ import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.world.World;
 
 import org.plateau.citygmleditor.citymodel.BuildingView;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
@@ -78,6 +79,7 @@ public class FeatureSelection {
             PickResult pickResult = event.getPickResult();
             var newSelectedMesh = pickResult.getIntersectedNode();
             var feature = getBuilding(newSelectedMesh);
+            var element = getLodSolidView(newSelectedMesh);
 
             clear();
 
@@ -97,6 +99,8 @@ public class FeatureSelection {
             }
 
             refreshOutLine();
+
+            selectElement.set((Node)element);
         });
     }
 
@@ -118,6 +122,7 @@ public class FeatureSelection {
         active.set(null);
         activeSection.set(null);
         outLine.setMesh(null);
+        selectElement.set(null);
     }
 
     public void refreshOutLine() {
@@ -155,6 +160,13 @@ public class FeatureSelection {
         return (BuildingView)node;
     }
     
+    private ILODSolidView getLodSolidView(Node node) {
+        while (node != null && !(node instanceof ILODSolidView)) {
+            node = node.getParent();
+        }
+        return (ILODSolidView) node;
+    }
+
     public void setSelectElement(Node node) {
         selectElement.set(node);
     }
