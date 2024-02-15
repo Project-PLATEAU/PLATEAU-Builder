@@ -1,0 +1,424 @@
+{
+  "sitemap": {
+    "fileOptions": {
+      "api/*": {
+        "changefreq": "daily"
+      }
+    },
+    "baseUrl": "https://project-plateau.github.io/PLATEAU-CityGML-Editor/",
+    "changefreq": "weekly"
+  },
+  "source_base_path": "C:/Users/kazum/Synesthesias/PLATEAU-CityGML-Editor/Documentation",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Resource",
+      "output": {
+        "resource": {
+          "relative_path": "index.json"
+        }
+      }
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "manual/HowToUse.md",
+      "output": {
+        ".html": {
+          "relative_path": "manual/HowToUse.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "manual/Setup.md",
+      "output": {
+        ".html": {
+          "relative_path": "manual/Setup.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "manual/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "manual/toc.html"
+        },
+        ".json": {
+          "relative_path": "manual/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/3d_export.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/3d_export.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/3d_import.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/3d_import.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/attribute_add.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/attribute_add.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/attribute_add2.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/attribute_add2.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/attribute_context_menu.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/attribute_context_menu.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/attribute_edit_code.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/attribute_edit_code.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/attribute_edit_code2.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/attribute_edit_code2.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/attribute_edit_code3.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/attribute_edit_code3.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/attribute_edit_uom.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/attribute_edit_uom.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/citygml_export.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/citygml_export.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/citygml_export①.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/citygml_export①.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/citygml_export②.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/citygml_export②.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/citygml_import.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/citygml_import.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/citygml_import②.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/citygml_import②.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/feature_info.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/feature_info.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/feature_opening_edit.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/feature_opening_edit.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/feature_opening_select.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/feature_opening_select.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/feature_polygon_edit.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/feature_polygon_edit.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/feature_polygon_edit_select.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/feature_polygon_edit_select.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/feature_type_edit.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/feature_type_edit.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/hierarchy_context.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/hierarchy_context.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/panel.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/panel.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/panel①.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/panel①.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/panel②.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/panel②.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/panel③.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/panel③.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/panel④.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/panel④.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/panel⑤.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/panel⑤.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/surface_type_edit.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/surface_type_edit.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/surface_view_mode.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/surface_view_mode.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/top.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/top.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/top_normal.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/top_normal.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/validation_1.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/validation_1.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/validation_2.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/validation_2.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/Index/index.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/Index/index.png"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html"
+        },
+        ".json": {
+          "relative_path": "toc.json"
+        }
+      },
+      "version": ""
+    }
+  ],
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}
