@@ -1,45 +1,147 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import java.net.URL?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane style="-fx-background-color: #515151;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.ThreeDimensionsImportDialogController">
+<AnchorPane style="-fx-background-color: #515151;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.ThreeDimensionsImportDialogController">
    <children>
       <Pane layoutX="-28.0" prefHeight="518.0" prefWidth="445.0">
          <children>
-            <Label layoutX="39.0" layoutY="14.0" text="入力ファイル" />
-            <TextField fx:id="textFieldFile" layoutX="166.0" layoutY="10.0" />
-            <Button layoutX="318.0" layoutY="10.0" mnemonicParsing="false" onAction="#onSelectFile" text="..." />
-            <Label layoutX="41.0" layoutY="47.0" text="LOD" />
-            <ComboBox fx:id="comboBoxLod" layoutX="166.0" layoutY="43.0" prefWidth="150.0" />
-            <Label layoutX="39.0" layoutY="90.0" text="面検出角度の閾値" />
-            <TextField fx:id="textFieldWallThreshold" layoutX="166.0" layoutY="86.0" />
+            <HBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="10.0" spacing="5.0">
+               <children>
+                  <Label prefWidth="120.0" text="入力ファイル">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField fx:id="textFieldFile" prefHeight="30.0" prefWidth="200.0" />
+                  <Button mnemonicParsing="false" onAction="#onSelectFile" prefHeight="30.0" prefWidth="40.0" text="..." />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" layoutX="41.0" layoutY="50.0" spacing="5.0">
+               <children>
+                  <Label prefWidth="120.0" text="LOD">
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <ComboBox fx:id="comboBoxLod" prefWidth="150.0" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" layoutX="39.0" layoutY="86.0" spacing="5.0">
+               <children>
+                  <Label prefWidth="120.0" text="面検出角度の閾値">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField fx:id="textFieldWallThreshold" prefWidth="200.0" />
+               </children>
+            </HBox>
             <Label layoutX="39.0" layoutY="120.0" prefHeight="75.0" prefWidth="391.0" text="*3Dモデルインポート時に、自動で屋根面や壁面を検出します。屋根面と壁面の定義として、面の法線がZ軸に対して何度以上であれば壁面として定義するかに利用する値です。デフォルトの80度で設定して、インポート後に屋根面・壁面の属性編集を行うことを推奨します。" wrapText="true" />
-            <Label layoutX="39.0" layoutY="218.0" text="モデル配置" />
-            <RadioButton fx:id="radioUseGeoReference" layoutX="166.0" layoutY="218.0" mnemonicParsing="false" onAction="#onUseGeoReference" selected="true" text="参照座標系を利用">
-               <toggleGroup>
-                  <ToggleGroup fx:id="modelPlacement" />
-               </toggleGroup></RadioButton>
-            <RadioButton fx:id="radioAuto" layoutX="166.0" layoutY="242.0" mnemonicParsing="false" onAction="#onAuto" text="自動" toggleGroup="$modelPlacement" />
-            <Button layoutX="258.0" layoutY="463.0" mnemonicParsing="false" onAction="#onSubmit" text="インポート" />
+            <HBox layoutX="39.0" layoutY="218.0" spacing="5.0">
+               <children>
+                  <Label prefWidth="120.0" text="モデル配置">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <VBox spacing="5.0">
+                     <children>
+                        <RadioButton fx:id="radioUseGeoReference" mnemonicParsing="false" onAction="#onUseGeoReference" selected="true" text="参照座標系を利用">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="modelPlacement" />
+                           </toggleGroup>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </RadioButton>
+                        <RadioButton fx:id="radioAuto" mnemonicParsing="false" onAction="#onAuto" text="自動" toggleGroup="$modelPlacement">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </RadioButton>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <Button layoutX="120.0" layoutY="463.0" mnemonicParsing="false" onAction="#onSubmit" prefHeight="30.0" prefWidth="200.0" text="インポート" />
             <Pane fx:id="paneUseGeoReference" layoutX="27.0" layoutY="273.0" prefHeight="173.0" prefWidth="391.0">
                <children>
-                  <Label layoutX="11.0" layoutY="22.0" text="参照座標系" />
-                  <Label fx:id="labelGeoReference" layoutX="139.0" layoutY="22.0" text="EPSG" />
-                  <Label layoutX="13.0" layoutY="63.0" text="基準点位置" />
-                  <Label layoutX="85.0" layoutY="63.0" text="東(m)" />
-                  <Label layoutX="85.0" layoutY="95.0" text="北(m)" />
-                  <Label layoutX="85.0" layoutY="125.0" text="上(m)" />
-                  <TextField fx:id="textFieldEast" layoutX="139.0" layoutY="59.0" />
-                  <TextField fx:id="textFieldNorth" layoutX="139.0" layoutY="91.0" />
-                  <TextField fx:id="textFieldTop" layoutX="139.0" layoutY="121.0" />
+                  <HBox alignment="CENTER_LEFT" layoutX="11.0" layoutY="22.0" spacing="5.0">
+                     <children>
+                        <Label prefWidth="120.0" text="参照座標系">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Label fx:id="labelGeoReference" text="EPSG">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox layoutX="13.0" layoutY="59.0" spacing="5.0">
+                     <children>
+                        <Label prefWidth="120.0" text="基準点位置">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin>
+                        </Label>
+                        <VBox spacing="5.0">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                 <children>
+                                    <Label text="東(m)" />
+                                    <TextField fx:id="textFieldEast" />
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                 <children>
+                                    <Label text="北(m)" />
+                                    <TextField fx:id="textFieldNorth" />
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                 <children>
+                                    <Label text="上(m)" />
+                                    <TextField fx:id="textFieldTop" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
                </children>
             </Pane>
             <Pane fx:id="paneAuto" layoutX="27.0" layoutY="273.0" prefHeight="190.0" prefWidth="391.0" visible="false">
@@ -50,4 +152,7 @@
          </children>
       </Pane>
    </children>
+   <stylesheets>
+      <URL value="@../viewer.css" />
+   </stylesheets>
 </AnchorPane>
