@@ -49,6 +49,8 @@ public class LOD2SolidFactory extends GeometryFactory {
             solid.addMeshView(meshView);
         }
 
+        solid.addSurfaceTypeView(gmlObject);
+
         return solid;
     }
 

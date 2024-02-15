@@ -3,12 +3,14 @@ package org.plateau.citygmleditor.citymodel.geometry;
 import org.citygml4j.model.gml.geometry.AbstractGeometry;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
+import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import javafx.scene.shape.MeshView;
 import java.util.ArrayList;
+import java.util.List;
 
-public class GeometryView extends MeshView implements ILODSolidView {
+public class GeometryView extends MeshView {
     private AbstractGeometry gmlObject;
     private ArrayList<PolygonView> polygons;
     private VertexBuffer vertexBuffer = new VertexBuffer();
@@ -29,12 +31,6 @@ public class GeometryView extends MeshView implements ILODSolidView {
         this.polygons = polygons;
     }
 
-    @Override
-    public AbstractSolid getAbstractSolid() {
-        return null;
-    }
-
-    @Override
     public VertexBuffer getVertexBuffer() {
         return vertexBuffer;
     }
@@ -43,22 +39,43 @@ public class GeometryView extends MeshView implements ILODSolidView {
         this.vertexBuffer = vertexBuffer;
     }
 
-    @Override
     public MeshView getMeshView() {
         return this;
     }
 
-    @Override
     public TexCoordBuffer getTexCoordBuffer() {
         return texCoordBuffer;
     }
 
-    @Override
     public TransformManipulator getTransformManipulator() {
         return transformManipulator;
     }
 
-    @Override
+    /**
+     * 使用しているテクスチャパス
+     * @return
+     */
+    public List<String> getTexturePaths() {
+        var parentNode = this.getParent();
+        while (parentNode != null) {
+            if (parentNode instanceof CityModelView)
+                break;
+            parentNode = parentNode.getParent();
+        }
+        var cityModelView = (CityModelView)parentNode;
+        var ret = new ArrayList<String>();
+        for (var polygon : getPolygons()) {
+            if (polygon.getSurfaceData() == null)
+                continue;
+            var parameterizedTexture = (org.citygml4j.model.citygml.appearance.ParameterizedTexture) polygon.getSurfaceData().getOriginal();
+            var imageRelativePath = java.nio.file.Paths.get(parameterizedTexture.getImageURI());
+            var imageAbsolutePath = java.nio.file.Paths.get(cityModelView.getGmlPath()).getParent().resolve(imageRelativePath);
+            if (!ret.contains(imageAbsolutePath.toString()))
+                ret.add(imageAbsolutePath.toString());
+        }
+        return ret;
+    }
+
     public void refrectGML() {
         for (var polygon : getPolygons()) {
             var coordinates = polygon.getExteriorRing().getOriginCoords();//.getOriginal().getPosList().toList3d();

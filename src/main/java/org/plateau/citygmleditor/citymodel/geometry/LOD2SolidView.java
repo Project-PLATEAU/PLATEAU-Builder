@@ -8,6 +8,7 @@ import java.util.List;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
+import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
@@ -15,7 +16,7 @@ import org.plateau.citygmleditor.citymodel.SurfaceDataView;
 
 import javafx.scene.Parent;
 import javafx.scene.shape.MeshView;
-import org.plateau.citygmleditor.control.BuildingSurfaceTypeView;
+import org.plateau.citygmleditor.control.surfacetype.BuildingSurfaceTypeView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.FaceBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
@@ -28,7 +29,7 @@ public class LOD2SolidView extends Parent implements ILODSolidView {
     private TransformManipulator transformManipulator = new TransformManipulator(this);
     private List<MeshView> meshViews = new ArrayList<>();
 
-    private final BuildingSurfaceTypeView surfaceTypeView = new BuildingSurfaceTypeView();
+    private final BuildingSurfaceTypeView surfaceTypeView = new BuildingSurfaceTypeView(2);
 
     public LOD2SolidView(AbstractSolid gmlObject, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
         this.gmlObject = gmlObject;
@@ -49,6 +50,7 @@ public class LOD2SolidView extends Parent implements ILODSolidView {
         surfaceTypeView.setVisible(isVisible);
     }
 
+    @Override
     public BuildingSurfaceTypeView getSurfaceTypeView() {
         return surfaceTypeView;
     }
@@ -67,10 +69,12 @@ public class LOD2SolidView extends Parent implements ILODSolidView {
 
     public void setBoundaries(ArrayList<BoundarySurfaceView> boundaries) {
         this.boundaries = boundaries;
+    }
 
-        // TODO: temp
+    public void addSurfaceTypeView(AbstractBuilding building) {
         getChildren().add(surfaceTypeView);
-        surfaceTypeView.setTarget(this);
+        surfaceTypeView.setTarget(building, this);
+        surfaceTypeView.updateVisual();
     }
 
     public HashMap<SurfaceDataView, ArrayList<PolygonView>> getSurfaceDataPolygonsMap() {

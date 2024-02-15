@@ -53,6 +53,8 @@ public class LOD3SolidFactory extends GeometryFactory {
             solid.addMeshView(meshView);
         }
 
+        solid.addSurfaceTypeView(gmlObject);
+
         return solid;
     }
     
@@ -71,10 +73,14 @@ public class LOD3SolidFactory extends GeometryFactory {
             }
             boundary.setPolygons(boundaryPolygons);
         }
+
         // <bldg:opening>
+        var openings = boundary.getOpenings();
         if (boundedBySurface.getBoundarySurface().getOpening() != null) {
-            var boundaryPolygons = new ArrayList<PolygonView>();
             for (var opening : boundedBySurface.getBoundarySurface().getOpening()) {
+                var openingView = new OpeningView(opening.getOpening());
+
+                var boundaryPolygons = new ArrayList<PolygonView>();
                 for (var surfaceMember : opening.getOpening().getLod3MultiSurface().getMultiSurface().getSurfaceMember()) {
                     var polygon = (Polygon) surfaceMember.getSurface();
                     if (polygon == null)
@@ -82,8 +88,11 @@ public class LOD3SolidFactory extends GeometryFactory {
                     var polygonObject = createPolygon(polygon);
                     boundaryPolygons.add(polygonObject);
                 }
+                openingView.setPolygons(boundaryPolygons);
+
+                openings.add(openingView);
             }
-            boundary.setOpeningPolygons(boundaryPolygons);
+            boundary.setOpenings(openings);
         }
         return boundary;
     }

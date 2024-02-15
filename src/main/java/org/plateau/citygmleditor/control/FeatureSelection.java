@@ -1,46 +1,48 @@
 package org.plateau.citygmleditor.control;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.SubScene;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.*;
-import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
+import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
+import org.plateau.citygmleditor.utils3d.polygonmesh.FaceBuffer;
 import org.plateau.citygmleditor.world.World;
 
 import org.plateau.citygmleditor.citymodel.BuildingView;
-import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 
+import java.util.List;
+
 public class FeatureSelection {
     private final ObjectProperty<BuildingView> active = new SimpleObjectProperty<>();
-    private final MeshView outLine = new MeshView();
+    private final ObjectProperty<AbstractCityObject> activeCityObject = new SimpleObjectProperty<>();
+    private final OutLine outLine = new OutLine();
 
-    private final ObjectProperty<SurfacePolygonSection> activeSection = new SimpleObjectProperty<>();
+    private final ObjectProperty<List<PolygonSection>> activeSection = new SimpleObjectProperty<>();
 
     private final ObjectProperty<Node> selectElement = new SimpleObjectProperty<>();
 
+    private BooleanProperty enabled = new SimpleBooleanProperty();
+    {
+        enabled.set(true);
+        enabled.addListener((observableValue, oldValue, newValue) -> {
+            if (!newValue)
+                clear();
+        });
+    }
+
     public FeatureSelection() {
-        var material = new PhongMaterial();
-        material.setDiffuseColor(new Color(1, 1, 0, 0.3));
-        WritableImage image = new WritableImage(1, 1);
-        PixelWriter writer = image.getPixelWriter();
-        writer.setColor(0, 0, Color.web("#ff330033"));
-
-        material.setSelfIlluminationMap(image);
-        outLine.setMaterial(material);
-        outLine.setDrawMode(DrawMode.FILL);
-        outLine.setOpacity(0.3);
-        outLine.setViewOrder(-1);
-
         var node = (Group) World.getRoot3D();
         node.getChildren().add(outLine);
 
@@ -58,12 +60,15 @@ public class FeatureSelection {
         return active;
     }
 
-    public ObjectProperty<SurfacePolygonSection> getSurfacePolygonSectionProperty() {
+    public ObjectProperty<List<PolygonSection>> getSurfacePolygonSectionProperty() {
         return activeSection;
     }
 
     public void registerClickEvent(SubScene scene) {
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+            if (!enabled.get())
+                return;
+
             if (!event.isPrimaryButtonDown())
                 return;
 
@@ -79,33 +84,19 @@ public class FeatureSelection {
             PickResult pickResult = event.getPickResult();
             var newSelectedMesh = pickResult.getIntersectedNode();
             var feature = getBuilding(newSelectedMesh);
-            var element = getLodSolidView(newSelectedMesh);
 
-            clear();
-
-            if (feature == null)
-                return;
-
-            var viewMode = CityGMLEditorApp.getCityModelViewMode();
-
-            var solid = feature.getSolid(viewMode.getLOD());
-            if (solid == null)
-                return;
-
-            active.set(feature);
-
-            if (viewMode.isSurfaceViewModeProperty().get() && feature.getLOD2Solid() != null) {
-                activeSection.set(feature.getLOD2Solid().getSurfaceTypeView().getSection(pickResult));
-            }
-
-            refreshOutLine();
-
-            selectElement.set((Node)element);
+            select(feature);
         });
     }
 
     public void select(BuildingView feature) {
+        if (!enabled.get())
+            return;
+
         clear();
+
+        if (feature == null)
+            return;
 
         var viewMode = CityGMLEditorApp.getCityModelViewMode();
 
@@ -114,6 +105,7 @@ public class FeatureSelection {
             return;
 
         active.set(feature);
+        activeCityObject.set(feature.getGMLObject());
 
         refreshOutLine();
     }
@@ -121,8 +113,8 @@ public class FeatureSelection {
     public void clear() {
         active.set(null);
         activeSection.set(null);
+        activeCityObject.set(null);
         outLine.setMesh(null);
-        selectElement.set(null);
     }
 
     public void refreshOutLine() {
@@ -132,23 +124,12 @@ public class FeatureSelection {
             return;
         
         var viewMode = CityGMLEditorApp.getCityModelViewMode();
-        if (viewMode.isSurfaceViewModeProperty().get()) {
-            var solid = active.get().getLOD2Solid();
-
-            if (solid == null || solid.getSurfaceTypeView() == null || activeSection.get() == null)
-                return;
-
-            solid.getSurfaceTypeView().updateSelectionOutLine(activeSection.get().polygon, outLine);
-            return;
-        }
 
         var solid = active.get().getSolid(viewMode.getLOD());
         if (solid == null)
             return;
 
         outLine.setMesh(solid.getTotalMesh());
-
-        selectElement.set((Node) solid);
     }
 
     public MeshView getOutLine() {
@@ -162,19 +143,8 @@ public class FeatureSelection {
         return (BuildingView)node;
     }
     
-    private ILODSolidView getLodSolidView(Node node) {
-        while (node != null && !(node instanceof ILODSolidView)) {
-            node = node.getParent();
-        }
-        return (ILODSolidView) node;
-    }
-
     public void setSelectElement(Node node) {
         selectElement.set(node);
-
-        if (node instanceof ILODSolidView) {
-            outLine.setMesh(((ILODSolidView) node).getTotalMesh());
-        }
     }
 
     public Node getSelectElement() {
@@ -183,5 +153,21 @@ public class FeatureSelection {
     
     public ObjectProperty<Node> getSelectElementProperty() {
         return selectElement;
+    }
+
+    public boolean isEnabled() {
+        return enabled.get();
+    }
+
+    public BooleanProperty enabledProperty() {
+        return enabled;
+    }
+
+    public AbstractCityObject getActiveCityObject() {
+        return activeCityObject.get();
+    }
+
+    public ObjectProperty<AbstractCityObject> activeCityObjectProperty() {
+        return activeCityObject;
     }
 }

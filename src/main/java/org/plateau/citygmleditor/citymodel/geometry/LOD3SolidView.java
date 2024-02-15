@@ -1,17 +1,16 @@
 package org.plateau.citygmleditor.citymodel.geometry;
 
 import javafx.scene.Parent;
-import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
-import javafx.scene.shape.TriangleMesh;
-import javafx.scene.shape.VertexFormat;
+import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
+import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.citymodel.SurfaceDataView;
+import org.plateau.citygmleditor.control.surfacetype.BuildingSurfaceTypeView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -22,11 +21,25 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
     private TexCoordBuffer texCoordBuffer = new TexCoordBuffer();
     private TransformManipulator transformManipulator = new TransformManipulator(this);
     private final List<MeshView> meshViews = new ArrayList<>();
+    private final BuildingSurfaceTypeView surfaceTypeView = new BuildingSurfaceTypeView(3);
 
     public LOD3SolidView(AbstractSolid gmlObject, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
         this.gmlObject = gmlObject;
         this.vertexBuffer = vertexBuffer;
         this.texCoordBuffer = texCoordBuffer;
+
+        toggleSurfaceView(CityGMLEditorApp.getCityModelViewMode().isSurfaceViewMode());
+
+        CityGMLEditorApp.getCityModelViewMode().isSurfaceViewModeProperty().addListener((observable, oldValue, newValue) -> {
+            toggleSurfaceView(newValue);
+        });
+    }
+
+    private void toggleSurfaceView(boolean isVisible) {
+        for (var meshView : meshViews) {
+            meshView.setVisible(!isVisible);
+        }
+        surfaceTypeView.setVisible(isVisible);
     }
 
     public AbstractSolid getGmlObject() {
@@ -37,7 +50,7 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
         this.gmlObject = gmlObject;
     }
 
-    public ArrayList<BoundarySurfaceView> getBoundaries() {
+    @Override public List<BoundarySurfaceView> getBoundaries() {
         return boundaries;
     }
 
@@ -56,15 +69,23 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
                     map.get(polygon.getSurfaceData()).add(polygon);
                 }   
             }
-            if (boundary.getOpeningPolygons() != null) {
-                for (var polygon : boundary.getOpeningPolygons()) {
-                    map.computeIfAbsent(polygon.getSurfaceData(), k -> new ArrayList<>());
-                    map.get(polygon.getSurfaceData()).add(polygon);
+            if (boundary.getOpenings() != null) {
+                for (var opening : boundary.getOpenings()) {
+                    for (var polygon : opening.getPolygons()) {
+                        map.computeIfAbsent(polygon.getSurfaceData(), k -> new ArrayList<>());
+                        map.get(polygon.getSurfaceData()).add(polygon);
+                    }
                 }
             }
         }
 
         return map;
+    }
+
+    public void addSurfaceTypeView(AbstractBuilding building) {
+        getChildren().add(surfaceTypeView);
+        surfaceTypeView.setTarget(building, this);
+        surfaceTypeView.updateVisual();
     }
 
     public void addMeshView(MeshView meshView) {
@@ -80,8 +101,10 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
             if (boundary.getPolygons() != null) {
                 polygons.addAll(boundary.getPolygons());
             }
-            if (boundary.getOpeningPolygons() != null) {
-                polygons.addAll(boundary.getOpeningPolygons());
+            if (boundary.getOpenings() != null) {
+                for (var opening : boundary.getOpenings()) {
+                    polygons.addAll(opening.getPolygons());
+                }
             }
         }
 
@@ -105,6 +128,11 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
     @Override
     public TexCoordBuffer getTexCoordBuffer() {
         return this.texCoordBuffer;
+    }
+
+    @Override
+    public BuildingSurfaceTypeView getSurfaceTypeView() {
+        return surfaceTypeView;
     }
 
     @Override

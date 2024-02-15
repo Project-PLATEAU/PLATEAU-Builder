@@ -84,6 +84,10 @@ module CityGMLEditor {
 
     opens org.plateau.citygmleditor.fxml.validation to javafx.fxml, javafx.graphics;
 
+    exports org.plateau.citygmleditor.fxml.surfacetype;
+
+    opens org.plateau.citygmleditor.fxml.surfacetype to javafx.fxml, javafx.graphics;
+
     exports org.plateau.citygmleditor.control;
 
     opens org.plateau.citygmleditor.control to javafx.fxml, javafx.graphics;

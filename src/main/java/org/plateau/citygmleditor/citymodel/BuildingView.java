@@ -9,8 +9,6 @@ import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD3SolidView;
-import org.plateau.citygmleditor.control.BuildingSurfaceTypeView;
-import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

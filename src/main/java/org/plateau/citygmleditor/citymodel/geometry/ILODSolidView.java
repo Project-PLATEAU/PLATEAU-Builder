@@ -9,13 +9,12 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.control.surfacetype.BuildingSurfaceTypeView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
-import org.plateau.citygmleditor.world.World;
 
 /**
  * LODSolidのインターフェースを表します。
@@ -52,6 +51,10 @@ public interface ILODSolidView {
      */
     public MeshView getMeshView();
 
+    default public List<BoundarySurfaceView> getBoundaries() {
+        return null;
+    }
+
     default public Mesh getTotalMesh() {
         if (getMeshView() == null)
             return null;
@@ -83,6 +86,8 @@ public interface ILODSolidView {
      * 
      */
     public TransformManipulator getTransformManipulator();
+
+    public BuildingSurfaceTypeView getSurfaceTypeView();
 
     /**
      * GML、各頂点バッファへ情報を適用

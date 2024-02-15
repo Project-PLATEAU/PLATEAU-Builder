@@ -8,6 +8,7 @@ import org.citygml4j.model.gml.geometry.primitives.Solid;
 
 import javafx.scene.shape.MeshView;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
+import org.plateau.citygmleditor.control.surfacetype.BuildingSurfaceTypeView;
 import org.plateau.citygmleditor.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateau.citygmleditor.utils3d.polygonmesh.VertexBuffer;
 
@@ -70,6 +71,11 @@ public class LOD1SolidView extends MeshView implements ILODSolidView {
     @Override
     public Mesh getTotalMesh() {
         return getMesh();
+    }
+
+    @Override
+    public BuildingSurfaceTypeView getSurfaceTypeView() {
+        return null;
     }
 
     @Override

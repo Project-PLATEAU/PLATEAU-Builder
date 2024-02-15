@@ -33,8 +33,6 @@ package org.plateau.citygmleditor.citygmleditor;
 
 import java.util.Objects;
 
-import javax.swing.text.Document;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -44,10 +42,10 @@ import javafx.scene.Group;
 
 import javafx.stage.Window;
 import org.plateau.citygmleditor.control.CityModelViewMode;
+import org.plateau.citygmleditor.control.surfacetype.SurfaceTypeEditor;
 import org.plateau.citygmleditor.world.*;
 import org.plateau.citygmleditor.control.FeatureSelection;
 import org.plateau.citygmleditor.citymodel.*;
-import org.w3c.dom.*;
 
 /**
  * JavaFX 3D Viewer Application
@@ -60,6 +58,7 @@ public class CityGMLEditorApp extends Application {
     private static SceneContent sceneContent;
     private static AntiAliasing antiAliasing;
     private static CityModelViewMode cityModelViewMode;
+    private static SurfaceTypeEditor surfaceTypeEditor;
     private static UroAttributeInfo uroAttributeInfo;
     private static String datasetPath;
 
@@ -103,6 +102,10 @@ public class CityGMLEditorApp extends Application {
         return cityModelViewMode;
     }
 
+    public static SurfaceTypeEditor getSurfaceTypeEditor() {
+        return surfaceTypeEditor;
+    }
+
     public static org.w3c.dom.Document getUroAttributeDocument() {
         return uroAttributeInfo.getUroAttributeDocument();
     }
@@ -141,6 +144,8 @@ public class CityGMLEditorApp extends Application {
 
         cityModelViewMode = new CityModelViewMode();
 
+        surfaceTypeEditor = new SurfaceTypeEditor();
+
         selection = new FeatureSelection();
 
         // UI, Controller初期化
@@ -149,6 +154,11 @@ public class CityGMLEditorApp extends Application {
                 1024, 600, true);
 
         selection.registerClickEvent(sceneContent.getSubScene());
+        surfaceTypeEditor.registerClickEvent(sceneContent.getSubScene());
+        cityModelViewMode.isSurfaceViewModeProperty().addListener((observable, oldValue, newValue) -> {
+            selection.enabledProperty().set(!newValue);
+            surfaceTypeEditor.enabledProperty().set(newValue);
+        });
 
         stage.setScene(scene);
         stage.show();
