@@ -68,9 +68,9 @@ CityGMLインポートを行います。ボタン押下後に「2-2.CityGMLイ�
 
 ## 2-4. 品質検査画面
 品質検査パラメータと出力先フォルダをPC上で選択できます。
-実行ボタン押下後に、品質検査が実行され、結果ファイルと画面上にログを出力します。
+実行ボタン押下後に品質検査が実行され、画面上にログが出力されます。
 
-![image](../resources/HowToUse/validation.png)
+![image](../resources/HowToUse/validation_1.png)
 
 ## 3. 使い方
 
