@@ -51,7 +51,7 @@ public class SolveEquationUtil {
     return planeEquation;
   }
 
-  public static boolean onPlane(double[] plane1, double[] plane2){
+  public static boolean equalPlane(double[] plane1, double[] plane2){
     return plane1[0] == plane2[0] && plane1[1] == plane2[1] && plane1[2] == plane2[2];
   }
 

@@ -33,4 +33,5 @@ public interface TagName {
     String BLDG_WALLSURFACE = "bldg:WallSurface";
     String BLDG_LOD3_MULTISURFACE = "bldg:lod3MultiSurface";
     String BLDG_OPENING = "bldg:opening";
+    String BLDG_CONSIST_OF_BUILDING_PART = "bldg:consistsOfBuildingPart";
 }

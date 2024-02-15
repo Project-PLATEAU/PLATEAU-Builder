@@ -120,7 +120,7 @@ public class L14LogicalAccuaracyValidator implements IValidator {
             for (int j = i + 1; j < polygons.size(); j++) {
                 List<LineSegment3D> polygon2 = polygons.get(j);
                 double[] plane2 = SolveEquationUtil.findPlaneEquation(polygon2.get(0).getStart(), polygon2.get(0).getEnd(), polygon2.get(1).getEnd());
-                if (SolveEquationUtil.onPlane(plane1, plane2)) {
+                if (SolveEquationUtil.equalPlane(plane1, plane2)) {
                     indexFilter.add(j);
                     polygon1 = this.union(polygon1, polygon2);
                 }
