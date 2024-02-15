@@ -38,11 +38,11 @@ PLATEAU-CityGML-Editorフォルダ内で以下を実行します。
 gradle run
 ```
 
-### ※exe生成
+### exeファイル生成
 PLATEAU-CityGML-Editorフォルダ内で以下を実行します。
 ```
 gradle deploy
 ```
-`build/product`配下にexeファイルを含んだ配布用ディレクトリが生成される。
+`build/product`配下にexeファイルを含んだ配布用ディレクトリが生成されます。
 
 
