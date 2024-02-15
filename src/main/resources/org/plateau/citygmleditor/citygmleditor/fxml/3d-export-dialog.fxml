@@ -31,7 +31,7 @@
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="5.0">
                <children>
-                  <Label prefWidth="100.0" text="参照座標系">
+                  <Label prefWidth="100.0" text="LOD">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -44,7 +44,7 @@
             </HBox>
             <HBox>
                <children>
-                  <Label prefWidth="100.0" text="LOD">
+                  <Label prefWidth="100.0" text="参照座標系">
                      <font>
                         <Font size="14.0" />
                      </font>
