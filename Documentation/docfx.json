@@ -1,0 +1,50 @@
+{
+    "metadata": [
+    ],
+    "build": {
+        "globalMetadata": {
+            "_appTitle": "CityGML編集ツール",
+            "_appFooter": "PLATEAU",
+            "_enableSearch": true
+        },
+        "content": [
+            {
+                "files": [
+                    "toc.yml",
+                    "index.md"
+                ]
+            },
+            {
+                "src": "manual",
+                "files": [
+                    "toc.yml",
+                    "*.md"
+                ],
+                "dest": "manual"
+            }
+        ],
+        "resource": [
+            {
+                "files": [
+                    "resources/**/*"
+                ]
+            }
+        ],
+        "sitemap": {
+            "baseUrl": "https://project-plateau.github.io/PLATEAU-CityGML-Editor",
+            "changefreq": "weekly",
+            "fileOptions": {
+                "api/*": {
+                    "changefreq": "daily"
+                }
+            }
+        },
+        "xref": [
+            "https://normanderwan.github.io/UnityXrefMaps/xrefmap.yml"
+        ],
+        "xrefService": [
+            "https://xref.docs.microsoft.com/query?uid={uid}"
+        ],
+        "dest": "../.docs/_site"
+    }
+}
