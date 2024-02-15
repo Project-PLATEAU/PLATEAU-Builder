@@ -20,6 +20,8 @@ Githubリポジトリの[リリース](https://github.com/Synesthesias/PLATEAU-C
 ファイル内にあるexeファイルを実行することで本ツールを利用できます。
 
 ## 4. ビルド手順
+ソースコードからビルドする場合、以下の手順に従ってください。
+
 ###  事前準備
 - gradleのインストール
   - [こちらの手順でインストール](https://www.kkaneko.jp/tools/win/gradle.html)
