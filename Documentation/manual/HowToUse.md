@@ -37,6 +37,11 @@ CityGMLインポートを行います。ボタン押下後に「2-2.CityGMLイ�
 |---|---|---|
 |①|マウスポインタによって地物を選択できます|![image](../resources/HowToUse/panel①.png)|
 |②|矢印をマウスで掴み移動させることで、地物を直線移動できます|![image](../resources/HowToUse/panel②.png)|
+|③|青い円上をマウスで掴み移動させることで、地物を回転できます|![image](../resources/HowToUse/panel③.png)|
+|④|矢印をマウスで掴み移動させることで、地物を直線方向に拡大縮小できます|![image](../resources/HowToUse/panel④.png)|
+|⑤|面（屋根面・壁面など）の定義ごとに色分けして表示できます|![image](../resources/HowToUse/panel⑤.png)|
+|⑥|描画するLODを変更できます||
+
 
 
 ### ⑥地物詳細エリア
