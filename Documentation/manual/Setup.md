@@ -43,6 +43,4 @@ gradle deploy
 ```
 `build/product`配下にexeファイルを含んだ配布用ディレクトリが生成される。
 
-## 5. Quick Start
-ツール実行後に`インポート...`→`src/test/resources/org/plateau/citygmleditor/gml/13100_tokyo23-ku_2022_citygml_1_3_op/udx/bldg/53392633_bldg_6697_2_op.gml`を選択
 
