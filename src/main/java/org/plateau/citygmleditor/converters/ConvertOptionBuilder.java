@@ -7,7 +7,7 @@ public class ConvertOptionBuilder {
 
     private boolean useGeoReference = false;
 
-    private Vec3d offset;
+    private Vec3d offset = new Vec3d();
 
     public ConvertOptionBuilder() {
     }
