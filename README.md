@@ -1,4 +1,4 @@
-# [WIP]CityGML編集ツール
+# [CityGML編集ツール
 ![スクリーンショット 2024-02-14 171551](https://github.com/Synesthesias/PLATEAU-CityGML-Editor/assets/20107036/707d9f43-aca8-463c-a575-214ee7e4319a)
 
 
@@ -35,12 +35,12 @@
 ## 5. 利用技術
 | 種別 | 名称 | バージョン | 詳細 |
 | --- | --- | --- | --- |
-|プログラミング言語|[java](https://www.java.com/ja/)||プログラミング言語。本ツールは全てjavaで実装する。|
-|フレームワーク|[javafx](https://openjfx.io/)||javaのGUIフレームワーク|
-|ライブラリ|[citygml4j](https://github.com/citygml4j/citygml4j)||citygml読み込み・書き出しのためのライブラリ|
-||[iur-ade-citygml4j](https://github.com/citygml4j/iur-ade-citygml4j)||citygml4jのiUR向け拡張ライブラリ|
-||[java3D](https://www.oracle.com/java/technologies/javase/java-3d.html)||3Dレンダリングライブラリ。3Dレンダリング自体はjavafxで行うため、CityGMLの頂点データのポリゴンメッシュ化のみに利用する。|
-||[JglTF](https://github.com/javagl/JglTF)||glTF読み込みライブラリ|
+|プログラミング言語|[java](https://www.java.com/ja/)|11~|プログラミング言語。本ツールは全てjavaで実装する。|
+|フレームワーク|[javafx](https://openjfx.io/)|17.0.10|javaのGUIフレームワーク|
+|ライブラリ|[citygml4j](https://github.com/citygml4j/citygml4j)|1.4.2|citygml読み込み・書き出しのためのライブラリ|
+||[iur-ade-citygml4j](https://github.com/citygml4j/iur-ade-citygml4j)|2.12.0|citygml4jのiUR向け拡張ライブラリ|
+||[java3D](https://www.oracle.com/java/technologies/javase/java-3d.html)|1.3.1|3Dレンダリングライブラリ。3Dレンダリング自体はjavafxで行うため、CityGMLの頂点データのポリゴンメッシュ化のみに利用する。|
+||[JglTF](https://github.com/javagl/JglTF)|2.0.3|glTF読み込みライブラリ|
 
 ## 6. 動作環境
 | 項目 | 最小動作環境 | 推奨動作環境 |
@@ -52,8 +52,19 @@
 |ネットワーク|不要|同左|
 
 ## 7. 本リポジトリのフォルダ構成
+本リポジトリのソースコードはsrc/main/java/org/plateau/citygmleditor内に以下のモジュールごとに配置されている。
 | フォルダ名 | 詳細 |
 | --- | --- |
+|citygmleditor|アプリケーションの初期化処理|
+|citymodel|3D都市モデルの可視化・情報保持|
+|control|3D都市モデルの操作|
+|converters|3Dファイル、CityGML間の変換|
+|exporters|各種ファイルへのエクスポート|
+|fxml|UI|
+|geometry|座標系変換|
+|importers|各種ファイルのインポート|
+|validation|品質検査|
+|world|3D都市モデルの配置空間およびそこに配置するGizmo等のオブジェクト定義|
 
 ## 8. ライセンス
 - ソースコード及び関連ドキュメントの著作権は国土交通省に帰属します。
@@ -65,9 +76,6 @@
 - 本リポジトリの利用により生じた損失及び損害等について、国土交通省はいかなる責任も負わないものとします。
 
 ## 10. 参考資料
-
-
-`build/product`配下にexeファイルを含んだ配布用ディレクトリが生成される。
-
-## IDE
-- Eclipse, IntelliJ IDEA, vscode等gradle対応しているものなら使用可能
+- 技術検証レポート：
+- PLATEAU WebサイトのUse caseページ「CityGML編集ツール」：
+- 操作マニュアル：
