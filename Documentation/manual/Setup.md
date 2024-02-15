@@ -25,7 +25,7 @@ Githubリポジトリの[リリース](https://github.com/Synesthesias/PLATEAU-C
   - [こちらの手順でインストール](https://www.kkaneko.jp/tools/win/gradle.html)
 
 ### セットアップ
-以下コマンド等でローカルにクローン
+以下コマンド等でローカルにクローンします。
 ```
 git clone https://github.com/Synesthesias/PLATEAU-CityGML-Editor
 ```
