@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?import java.net.URL?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
@@ -31,5 +31,7 @@
         <Button fx:id="cancelButton" text="キャンセル" onAction="#handleCancel"/>
         <Button fx:id="addButton" text="追加" onAction="#handleAdd"/>
     </HBox>
-
+    <stylesheets>
+        <URL value="@../viewer.css" />
+    </stylesheets>
 </VBox>

@@ -103,9 +103,7 @@
      visibility: hidden;
  -fx-padding: -1em;
 }
-.tree-table-view .tree-table-row-cell:focused {
-    -fx-background-color: #0078D7; /* フォーカスされた行の背景色 */
-}
+
 .table-view .column-header,
 .tree-table-view .column-header,
 .table-view .filler,
@@ -173,13 +171,13 @@
 .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected,
 .tree-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-cell:filled:selected,
 .table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:selected,
-.tree-table-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-table-row-cell:filled:selected,
-.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell .table-cell:selected,
-.tree-table-view:focused > .virtual-flow > .clipped-container > .sheet > .tree-table-row-cell .tree-table-cell:selected {
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell .table-cell:selected{
     -fx-background: #0078D7;
     -fx-table-cell-border-color: derive(-fx-selection-bar, 20%);
 }
-
+#hierarchyTreeTable .tree-table-row-cell:focused {
+    -fx-background-color: #0078D7; /* フォーカスされた行の背景色 */
+}
 .SurfaceButton {
     -fx-text-fill: black;
     -fx-base: transparent;
@@ -189,10 +187,10 @@
     -fx-effect: null;
 }
 
-
 /*******************************************************************************
  * Custom ID Settings                                                          *
  ******************************************************************************/
+
 #list{
 	-fx-border-style      : solid inside;  /* 枠線のスタイル   */
 	-fx-border-color      : #515151;           /* 枠線の色         */
