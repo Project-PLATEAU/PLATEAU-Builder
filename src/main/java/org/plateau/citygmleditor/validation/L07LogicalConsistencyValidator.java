@@ -53,9 +53,9 @@ public class L07LogicalConsistencyValidator implements IValidator {
                     .collect(Collectors.joining("\n"));
             String errorLogicalLineString = this.lineStrings.get(LOGICAL_ERROR).stream().map(l -> "<gml:LineString gml:id=\"" + l + "\">")
                     .collect(Collectors.joining("\n"));
-            String errorFormatLinearRing = this.linearRings.get(FORMAT_ERROR).stream().map(f -> "<gml:LineString gml:id=\"" + f + "\">")
+            String errorFormatLinearRing = this.linearRings.get(FORMAT_ERROR).stream().map(f -> "<gml:LinearRings gml:id=\"" + f + "\">")
                     .collect(Collectors.joining("\n"));
-            String errorLogicalLinearRing = this.linearRings.get(LOGICAL_ERROR).stream().map(l -> "<gml:LineString gml:id=\"" + l + "\">")
+            String errorLogicalLinearRing = this.linearRings.get(LOGICAL_ERROR).stream().map(l -> "<gml:LinearRings gml:id=\"" + l + "\">")
                     .collect(Collectors.joining("\n"));
             String errorFormat = (errorFormatLineString.isBlank() ? "" : ("\n" + errorFormatLineString) + "\n")
                     + (errorFormatLinearRing.isBlank() ? "" : errorFormatLinearRing + "\n");
