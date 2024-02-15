@@ -1,35 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import java.net.URL?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
 
-<VBox fx:id="inputAttributeForm" spacing="10" alignment="TOP_LEFT"  xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.citygmleditor.citygmleditor.InputAttributeFormController">
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="inputAttributeForm" alignment="TOP_LEFT" spacing="10" style="-fx-background-color: #444444;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="org.plateau.citygmleditor.citygmleditor.InputAttributeFormController">
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20" />
+        <Insets bottom="20" left="20" right="20" top="20" />
     </padding>
 
-    <Label fx:id="name" text="要素名："/>
-    <VBox  fx:id="codeSpaceVbox">
-        <Label  text="■ CodeSpaceの入力"/>
+    <Label fx:id="name" text="要素名：" />
+    <VBox fx:id="codeSpaceVbox">
+        <Label text="■ CodeSpaceの入力" />
         <HBox fx:id="codeSpaceHbox" spacing="10">
-            <TextField fx:id="codeSpaceField" promptText="CodeSpace"/>
-            <Button text="CodeSpaceの選択" onAction="#handleSelectCodeSpace"/>
-            <Button text="値の変更" onAction="#handleSelectCodeSpaceValue"/>
+            <TextField fx:id="codeSpaceField" promptText="CodeSpace" />
+            <Button onAction="#handleSelectCodeSpace" text="CodeSpaceの選択" />
+            <Button onAction="#handleSelectCodeSpaceValue" text="値の変更" />
         </HBox>
     </VBox>
-    <VBox fx:id="uomVbox" >
-        <Label  text="■ uomの入力"/>
-        <Label text="原則：長さの単位は m,面積の単位は m2,時間の単位は hour"/>
-        <TextField fx:id="uomField" promptText="uom"/>
+    <VBox fx:id="uomVbox">
+        <Label text="■ uomの入力" />
+        <Label text="原則：長さの単位は m,面積の単位は m2,時間の単位は hour" />
+        <TextField fx:id="uomField" promptText="uom" />
     </VBox>
-    <VBox fx:id="valueVbox" >
-        <Label  text="■ 値の入力"/>
-       <TextField fx:id="valueField" promptText="属性値"/>
+    <VBox fx:id="valueVbox">
+        <Label text="■ 値の入力" />
+       <TextField fx:id="valueField" promptText="属性値" />
     </VBox>
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button fx:id="cancelButton" text="キャンセル" onAction="#handleCancel"/>
-        <Button fx:id="addButton" text="追加" onAction="#handleAdd"/>
+    <HBox alignment="CENTER_RIGHT" spacing="10">
+        <Button fx:id="cancelButton" onAction="#handleCancel" text="キャンセル" />
+        <Button fx:id="addButton" onAction="#handleAdd" text="追加" />
     </HBox>
     <stylesheets>
         <URL value="@../viewer.css" />

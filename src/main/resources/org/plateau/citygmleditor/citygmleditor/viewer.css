@@ -186,7 +186,12 @@
     -fx-border-color: transparent;
     -fx-effect: null;
 }
-
+.multiple-attributes-tab-pane {
+    -fx-tab-min-width: 100;
+    -fx-tab-max-width: 100;
+    -fx-tab-min-height: 20;
+    -fx-tab-max-height: 20;
+}
 /*******************************************************************************
  * Custom ID Settings                                                          *
  ******************************************************************************/
