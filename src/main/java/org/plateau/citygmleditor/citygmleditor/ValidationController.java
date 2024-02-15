@@ -357,7 +357,7 @@ public class ValidationController implements Initializable {
                                     var meshView = new MeshView(mesh);
                                     meshView.setMesh(mesh);
                                     meshView.setMaterial(material);
-                                    meshView.setDrawMode(DrawMode.LINE);
+                                    meshView.setDrawMode(DrawMode.FILL);
                                     meshView.setCullFace(CullFace.NONE);
                                     meshView.setDepthTest(DepthTest.DISABLE);
                                     highLightGroup.getChildren().add(meshView);
