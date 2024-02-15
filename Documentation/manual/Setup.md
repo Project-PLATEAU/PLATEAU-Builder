@@ -37,7 +37,7 @@ gradle run
 ```
 
 ### ※exe生成
-PLATEAU-CityGML-Editorフォルダ内で以下を実行
+PLATEAU-CityGML-Editorフォルダ内で以下を実行します。
 ```
 gradle deploy
 ```
