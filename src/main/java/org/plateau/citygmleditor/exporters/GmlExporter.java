@@ -77,8 +77,11 @@ public class GmlExporter {
 
         writer.setPrefixes(moduleContext);
 
-        var uroSchemaURI = SchemaHelper.getUroSchemaURI(schemaHandler);
-        var uroSchemaLocation = SchemaHelper.getUroSchemaLocation(schemaHandler);
+        var uroSchema = SchemaHelper.getUroSchema(schemaHandler);
+        var uroSchemaURI = uroSchema == null
+                ? null : SchemaHelper.getSchemaURI(uroSchema);
+        var uroSchemaLocation = uroSchema == null
+                ? null : SchemaHelper.getRelativeSchemaLocation(uroSchema);
 
         if (uroSchemaURI != null)
             writer.setPrefix("uro", uroSchemaURI);

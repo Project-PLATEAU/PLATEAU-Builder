@@ -9,6 +9,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.*;
 import java.io.FileInputStream;
 import org.xml.sax.InputSource;
+
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -25,8 +28,9 @@ public class UroAttributeInfo {
             // DOMパーサのインスタンスを作成
             DOMParser parser = new DOMParser();
             // XMLファイルをパース
-            var fileStream = new FileInputStream(path);
-            var inputSource = new InputSource(fileStream);
+            InputStream stream;
+            stream = new URL(path).openStream();
+            var inputSource = new InputSource(stream);
             parser.parse(inputSource);
             // ドキュメントオブジェクトを取得
             document = parser.getDocument();

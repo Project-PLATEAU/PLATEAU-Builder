@@ -33,6 +33,6 @@ public class OutLine extends MeshView {
     }
 
     public void clear() {
-        ((TriangleMesh)getMesh()).getFaces().clear();
+        setMesh(null);
     }
 }

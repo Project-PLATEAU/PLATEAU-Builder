@@ -124,6 +124,11 @@ public class CityGMLEditorApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            System.err.println("Uncaught exception in thread: " + t.getName() + ": " + e.getMessage());
+            e.printStackTrace();
+        });
+
         sessionManager = SessionManager.createSessionManager("CityGMLEditor");
         sessionManager.loadSession();
         uroAttributeInfo = new UroAttributeInfo();

@@ -47,7 +47,6 @@ import org.locationtech.jts.math.Vector2D;
  */
 public class Camera {
     private final PerspectiveCamera camera = new PerspectiveCamera(true);
-    private final Translate cameraPosition = new Translate(0, 0, 0);
 
     // 座標変換
     private final Translate pivotTranslate = new Translate();
@@ -115,7 +114,7 @@ public class Camera {
             pivotTranslate.setZ(pivotTranslate.getZ() + deltaPosition.getZ());
         } else if (event.isSecondaryButtonDown()) {
             // 回転
-            yaw.setAngle(yaw.getAngle() + deltaMousePosition.getX() * modifier * 0.6);
+            yaw.setAngle(yaw.getAngle() - deltaMousePosition.getX() * modifier * 0.6);
             pitch.setAngle(pitch.getAngle() + deltaMousePosition.getY() * modifier * 0.6);
         }
     };

@@ -113,8 +113,9 @@ public class CoordinateDialogController implements Initializable {
                     .getParent();
             var cityModelView = World.getActiveInstance().getCityModels().get(0);
             var schemaHandler = cityModelView.getSchemaHandler();
-            var uroSchemaLocation = SchemaHelper.getUroSchemaLocation(schemaHandler);
-            uroSchemaLocation = Paths.get(cityModelView.getGmlPath()).getParent().toString() + "\\" + uroSchemaLocation;
+            var uroSchema = SchemaHelper.getUroSchema(schemaHandler);
+            var uroSchemaLocation = uroSchema == null
+                    ? null : SchemaHelper.getSchemaLocation(uroSchema);
 
             CityGMLEditorApp.setDatasetPath(datasetPath.toString());
             CityGMLEditorApp.settingUroAttributeInfo(uroSchemaLocation);
