@@ -6,9 +6,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.ListView?>
 
-<VBox fx:controller="org.plateau.citygmleditor.citygmleditor.CodeTypeMenuController" xmlns:fx="http://javafx.com/fxml">
-    <ListView fx:id="codeTypeListView" />
+
+<VBox style="-fx-background-color: #444444;" prefWidth="350" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="org.plateau.citygmleditor.citygmleditor.CodeTypeMenuController">
+    <TextField fx:id="searchField" promptText="Search"/>
+    <ListView fx:id="codeTypeListView" style="-fx-background-color: #444444;"/>    
     <stylesheets>
-        <URL value="@../viewer.css" />
+        <URL value="@../viewer.css"/>
     </stylesheets>
 </VBox>
