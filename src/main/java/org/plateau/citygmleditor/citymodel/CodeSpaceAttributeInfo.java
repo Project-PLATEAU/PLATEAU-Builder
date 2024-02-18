@@ -22,7 +22,7 @@ public class CodeSpaceAttributeInfo {
     /**
      * readCodeType
      * CodeTypeのxmlをパースする
-     * 
+     *
      * @param path CodeTypeのパス
      */
     public void readCodeType(String path) {
@@ -41,22 +41,31 @@ public class CodeSpaceAttributeInfo {
             builder = factory.newDocumentBuilder();
             codeTypeDocument = builder.newDocument();
             Element documentRootElement = sourceDocument.getDocumentElement();
-            // String xmlnsUro = documentRootElement.getAttribute("xmlns:uro");
 
-            // 新しいElementを作成
             Element rootElement = codeTypeDocument.createElement("codeType");
-            // rootElement.setAttribute("xmlns:uro");
-            // ElementをDocumentのルートとして追加
             codeTypeDocument.appendChild(rootElement);
-            // complexTypeタグを取得
             dictionaryEntryNodeList = sourceDocument.getElementsByTagName("gml:dictionaryEntry");
 
             for (int i = 0; i < dictionaryEntryNodeList.getLength(); i++) {
                 Node node = dictionaryEntryNodeList.item(i);
                 Element element = (Element) node;
-                Node importedNode = codeTypeDocument.importNode(node, true);
-                rootElement.appendChild(importedNode);
-                // System.out.println("element:" + element.getTagName());
+
+                NodeList definitionNodeList = element.getElementsByTagName("gml:Definition");
+                Node importedDefinitionNode = codeTypeDocument.importNode(definitionNodeList.item(0), false);
+
+                NodeList descriptionNodeList = element.getElementsByTagName("gml:description");
+                Node descriptionNode = descriptionNodeList.item(0);
+
+                NodeList nameNodeList = element.getElementsByTagName("gml:name");
+                Node nameNode = nameNodeList.item(0);
+
+                Node importedNameNode = codeTypeDocument.importNode(nameNode, true);
+                Node importedDescriptionNode = codeTypeDocument.importNode(descriptionNode, true);
+
+                ((Element) importedDefinitionNode).appendChild(importedNameNode);
+                ((Element) importedDefinitionNode).appendChild(importedDescriptionNode);
+
+                rootElement.appendChild(((Element) importedDefinitionNode));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,7 +76,7 @@ public class CodeSpaceAttributeInfo {
     /**
      * getCodeTypeAttributeDocument
      * パースしたCodeTypeの要素リストを返す
-     * 
+     *
      * @return パースしたuroの要素リスト
      */
     public Document getCodeTypeDocument() {
@@ -81,8 +90,8 @@ public class CodeSpaceAttributeInfo {
             String indent = new String(new char[depth * 2]).replace("\0", " ");
             Element element = (Element) node;
             // ノードの情報を表示
-            System.out.println(indent + "Tag Name: " + element.getTagName() + "   Node Name: "
-                    + element.getAttribute("name") + "   Parent TagName: " + element.getParentNode());
+            System.out.println(indent + "Tag Name: " + element.getTagName() + "   Node Value: "
+                    + node.getTextContent() + "   Parent TagName: " + element.getParentNode());
 
             // 子ノードがあれば、それぞれに対してこのメソッドを再帰的に呼び出す
             NodeList childNodes = node.getChildNodes();

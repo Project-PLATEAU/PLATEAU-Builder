@@ -7,6 +7,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import org.plateau.citygmleditor.citymodel.CodeSpaceValue;
 import javafx.scene.control.MultipleSelectionModel;
@@ -51,17 +52,28 @@ public class CodeSpaceValueMenuController {
         ObservableList<CodeSpaceValue> dataList = FXCollections.observableArrayList();
         CodeSpaceValue codeSpaceValue;
         for (int i = 0; i < nodeList.getLength(); i++) {
-            NodeList childNodeList = nodeList.item(i).getChildNodes();
-            for (int j = 0; j < childNodeList.getLength(); j++) {
-                if (childNodeList.item(j).getNodeType() == Node.ELEMENT_NODE) {
-                    codeSpaceValue = new CodeSpaceValue(((Element) childNodeList.item(j)).getAttribute("gml:id"),
-                            childNodeList.item(j).getChildNodes().item(1).getTextContent(),
-                            childNodeList.item(j).getChildNodes().item(3).getTextContent());
-                    dataList.add(codeSpaceValue);
-                }
+            Node node = nodeList.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+
+                // ID, 説明、名前を各ノードから取得
+                String id = element.getAttribute("gml:id");
+                String description = getElementTextContentByTagName(element, "gml:description");
+                String name = getElementTextContentByTagName(element, "gml:name");
+
+                codeSpaceValue = new CodeSpaceValue(id, description, name);
+                dataList.add(codeSpaceValue);
             }
         }
         codeSpaceValueTable.setItems(dataList);
+    }
+
+    private String getElementTextContentByTagName(Element parentElement, String tagName) {
+        NodeList nodes = parentElement.getElementsByTagName(tagName);
+        if (nodes.getLength() > 0) {
+            return nodes.item(0).getTextContent();
+        }
+        return ""; // タグが存在しない場合は空文字を返す
     }
 
     // コールバックを設定するメソッド
