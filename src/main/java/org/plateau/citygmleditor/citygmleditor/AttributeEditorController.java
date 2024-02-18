@@ -320,17 +320,6 @@ public class AttributeEditorController implements Initializable {
         showListView(
                 (ChildList<ADEComponent>) selectedBuilding.getGenericApplicationPropertyOfAbstractBuilding(),
                 null, -2, -2);
-
-//        Consumer<AddAttributeListViewController> onAdd = (AddAttributeListViewController attributeAdditionPanel) -> {
-//            // addAttribute(
-//            // attributeAdditionPanel.getSelectedTagName(),
-//            // null,
-//            // attributeAdditionPanel.getAttributeList().get(attributeAdditionPanel.getSelectedIndex()).get(1),
-//            // attributeAdditionPanel.getAttributeList());
-//        };
-//
-//        // 未選択もしくはルート選択状態時
-//        AddAttributeListViewController.createModal(attributeTreeTable.getRoot(), true, onAdd);
     }
 
     private static void addADEPropertyToTree(AbstractBuilding selectedBuilding, TreeItem<AttributeItem> root) {
@@ -355,13 +344,7 @@ public class AttributeEditorController implements Initializable {
                 return;
             // 子の内容を属性値として登録して再帰処理を終了
             AttributeItem attribute;
-            // if (uom == "") {
             attribute = new AttributeItem(node.getNodeName(), firstChild.getNodeValue(), uom, codeSpace);
-            // } else {
-            // attribute = new AttributeItem(node.getNodeName() + " uom(" + uom + ")",
-            // firstChild.getNodeValue(), uom,
-            // codeSpace);
-            // }
             attribute.valueProperty().addListener((observable, oldValue, newValue) -> {
                 firstChild.setNodeValue(newValue);
             });
@@ -498,7 +481,9 @@ public class AttributeEditorController implements Initializable {
         uroAttributeDocument = CityGMLEditorApp.getUroAttributeDocument();
         Node rootNode = uroAttributeDocument.getDocumentElement();
         NodeList nodeList = rootNode.getChildNodes();
-        Element baseElement = null;
+        Element baseElement = (Element) rootNode;
+        if (parentAttributeKeyName == null)
+            parentAttributeKeyName = null;
 
         // 確認対象の基準となる親要素を取得
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -586,6 +571,7 @@ public class AttributeEditorController implements Initializable {
             int selectedItemIndex = selectedItem.getSelectedIndex();
 
             ArrayList<ArrayList<String>> requiredChildAttributeList = getUroList("uro:" + selectedItemName, true);
+            int childElementLength = getUroList("uro:" + selectedItemName, false).size();
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/add-attribute-form.fxml"));
                 Parent formRoot = loader.load();
@@ -608,7 +594,7 @@ public class AttributeEditorController implements Initializable {
 
                 inputAttributeFormController.initialize(childList, selectedAttributeKeyName, "uro:" + selectedItemName,
                         addAttributeList.get(selectedItemIndex).get(1), addAttributeList, uroAttributeDocument,
-                        requiredChildAttributeList, parentIndex, selectedIndex);
+                        requiredChildAttributeList, parentIndex, selectedIndex, childElementLength);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -624,7 +610,8 @@ public class AttributeEditorController implements Initializable {
     private void editAttribute(ChildList<ADEComponent> childList, String selectedItemName, String parentItemName,
             int parentIndex,
             int selectedIndex) {
-        if (parentIndex == -1) {
+        int childElementLength = getUroList(selectedItemName, false).size();
+        if (parentIndex == -1 && childElementLength != 0) {
             // アラートを作成
             Alert alert = new Alert(AlertType.WARNING);
             alert.setTitle("編集エラー");
@@ -640,7 +627,7 @@ public class AttributeEditorController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/add-attribute-form.fxml"));
             Parent formRoot = loader.load();
             InputAttributeFormController inputAttributeFormController = loader.getController();
-            inputAttributeFormController.initialize(childList, "uro:" + selectedItemName,
+            inputAttributeFormController.initialize(childList, selectedItemName,
                     getType(selectedItemName, parentItemName), parentIndex, selectedIndex);
             // 新しいウィンドウ（ステージ）の設定
             Stage stage = new Stage();

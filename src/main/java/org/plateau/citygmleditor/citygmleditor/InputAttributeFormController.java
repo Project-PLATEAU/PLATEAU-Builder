@@ -95,9 +95,7 @@ public class InputAttributeFormController {
         this.addAttributeType = addAttributeType;
         this.parentIndex = parentIndex;
         this.selectedIndex = selectedIndex;
-
         if (addAttributeType.matches("gml:CodeType")) {
-            // setCodeSpaceField(value);
             String oldCodeSpace = getCodeSpace(childList, parentIndex, selectedIndex);
             valueField.setDisable(true);
             setCodeSpaceField(oldCodeSpace.substring(oldCodeSpace.lastIndexOf("/") + 1));
@@ -129,11 +127,12 @@ public class InputAttributeFormController {
      * @param requiredChildAttributeList 追加が必須となっている子属性のリスト
      * @param parentIndex                ツリービュー上で選択した属性の親のインデックス
      * @param selectedIndex              ツリービュー上で選択した属性のインデックス
+     * @param childLength                追加対象が持つ子要素の数
      */
     public void initialize(ChildList<ADEComponent> childList, String parentAttributeName,
             String addAttributeName, String addAttributeType, ArrayList<ArrayList<String>> attributeList,
             org.w3c.dom.Document uroAttributeDocument, ArrayList<ArrayList<String>> requiredChildAttributeList,
-            int parentIndex, int selectedIndex) {
+            int parentIndex, int selectedIndex, int childLength) {
         addFlag = true;
         name.setText(name.getText() + addAttributeName);
         this.childList = childList;
@@ -151,12 +150,12 @@ public class InputAttributeFormController {
             codeSpaceVbox.setManaged(false);
             codeSpaceVbox.setVisible(false);
         }
-        if (!addAttributeType.matches("gml:MeasureType") & !addAttributeType.matches("gml:LengthType")
+        if (!addAttributeType.matches("gml:MeasureType") && !addAttributeType.matches("gml:LengthType")
                 & !addAttributeType.matches("gml::MeasureOrNullListType")) {
             uomVbox.setManaged(false);
             uomVbox.setVisible(false);
         }
-        if (parentAttributeName == null) {
+        if (parentAttributeName == null && childLength != 0) {
             valueVbox.setManaged(false);
             valueVbox.setVisible(false);
         }
@@ -197,34 +196,44 @@ public class InputAttributeFormController {
     }
 
     private String getUom(ChildList<ADEComponent> childList, int parentIndex, int index) {
-        var adeComponent = childList.get(parentIndex - 1);
-        var adeElement = (ADEGenericElement) adeComponent;
-        Node content = adeElement.getContent();
-        Node parentNode = content.getChildNodes().item(0);
-        Node targetNode = parentNode.getChildNodes().item(index);
-        String uomValue;
+        Node parentNode = null;
+        Node targetNode = null;
+        if (parentIndex != -1) {
+            ADEComponent adeComponent = childList.get(parentIndex - 1);
+            var adeElement = (ADEGenericElement) adeComponent;
+            Node content = adeElement.getContent();
+            parentNode = content.getChildNodes().item(0);
+            targetNode = parentNode.getChildNodes().item(index);
+        } else {
+            ADEComponent adeComponent = childList.get(index - 1);
+            var adeElement = (ADEGenericElement) adeComponent;
+            targetNode = adeElement.getContent();
+        }
+        String uomValue = "";
         if (targetNode instanceof Element) {
             Element targetElement = (Element) targetNode;
-            uomValue = targetElement.getAttribute("uom");
-        } else {
-            Element targetElement = (Element) parentNode;
             uomValue = targetElement.getAttribute("uom");
         }
         return uomValue;
     }
 
     private String getCodeSpace(ChildList<ADEComponent> childList, int parentIndex, int index) {
-        var adeComponent = childList.get(parentIndex - 1);
-        var adeElement = (ADEGenericElement) adeComponent;
-        Node content = adeElement.getContent();
-        Node parentNode = content.getChildNodes().item(0);
-        Node targetNode = parentNode.getChildNodes().item(index);
-        String codeSpace;
+        Node parentNode = null;
+        Node targetNode = null;
+        if (parentIndex != -1) {
+            ADEComponent adeComponent = childList.get(parentIndex - 1);
+            var adeElement = (ADEGenericElement) adeComponent;
+            Node content = adeElement.getContent();
+            parentNode = content.getChildNodes().item(0);
+            targetNode = parentNode.getChildNodes().item(index);
+        } else {
+            ADEComponent adeComponent = childList.get(index - 1);
+            var adeElement = (ADEGenericElement) adeComponent;
+            targetNode = adeElement.getContent();
+        }
+        String codeSpace = "";
         if (targetNode instanceof Element) {
             Element targetElement = (Element) targetNode;
-            codeSpace = targetElement.getAttribute("codeSpace");
-        } else {
-            Element targetElement = (Element) parentNode;
             codeSpace = targetElement.getAttribute("codeSpace");
         }
 
@@ -232,28 +241,42 @@ public class InputAttributeFormController {
     }
 
     private String getValue(ChildList<ADEComponent> childList, int parentIndex, int index) {
-        var adeComponent = childList.get(parentIndex - 1);
-        var adeElement = (ADEGenericElement) adeComponent;
-        Node content = adeElement.getContent();
-        Node parentNode = content.getChildNodes().item(0);
-        Node targetNode = parentNode.getChildNodes().item(index);
+        Node parentNode = null;
+        Node targetNode = null;
         String value = null;
+        if (parentIndex != -1) {
+            ADEComponent adeComponent = childList.get(parentIndex - 1);
+            var adeElement = (ADEGenericElement) adeComponent;
+            Node content = adeElement.getContent();
+            parentNode = content.getChildNodes().item(0);
+            targetNode = parentNode.getChildNodes().item(index);
+        } else {
+            ADEComponent adeComponent = childList.get(index - 1);
+            var adeElement = (ADEGenericElement) adeComponent;
+            targetNode = adeElement.getContent();
+        }
+
         if ((targetNode instanceof Element) && (targetNode.getChildNodes().getLength() != 0)) {
-            value = targetNode.getChildNodes().item(0).getNodeValue();
-        } else if ((parentNode instanceof Element) && (parentNode.getChildNodes().getLength() != 0)) {
-            value = parentNode.getChildNodes().item(0).getNodeValue();
+            value = targetNode.getChildNodes().item(0).getTextContent();
         }
         return value;
     }
 
     private void editAttribute(ChildList<ADEComponent> childList, int parentIndex, int index, String codeSpace,
             String uom, String value) {
-        var adeComponent = childList.get(parentIndex - 1);
-        var adeElement = (ADEGenericElement) adeComponent;
-        Node content = adeElement.getContent();
-        Node parentNode = content.getChildNodes().item(0);
-        Node targetNode = parentNode.getChildNodes().item(index);
-
+        Node parentNode = null;
+        Node targetNode = null;
+        if (parentIndex != -1) {
+            ADEComponent adeComponent = childList.get(parentIndex - 1);
+            var adeElement = (ADEGenericElement) adeComponent;
+            Node content = adeElement.getContent();
+            parentNode = content.getChildNodes().item(0);
+            targetNode = parentNode.getChildNodes().item(index);
+        } else {
+            ADEComponent adeComponent = childList.get(index - 1);
+            var adeElement = (ADEGenericElement) adeComponent;
+            targetNode = adeElement.getContent();
+        }
         if (targetNode instanceof Element) {
             Element targetElement = (Element) targetNode;
             if (codeSpace != "") {
@@ -432,6 +455,14 @@ public class InputAttributeFormController {
 
             if (addAttributeName != null) {
                 Element newElement = doc.createElementNS(namespaceURI, addAttributeName);
+                if (value != null)
+                    newElement.setTextContent(value);
+                if (codeSpacePath != "") {
+                    newElement.setAttribute("codeSpace", codeSpacePath);
+                }
+                if (uom != "") {
+                    newElement.setAttribute("uom", uom);
+                }
                 ADEGenericElement newAdelement = new ADEGenericElement(newElement);
                 childList.add(childList.size(), (ADEComponent) newAdelement);
 

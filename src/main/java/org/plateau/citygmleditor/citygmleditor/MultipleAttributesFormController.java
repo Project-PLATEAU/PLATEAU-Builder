@@ -69,7 +69,7 @@ public class MultipleAttributesFormController {
                 InputAttributeFormController formController = loader.getController(); // コントローラを取得
                 formController.initialize(childList, parentAttributeName, "uro:" + attribute.get(0), attribute.get(1),
                         attributeList,
-                        uroAttributeDocument, null, parentIndex, parentIndex);
+                        uroAttributeDocument, null, parentIndex, parentIndex, 0);
                 formController.hideButtons();
                 controllers.add(formController);
                 // 必要に応じてコントローラにデータを設定
