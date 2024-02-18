@@ -86,7 +86,7 @@ public class AutoGeometryAligner {
 
         ((Node)lodSolidView).getTransforms().clear();
         ((Node)lodSolidView).getTransforms().add(manipulator.getTransformCache());
-        lodSolidView.refrectGML();
+        lodSolidView.reflectGML();
     }
     
     private static int findNear(Geometry lod1geometry, List<Geometry> lod2Geometries) {

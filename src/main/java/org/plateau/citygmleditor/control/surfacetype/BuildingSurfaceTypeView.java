@@ -9,6 +9,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
+import javafx.scene.transform.Scale;
 import org.citygml4j.model.citygml.CityGMLClass;
 import org.citygml4j.model.citygml.building.*;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSurface;
@@ -198,6 +199,14 @@ public class BuildingSurfaceTypeView extends MeshView {
     }
 
     public void updateSelectionOutLine(FaceBuffer selectedFaces, MeshView outLine) {
+        outLine.getTransforms().clear();
+        var manipulator = solid.getTransformManipulator();
+        var pivot = manipulator.getOrigin();
+        // 建物の座標変換情報から建物の座標変換を作成
+        outLine.getTransforms().add(manipulator.getTransformCache());
+        // スケールを適用
+        outLine.getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+
         var selfMesh = (TriangleMesh)getMesh();
         var mesh = new TriangleMesh();
         mesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
@@ -272,8 +281,8 @@ public class BuildingSurfaceTypeView extends MeshView {
             case BUILDING_GROUND_SURFACE: return Color.web("#000000ff");
             case OUTER_BUILDING_CEILING_SURFACE: return Color.web("#f0eb8cff");
             case OUTER_BUILDING_FLOOR_SURFACE: return Color.web("#66cdaaff");
-            case BUILDING_DOOR: return Color.web("#00a0e9ff");
-            case BUILDING_WINDOW: return Color.web("#909090ff");
+            case BUILDING_WINDOW: return Color.web("#00a0e9ff");
+            case BUILDING_DOOR: return Color.web("#909090ff");
         }
 
         throw new IllegalArgumentException();

@@ -146,7 +146,7 @@ public class LOD3SolidView extends Parent implements ILODSolidView {
     }
 
     @Override
-    public void refrectGML() {
+    public void reflectGML() {
         for (var polygon : getPolygons()) {
             var coordinates = polygon.getExteriorRing().getOriginCoords();// .getOriginal().getPosList().toList3d();
             polygon.getExteriorRing().getOriginal().getPosList()

@@ -29,7 +29,7 @@ public class AppearanceFactory extends CityGMLFactory {
             }
 
             if (surfaceData.getSurfaceData().getCityGMLClass() == CityGMLClass.X3D_MATERIAL) {
-                throw new UnsupportedOperationException();
+                // TODO: X3Dマテリアル対応
             }
         }
 

@@ -458,7 +458,7 @@ public class GizmoModel extends Parent {
             return;
 
         // GMLに書き戻す
-        ((ILODSolidView) manipulator.getSolidView()).refrectGML();
+        ((ILODSolidView) manipulator.getSolidView()).reflectGML();
     }
 
     /**

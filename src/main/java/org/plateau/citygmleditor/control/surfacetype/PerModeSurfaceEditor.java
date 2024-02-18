@@ -12,6 +12,7 @@ import org.citygml4j.model.citygml.CityGMLClass;
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
+import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurfaceProperty;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSurface;
@@ -19,6 +20,7 @@ import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.control.OutLine;
 import org.plateau.citygmleditor.control.PolygonSection;
+import org.plateau.citygmleditor.world.World;
 
 import java.util.ArrayList;
 
@@ -41,6 +43,8 @@ public abstract class PerModeSurfaceEditor {
 
         if (view == null)
             return;
+
+        updateActiveFeatureSelection(event.getPickResult());
 
         var section = view.getPolygonSection(event.getPickResult());
 
@@ -76,5 +80,31 @@ public abstract class PerModeSurfaceEditor {
 
     protected ObjectProperty<BuildingSurfaceTypeView> targetViewProperty() {
         return targetView;
+    }
+
+    protected void updateActiveFeatureSelection(PickResult pickResult) {
+        var view = getSurfaceView(pickResult);
+        var section = view.getPolygonSection(pickResult);
+        if (section == null)
+            return;
+
+        if (!(section.getFeature() instanceof AbstractCityObject))
+            return;
+
+        CityGMLEditorApp.getFeatureSellection().activeCityObjectProperty().set((AbstractCityObject) section.getFeature());
+
+        var building = getBuilding(view);
+
+        if (building == null)
+            return;
+
+        CityGMLEditorApp.getFeatureSellection().getActiveFeatureProperty().set(building);
+    }
+
+    private BuildingView getBuilding(Node node) {
+        while (node != null && !(node instanceof BuildingView)) {
+            node = node.getParent();
+        }
+        return (BuildingView)node;
     }
 }

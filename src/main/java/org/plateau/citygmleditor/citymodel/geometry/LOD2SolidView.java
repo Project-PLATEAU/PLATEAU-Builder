@@ -141,19 +141,19 @@ public class LOD2SolidView extends Parent implements ILODSolidView {
     }
 
     @Override
-    public void refrectGML() {
+    public void reflectGML() {
         for (var polygon : getPolygons()) {
                 var coordinates = polygon.getExteriorRing().getOriginCoords();//.getOriginal().getPosList().toList3d();
                 polygon.getExteriorRing().getOriginal().getPosList().setValue(transformManipulator.unprojectTransforms(coordinates));
 
                 for (var interiorRing : polygon.getInteriorRings()) {
                     var coordinatesInteriorRing = interiorRing.getOriginCoords();//.getOriginal().getPosList().toList3d();
-                    polygon.getExteriorRing().getOriginal().getPosList().setValue(transformManipulator.unprojectTransforms(coordinatesInteriorRing));
+                    interiorRing.getOriginal().getPosList().setValue(transformManipulator.unprojectTransforms(coordinatesInteriorRing));
                 }
             }
             var vertexBuffer = new VertexBuffer();
             var vertices = transformManipulator.unprojectVertexTransforms(getVertexBuffer().getVertices());
-            for(var vertex : vertices){
+            for (var vertex : vertices) {
                 vertexBuffer.addVertex(vertex);
             }
             setVertexBuffer(vertexBuffer);

@@ -53,9 +53,6 @@ public class FeatureInfoController implements Initializable {
 
                     featureInfoContainer.setVisible(true);
 
-                    featureIDText.setText("地物ID：" + feature.getGMLObject().getId());
-                    featureTypeText.setText("地物型：" + UIConstants.buildingTypeDescription(feature.getGMLObject().getCityGMLClass()));
-
                     for (int lod = 1; lod <= 3; ++lod) {
                         var toggle = toggles.get(lod - 1);
                         if (feature.getSolid(lod) == null) {
@@ -68,6 +65,16 @@ public class FeatureInfoController implements Initializable {
                             toggle.selectedProperty().unbindBidirectional(((Node)oldFeature.getSolid(lod)).visibleProperty());
                         toggle.selectedProperty().bindBidirectional(((Node)feature.getSolid(lod)).visibleProperty());
                     }
+                });
+
+
+        CityGMLEditorApp.getFeatureSellection().activeCityObjectProperty()
+                .addListener((observable, oldFeature, feature) -> {
+                    if (feature == null)
+                        return;
+
+                    featureIDText.setText("地物ID：" + feature.getId());
+                    featureTypeText.setText("地物型：" + UIConstants.buildingTypeDescription(feature.getCityGMLClass()));
                 });
     }
 }

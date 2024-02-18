@@ -23,26 +23,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class TextureExporter {
     public static void export(String folderPath, CityModelView cityModel) {
-        // ImageURIの取得
-        List<String> appearanceList = new ArrayList<>();
-        org.citygml4j.model.citygml.core.CityModel gmlObject = cityModel.getGmlObject();
-        // appearanceがない場合は終了
-        if (gmlObject.getAppearanceMember().size() == 0) {
-            return;
-        }
-        for (var appearanceMember : gmlObject.getAppearanceMember()) {
-            var surfaceDataMembers = appearanceMember.getAppearance().getSurfaceDataMember();
-            for (var surfaceData : surfaceDataMembers) {
-                ParameterizedTexture parameterizedTexture;
-                if (surfaceData.getSurfaceData().getCityGMLClass() == CityGMLClass.PARAMETERIZED_TEXTURE) {
-                    parameterizedTexture = (ParameterizedTexture) surfaceData.getSurfaceData();
-                    var imageURI = parameterizedTexture.getImageURI();
-                    appearanceList.add(imageURI);
-                }
-            }
-        }
-
-        // テクスチャのエクスポート
         AppearanceView tempAppearance = cityModel.getRGBTextureAppearance();
         if(tempAppearance == null)
             return;
@@ -51,8 +31,14 @@ public class TextureExporter {
         int count = 0;
 
         for (SurfaceDataView surfaceData : tempSurfaceDatas) {
+            if (surfaceData.getOriginal().getCityGMLClass() != CityGMLClass.PARAMETERIZED_TEXTURE)
+                continue;
+
+            var parameterizedTexture = (ParameterizedTexture) surfaceData.getOriginal();
+            var imageURI = parameterizedTexture.getImageURI();
+
             if (count == 0) {
-                var filePathComponents = appearanceList.get(0).split("/");
+                var filePathComponents = imageURI.split("/");
                 appearanceDirName = filePathComponents[0];
                 try {
                     if (new File(folderPath + "/" + appearanceDirName).exists()) {
@@ -68,8 +54,8 @@ public class TextureExporter {
             var diffuseMap = material.getDiffuseMap();
             var textureImage = SwingFXUtils.fromFXImage(diffuseMap, null);
             try {
-                File exportPath = new File(folderPath + "/" + appearanceList.get(count));
-                // 最後の '\' 以降を抽出
+                File exportPath = new File(folderPath + "/" + imageURI);
+                // ファイル名を抽出
                 String fileName = exportPath.getAbsolutePath()
                         .substring(exportPath.getAbsolutePath().lastIndexOf("\\") + 1);
                 // '.' 以降（ファイルの拡張子）を抽出

@@ -92,7 +92,7 @@ public interface ILODSolidView {
     /**
      * GML、各頂点バッファへ情報を適用
      */
-    public void refrectGML();
+    public void reflectGML();
 
     /**
      * 使用しているテクスチャパス

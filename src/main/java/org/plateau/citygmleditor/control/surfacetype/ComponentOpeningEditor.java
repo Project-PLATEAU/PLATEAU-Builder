@@ -19,6 +19,7 @@ public class ComponentOpeningEditor extends PerModeSurfaceEditor {
     public void reset() {
         targetComponent.set(null);
         selectedComponents.clear();
+        openingOutLine.clear();
         mode.set(EditorMode.SELECT_COMPONENT);
     }
 
