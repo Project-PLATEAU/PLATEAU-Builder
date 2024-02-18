@@ -18,6 +18,8 @@ import org.plateau.citygmleditor.citymodel.BuildingInstallationView;
 import org.plateau.citygmleditor.citymodel.geometry.GeometryView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
+import org.plateau.citygmleditor.citymodel.geometry.LOD3SolidView;
 import org.plateau.citygmleditor.converters.Gltf2LodConverter;
 import org.plateau.citygmleditor.converters.Obj2LodConverter;
 import org.plateau.citygmleditor.exporters.GltfExporter;
@@ -234,7 +236,9 @@ public class HierarchyController implements Initializable {
             if (!option.isUseGeoReference()) {
                 // 位置合わせ
                 var id = solid.getParent().getId();
-                AutoGeometryAligner.GeometryAlign(convertedCityModel, id);
+                var lod = solid instanceof LOD2SolidView ? 2 : solid instanceof LOD3SolidView ? 3 : 0;
+                if (lod > 0) 
+                    AutoGeometryAligner.GeometryAlign(convertedCityModel, id, lod);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -265,7 +269,9 @@ public class HierarchyController implements Initializable {
             if (!option.isUseGeoReference()) {
                 // 位置合わせ
                 var id = solid.getParent().getId();
-                AutoGeometryAligner.GeometryAlign(convertedCityModel, id);
+                var lod = solid instanceof LOD2SolidView ? 2 : solid instanceof LOD3SolidView ? 3 : 0;
+                if (lod > 0) 
+                    AutoGeometryAligner.GeometryAlign(convertedCityModel, id, lod);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

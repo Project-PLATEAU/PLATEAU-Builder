@@ -52,6 +52,7 @@ import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
 import org.plateau.citygmleditor.geometry.GeoReference;
+import org.plateau.citygmleditor.utils3d.geom.Vec3d;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.world.World;
 
@@ -599,6 +600,8 @@ public abstract class AbstractLodConverter {
         DirectPositionList directPositionList = new DirectPositionList();
         var geoReference = getGeoReference();
         var offset = _convertOption.getOffset();
+        if (offset == null)
+            offset = new Vec3d();
         for (var i = 0; i < jtsLinearRing.getNumPoints(); i++) {
             var coordinate = jtsLinearRing.getCoordinateN(i);
             var geoCoordinate = geoReference.unproject(new Vec3f((float)(coordinate.x + offset.x), (float)(coordinate.y + offset.y), (float)(coordinate.z + offset.z)));

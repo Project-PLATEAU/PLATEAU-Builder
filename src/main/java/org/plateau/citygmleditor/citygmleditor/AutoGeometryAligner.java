@@ -7,8 +7,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.plateau.citygmleditor.citymodel.CityModelView;
-import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
-import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.world.World;
@@ -16,39 +15,46 @@ import javafx.geometry.Point3D;
 import javafx.scene.shape.Polygon;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
+import javafx.scene.transform.Translate;
+import javafx.scene.Node;
 
 public class AutoGeometryAligner {
-    public static void GeometryAlign(CityModelView convertedCityModel, String id) {
-        LOD1SolidView lod1SolidView = null;
-        LOD2SolidView lod2SolidView = null;
+    public static void GeometryAlign(CityModelView convertedCityModel, String id, int lod) {
+        ILODSolidView lod1SolidView = null;
+        ILODSolidView lodSolidView = null;
         for (var building : convertedCityModel.getChildrenUnmodifiable()) {
             if (!building.getId().equals(id))
                 continue;
             var buildingView = (org.plateau.citygmleditor.citymodel.BuildingView) building;
             lod1SolidView = buildingView.getLOD1Solid();
-            lod2SolidView = buildingView.getLOD2Solid();
+            switch (lod) {
+                case 2:
+                    lodSolidView = buildingView.getLOD2Solid();
+                    break;
+                case 3:
+                    lodSolidView = buildingView.getLOD2Solid();
+                    break;
+            }
         }
-        if ((lod1SolidView == null) || (lod2SolidView == null)) {
+        if ((lod1SolidView == null) || (lodSolidView == null)) {
             return;
         }
         var lod1vertices = lod1SolidView.getVertexBuffer().getVertices();
         var lod1geometry = createJTSGeometry(lod1vertices);
-        var lod2vertices = lod2SolidView.getVertexBuffer().getVertices();
+        var lod2vertices = lodSolidView.getVertexBuffer().getVertices();
         var lod2geometry = createJTSGeometry(lod2vertices);
         if ((lod1geometry == null) || (lod2geometry == null))
             return;
-        var lod2polygon = createJavaFXPolygon((org.locationtech.jts.geom.Polygon) lod2geometry);
         var geoReference = World.getActiveInstance().getGeoReference();
         var lod1point = geoReference.project(new GeoCoordinate(lod1geometry.getCentroid().getX(), lod1geometry.getCentroid().getY(), 0));
         var lod2point = geoReference.project(new GeoCoordinate(lod2geometry.getCentroid().getX(), lod2geometry.getCentroid().getY(), 0));
-        var translate = new javafx.scene.transform.Translate(lod2point.x - lod1point.x, lod2point.y - lod1point.y);
+        var translate = new Translate(lod1point.x - lod2point.x, lod1point.y - lod2point.y);
         List<Geometry> lod2Geometries = new ArrayList<Geometry>();
         // 10度づつの回転オフセット
         for (int i = 0; i < 360/10; i++) {
-            var rotate = new javafx.scene.transform.Rotate(i*10, lod2point.x, lod2point.y, 0, Rotate.Z_AXIS);
-            lod2polygon.getTransforms().clear();
-            lod2polygon.getTransforms().addAll(rotate, translate);
-            lod2Geometries.add(createJTSPolygon(lod2polygon));
+            var rotate = new Rotate(i*10, lod2point.x, lod2point.y, 0, Rotate.Z_AXIS);
+            Transform transform = translate.createConcatenation(rotate);
+            lod2Geometries.add(createJTSGeometry(transformVertices(lod2vertices, transform)));
         }
         var index1 = findNear(lod1geometry, lod2Geometries);
         var baseangle = index1 * 10;
@@ -60,35 +66,27 @@ public class AutoGeometryAligner {
             for (int j = 1; j < 10; j++) {
                 var angle = (baseangle + (j * (i == 0 ? 1 : -1)) + 360) % 360;
                 angles.add(angle);
-                var rotate = new javafx.scene.transform.Rotate(angle, lod2point.x, lod2point.y, 0, Rotate.Z_AXIS);
-                lod2polygon.getTransforms().clear();
-                lod2polygon.getTransforms().addAll(rotate, translate);
-                lod2Geometries.add(createJTSPolygon(lod2polygon));
+                var rotate = new Rotate(angle, lod2point.x, lod2point.y, 0, Rotate.Z_AXIS);
+                Transform transform = translate.createConcatenation(rotate);
+                lod2Geometries.add(createJTSGeometry(transformVertices(lod2vertices, transform)));
             }
-        }
+        } 
         var index2 = findNear(lod1geometry, lod2Geometries);
         var fixangle = angles.get(index2);
+        
         // 反映
-        var manipulator = lod2SolidView.getTransformManipulator();
-        Transform worldToLocalTransform = manipulator.getTransformCache();
-        // 逆変換行列を取得
-        try {
-            worldToLocalTransform = worldToLocalTransform.createInverse();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        var offset = worldToLocalTransform.transform(lod1point.x - lod2point.x, lod1point.y - lod2point.y, lod1SolidView.getTransformManipulator().getOrigin().getZ() - manipulator.getOrigin().getZ());
-        var pivot = worldToLocalTransform.transform(lod2point.x, lod2point.y, 0);
-        var axis = worldToLocalTransform.transform(Rotate.Z_AXIS);
-        var fixTranslate = new javafx.scene.transform.Translate(offset.getX(), offset.getY(), offset.getZ());
-        var fixRotate = new javafx.scene.transform.Rotate(-fixangle, pivot.getX(), pivot.getY(), pivot.getZ(), axis);
-        manipulator.addTransformCache(fixTranslate);
+        var manipulator = lodSolidView.getTransformManipulator();
+
+        var translateHeight = new Translate(0, 0, lod1SolidView.getTransformManipulator().getOrigin().getZ() - manipulator.getOrigin().getZ());
+        var fixRotate = new Rotate(fixangle, lod2point.x, lod2point.y, 0, Rotate.Z_AXIS);
+        
+        manipulator.addTransformCache(translateHeight);
+        manipulator.addTransformCache(translate);
         manipulator.addTransformCache(fixRotate);
-        manipulator.setLocation(new Point3D(manipulator.getLocation().getX() + offset.getX(), manipulator.getLocation().getY() + offset.getY(), manipulator.getLocation().getZ() + offset.getZ()));
-        manipulator.setRotation(new Point3D(0, 0, fixangle));
-        lod2SolidView.getTransforms().clear();
-        lod2SolidView.getTransforms().add(manipulator.getTransformCache());
-        lod2SolidView.refrectGML();
+
+        ((Node)lodSolidView).getTransforms().clear();
+        ((Node)lodSolidView).getTransforms().add(manipulator.getTransformCache());
+        lodSolidView.refrectGML();
     }
     
     private static int findNear(Geometry lod1geometry, List<Geometry> lod2Geometries) {
@@ -105,6 +103,15 @@ public class AutoGeometryAligner {
         return index;
     }
 
+    private static List<Vec3f> transformVertices(List<Vec3f> org, Transform trans){
+        var ret = new ArrayList<Vec3f>();
+        for (var v : org) {
+            var newV = trans.transform(v.x, v.y, v.z);
+            ret.add(new Vec3f((float)newV.getX(), (float)newV.getY(), (float)newV.getZ()));
+        }
+        return ret;
+    }
+    
     private static Geometry createJTSGeometry(List<Vec3f> vertices) {
         var coordinates = new ArrayList<Coordinate>();
         var geoReference = World.getActiveInstance().getGeoReference();
