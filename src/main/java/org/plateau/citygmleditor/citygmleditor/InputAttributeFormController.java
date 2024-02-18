@@ -237,10 +237,10 @@ public class InputAttributeFormController {
         Node content = adeElement.getContent();
         Node parentNode = content.getChildNodes().item(0);
         Node targetNode = parentNode.getChildNodes().item(index);
-        String value;
-        if (targetNode instanceof Element) {
+        String value = null;
+        if ((targetNode instanceof Element) && (targetNode.getChildNodes().getLength() != 0)) {
             value = targetNode.getChildNodes().item(0).getNodeValue();
-        } else {
+        } else if ((parentNode instanceof Element) && (parentNode.getChildNodes().getLength() != 0)) {
             value = parentNode.getChildNodes().item(0).getNodeValue();
         }
         return value;
