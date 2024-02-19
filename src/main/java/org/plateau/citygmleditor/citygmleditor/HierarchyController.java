@@ -1,5 +1,6 @@
 package org.plateau.citygmleditor.citygmleditor;
 
+import javafx.application.Platform;
 import javafx.beans.binding.ObjectBinding;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
@@ -64,12 +65,7 @@ public class HierarchyController implements Initializable {
         });
 
         CityGMLEditorApp.getFeatureSellection().getActiveFeatureProperty().addListener(observable -> {
-            if (syncingTreeTable)
-                return;
-
-            syncingTreeTable = true;
-
-            try {
+            Platform.runLater(() -> {
                 BuildingView activeFeature = CityGMLEditorApp.getFeatureSellection().getActive();
                 if (activeFeature == null) {
                     if (hierarchyTreeTable.getSelectionModel().getSelectedItem() != null)
@@ -83,9 +79,7 @@ public class HierarchyController implements Initializable {
                     hierarchyTreeTable.getSelectionModel().select(activeItem);
                     hierarchyTreeTable.scrollTo(hierarchyTreeTable.getRow(activeItem));
                 }
-            } finally {
-                syncingTreeTable = false;
-            }
+            });
         });
 
         hierarchyTreeTable.getFocusModel().focusedCellProperty().addListener((obs, oldVal, newVal) -> {
