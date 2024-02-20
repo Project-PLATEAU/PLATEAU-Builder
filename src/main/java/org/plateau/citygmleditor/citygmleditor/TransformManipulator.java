@@ -108,6 +108,15 @@ public class TransformManipulator {
     }
 
     /**
+     * 原点座標を更新
+     * 
+     * @return
+     */
+    public void updateOrigin(Point3D newOrigin) {
+        origin = newOrigin;
+    }
+
+    /**
      * 原点座標を返す
      * @return
      */

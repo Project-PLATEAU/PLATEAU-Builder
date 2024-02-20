@@ -84,9 +84,15 @@ public class AutoGeometryAligner {
         manipulator.addTransformCache(translate);
         manipulator.addTransformCache(fixRotate);
 
+        manipulator.updateOrigin(new Point3D(lod2point.x, lod2point.y, manipulator.getOrigin().getZ()));
+        manipulator.setLocation(new Point3D(lod1point.x - lod2point.x, lod1point.y - lod2point.y, lod1SolidView.getTransformManipulator().getOrigin().getZ() - manipulator.getOrigin().getZ()));
+        manipulator.setRotation(new Point3D(0.0, 0.0, fixangle));
+
         ((Node)lodSolidView).getTransforms().clear();
         ((Node)lodSolidView).getTransforms().add(manipulator.getTransformCache());
         lodSolidView.reflectGML();
+
+        CityGMLEditorApp.getFeatureSellection().setSelectElement((Node) lodSolidView);
     }
     
     private static int findNear(Geometry lod1geometry, List<Geometry> lod2Geometries) {
