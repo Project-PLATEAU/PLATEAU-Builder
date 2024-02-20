@@ -32,7 +32,7 @@ public class AutoGeometryAligner {
                     lodSolidView = buildingView.getLOD2Solid();
                     break;
                 case 3:
-                    lodSolidView = buildingView.getLOD2Solid();
+                    lodSolidView = buildingView.getLOD3Solid();
                     break;
             }
         }

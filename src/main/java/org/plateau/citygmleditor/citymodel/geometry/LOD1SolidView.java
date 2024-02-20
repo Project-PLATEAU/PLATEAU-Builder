@@ -86,14 +86,14 @@ public class LOD1SolidView extends MeshView implements ILODSolidView {
 
             for (var interiorRing : polygon.getInteriorRings()) {
                 var coordinatesInteriorRing = interiorRing.getOriginCoords();//.getOriginal().getPosList().toList3d();
-                polygon.getExteriorRing().getOriginal().getPosList().setValue(transformManipulator.unprojectTransforms(coordinatesInteriorRing));
+                interiorRing.getOriginal().getPosList().setValue(transformManipulator.unprojectTransforms(coordinatesInteriorRing));
             }
         }
-        var vertexBuffer = new VertexBuffer();
         var vertices = transformManipulator.unprojectVertexTransforms(vertexBuffer.getVertices());
-        for(var vertex : vertices){
-            vertexBuffer.addVertex(vertex);
+        var newVertexBuffer = new VertexBuffer();
+        for (var vertex : vertices) {
+            newVertexBuffer.addVertex(vertex);
         }
-        setVertexBuffer(vertexBuffer);
+        setVertexBuffer(newVertexBuffer);
     }
 }

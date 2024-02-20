@@ -296,7 +296,7 @@ public class ValidationController implements Initializable {
                     result.add(new L13LogicalConsistencyValidator());
                     break;
                 case L18:
-                    result.add(new L18LogicalConsistencyValidator());
+                    //result.add(new L18LogicalConsistencyValidator());
                     break;
                 case T03:
                     result.add(new T03ThematicAccuaracyValidator());
@@ -308,13 +308,13 @@ public class ValidationController implements Initializable {
                     result.add(new Lbldg02LogicalConsistencyValidator());
                     break;
                 case L_BLDG_03:
-                    result.add(new Lbldg03LogicalAccuaracyValidator());
+                    //result.add(new Lbldg03LogicalAccuaracyValidator());
                     break;
                 case T_BLDG_02:
                     result.add(new Tbldg02ThematicAccuaracyValidator());
                     break;
                 case L14:
-                    result.add(new L14LogicalAccuaracyValidator());
+                    //result.add(new L14LogicalAccuaracyValidator());
                     break;
             }
         }

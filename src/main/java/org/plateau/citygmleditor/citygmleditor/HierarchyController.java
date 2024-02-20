@@ -223,15 +223,14 @@ public class HierarchyController implements Initializable {
                 return;
 
             var fileUrl = controller.getFileUrl();
-            var solid = controller.getLodSolidView();
+            var lod = controller.getLod();
             var option = controller.getConvertOption();
-            var convertedCityModel = new Gltf2LodConverter(cityModelView, solid, option).convert(fileUrl);
+            var convertedCityModel = new Gltf2LodConverter(cityModelView, building, lod, option).convert(fileUrl);
 
             if (!option.isUseGeoReference()) {
                 // 位置合わせ
-                var id = solid.getParent().getId();
-                var lod = solid instanceof LOD2SolidView ? 2 : solid instanceof LOD3SolidView ? 3 : 0;
-                if (lod > 0) 
+                var id = building.getId();
+                if (lod > 0)
                     AutoGeometryAligner.GeometryAlign(convertedCityModel, id, lod);
             }
         } catch (Exception e) {
@@ -256,15 +255,15 @@ public class HierarchyController implements Initializable {
                 return;
 
             var fileUrl = controller.getFileUrl();
-            var solid = controller.getLodSolidView();
+            var lod = controller.getLod();
             var option = controller.getConvertOption();
-            var convertedCityModel = new Obj2LodConverter(cityModelView, solid, option).convert(fileUrl);
+
+            var convertedCityModel = new Obj2LodConverter(cityModelView, building, lod, option).convert(fileUrl);
 
             if (!option.isUseGeoReference()) {
                 // 位置合わせ
-                var id = solid.getParent().getId();
-                var lod = solid instanceof LOD2SolidView ? 2 : solid instanceof LOD3SolidView ? 3 : 0;
-                if (lod > 0) 
+                var id = building.getId();
+                if (lod > 0)
                     AutoGeometryAligner.GeometryAlign(convertedCityModel, id, lod);
             }
         } catch (Exception e) {

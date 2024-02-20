@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
 import org.citygml4j.model.gml.basicTypes.Code;
+import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
@@ -41,8 +42,8 @@ public class Gltf2LodConverter extends AbstractLodConverter {
 
     private GltfModel _gltfModel;
 
-    public Gltf2LodConverter(CityModelView cityModelView, ILODSolidView lodSolidView, ConvertOption convertOption) {
-        super(cityModelView, lodSolidView, convertOption, true);
+    public Gltf2LodConverter(CityModelView cityModelView, BuildingView buildingView, int lod, ConvertOption convertOption) {
+        super(cityModelView, buildingView, lod, convertOption, true);
     }
 
     @Override protected void initialize(String fileUrl) throws IOException, URISyntaxException {

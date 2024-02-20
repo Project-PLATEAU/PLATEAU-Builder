@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class LOD3SolidFactory extends GeometryFactory {
-    protected LOD3SolidFactory(CityModelView target) {
+    public LOD3SolidFactory(CityModelView target) {
         super(target);
     }
 

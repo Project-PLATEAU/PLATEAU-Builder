@@ -83,7 +83,7 @@ public class BuildingView extends Parent {
         if (solid == null)
             return;
 
-        if (this.lod2Solid == null) {
+        if (this.lod2Solid != null) {
             this.getChildren().remove(this.lod2Solid);
         }
         this.lod2Solid = solid;
@@ -99,7 +99,7 @@ public class BuildingView extends Parent {
         if (solid == null)
             return;
 
-        if (this.lod3Solid == null) {
+        if (this.lod3Solid != null) {
             this.getChildren().remove(this.lod3Solid);
         }
         this.lod3Solid = solid;

@@ -12,8 +12,8 @@ import java.util.Map;
 
 import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
 import org.citygml4j.model.gml.basicTypes.Code;
+import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
-import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
 import org.plateau.citygmleditor.importers.obj.ObjImporter;
 
@@ -25,8 +25,8 @@ public class Obj2LodConverter extends AbstractLodConverter {
 
     private ObjImporter _objImporter;
 
-    public Obj2LodConverter(CityModelView cityModelView, ILODSolidView lodSolidView, ConvertOption convertOption) {
-        super(cityModelView, lodSolidView, convertOption, false);
+    public Obj2LodConverter(CityModelView cityModelView, BuildingView buildingView, int lod, ConvertOption convertOption) {
+        super(cityModelView, buildingView, lod, convertOption, false);
     }
 
     @Override protected void initialize(String fileUrl) throws IOException, URISyntaxException {

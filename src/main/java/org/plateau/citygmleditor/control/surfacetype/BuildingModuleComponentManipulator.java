@@ -54,6 +54,7 @@ public class BuildingModuleComponentManipulator {
     }
 
     public void reconstructWithSurfaces(List<AbstractSurface> surfaces, List<BuildingModuleComponent> srcProperties, BuildingModuleComponent dstProperty) {
+        // 再構築前のsurfaceを列挙
         var originalSurfaces = new ArrayList<AbstractSurface>();
         if (dstProperty instanceof OpeningProperty) {
             for (var surface : getMultiSurfaceProperty(((OpeningProperty) dstProperty).getOpening()).getMultiSurface().getSurfaceMember()) {
@@ -65,6 +66,7 @@ public class BuildingModuleComponentManipulator {
             }
         }
 
+        // surfaceのリストで再構築
         for (int i = 0; i < surfaces.size(); ++i) {
             var surface = surfaces.get(i);
             var srcProperty = srcProperties.get(i);
@@ -74,6 +76,7 @@ public class BuildingModuleComponentManipulator {
                 continue;
             }
 
+            // 移行元のsurfaceを削除
             if (srcProperty instanceof OpeningProperty) {
                 var openingProperty = (OpeningProperty) srcProperty;
                 var parent = Objects.requireNonNull(findParentBoundarySurfaceProperty(openingProperty));
@@ -83,22 +86,27 @@ public class BuildingModuleComponentManipulator {
                 removeSurfaceFromBoundary(boundedBy, surface);
             }
 
+            // surface追加
             if (dstProperty instanceof OpeningProperty)
                 getMultiSurfaceProperty(((OpeningProperty) dstProperty).getOpening()).getMultiSurface().getSurfaceMember().add(new SurfaceProperty(surface));
             else
                 getMultiSurfaceProperty(((BoundarySurfaceProperty) dstProperty).getBoundarySurface()).getMultiSurface().getSurfaceMember().add(new SurfaceProperty(surface));
         }
 
+        // 再構築前のsurfaceのうち、削除されたsurfaceは新しい面に移行
         if (dstProperty instanceof OpeningProperty) {
             var openingProperty = (OpeningProperty) dstProperty;
             for (var surface : originalSurfaces) {
                 moveSurfaceIntoNewOpening(openingProperty, openingProperty.getCityGMLClass(), surface);
             }
+            var parent = Objects.requireNonNull(findParentBoundarySurfaceProperty(openingProperty));
+            cleanUp(parent);
         } else {
             var boundedBy = (BoundarySurfaceProperty) dstProperty;
             for (var surface : originalSurfaces) {
                 moveSurfaceIntoNewBoundedBy(boundedBy, boundedBy.getBoundarySurface().getCityGMLClass(), surface);
             }
+            cleanUp(boundedBy);
         }
     }
 
@@ -291,12 +299,16 @@ public class BuildingModuleComponentManipulator {
                 surfaceExists = true;
         }
         if (boundarySurface.isSetOpening()) {
+            var emptyOpenings = new ArrayList<OpeningProperty>();
             for (var opening : boundarySurface.getOpening()) {
                 var isEmpty = cleanUp(opening);
                 if (isEmpty)
-                    boundarySurface.unsetOpening();
+                    emptyOpenings.add(opening);
                 else
                     surfaceExists = true;
+            }
+            for (var opening : emptyOpenings) {
+                boundarySurface.unsetOpening(opening);
             }
         }
 

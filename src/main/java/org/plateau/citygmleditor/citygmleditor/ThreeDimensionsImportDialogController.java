@@ -37,7 +37,7 @@ public class ThreeDimensionsImportDialogController implements Initializable {
 
     private String fileUrl;
 
-    private ILODSolidView lodSolidView;
+    private int lod;
 
     private ConvertOption convertOption;
 
@@ -142,11 +142,11 @@ public class ThreeDimensionsImportDialogController implements Initializable {
     }
 
     /**
-     * 3Dエクスポート対象のLodSolidViewを取得
+     * 3Dエクスポート対象のLODを取得
      * @return
      */
-    public ILODSolidView getLodSolidView() {
-        return lodSolidView;
+    public int getLod() {
+        return lod;
     }
 
     /**
@@ -186,13 +186,13 @@ public class ThreeDimensionsImportDialogController implements Initializable {
     public void onSubmit(ActionEvent actionEvent) {
         switch (comboBoxLod.getValue()) {
             case "LOD1":
-                this.lodSolidView = buildingView.getLOD1Solid();
+                lod = 1;
                 break;
             case "LOD2":
-                this.lodSolidView = buildingView.getLOD2Solid();
+                lod = 2;
                 break;
             case "LOD3":
-                this.lodSolidView = buildingView.getLOD3Solid();
+                lod = 3;
                 break;
             default:
                 return;

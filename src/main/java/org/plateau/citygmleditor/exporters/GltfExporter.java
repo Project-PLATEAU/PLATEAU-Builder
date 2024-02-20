@@ -3,6 +3,8 @@ package org.plateau.citygmleditor.exporters;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.file.Paths;
@@ -205,7 +207,12 @@ public class GltfExporter {
     }
 
     private MaterialModelV2 createMaterial(PhongMaterial material) {
-        var materialFile = new File(material.getDiffuseMap().getUrl());
+        File materialFile = null;
+        try {
+            materialFile = new File(new URI(material.getDiffuseMap().getUrl()).getPath());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
         var inputUri = Paths.get(materialFile.getAbsolutePath()).toUri().normalize().toString();
         DefaultImageModel imageModel = ImageModels.create(inputUri, materialFile.getName());
         var textureModel = new DefaultTextureModel();
