@@ -42,7 +42,7 @@ public class Gltf2LodConverter extends AbstractLodConverter {
     private GltfModel _gltfModel;
 
     public Gltf2LodConverter(CityModelView cityModelView, ILODSolidView lodSolidView, ConvertOption convertOption) {
-        super(cityModelView, lodSolidView, convertOption);
+        super(cityModelView, lodSolidView, convertOption, true);
     }
 
     @Override protected void initialize(String fileUrl) throws IOException, URISyntaxException {

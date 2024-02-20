@@ -42,6 +42,8 @@ import org.citygml4j.model.gml.geometry.primitives.Solid;
 import org.citygml4j.model.gml.geometry.primitives.SolidProperty;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
 import org.locationtech.jts.algorithm.Orientation;
+import org.plateau.citygmleditor.citygmleditor.AxisDirection;
+import org.plateau.citygmleditor.citygmleditor.AxisTransformer;
 import org.plateau.citygmleditor.citymodel.AppearanceView;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
@@ -53,7 +55,6 @@ import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
 import org.plateau.citygmleditor.geometry.GeoReference;
 import org.plateau.citygmleditor.utils3d.geom.Vec3d;
-import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.world.World;
 
 public abstract class AbstractLodConverter {
@@ -73,14 +74,19 @@ public abstract class AbstractLodConverter {
 
     private ConvertOption _convertOption;
 
+    private AxisTransformer _axisTransformer;
+
     private ArrayList<AbstractBoundarySurface> _boundedBy = new ArrayList<AbstractBoundarySurface>();
 
     private CompositeSurface _compositeSurface = new CompositeSurface();
 
-    public AbstractLodConverter(CityModelView cityModelView, ILODSolidView lodSolidView, ConvertOption convertOption) {
+    public AbstractLodConverter(CityModelView cityModelView, ILODSolidView lodSolidView, ConvertOption convertOption, boolean isRightHanded) {
         _cityModelView = cityModelView;
         _lodSolidView = lodSolidView;
         _convertOption = convertOption;
+        _axisTransformer = new AxisTransformer(
+            new AxisDirection(convertOption.getAxisEast(), convertOption.getAxisUp(), isRightHanded),
+            AxisDirection.TOOL_AXIS_DIRECTION);
         _buildingView = (BuildingView)lodSolidView.getParent();
         _appearanceView = cityModelView.getRGBTextureAppearance();
         _cityModel = (CityModel) cityModelView.getGmlObject();
@@ -109,6 +115,10 @@ public abstract class AbstractLodConverter {
 
     protected GeoReference getGeoReference() {
         return _geoReference;
+    }
+
+    protected ConvertOption getConvertOption() {
+        return _convertOption;
     }
 
     public CityModelView convert(String fileUrl) throws Exception {
@@ -604,7 +614,8 @@ public abstract class AbstractLodConverter {
             offset = new Vec3d();
         for (var i = 0; i < jtsLinearRing.getNumPoints(); i++) {
             var coordinate = jtsLinearRing.getCoordinateN(i);
-            var geoCoordinate = geoReference.unproject(new Vec3f((float)(coordinate.x + offset.x), (float)(coordinate.y + offset.y), (float)(coordinate.z + offset.z)));
+            var vec3f = _axisTransformer.transform((float)(coordinate.x + offset.x), (float)(coordinate.y + offset.y), (float)(coordinate.z + offset.z));
+            var geoCoordinate = geoReference.unproject(vec3f);
             directPositionList.addValue(geoCoordinate.lat);
             directPositionList.addValue(geoCoordinate.lon);
             directPositionList.addValue(geoCoordinate.alt);

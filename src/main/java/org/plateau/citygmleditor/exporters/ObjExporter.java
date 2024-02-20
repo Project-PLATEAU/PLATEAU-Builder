@@ -12,10 +12,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
+import org.plateau.citygmleditor.citygmleditor.AxisDirection;
+import org.plateau.citygmleditor.citygmleditor.AxisTransformer;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
 
 import javafx.scene.paint.PhongMaterial;
-import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
 
 /**
  * A class for exporting a {@link ILODSolidView} to a OBJ file
@@ -44,10 +46,12 @@ public class ObjExporter {
             writer.write(String.format("g %s\r\n", objectModel.getName()));
             writer.write(String.format("usemtl %s\r\n", objectModel.getMaterial().getName()));
 
+            var axisTransformer = new AxisTransformer(AxisDirection.TOOL_AXIS_DIRECTION, new AxisDirection(exportOption.getAxisEast(), exportOption.getAxisTop(), false));
             var offset = exportOption.getOffset();
             var vertices = objectModel.getVertices();
             for (int i = 0; i < vertices.length; i += 3) {
-                writer.write(String.format("v %f %f %f\r\n", vertices[i] + offset.x, vertices[i + 1] + offset.y, vertices[i + 2] + offset.z));
+                var vec3f = axisTransformer.transform((float)(vertices[i] + offset.x), (float)(vertices[i + 1] + offset.y), (float)(vertices[i + 2] + offset.z));
+                writer.write(String.format("v %f %f %f\r\n", vec3f.x, vec3f.y, vec3f.z));
             }
 
             var uvs = objectModel.getUVs();

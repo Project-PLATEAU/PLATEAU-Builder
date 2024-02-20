@@ -26,7 +26,7 @@ public class Obj2LodConverter extends AbstractLodConverter {
     private ObjImporter _objImporter;
 
     public Obj2LodConverter(CityModelView cityModelView, ILODSolidView lodSolidView, ConvertOption convertOption) {
-        super(cityModelView, lodSolidView, convertOption);
+        super(cityModelView, lodSolidView, convertOption, false);
     }
 
     @Override protected void initialize(String fileUrl) throws IOException, URISyntaxException {

@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang3.StringUtils;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.converters.ConvertOption;
@@ -13,6 +14,7 @@ import org.plateau.citygmleditor.utils3d.geom.Vec3d;
 import org.plateau.citygmleditor.world.World;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,10 +22,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 public class ThreeDimensionsImportDialogController implements Initializable {
     private Stage root;
@@ -45,6 +50,12 @@ public class ThreeDimensionsImportDialogController implements Initializable {
 
     @FXML
     private ComboBox<String> comboBoxLod;
+
+    @FXML
+    private ComboBox<AxisEnum> comboBoxAxisEast;
+
+    @FXML
+    private ComboBox<AxisEnum> comboBoxAxisUp;
 
     @FXML
     private TextField textFieldWallThreshold;
@@ -69,6 +80,26 @@ public class ThreeDimensionsImportDialogController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        Callback<ListView<AxisEnum>, ListCell<AxisEnum>> cellFactory
+                = (ListView<AxisEnum> param) -> new ListCell<AxisEnum>() {
+            @Override
+            protected void updateItem(AxisEnum item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null && !empty) {
+                    setText(item.getDisplayName());
+                }
+            }
+        };
+        ObservableList<AxisEnum> list = FXCollections.observableArrayList(AxisEnum.values());
+        comboBoxAxisEast.getItems().addAll(list);
+        comboBoxAxisEast.setButtonCell(cellFactory.call(null));
+        comboBoxAxisEast.setCellFactory(cellFactory);
+        comboBoxAxisEast.setValue(AxisEnum.X);
+        comboBoxAxisUp.getItems().addAll(list);
+        comboBoxAxisUp.setButtonCell(cellFactory.call(null));
+        comboBoxAxisUp.setCellFactory(cellFactory);
+        comboBoxAxisUp.setValue(AxisEnum.Z);
+
         textFieldWallThreshold.setText(String.valueOf(ConvertOption.DEFAULT_WALL_THRESHOLD));
         var geoReference = World.getActiveInstance().getGeoReference();
         var origin = geoReference.getOrigin();
@@ -164,21 +195,26 @@ public class ThreeDimensionsImportDialogController implements Initializable {
                 this.lodSolidView = buildingView.getLOD3Solid();
                 break;
             default:
-                break;
+                return;
         }
         this.fileUrl = textFieldFile.getText();
+        if (StringUtils.isEmpty(this.fileUrl)) {
+            return;
+        }
 
         var optionBuilder = new ConvertOptionBuilder().wallThreshold(Double.parseDouble(textFieldWallThreshold.getText()));
-        if (paneUseGeoReference.isVisible()) {
+        var useGeoReference = paneUseGeoReference.isVisible();
+        optionBuilder
+                .axisEast(comboBoxAxisEast.getValue())
+                .axisUp(comboBoxAxisUp.getValue())
+                .useGeoReference(useGeoReference);
+        if (useGeoReference) {
             var origin = World.getActiveInstance().getGeoReference().getOrigin();
             optionBuilder
-                .useGeoReference(true)
                 .offset(new Vec3d(
                     origin.x - Double.parseDouble(textFieldEast.getText()),
                     origin.y - Double.parseDouble(textFieldNorth.getText()),
                     origin.z - Double.parseDouble(textFieldTop.getText())));
-        } else {
-            optionBuilder.useGeoReference(false);
         }
 
         this.convertOption = optionBuilder.build();

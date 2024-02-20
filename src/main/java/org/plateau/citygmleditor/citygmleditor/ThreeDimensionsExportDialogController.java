@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang3.StringUtils;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.exporters.ExportOption;
@@ -14,6 +15,7 @@ import org.plateau.citygmleditor.utils3d.geom.Vec3d;
 import org.plateau.citygmleditor.world.World;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,10 +23,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 public class ThreeDimensionsExportDialogController implements Initializable {
     private Stage root;
@@ -48,6 +53,12 @@ public class ThreeDimensionsExportDialogController implements Initializable {
     private ComboBox<String> comboBoxLod;
 
     @FXML
+    private ComboBox<AxisEnum> comboBoxAxisEast;
+
+    @FXML
+    private ComboBox<AxisEnum> comboBoxAxisUp;
+
+    @FXML
     private Label labelGeoReference;
 
     @FXML
@@ -61,6 +72,26 @@ public class ThreeDimensionsExportDialogController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        Callback<ListView<AxisEnum>, ListCell<AxisEnum>> cellFactory
+                = (ListView<AxisEnum> param) -> new ListCell<AxisEnum>() {
+            @Override
+            protected void updateItem(AxisEnum item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null && !empty) {
+                    setText(item.getDisplayName());
+                }
+            }
+        };
+        ObservableList<AxisEnum> list = FXCollections.observableArrayList(AxisEnum.values());
+        comboBoxAxisEast.getItems().addAll(list);
+        comboBoxAxisEast.setButtonCell(cellFactory.call(null));
+        comboBoxAxisEast.setCellFactory(cellFactory);
+        comboBoxAxisEast.setValue(AxisEnum.X);
+        comboBoxAxisUp.getItems().addAll(list);
+        comboBoxAxisUp.setButtonCell(cellFactory.call(null));
+        comboBoxAxisUp.setCellFactory(cellFactory);
+        comboBoxAxisUp.setValue(AxisEnum.Z);
+
         var geoReference = World.getActiveInstance().getGeoReference();
         var origin = geoReference.getOrigin();
         labelGeoReference.setText(geoReference.getEPSGCode());
@@ -172,12 +203,17 @@ public class ThreeDimensionsExportDialogController implements Initializable {
                 this.lodSolidView = buildingView.getLOD3Solid();
                 break;
             default:
-                break;
+                return;
         }
         this.fileUrl = textFieldFile.getText();
+        if (StringUtils.isEmpty(this.fileUrl)) {
+            return;
+        }
 
         var origin = World.getActiveInstance().getGeoReference().getOrigin();
         this.exportOption = new ExportOptionBuilder()
+                .axisEast(comboBoxAxisEast.getValue())
+                .axisTop(comboBoxAxisUp.getValue())
                 .offset(new Vec3d(
                         origin.x - Double.parseDouble(textFieldEast.getText()),
                         origin.y - Double.parseDouble(textFieldNorth.getText()),

@@ -80,7 +80,7 @@
                                     <Font size="14.0" />
                                  </font>
                               </Label>
-                              <ComboBox fx:id="comboBoxAxisTop" prefWidth="150.0" />
+                              <ComboBox fx:id="comboBoxAxisUp" prefWidth="150.0" />
                            </children>
                         </HBox>
                      </children>
@@ -100,7 +100,7 @@
                   <TextField fx:id="textFieldWallThreshold" prefWidth="200.0" />
                </children>
             </HBox>
-            <Label layoutX="40.0" layoutY="120.0" prefHeight="190.0" prefWidth="391.0" text="*3Dモデルインポート時に、自動で屋根面や壁面を検出します。屋根面と壁面の定義として、面の法線がZ軸に対して何度以上であれば壁面として定義するかに利用する値です。デフォルトの80度で設定して、インポート後に屋根面・壁面の属性編集を行うことを推奨します。" wrapText="true" />
+            <Label layoutX="40.0" layoutY="185.0" prefHeight="69.0" prefWidth="391.0" text="*3Dモデルインポート時に、自動で屋根面や壁面を検出します。屋根面と壁面の定義として、面の法線がZ軸に対して何度以上であれば壁面として定義するかに利用する値です。デフォルトの80度で設定して、インポート後に屋根面・壁面の属性編集を行うことを推奨します。" wrapText="true" />
             <HBox layoutX="40.0" layoutY="270.0" spacing="5.0">
                <children>
                   <Label prefWidth="120.0" text="モデル配置">

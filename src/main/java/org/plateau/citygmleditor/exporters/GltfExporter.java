@@ -11,9 +11,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.plateau.citygmleditor.citygmleditor.AxisDirection;
+import org.plateau.citygmleditor.citygmleditor.AxisTransformer;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
+import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
+import org.plateau.citygmleditor.utils3d.geom.Vec2f;
+import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 
 import de.javagl.jgltf.model.creation.GltfModelBuilder;
 import de.javagl.jgltf.model.creation.ImageModels;
@@ -29,10 +34,6 @@ import de.javagl.jgltf.model.impl.DefaultTextureModel;
 import de.javagl.jgltf.model.io.GltfModelWriter;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
 import javafx.scene.paint.PhongMaterial;
-import org.plateau.citygmleditor.citymodel.geometry.PolygonView;
-import org.plateau.citygmleditor.converters.ConvertOption;
-import org.plateau.citygmleditor.utils3d.geom.Vec2f;
-import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 
 /**
  * A class for exporting a {@link DefaultGltfModel} to a gLTF file
@@ -158,14 +159,15 @@ public class GltfExporter {
         MeshPrimitiveBuilder meshPrimitiveBuilder = MeshPrimitiveBuilder.create();
         meshPrimitiveBuilder.setIntIndicesAsShort(IntBuffer.wrap(faces));
 
-        // 右手系Y-up
+        var axisTransformer = new AxisTransformer(AxisDirection.TOOL_AXIS_DIRECTION, new AxisDirection(exportOption.getAxisEast(), exportOption.getAxisTop(), true));
         var offset = exportOption.getOffset();
         var positions = new float[vertexList.size() * 3];
         for (int i = 0; i < vertexList.size(); i++) {
             var vertex = vertexList.get(i);
-            positions[i * 3] = (float)(vertex.y + offset.y);
-            positions[i * 3 + 1] = (float)(vertex.z + offset.z);
-            positions[i * 3 + 2] = (float)(vertex.x + offset.x);
+            var vec3f = axisTransformer.transform((float)(vertex.x + offset.x), (float)(vertex.y + offset.y), (float)(vertex.z + offset.z));
+            positions[i * 3] = vec3f.x;
+            positions[i * 3 + 1] = vec3f.y;
+            positions[i * 3 + 2] = vec3f.z;
         }
         meshPrimitiveBuilder.addPositions3D(FloatBuffer.wrap(positions));
 
