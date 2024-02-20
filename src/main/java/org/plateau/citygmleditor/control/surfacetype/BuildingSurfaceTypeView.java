@@ -38,6 +38,7 @@ public class BuildingSurfaceTypeView extends MeshView {
 
         var material = new PhongMaterial();
         material.setSelfIlluminationMap(createBuildingTypeColorImage());
+//        material.setDiffuseMap(createBuildingTypeColorImage());
         setMaterial(material);
         setViewOrder(-1);
     }
@@ -58,12 +59,11 @@ public class BuildingSurfaceTypeView extends MeshView {
         for (var boundarySurface : solid.getBoundaries()) {
             // 開口部
             for (var opening : boundarySurface.getOpenings()) {
-                var openingTexCoordIndex = getIndex(opening.getOriginal().getCityGMLClass());
-                faceIndexOffset = createSections(findOpeningProperty(boundarySurface.getOriginal(), opening.getOriginal()), opening.getPolygons(), faceIndexOffset, openingTexCoordIndex);
+                var openingProperty = findOpeningProperty(boundarySurface.getOriginal(), opening.getOriginal());
+                faceIndexOffset = createSections(openingProperty, opening.getPolygons(), faceIndexOffset, opening.getOriginal().getCityGMLClass());
             }
-            var boundaryTexCoordIndex = getIndex(boundarySurface.getOriginal().getCityGMLClass());
-            faceIndexOffset = createSections(findBoundarySurfaceProperty(boundarySurface.getOriginal()), boundarySurface.getPolygons(), faceIndexOffset, boundaryTexCoordIndex);
-
+            var boundedBy = findBoundarySurfaceProperty(boundarySurface.getOriginal());
+            faceIndexOffset = createSections(boundedBy, boundarySurface.getPolygons(), faceIndexOffset, boundarySurface.getOriginal().getCityGMLClass());
         }
         mesh.getFaces().addAll(faceBuffer.getBufferAsArray());
 
@@ -96,7 +96,7 @@ public class BuildingSurfaceTypeView extends MeshView {
         return null;
     }
 
-    private int createSections(BuildingModuleComponent component, List<PolygonView> polygons, int faceIndexOffset, int texCoordIndex) {
+    private int createSections(BuildingModuleComponent component, List<PolygonView> polygons, int faceIndexOffset, CityGMLClass clazz) {
         for (var polygon : polygons) {
             var pointStartIndex = faceIndexOffset;
             var pointEndIndex = faceIndexOffset + polygon.getFaceBuffer().getPointCount() - 1;
@@ -116,7 +116,7 @@ public class BuildingSurfaceTypeView extends MeshView {
             var polygonFaceBuffer = new FaceBuffer();
             polygonFaceBuffer.addFaces(polygon.getFaceBuffer().getBuffer());
             for (int i = 0; i < polygonFaceBuffer.getPointCount(); ++i) {
-                polygonFaceBuffer.setTexCoordIndex(i, texCoordIndex);
+                polygonFaceBuffer.setTexCoordIndex(i, getTexCoordIndex(clazz));
             }
             faceBuffer.addFaces(polygonFaceBuffer.getBuffer());
         }
@@ -157,7 +157,7 @@ public class BuildingSurfaceTypeView extends MeshView {
             section.setProperty(newProperty);
 
             for (int i = section.getSection().getStart(); i <= section.getSection().getEnd(); ++i) {
-                faceBuffer.setTexCoordIndex(i, getIndex(feature.getCityGMLClass()));
+                faceBuffer.setTexCoordIndex(i, getTexCoordIndex(feature.getCityGMLClass()));
             }
         }
 
@@ -231,18 +231,17 @@ public class BuildingSurfaceTypeView extends MeshView {
     private TexCoordBuffer createTexCoords() {
         var texCoordBuffer = new TexCoordBuffer();
         var colorCount = getLOD3BuildingComponentTypes().size();
-        for (int i = 0; i < colorCount; ++i) {
-            texCoordBuffer.addTexCoord(new Vec2f((float)i / colorCount, 0), false);
+        // ピクセル中心に座標を合わせるためのオフセット値
+        var centerOffset = 1f / colorCount / 2f;
+
+        for (int colorIndex = 0; colorIndex < colorCount; ++colorIndex) {
+            var texCoord = new Vec2f((float)colorIndex / colorCount + centerOffset, 0f);
+            texCoordBuffer.addTexCoord(texCoord, false);
         }
         return texCoordBuffer;
     }
 
-    private int getIndex(BoundarySurfaceView boundarySurfaceView) {
-        var boundaryClazz = boundarySurfaceView.getOriginal().getCityGMLClass();
-        return getIndex(boundaryClazz);
-    }
-
-    private int getIndex(CityGMLClass clazz) {
+    private int getTexCoordIndex(CityGMLClass clazz) {
         int index = 0;
         for (var key : getLOD3BuildingComponentTypes()) {
             if (key == clazz)
@@ -250,16 +249,6 @@ public class BuildingSurfaceTypeView extends MeshView {
             index++;
         }
         return 0;
-    }
-
-    private CityGMLClass getClazz(int texCoordIndex) {
-        int index = 0;
-        for (var key : getLOD3BuildingComponentTypes()) {
-            if (index == texCoordIndex)
-                return key;
-            index++;
-        }
-        return null;
     }
 
     private Image createBuildingTypeColorImage() {
