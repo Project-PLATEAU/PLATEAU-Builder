@@ -49,29 +49,30 @@ public class AutoGeometryAligner {
         var lod1point = geoReference.project(new GeoCoordinate(lod1geometry.getCentroid().getX(), lod1geometry.getCentroid().getY(), 0));
         var lod2point = geoReference.project(new GeoCoordinate(lod2geometry.getCentroid().getX(), lod2geometry.getCentroid().getY(), 0));
         var translate = new Translate(lod1point.x - lod2point.x, lod1point.y - lod2point.y);
-        List<Geometry> lod2Geometries = new ArrayList<Geometry>();
+        List<Geometry> geometries1 = new ArrayList<Geometry>();
         // 10度づつの回転オフセット
         for (int i = 0; i < 360/10; i++) {
             var rotate = new Rotate(i*10, lod2point.x, lod2point.y, 0, Rotate.Z_AXIS);
             Transform transform = translate.createConcatenation(rotate);
-            lod2Geometries.add(createJTSGeometry(transformVertices(lod2vertices, transform)));
+            geometries1.add(createJTSGeometry(transformVertices(lod2vertices, transform)));
         }
-        var index1 = findNear(lod1geometry, lod2Geometries);
+        var index1 = findNear(lod1geometry, geometries1);
         var baseangle = index1 * 10;
         var angles = new ArrayList<Integer>();
         angles.add(baseangle);
         // ±1度づつの回転オフセット
-        lod2Geometries.clear();
+        List<Geometry> geometries2 = new ArrayList<Geometry>();
+        geometries2.add(geometries1.get(index1));
         for (int i = 0; i < 2; i++) {
             for (int j = 1; j < 10; j++) {
                 var angle = (baseangle + (j * (i == 0 ? 1 : -1)) + 360) % 360;
                 angles.add(angle);
                 var rotate = new Rotate(angle, lod2point.x, lod2point.y, 0, Rotate.Z_AXIS);
                 Transform transform = translate.createConcatenation(rotate);
-                lod2Geometries.add(createJTSGeometry(transformVertices(lod2vertices, transform)));
+                geometries2.add(createJTSGeometry(transformVertices(lod2vertices, transform)));
             }
         } 
-        var index2 = findNear(lod1geometry, lod2Geometries);
+        var index2 = findNear(lod1geometry, geometries2);
         var fixangle = angles.get(index2);
         
         // 反映
