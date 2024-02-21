@@ -277,6 +277,16 @@ public class GizmoModel extends Parent {
     }
     
     /**
+     * ギズモの操作対象を返す
+     * @return ギズモの操作対象
+     */
+    public Node getAttachNode() {
+        if (manipulator == null)
+            return null;
+        return manipulator.getSolidView();
+    }
+
+    /**
      * ギズモを操作対象にセット
      * @param manipulator ギズモの操作対象
      */

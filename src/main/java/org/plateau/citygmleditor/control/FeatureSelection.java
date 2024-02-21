@@ -84,6 +84,12 @@ public class FeatureSelection {
 
             PickResult pickResult = event.getPickResult();
             var newSelectedMesh = pickResult.getIntersectedNode();
+
+            if (newSelectedMesh != null
+                    && World.getActiveInstance().getGizmo().isGizmoDragging(newSelectedMesh)) {
+                newSelectedMesh = World.getActiveInstance().getGizmo().getAttachNode();
+            }
+
             var feature = getBuilding(newSelectedMesh);
             var element = getLodSolidView(newSelectedMesh);
 

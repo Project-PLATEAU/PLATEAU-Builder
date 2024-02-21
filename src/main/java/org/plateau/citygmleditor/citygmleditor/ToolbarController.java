@@ -36,7 +36,7 @@ public class ToolbarController implements Initializable {
         sceneContent.getSubScene().addEventHandler(MouseEvent.ANY, mouseEventHandler);
 
         gizmoModel = new GizmoModel();
-        World.getRoot3D().getChildren().add(gizmoModel);
+        World.getActiveInstance().setGizmo(gizmoModel);
 
         initializeLODToggle();
 

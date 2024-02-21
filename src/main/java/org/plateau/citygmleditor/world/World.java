@@ -13,7 +13,7 @@ import javafx.scene.SubScene;
 import javafx.scene.input.*;
 
 import org.w3c.dom.events.MouseEvent;
-
+import org.plateau.citygmleditor.citygmleditor.GizmoModel;
 import org.plateau.citygmleditor.citymodel.CityModelView;
 import org.plateau.citygmleditor.geometry.GeoReference;
 
@@ -33,6 +33,7 @@ public class World {
     private List<CityModelView> cityModel;
     private Material defaultMaterial;
     private Camera camera;
+    private GizmoModel gizmo;
 
     public World() {
         defaultMaterial = new PhongMaterial(Color.WHITE);
@@ -99,5 +100,14 @@ public class World {
 
     public void setCityModelGroup(Group cityModelGroup) {
         this.cityModelGroup.set(cityModelGroup);
+    }
+
+    public void setGizmo(GizmoModel gizmo) {
+        this.gizmo = gizmo;
+        root3D.getChildren().add(gizmo);
+    }
+
+    public GizmoModel getGizmo() {
+        return gizmo;
     }
 }

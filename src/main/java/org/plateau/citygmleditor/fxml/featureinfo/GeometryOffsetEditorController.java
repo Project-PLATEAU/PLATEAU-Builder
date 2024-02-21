@@ -7,6 +7,7 @@ import org.plateau.citygmleditor.citygmleditor.GizmoModel;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.world.World;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point3D;
@@ -40,24 +41,67 @@ public class GeometryOffsetEditorController implements Initializable {
 
     private TransformManipulator manipulator;
 
+    private ChangeListener<Point3D> listenerPosition;
+    private ChangeListener<Point3D> listenerRotation;
+    private ChangeListener<Point3D> listenerScale;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         CityGMLEditorApp.getFeatureSellection().getSelectElementProperty().addListener((ov, oldSelectElement, newSelectElement) -> {
+            if (oldSelectElement != null) {
+                if (oldSelectElement instanceof ILODSolidView) {
+                    var oldManipulator = ((ILODSolidView) oldSelectElement).getTransformManipulator();
+
+                    if (listenerPosition != null)
+                        oldManipulator.getLocationProperty().removeListener(listenerPosition);
+
+                    if (listenerRotation != null)
+                        oldManipulator.getRotationProperty().removeListener(listenerRotation);
+
+                    if (listenerScale != null)
+                        oldManipulator.getScaleProperty().removeListener(listenerScale);
+                }
+            }
+
             if (newSelectElement != null) {
                 if (newSelectElement instanceof ILODSolidView) {
                     manipulator = ((ILODSolidView) newSelectElement).getTransformManipulator();
-                    
-                    PositionX.textProperty().set(String.valueOf(manipulator.getLocation().getX()));
-                    PositionY.textProperty().set(String.valueOf(manipulator.getLocation().getY()));
-                    PositionZ.textProperty().set(String.valueOf(manipulator.getLocation().getZ()));
-                    
-                    RotationX.textProperty().set(String.valueOf(manipulator.getRotation().getX()));
-                    RotationY.textProperty().set(String.valueOf(manipulator.getRotation().getY()));
-                    RotationZ.textProperty().set(String.valueOf(manipulator.getRotation().getZ()));
-                    
-                    ScaleX.textProperty().set(String.valueOf(manipulator.getScale().getX()));
-                    ScaleY.textProperty().set(String.valueOf(manipulator.getScale().getY()));
-                    ScaleZ.textProperty().set(String.valueOf(manipulator.getScale().getZ()));
+
+                    PositionX.textProperty().set(toString(manipulator.getLocation().getX()));
+                    PositionY.textProperty().set(toString(manipulator.getLocation().getY()));
+                    PositionZ.textProperty().set(toString(manipulator.getLocation().getZ()));
+
+                    RotationX.textProperty().set(toString(manipulator.getRotation().getX()));
+                    RotationY.textProperty().set(toString(manipulator.getRotation().getY()));
+                    RotationZ.textProperty().set(toString(manipulator.getRotation().getZ()));
+
+                    ScaleX.textProperty().set(toString(manipulator.getScale().getX()));
+                    ScaleY.textProperty().set(toString(manipulator.getScale().getY()));
+                    ScaleZ.textProperty().set(toString(manipulator.getScale().getZ()));
+
+                    listenerPosition = (observable, oldValue, newValue) -> {
+                        PositionX.textProperty().set(toString(newValue.getX()));
+                        PositionY.textProperty().set(toString(newValue.getY()));
+                        PositionZ.textProperty().set(toString(newValue.getZ()));
+                    };
+
+                    manipulator.getLocationProperty().addListener(listenerPosition);
+
+                    listenerRotation = (observable, oldValue, newValue) -> {
+                        RotationX.textProperty().set(toString(newValue.getX()));
+                        RotationY.textProperty().set(toString(newValue.getY()));
+                        RotationZ.textProperty().set(toString(newValue.getZ()));
+                    };
+
+                    manipulator.getRotationProperty().addListener(listenerRotation);
+
+                    listenerScale = (observable, oldValue, newValue) -> {
+                        ScaleX.textProperty().set(toString(newValue.getX()));
+                        ScaleY.textProperty().set(toString(newValue.getY()));
+                        ScaleZ.textProperty().set(toString(newValue.getZ()));
+                    };
+
+                    manipulator.getScaleProperty().addListener(listenerScale);
                 }
             }
         });
@@ -103,13 +147,23 @@ public class GeometryOffsetEditorController implements Initializable {
         });
     }
 
-    private double toDouble(String value){
-        double ret = 0.0;
+    private String toString(double value) {
         try {
-            ret = Double.parseDouble(value);
+            int integer = (int) value;
+            if(integer == value)
+                return String.valueOf(integer);
+            return String.valueOf(value);
         } catch (NumberFormatException e) {
+            return "";
         }
-        return ret;
+    }
+
+    private double toDouble(String value){
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
     }
 
     private void updateLocateFromTextFields(int axis, double value) {

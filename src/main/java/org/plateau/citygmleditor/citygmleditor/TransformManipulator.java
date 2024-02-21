@@ -5,6 +5,8 @@ import java.util.List;
 import org.plateau.citygmleditor.geometry.GeoCoordinate;
 import org.plateau.citygmleditor.utils3d.geom.Vec3f;
 import org.plateau.citygmleditor.world.World;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
 import javafx.scene.Node;
@@ -21,9 +23,9 @@ import javafx.scene.transform.Transform;
 public class TransformManipulator {
     private Node solid;
 
-    private Point3D location;
-    private Point3D rotation;
-    private Point3D scale;
+    private ObjectProperty<Point3D> location = new SimpleObjectProperty<>();
+    private ObjectProperty<Point3D> rotation = new SimpleObjectProperty<>();
+    private ObjectProperty<Point3D> scale = new SimpleObjectProperty<>();
 
     private Point3D origin;
 
@@ -36,9 +38,9 @@ public class TransformManipulator {
     public TransformManipulator(Node node) {
         solid = node;
 
-        this.location = new Point3D(0, 0, 0);
-        this.rotation = new Point3D(0, 0, 0);
-        this.scale = new Point3D(1, 1, 1);
+        this.location.set(new Point3D(0, 0, 0));
+        this.rotation.set(new Point3D(0, 0, 0));
+        this.scale.set(new Point3D(1, 1, 1));
 
         transformCache = new Translate();
     }
@@ -52,11 +54,20 @@ public class TransformManipulator {
     }
 
     /**
+     * 座標情報のプロパティを返します。
+     * 
+     * @return  座標情報のプロパティ
+     */
+    public ObjectProperty<Point3D> getLocationProperty() {
+        return location;
+    }
+
+    /**
      * 座標情報を返す
      * @return
      */
     public Point3D getLocation() {
-        return location;
+        return location.get();
     }
 
     /**
@@ -64,15 +75,24 @@ public class TransformManipulator {
      * @param locate
      */
     public void setLocation(Point3D locate) {
-        this.location = locate;
+        this.location.set(locate);
     }
     
+    /**
+     * 回転情報のプロパティを返します。
+     * 
+     * @return 回転情報のプロパティ
+     */
+    public ObjectProperty<Point3D> getRotationProperty() {
+        return rotation;
+    }
+
     /**
      * 回転情報を返す
      * @return
      */
     public Point3D getRotation() {
-        return rotation;
+        return rotation.get();
     }
 
     /**
@@ -80,15 +100,24 @@ public class TransformManipulator {
      * @param rotate
      */
     public void setRotation(Point3D rotate) {
-        this.rotation = rotate;
+        this.rotation.set(rotate);
     }
     
+    /**
+     * スケール情報のプロパティを返します。
+     * 
+     * @return スケール情報のプロパティ
+     */
+    public ObjectProperty<Point3D> getScaleProperty() {
+        return scale;
+    }
+
     /**
      * スケール情報を返す
      * @return
      */
     public Point3D getScale() {
-        return scale;
+        return scale.get();
     }
 
     /**
@@ -96,7 +125,7 @@ public class TransformManipulator {
      * @param scale
      */
     public void setScale(Point3D scale) {
-        this.scale = scale;
+        this.scale.set(scale);
     }
 
     /**
