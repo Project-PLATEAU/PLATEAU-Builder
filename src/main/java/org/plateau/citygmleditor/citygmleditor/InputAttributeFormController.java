@@ -204,6 +204,9 @@ public class InputAttributeFormController {
             Node content = adeElement.getContent();
             parentNode = content.getChildNodes().item(0);
             targetNode = parentNode.getChildNodes().item(index);
+            if (!(targetNode instanceof Element)) {
+                targetNode = content.getChildNodes().item(index);
+            }
         } else {
             ADEComponent adeComponent = childList.get(index - 1);
             var adeElement = (ADEGenericElement) adeComponent;
@@ -226,6 +229,9 @@ public class InputAttributeFormController {
             Node content = adeElement.getContent();
             parentNode = content.getChildNodes().item(0);
             targetNode = parentNode.getChildNodes().item(index);
+            if (!(targetNode instanceof Element)) {
+                targetNode = content.getChildNodes().item(index);
+            }
         } else {
             ADEComponent adeComponent = childList.get(index - 1);
             var adeElement = (ADEGenericElement) adeComponent;
@@ -250,12 +256,14 @@ public class InputAttributeFormController {
             Node content = adeElement.getContent();
             parentNode = content.getChildNodes().item(0);
             targetNode = parentNode.getChildNodes().item(index);
+            if (!(targetNode instanceof Element)) {
+                targetNode = content.getChildNodes().item(index);
+            }
         } else {
             ADEComponent adeComponent = childList.get(index - 1);
             var adeElement = (ADEGenericElement) adeComponent;
             targetNode = adeElement.getContent();
         }
-
         if ((targetNode instanceof Element) && (targetNode.getChildNodes().getLength() != 0)) {
             value = targetNode.getChildNodes().item(0).getTextContent();
         }
@@ -279,19 +287,19 @@ public class InputAttributeFormController {
         }
         if (targetNode instanceof Element) {
             Element targetElement = (Element) targetNode;
-            if (codeSpace != "") {
+            if (codeSpace != null && !codeSpace.isEmpty()) {
                 targetElement.setAttribute("codeSpace", "../../codelists/" + codeSpace);
             }
-            if (uom != "") {
+            if (uom != null && !uom.isEmpty()) {
                 targetElement.setAttribute("uom", uom);
             }
             targetElement.setTextContent(value);
         } else {
             Element targetElement = (Element) parentNode;
-            if (codeSpace != null) {
+            if (codeSpace != null && !codeSpace.isEmpty()) {
                 targetElement.setAttribute("codeSpace", "../../codelists/" + codeSpace);
             }
-            if (uom != null) {
+            if (uom != null && !uom.isEmpty()) {
                 targetElement.setAttribute("uom", uom);
             }
             targetElement.setTextContent(value);
@@ -455,23 +463,24 @@ public class InputAttributeFormController {
 
             if (addAttributeName != null) {
                 Element newElement = doc.createElementNS(namespaceURI, addAttributeName);
-                if (value != null)
+                if (value != null && !value.isEmpty()) {
                     newElement.setTextContent(value);
-                if (codeSpacePath != "") {
+                }
+                if (codeSpace != null && !codeSpace.isEmpty()) {
                     newElement.setAttribute("codeSpace", codeSpacePath);
                 }
-                if (uom != "") {
+                if (uom != null && !uom.isEmpty()) {
                     newElement.setAttribute("uom", uom);
                 }
-                ADEGenericElement newAdelement = new ADEGenericElement(newElement);
-                childList.add(childList.size(), (ADEComponent) newAdelement);
+                ADEGenericElement newAdeElement = new ADEGenericElement(newElement);
+                childList.add(childList.size(), (ADEComponent) newAdeElement);
 
                 // 型要素があるかどうかを確認し、あれば追加
                 for (int i = 0; i < attributeList.size(); i++) {
                     if (!attributeList.get(i).isEmpty() && attributeList.get(i).get(3) != null) {
                         if (("uro:" + attributeList.get(i).get(3).toLowerCase())
                                 .matches(addAttributeName.toLowerCase())) {
-                            Node parentNode = newAdelement.getContent();
+                            Node parentNode = newAdeElement.getContent();
                             Element newChildElement = doc.createElementNS(namespaceURI,
                                     "uro:" + attributeList.get(i).get(3));
                             parentNode.appendChild(newChildElement);
@@ -491,11 +500,10 @@ public class InputAttributeFormController {
             Node childNode = childNodeList.item(0);
             Element newElement = doc.createElementNS(namespaceURI, addAttributeName);
             newElement.setTextContent(value);
-
-            if (codeSpacePath != "") {
+            if (codeSpace != null && !codeSpace.isEmpty()) {
                 newElement.setAttribute("codeSpace", codeSpacePath);
             }
-            if (uom != "") {
+            if (uom != null && !uom.isEmpty()) {
                 newElement.setAttribute("uom", uom);
             }
 
