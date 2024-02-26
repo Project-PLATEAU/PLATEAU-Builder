@@ -202,9 +202,9 @@ public class Gltf2LodConverter extends AbstractLodConverter {
         FloatBuffer floatBuffer = byteBuffer.asFloatBuffer();
         float[] vertices = new float[floatBuffer.capacity()];
         for (int i = 0; i < floatBuffer.capacity(); i += 3) {
-            vertices[i] = floatBuffer.get(i + 2);
-            vertices[i + 1] = floatBuffer.get(i);
-            vertices[i + 2] = floatBuffer.get(i + 1);
+            vertices[i] = floatBuffer.get(i);
+            vertices[i + 1] = floatBuffer.get(i + 1);
+            vertices[i + 2] = floatBuffer.get(i + 2);
         }
 
         return vertices;

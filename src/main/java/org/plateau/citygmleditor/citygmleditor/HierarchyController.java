@@ -1,37 +1,36 @@
 package org.plateau.citygmleditor.citygmleditor;
 
-import javafx.application.Platform;
-import javafx.beans.binding.ObjectBinding;
-import javafx.event.ActionEvent;
-import javafx.fxml.Initializable;
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.CheckBoxTreeTableCell;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
-import javafx.scene.shape.MeshView;
-import javafx.stage.FileChooser;
-import org.plateau.citygmleditor.citymodel.BuildingView;
-import org.plateau.citygmleditor.citymodel.CityModelView;
-import org.plateau.citygmleditor.citymodel.BuildingInstallationView;
-import org.plateau.citygmleditor.citymodel.geometry.GeometryView;
-import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
-import org.plateau.citygmleditor.citymodel.geometry.LOD1SolidView;
-import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
-import org.plateau.citygmleditor.citymodel.geometry.LOD3SolidView;
-import org.plateau.citygmleditor.converters.Gltf2LodConverter;
-import org.plateau.citygmleditor.converters.Obj2LodConverter;
-import org.plateau.citygmleditor.exporters.GltfExporter;
-import org.plateau.citygmleditor.exporters.ObjExporter;
-import org.plateau.citygmleditor.world.*;
-
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.plateau.citygmleditor.citymodel.BuildingView;
+import org.plateau.citygmleditor.citymodel.CityModelView;
+import org.plateau.citygmleditor.citymodel.geometry.GeometryView;
+import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
+import org.plateau.citygmleditor.converters.Gltf2LodConverter;
+import org.plateau.citygmleditor.converters.Obj2LodConverter;
+import org.plateau.citygmleditor.exporters.GltfExporter;
+import org.plateau.citygmleditor.exporters.ObjExporter;
+import org.plateau.citygmleditor.world.World;
+
+import javafx.application.Platform;
+import javafx.beans.binding.ObjectBinding;
+import javafx.event.ActionEvent;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
+import javafx.scene.control.cell.CheckBoxTreeTableCell;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.shape.MeshView;
 
 public class HierarchyController implements Initializable {
     public TreeTableView<Node> hierarchyTreeTable;
@@ -170,7 +169,7 @@ public class HierarchyController implements Initializable {
             var fileUrl = controller.getFileUrl();
             var solid = controller.getLodSolidView();
             var option = controller.getExportOption();
-            new GltfExporter().export(fileUrl, solid, building.getId(), option);
+            new GltfExporter(solid, building.getId(), option).export(fileUrl);
             java.awt.Desktop.getDesktop().open(new File(fileUrl).getParentFile());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
@@ -199,7 +198,7 @@ public class HierarchyController implements Initializable {
             var fileUrl = controller.getFileUrl();
             var solid = controller.getLodSolidView();
             var option = controller.getExportOption();
-            new ObjExporter().export(fileUrl, solid, building.getId(), option);
+            new ObjExporter(solid, building.getId(), option).export(fileUrl);
             java.awt.Desktop.getDesktop().open(new File(fileUrl).getParentFile());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);

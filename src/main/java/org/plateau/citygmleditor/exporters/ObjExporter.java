@@ -22,18 +22,25 @@ import javafx.scene.paint.PhongMaterial;
 /**
  * A class for exporting a {@link ILODSolidView} to a OBJ file
  */
-public class ObjExporter {
+public class ObjExporter extends AbstractLodExporter {
     private static final MaterialModel defaultMaterialModel = new MaterialModel("defaultMaterialModel");
 
     /**
-     * Export the {@link ILODSolidView} to a OBJ file
-     * @param fileUrl the file url
+     * ObjExporter class constructor
      * @param lodSolid the {@link ILODSolidView}
      * @param buildingId the building id
      * @param exportOption the exportOption
      */
-    public void export(String fileUrl, ILODSolidView lodSolid, String buildingId, ExportOption exportOption) {
-        ObjectModel objectModel = createObjectModel(buildingId, lodSolid);
+    public ObjExporter(ILODSolidView lodSolid, String buildingId, ExportOption exportOption) {
+        super(lodSolid, buildingId, exportOption);
+    }
+
+    /**
+     * Export the {@link ILODSolidView} to a OBJ file
+     * @param fileUrl the file url
+     */
+    @Override public void export(String fileUrl) {
+        ObjectModel objectModel = createObjectModel();
 
         File file = new File(fileUrl);
         var fileName = file.getName();
@@ -46,6 +53,7 @@ public class ObjExporter {
             writer.write(String.format("g %s\r\n", objectModel.getName()));
             writer.write(String.format("usemtl %s\r\n", objectModel.getMaterial().getName()));
 
+            var exportOption = getExportOption();
             var axisTransformer = new AxisTransformer(AxisDirection.TOOL_AXIS_DIRECTION, new AxisDirection(exportOption.getAxisEast(), exportOption.getAxisTop(), false));
             var offset = exportOption.getOffset();
             var vertices = objectModel.getVertices();
@@ -102,7 +110,8 @@ public class ObjExporter {
         }
     }
 
-    private ObjectModel createObjectModel(String name, ILODSolidView lodSolid) {
+    private ObjectModel createObjectModel() {
+        var lodSolid = getLodSolid();
         var polygons = lodSolid.getPolygons();
         var indexCount = 0;
         for (var polygon : polygons) {
@@ -123,7 +132,7 @@ public class ObjExporter {
 
         var materialModel = createOrGetMaterial(polygons);
 
-        return new ObjectModel(name, faces, lodSolid.getVertexBuffer().getBufferAsArray(), lodSolid.getTexCoordBuffer().getBufferAsArray(true), materialModel);
+        return new ObjectModel(getBuildingId(), faces, lodSolid.getVertexBuffer().getBufferAsArray(), lodSolid.getTexCoordBuffer().getBufferAsArray(true), materialModel);
     }
 
     private MaterialModel createOrGetMaterial(ArrayList<PolygonView> polygons) {

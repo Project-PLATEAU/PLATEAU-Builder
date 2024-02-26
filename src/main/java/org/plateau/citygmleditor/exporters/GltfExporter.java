@@ -40,7 +40,7 @@ import javafx.scene.paint.PhongMaterial;
 /**
  * A class for exporting a {@link DefaultGltfModel} to a gLTF file
  */
-public class GltfExporter {
+public class GltfExporter extends AbstractLodExporter {
     private static final MaterialModelV2 defaultMaterialModel;
 
     static {
@@ -51,22 +51,27 @@ public class GltfExporter {
         defaultMaterialModel.setName("defaultMaterialModel");
     }
 
-    private ExportOption exportOption;
-
     /**
-     * Export the {@link ILODSolidView} to a gLTF file
-     * @param fileUrl the file url
+     * Constructor
      * @param lodSolid the {@link ILODSolidView}
      * @param buildingId the building id
      * @param exportOption the exportOption
      */
-    public void export(String fileUrl, ILODSolidView lodSolid, String buildingId, ExportOption exportOption) {
-        this.exportOption = exportOption;
+    public GltfExporter(ILODSolidView lodSolid, String buildingId, ExportOption exportOption) {
+        super(lodSolid, buildingId, exportOption);
+    }
+
+    /**
+     * Export the {@link ILODSolidView} to a gLTF file
+     * @param fileUrl the file url
+     */
+    @Override public void export(String fileUrl) {
         DefaultSceneModel sceneModel = null;
+        var lodSolid = getLodSolid();
         if (lodSolid instanceof LOD1SolidView) {
-            sceneModel = createSceneModel((LOD1SolidView) lodSolid, buildingId);
+            sceneModel = createSceneModel((LOD1SolidView) lodSolid);
         } else if (lodSolid instanceof LOD2SolidView) {
-            sceneModel = createSceneModel((LOD2SolidView) lodSolid, buildingId);
+            sceneModel = createSceneModel((LOD2SolidView) lodSolid);
         } else {
             throw new IllegalArgumentException("LOD1SolidView or LOD2SolidView is required.");
         }
@@ -97,11 +102,11 @@ public class GltfExporter {
         }
     }
 
-    private DefaultSceneModel createSceneModel(LOD1SolidView lod1Solid, String buildingId) {
+    private DefaultSceneModel createSceneModel(LOD1SolidView lod1Solid) {
         DefaultSceneModel sceneModel = new DefaultSceneModel();
         DefaultNodeModel nodeModel = new DefaultNodeModel();
         DefaultMeshModel meshModel = new DefaultMeshModel();
-        meshModel.setName(buildingId);
+        meshModel.setName(getBuildingId());
         for (var polygon : lod1Solid.getPolygons()) {
             DefaultMeshPrimitiveModel meshPrimitiveModel = createMeshPrimitive(lod1Solid, polygon, defaultMaterialModel);
             meshPrimitiveModel.setMaterialModel(defaultMaterialModel);
@@ -114,12 +119,12 @@ public class GltfExporter {
         return sceneModel;
     }
 
-    private DefaultSceneModel createSceneModel(LOD2SolidView lod2Solid, String buildingId) {
+    private DefaultSceneModel createSceneModel(LOD2SolidView lod2Solid) {
         DefaultSceneModel sceneModel = new DefaultSceneModel();
         Map<String, MaterialModelV2> materialMap = new HashMap<>();
         DefaultNodeModel nodeModel = new DefaultNodeModel();
         DefaultMeshModel meshModel = new DefaultMeshModel();
-        meshModel.setName(buildingId);
+        meshModel.setName(getBuildingId());
 
         for (var boundary : lod2Solid.getBoundaries()) {
             for (var polygon : boundary.getPolygons()) {
@@ -161,6 +166,7 @@ public class GltfExporter {
         MeshPrimitiveBuilder meshPrimitiveBuilder = MeshPrimitiveBuilder.create();
         meshPrimitiveBuilder.setIntIndicesAsShort(IntBuffer.wrap(faces));
 
+        var exportOption = getExportOption();
         var axisTransformer = new AxisTransformer(AxisDirection.TOOL_AXIS_DIRECTION, new AxisDirection(exportOption.getAxisEast(), exportOption.getAxisTop(), true));
         var offset = exportOption.getOffset();
         var positions = new float[vertexList.size() * 3];

@@ -1,10 +1,8 @@
 package org.plateau.citygmleditor.converters;
 
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,10 +11,6 @@ import java.util.UUID;
 
 import javax.vecmath.Point2f;
 
-import javafx.geometry.Point2D;
-import javafx.geometry.Point3D;
-import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
 import org.apache.commons.lang3.NotImplementedException;
 import org.citygml4j.model.citygml.appearance.Appearance;
 import org.citygml4j.model.citygml.appearance.AppearanceMember;
@@ -36,20 +30,38 @@ import org.citygml4j.model.citygml.core.CityModel;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurfaceProperty;
 import org.citygml4j.model.gml.geometry.complexes.CompositeSurface;
-import org.citygml4j.model.gml.geometry.primitives.*;
+import org.citygml4j.model.gml.geometry.primitives.AbstractRing;
+import org.citygml4j.model.gml.geometry.primitives.AbstractRingProperty;
+import org.citygml4j.model.gml.geometry.primitives.AbstractSurface;
+import org.citygml4j.model.gml.geometry.primitives.DirectPositionList;
+import org.citygml4j.model.gml.geometry.primitives.Exterior;
+import org.citygml4j.model.gml.geometry.primitives.Interior;
+import org.citygml4j.model.gml.geometry.primitives.LinearRing;
+import org.citygml4j.model.gml.geometry.primitives.Polygon;
+import org.citygml4j.model.gml.geometry.primitives.Solid;
+import org.citygml4j.model.gml.geometry.primitives.SolidProperty;
+import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
 import org.locationtech.jts.algorithm.Orientation;
 import org.plateau.citygmleditor.citygmleditor.AxisDirection;
 import org.plateau.citygmleditor.citygmleditor.AxisTransformer;
 import org.plateau.citygmleditor.citymodel.AppearanceView;
 import org.plateau.citygmleditor.citymodel.BuildingView;
 import org.plateau.citygmleditor.citymodel.CityModelView;
-import org.plateau.citygmleditor.citymodel.factory.*;
+import org.plateau.citygmleditor.citymodel.factory.AppearanceFactory;
+import org.plateau.citygmleditor.citymodel.factory.LOD1SolidFactory;
+import org.plateau.citygmleditor.citymodel.factory.LOD2SolidFactory;
+import org.plateau.citygmleditor.citymodel.factory.LOD3SolidFactory;
 import org.plateau.citygmleditor.citymodel.geometry.LOD2SolidView;
 import org.plateau.citygmleditor.citymodel.geometry.LOD3SolidView;
 import org.plateau.citygmleditor.converters.model.TriangleModel;
 import org.plateau.citygmleditor.geometry.GeoReference;
 import org.plateau.citygmleditor.utils3d.geom.Vec3d;
 import org.plateau.citygmleditor.world.World;
+
+import javafx.geometry.Point2D;
+import javafx.geometry.Point3D;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Transform;
 
 public abstract class AbstractLodConverter {
     private org.locationtech.jts.geom.GeometryFactory _geometryFactory = new org.locationtech.jts.geom.GeometryFactory();
