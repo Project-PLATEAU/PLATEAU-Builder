@@ -86,7 +86,7 @@ public class FeatureSelection {
             var newSelectedMesh = pickResult.getIntersectedNode();
 
             if (newSelectedMesh != null
-                    && World.getActiveInstance().getGizmo().isGizmoDragging(newSelectedMesh)) {
+                    && World.getActiveInstance().getGizmo().isNodeInGizmo(newSelectedMesh)) {
                 newSelectedMesh = World.getActiveInstance().getGizmo().getAttachNode();
             }
 

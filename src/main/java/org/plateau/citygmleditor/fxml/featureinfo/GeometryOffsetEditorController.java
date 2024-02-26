@@ -3,7 +3,6 @@ package org.plateau.citygmleditor.fxml.featureinfo;
 import java.net.URL;
 import java.util.ResourceBundle;
 import org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp;
-import org.plateau.citygmleditor.citygmleditor.GizmoModel;
 import org.plateau.citygmleditor.citygmleditor.TransformManipulator;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 import org.plateau.citygmleditor.world.World;
@@ -41,13 +40,21 @@ public class GeometryOffsetEditorController implements Initializable {
 
     private TransformManipulator manipulator;
 
+    // リスナーハンドル
     private ChangeListener<Point3D> listenerPosition;
     private ChangeListener<Point3D> listenerRotation;
     private ChangeListener<Point3D> listenerScale;
 
+    /**
+     * FXMLファイルがロードされた際に呼び出される初期化メソッドです。
+     * 
+     * @param location FXMLファイルのURL
+     * @param resources ロケール固有のリソースバンドル
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         CityGMLEditorApp.getFeatureSellection().getSelectElementProperty().addListener((ov, oldSelectElement, newSelectElement) -> {
+            // 以前のギズモの操作対象に設定されたリスナーハンドルを削除
             if (oldSelectElement != null) {
                 if (oldSelectElement instanceof ILODSolidView) {
                     var oldManipulator = ((ILODSolidView) oldSelectElement).getTransformManipulator();
@@ -67,6 +74,7 @@ public class GeometryOffsetEditorController implements Initializable {
                 if (newSelectElement instanceof ILODSolidView) {
                     manipulator = ((ILODSolidView) newSelectElement).getTransformManipulator();
 
+                    // 各TextFieldに現在の値を設定
                     PositionX.textProperty().set(toString(manipulator.getLocation().getX()));
                     PositionY.textProperty().set(toString(manipulator.getLocation().getY()));
                     PositionZ.textProperty().set(toString(manipulator.getLocation().getZ()));
@@ -79,6 +87,7 @@ public class GeometryOffsetEditorController implements Initializable {
                     ScaleY.textProperty().set(toString(manipulator.getScale().getY()));
                     ScaleZ.textProperty().set(toString(manipulator.getScale().getZ()));
 
+                    // ギズモ操作による値を各TextFieldに反映するためのリスナーを設定
                     listenerPosition = (observable, oldValue, newValue) -> {
                         PositionX.textProperty().set(toString(newValue.getX()));
                         PositionY.textProperty().set(toString(newValue.getY()));
@@ -106,7 +115,7 @@ public class GeometryOffsetEditorController implements Initializable {
             }
         });
         
-        // 各TextFieldにイベントハンドラを設定
+        // 各TextFieldによる入力を反映するためのイベントハンドラを設定
         PositionX.textProperty().addListener((obs, oldVal, newVal) -> {
             updateLocateFromTextFields(0, toDouble(newVal));
             updateGizmo();
@@ -147,6 +156,12 @@ public class GeometryOffsetEditorController implements Initializable {
         });
     }
 
+    /**
+     * 指定された double 値を文字列に変換します。
+     * 
+     * @param value 変換する double 値
+     * @return 変換された文字列
+     */
     private String toString(double value) {
         try {
             int integer = (int) value;
@@ -158,6 +173,12 @@ public class GeometryOffsetEditorController implements Initializable {
         }
     }
 
+    /**
+     * 指定された文字列を double 値に変換します。
+     * 
+     * @param value 変換する文字列
+     * @return 変換された double 値。変換できない場合は 0.0 を返します。
+     */
     private double toDouble(String value){
         try {
             return Double.parseDouble(value);
@@ -166,6 +187,12 @@ public class GeometryOffsetEditorController implements Initializable {
         }
     }
 
+    /**
+     * テキストフィールドからの入力を使用して、特定の軸方向の位置を更新します。
+     * 
+     * @param axis 軸の番号 (0: X軸, 1: Y軸, 2: Z軸)
+     * @param value 新しい位置の値
+     */
     private void updateLocateFromTextFields(int axis, double value) {
         if (manipulator == null) 
             return;
@@ -204,6 +231,12 @@ public class GeometryOffsetEditorController implements Initializable {
         manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
     }
     
+    /**
+     * テキストフィールドからの入力を使用して、特定の軸周りの回転を更新します。
+     * 
+     * @param axis 回転軸の番号 (0: X軸, 1: Y軸, 2: Z軸)
+     * @param value 新しい回転角度の値
+     */
     private void updateRotateFromTextFields(int axis, double value) {
         if (manipulator == null) 
             return;
@@ -233,6 +266,12 @@ public class GeometryOffsetEditorController implements Initializable {
         manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
     }
 
+    /**
+     * テキストフィールドからの入力を使用して、特定の軸に沿ったスケールを更新します。
+     * 
+     * @param axis スケールの軸の番号 (0: X軸, 1: Y軸, 2: Z軸)
+     * @param value 新しいスケール値
+     */
     private void updateScaleFromTextFields(int axis, double value) {
         if (manipulator == null) 
             return;
@@ -253,14 +292,14 @@ public class GeometryOffsetEditorController implements Initializable {
         manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
     }
     
+    /**
+     * ギズモを更新します。
+     * このメソッドは、ギズモに操作対象を再設定することでギズモの表示や位置、姿勢などを更新します。
+     */
     private void updateGizmo() {
         if (manipulator == null)
             return;
-            
-        for (var node : World.getRoot3D().getChildrenUnmodifiable()) {
-            if (node instanceof GizmoModel) {
-                ((GizmoModel) node).attachManipulator(manipulator);
-            }
-        }
+
+        World.getActiveInstance().getGizmo().attachManipulator(manipulator);
     }
 }

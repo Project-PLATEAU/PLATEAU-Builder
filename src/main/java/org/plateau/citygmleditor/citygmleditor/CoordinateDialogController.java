@@ -25,7 +25,6 @@ import javafx.scene.control.ListView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.plateau.citygmleditor.world.World;
 
 public class CoordinateDialogController implements Initializable {
     private Stage root;
@@ -35,6 +34,9 @@ public class CoordinateDialogController implements Initializable {
     @FXML
     private ComboBox<CoordinateCodesEnum> comboboxCoordinateCodes;
     
+    /**
+     * CoordinateCodesEnumは、座標系のコードを表す列挙型です。
+     */
     public enum CoordinateCodesEnum {
         EPSG2443("EPSG:2443(平面直角Ⅰ(1)系, 長崎県, 鹿児島県(南西部))"),
         EPSG2444("EPSG:2444(平面直角Ⅱ(2)系, 福岡県, 佐賀県, 熊本県, 大分県, 宮崎県, 鹿児島県(北東部))"),
@@ -56,12 +58,25 @@ public class CoordinateDialogController implements Initializable {
         EPSG2460("EPSG:2460(平面直角ⅩⅧ(18)系, 東京都(沖ノ鳥島))"),
         EPSG2461("EPSG:2461(平面直角ⅩⅨ(19)系, 東京都(南鳥島))");
 
+        /**
+         * 座標系の名称。
+         */
         final private String name;
 
+        /**
+         * 指定された座標系の名称を持つCoordinateCodesEnumを構築します。
+         *
+         * @param name 座標系の名称
+         */
         private CoordinateCodesEnum(String name) {
             this.name = name;
         }
 
+        /**
+         * この座標系の名称を返します。
+         *
+         * @return 座標系の名称
+         */
         public String getName() {
             return name;
         }
@@ -69,7 +84,8 @@ public class CoordinateDialogController implements Initializable {
 
     /**
      * FXMLのStageを設定
-     * @param stage
+     * 
+     * @param stage ルートとして設定するステージ
      */
     public void setRoot(Stage stage) {
         root = stage;
@@ -77,7 +93,8 @@ public class CoordinateDialogController implements Initializable {
 
     /**
      * 読み込むGMLファイルを設定
-     * @param files
+     * 
+     * @param files GMLファイルリスト
      */
     public void setFiles(List<File> files) {
         gmlFiles = files;
@@ -85,7 +102,8 @@ public class CoordinateDialogController implements Initializable {
 
     /**
      * 座標系選択完了ボタン選択時イベント
-     * @param actionEvent
+     * 
+     * @param actionEvent イベントオブジェクト
      */
     public void onSubmit(ActionEvent actionEvent) {
         var codeEnum = comboboxCoordinateCodes.getValue();
@@ -107,15 +125,12 @@ public class CoordinateDialogController implements Initializable {
                 }
             }
             World.getActiveInstance().setCityModelGroup((Group)root);
-            //CityGMLEditorApp.getSceneContent().setContent(root);
 
-            var datasetPath = Paths.get(World.getActiveInstance().getCityModels().get(0).getGmlPath()).getParent().getParent()
-                    .getParent();
+            var datasetPath = Paths.get(World.getActiveInstance().getCityModels().get(0).getGmlPath()).getParent().getParent().getParent();
             var cityModelView = World.getActiveInstance().getCityModels().get(0);
             var schemaHandler = cityModelView.getSchemaHandler();
             var uroSchema = SchemaHelper.getUroSchema(schemaHandler);
-            var uroSchemaLocation = uroSchema == null
-                    ? null : SchemaHelper.getSchemaLocation(uroSchema);
+            var uroSchemaLocation = uroSchema == null ? null : SchemaHelper.getSchemaLocation(uroSchema);
 
             CityGMLEditorApp.setDatasetPath(datasetPath.toString());
             CityGMLEditorApp.settingUroAttributeInfo(uroSchemaLocation);
@@ -125,6 +140,12 @@ public class CoordinateDialogController implements Initializable {
         root.close();
     }
 
+    /**
+     * FXMLファイルがロードされた際に呼び出される初期化メソッドです。
+     * 
+     * @param location FXMLファイルのURL
+     * @param resources ロケール固有のリソースバンドル
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Callback<ListView<CoordinateCodesEnum>, ListCell<CoordinateCodesEnum>> cellFactory
@@ -147,7 +168,7 @@ public class CoordinateDialogController implements Initializable {
     /**
      * 座標系選択ダイアログ表示
      * 
-     * @param files
+     * @param files GMLファイルリスト
      */
     public static void createCoorinateDialog(List<File> files) {
         try {

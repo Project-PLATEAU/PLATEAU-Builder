@@ -3,9 +3,7 @@ package org.plateau.citygmleditor.citygmleditor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.plateau.citygmleditor.importers.Importer3D;
 import javafx.animation.AnimationTimer;
-import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
 import javafx.scene.DepthTest;
 import javafx.scene.Group;
@@ -15,18 +13,15 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Box;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import org.plateau.citygmleditor.importers.Importer3D;
 import org.plateau.citygmleditor.citymodel.geometry.ILODSolidView;
 
-/**
- * 
- */
 public class GizmoModel extends Parent {
     public enum ControlMode {
         SELECT, MOVE, ROTATION, SCALE,
@@ -65,8 +60,6 @@ public class GizmoModel extends Parent {
     private TransformManipulator manipulator;
 
     private Node currentGizmo;
-
-    // private Box debugBoundingBox;
 
     /**
      * コンストラクタ
@@ -198,11 +191,6 @@ public class GizmoModel extends Parent {
                     // カメラからの距離でギズモのスケールを補正
                     var camera = localToScene(CityGMLEditorApp.getCamera().getCamera(), Point3D.ZERO);
                     var distance = manipulator.getOrigin().distance(camera);
-                    var fov = CityGMLEditorApp.getCamera().getCamera().getFieldOfView();
-                    var aspect = CityGMLEditorApp.getSceneContent().getSubScene().getWidth() / CityGMLEditorApp.getSceneContent().getSubScene().getHeight();
-                    double fovRadians = Math.toRadians(fov);
-                    double halfFovTan = Math.tan(fovRadians / 2.0);
-                    var rate = aspect * halfFovTan * 2.0 / distance;
                     var scale = (distance * 0.0005);
 
                     // モデル回転方向補正
@@ -223,6 +211,12 @@ public class GizmoModel extends Parent {
         animationTimer.start();
     }
     
+    /**
+     * 指定されたノード以下に含まれるすべての MeshView を検索します。
+     *
+     * @param node 検索対象のノード
+     * @return 検索された MeshView のリスト
+     */
     private List<MeshView> findMeshViews(Node node) {
         List<MeshView> meshViews = new ArrayList<>();
         if (node instanceof MeshView) {
@@ -236,6 +230,11 @@ public class GizmoModel extends Parent {
         return meshViews;
     }
 
+    /**
+     * ノードに適用されているマテリアルの色を調整します。
+     *
+     * @param node 色を調整するノード
+     */
     private void setMaterialColor(Node node) {
         for (var meshView : findMeshViews(node)) {
             PhongMaterial material = (PhongMaterial)meshView.getMaterial();
@@ -247,6 +246,13 @@ public class GizmoModel extends Parent {
         }
     }
 
+    /**
+     * ローカル座標系からシーン座標系へ座標を変換します。
+     *
+     * @param node 座標を変換するノード
+     * @param pt 変換する座標
+     * @return 変換後の座標
+     */
     public Point3D localToScene(Node node, Point3D pt) {
         Point3D res = node.localToParentTransformProperty().get().transform(pt);
         if (node.getParent() != null) {
@@ -256,16 +262,18 @@ public class GizmoModel extends Parent {
     }
     
     /**
-     * ギズモの操作モードを返す
-     * @return
+     * ギズモの操作モードを返します。
+     * 
+     * @return 操作モード
      */
     public ControlMode getControlMode() {
         return controlMode;
     }
 
     /**
-     * ギズモの操作モードを切り替え
-     * @param controlMode
+     * ギズモの操作モードを切り替えます。
+     * 
+     * @param controlMode 操作モード
      */
     public void setControlMode(ControlMode controlMode) {
         this.controlMode = controlMode;
@@ -277,7 +285,8 @@ public class GizmoModel extends Parent {
     }
     
     /**
-     * ギズモの操作対象を返す
+     * ギズモの操作対象を返します。
+     * 
      * @return ギズモの操作対象
      */
     public Node getAttachNode() {
@@ -287,7 +296,9 @@ public class GizmoModel extends Parent {
     }
 
     /**
-     * ギズモを操作対象にセット
+     * ギズモを操作対象に設定します。
+     * このメソッドは、操作対象に合わせてギズモ、アウトラインの表示も更新します。
+     * 
      * @param manipulator ギズモの操作対象
      */
     public void attachManipulator(TransformManipulator manipulator) {
@@ -312,30 +323,22 @@ public class GizmoModel extends Parent {
         outline.getTransforms().add(manipulator.getTransformCache());
         // スケールを適用
         outline.getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
-        
-        // デバッグ用バウンディングボックス表示
-        // BoundingBox bb = (BoundingBox) attachedBuilding.getSolidView().getBoundsInParent();
-        // if (debugBoundingBox != null) {
-        //     getChildren().remove(debugBoundingBox);
-        // }
-        // debugBoundingBox = createBoundingBoxVisual(bb);
-        // getChildren().add(debugBoundingBox);
-        // debugBoundingBox.setTranslateX(0.0d);
-        // debugBoundingBox.setTranslateY(0.0d);
-        // debugBoundingBox.setTranslateZ(bb.getDepth() / 2);
     }
     
     /**
-     * 操作中ギズモを設定
-     * @param node
+     * 操作ギズモを設定します。
+     * 
+     * @param node 操作ギズモのノード
      */
     public void setCurrentGizmo(Node node) {
         currentGizmo = node;
     }
 
     /**
-     * マウス操作によるギズモ操作
-     * @param delta
+     * マウス操作によりギズモを更新します。
+     * このメソッドは、ギズモの操作量をギズモの操作対象へ反映します。
+     * 
+     * @param delta ワールド上のマウス移動量
      */
     public void updateTransform(Point3D delta) {
         // 建物の座標変換情報を操作値をもとに更新
@@ -431,8 +434,8 @@ public class GizmoModel extends Parent {
                 scalingFactorZ = localdelta.getZ() / 100.0;
             }
             manipulator.setScale(new Point3D(manipulator.getScale().getX() + scalingFactorX, manipulator.getScale().getY() + scalingFactorY, manipulator.getScale().getZ() + scalingFactorZ));
+            
             // スケールは別途で毎回適用
-            //attachedBuilding.addTransformCache(new Scale(attachedBuilding.getScale().getX(), attachedBuilding.getScale().getY(), attachedBuilding.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
         }
 
         // 建物の座標変換を初期化
@@ -461,7 +464,8 @@ public class GizmoModel extends Parent {
     }
     
     /**
-     * ギズモ操作を確定
+     * ギズモ操作を確定します。
+     * このメソッドは、ギズモの操作値をGMLへ反映します。
      */
     public void fixTransform() {
         if (manipulator == null)
@@ -472,7 +476,7 @@ public class GizmoModel extends Parent {
     }
 
     /**
-     * ギズモの表示状態を更新
+     * ギズモの表示状態を更新します。
      */
     private void setVisibleGizmo() {
         moveGizmo.setVisible(this.controlMode == ControlMode.MOVE);
@@ -484,30 +488,12 @@ public class GizmoModel extends Parent {
     }
 
     /**
-     * デバッグ用バウンディングボックス
-     * @param boundingBox
-     * @return
+     * 指定されたノードがギズモ内に存在するかどうかを判定します。
+     * 
+     * @param node 検索対象のノード
+     * @return ノードがギズモ内に存在する場合はtrue、それ以外の場合はfalse
      */
-    private Box createBoundingBoxVisual(BoundingBox boundingBox) {
-        double width = boundingBox.getWidth();
-        double height = boundingBox.getHeight();
-        double depth = boundingBox.getDepth();
-
-        Box boundingBoxVisual = new Box(width, height, depth);
-        boundingBoxVisual.setTranslateX((boundingBox.getMinX() + boundingBox.getMaxX()) / 2);
-        boundingBoxVisual.setTranslateY((boundingBox.getMinY() + boundingBox.getMaxY()) / 2);
-        boundingBoxVisual.setTranslateZ((boundingBox.getMinZ() + boundingBox.getMaxZ()) / 2);
-        boundingBoxVisual.setMaterial(new PhongMaterial(new Color(1.0d, 0.0d, 0.0d, 0.3d)));
-
-        return boundingBoxVisual;
-    }
-
-    /**
-     * ドラッグ操作中のギズモがあるか検索
-     * @param node
-     * @return
-     */
-    public boolean isGizmoDragging(Node node) {
+    public boolean isNodeInGizmo(Node node) {
         if (isNodeInTree(node, moveGizmo))
             return true;
         if (isNodeInTree(node, rotationGizmo))
@@ -519,10 +505,11 @@ public class GizmoModel extends Parent {
     }
 
     /**
-     * ノードの子に特定のノードがあるか再帰検索
-     * @param findNode
-     * @param serchNode
-     * @return
+     * 指定されたノードが木構造内に存在するかどうかを判定します。
+     * 
+     * @param findNode 検索するノード
+     * @param serchNode 木構造のルートノード
+     * @return ノードが子に存在する場合はtrue、それ以外の場合はfalse
      */
     private boolean isNodeInTree(Node findNode, Node serchNode) {
         if (findNode == null || serchNode == null) {
