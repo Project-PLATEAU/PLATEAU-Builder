@@ -80,25 +80,48 @@ public class GizmoModel extends Parent {
             scaleYGizmoHandle = new Cylinder(20, 240);
             scaleZGizmoHandle = new Cylinder(20, 240);
             
-            moveXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveX.obj").toExternalForm());
-            moveYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveY.obj").toExternalForm());
-            moveZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_moveZ.obj").toExternalForm());
-            rotationXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateX.obj").toExternalForm());
-            rotationYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateY.obj").toExternalForm());
-            rotationZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotateZ.obj").toExternalForm());
-            scaleXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleX.obj").toExternalForm());
-            scaleYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleY.obj").toExternalForm());
-            scaleZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scaleZ.obj").toExternalForm());
+            moveXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_move.obj").toExternalForm());
+            moveYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_move.obj").toExternalForm());
+            moveZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_move.obj").toExternalForm());
+            rotationXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotate.obj").toExternalForm());
+            rotationYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotate.obj").toExternalForm());
+            rotationZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_rotate.obj").toExternalForm());
+            scaleXGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scale.obj").toExternalForm());
+            scaleYGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scale.obj").toExternalForm());
+            scaleZGizmoView = Importer3D.load(CityGMLEditorApp.class.getResource("Locater_scale.obj").toExternalForm());
             
-            setMaterialColor(moveXGizmoView);
-            setMaterialColor(moveYGizmoView);
-            setMaterialColor(moveZGizmoView);
-            setMaterialColor(rotationXGizmoView);
-            setMaterialColor(rotationYGizmoView);
-            setMaterialColor(rotationZGizmoView);
-            setMaterialColor(scaleXGizmoView);
-            setMaterialColor(scaleYGizmoView);
-            setMaterialColor(scaleZGizmoView);
+            moveXGizmoView.setRotationAxis(Rotate.X_AXIS);
+            moveXGizmoView.setRotate(270);
+            moveXGizmoView.setTranslateZ(-120);
+            moveXGizmoView.setTranslateY(-120);
+            moveYGizmoView.setRotationAxis(Rotate.Z_AXIS);
+            moveYGizmoView.setRotate(90);
+            moveYGizmoView.setTranslateX(-120);
+            moveYGizmoView.setTranslateY(-120);
+
+            rotationXGizmoView.setRotationAxis(Rotate.X_AXIS);
+            rotationXGizmoView.setRotate(90);
+            rotationYGizmoView.setRotationAxis(Rotate.Z_AXIS);
+            rotationYGizmoView.setRotate(270);
+
+            scaleXGizmoView.setRotationAxis(Rotate.X_AXIS);
+            scaleXGizmoView.setRotate(270);
+            scaleXGizmoView.setTranslateZ(-110);
+            scaleXGizmoView.setTranslateY(-110);
+            scaleYGizmoView.setRotationAxis(Rotate.Z_AXIS);
+            scaleYGizmoView.setRotate(90);
+            scaleYGizmoView.setTranslateX(-110);
+            scaleYGizmoView.setTranslateY(-110);
+
+            setMaterialColor(moveXGizmoView, Color.RED);
+            setMaterialColor(moveYGizmoView, Color.rgb(0, 255, 0));
+            setMaterialColor(moveZGizmoView, Color.BLUE);
+            setMaterialColor(rotationXGizmoView, Color.RED);
+            setMaterialColor(rotationYGizmoView, Color.rgb(0, 255, 0));
+            setMaterialColor(rotationZGizmoView, Color.BLUE);
+            setMaterialColor(scaleXGizmoView, Color.RED);
+            setMaterialColor(scaleYGizmoView, Color.rgb(0, 255, 0));
+            setMaterialColor(scaleZGizmoView, Color.BLUE);
 
             PhongMaterial transparentMaterial = new PhongMaterial();
             transparentMaterial.setDiffuseColor(Color.rgb(0, 0, 0, 0)); // ディフューズカラー（基本色）
@@ -231,18 +254,20 @@ public class GizmoModel extends Parent {
     }
 
     /**
-     * ノードに適用されているマテリアルの色を調整します。
+     * ギズモ用にマテリアルを調整します。
      *
      * @param node 色を調整するノード
      */
-    private void setMaterialColor(Node node) {
+    private void setMaterialColor(Node node, Color color) {
         for (var meshView : findMeshViews(node)) {
             PhongMaterial material = (PhongMaterial)meshView.getMaterial();
-            var color = material.getDiffuseColor();
             WritableImage image = new WritableImage(1, 1);
             PixelWriter writer = image.getPixelWriter();
-            writer.setColor(0, 0, new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getOpacity()));
+            writer.setColor(0, 0, color);
             material.setSelfIlluminationMap(image);
+            material.setDiffuseColor(color); // ディフューズカラー（基本色）
+            material.setSpecularColor(Color.rgb(0, 0, 0, 0)); // スペキュラカラー（光の反射）
+            material.setSpecularPower(0);
         }
     }
 
