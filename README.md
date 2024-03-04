@@ -15,7 +15,7 @@
 本システムの詳細については[技術検証レポート]()を参照してください。
 
 ## 3. 利用手順
-本システムの構築手順及び利用手順については[利用チュートリアル](https://github.io/Project-PLATEAU/PLATEAU-CityGML-Editor)を参照してください。
+本システムの構築手順及び利用手順については[操作マニュアル](https://synesthesias.github.io/PLATEAU-CityGML-Editor/index.html)を参照してください。
 
 ## 4. システム概要
 |分類|機能名|機能説明|
@@ -78,4 +78,4 @@
 ## 10. 参考資料
 - 技術検証レポート：
 - PLATEAU WebサイトのUse caseページ「CityGML編集ツール」：
-- 操作マニュアル：
+- 操作マニュアル：https://synesthesias.github.io/PLATEAU-CityGML-Editor/index.html
