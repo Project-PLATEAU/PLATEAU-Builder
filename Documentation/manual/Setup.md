@@ -3,8 +3,6 @@
 ## 1. 本書について
 本書では、CityGML編集ツール（以下「本ツール」という）の利用環境構築手順について記載しています。
 
-本ツールの構成や仕様の詳細については[技術検証レポート]()も参考にしてください。
-
 ## 2. 動作環境
 | 項目 | 最小動作環境 | 推奨動作環境 |
 | --- | --- | --- |
@@ -15,7 +13,7 @@
 |ネットワーク|不要|同左|
 
 ## 3. インストール手順
-Githubリポジトリの[リリース](https://github.com/Synesthesias/PLATEAU-CityGML-Editor/releases)から最新版のリリースファイルをダウンロードします。
+Githubリポジトリの[リリース](https://github.com/Project-PLATEAU/PLATEAU-CityGML-Editor/releases)から最新版のリリースファイルをダウンロードします。
 
 ファイル内にあるexeファイルを実行することで本ツールを利用できます。
 
@@ -29,7 +27,7 @@ Githubリポジトリの[リリース](https://github.com/Synesthesias/PLATEAU-C
 ### セットアップ
 以下コマンド等でローカルにクローンします。
 ```
-git clone https://github.com/Synesthesias/PLATEAU-CityGML-Editor
+git clone https://github.com/Project-PLATEAU/PLATEAU-CityGML-Editor
 ```
 
 ### 実行
