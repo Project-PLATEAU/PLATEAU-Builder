@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.geometry.Insets?>
+<?import java.net.URL?>
+
+<AnchorPane fx:id="root" prefHeight="337.0" prefWidth="217.0" styleClass="transparent" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.plateaubuilder.plateaubuilder.fxml.surfacetype.SurfaceTypeEditorController">
+    <TabPane fx:id="modeTabPane" styleClass="surface-type-edit-tab-pane" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Tab fx:id="polygonEditTab" text="ポリゴン編集">
+            <VBox fx:id="polygonEditTypeList" alignment="TOP_CENTER" prefWidth="177.0" styleClass="surface-type-list">
+                <fx:include source="surface-type-editor-list-item.fxml" />
+            </VBox>
+        </Tab>
+        <Tab fx:id="componentEditTab" text="地物編集">
+            <TabPane fx:id="componentEditTabPane" side="LEFT" styleClass="surface-type-edit-tab-pane" tabClosingPolicy="UNAVAILABLE">
+                <Tab fx:id="componentTypeEditTab" text="タイプ編集">
+                    <VBox fx:id="componentEditTypeList" alignment="TOP_CENTER" styleClass="surface-type-list">
+                        <fx:include source="surface-type-editor-list-item.fxml" />
+                    </VBox>
+                </Tab>
+                <Tab fx:id="componentPolygonEditTab" text="面編集">
+                    <AnchorPane styleClass="surface-type-list">
+                        <Text fx:id="componentPolygonSelectTutorialText" fill="WHITE" layoutY="34.0" text="面を選択してください" AnchorPane.leftAnchor="38.0" AnchorPane.topAnchor="21.0" />
+                        <Button fx:id="componentPolygonEditButton" layoutX="71.0" layoutY="21.0" onAction="#onClickComponentPolygonEditButton" text="編集" />
+                        <VBox fx:id="componentPolygonEditNode" alignment="CENTER" layoutX="26.0" layoutY="62.0" spacing="20">
+                            <VBox alignment="CENTER">
+                                <Text fill="WHITE" text="追加・削除するポリゴンを" />
+                                <Text fill="WHITE" text="クリックして選択してください" />
+                            </VBox>
+                            <HBox alignment="CENTER" layoutX="34.0" layoutY="106.0" spacing="20">
+                                <Button onAction="#onClickComponentPolygonCancelButton" text="キャンセル" />
+                                <Button onAction="#onClickComponentPolygonApplyButton" text="決定" />
+                            </HBox>
+                        </VBox>
+                    </AnchorPane>
+                </Tab>
+                <Tab fx:id="componentOpeningEditTab" text="開口部編集">
+                    <AnchorPane styleClass="surface-type-list">
+                        <Text fx:id="componentOpeningSelectTutorialText" fill="WHITE" layoutY="34.0" text="LOD3の面を選択してください" AnchorPane.leftAnchor="38.0" AnchorPane.topAnchor="21.0" />
+                        <Button fx:id="componentOpeningEditButton" layoutX="71.0" layoutY="21.0" onAction="#onClickComponentOpeningEditButton" text="編集" />
+                        <VBox fx:id="componentOpeningEditNode" alignment="CENTER" layoutX="26.0" layoutY="62.0" spacing="20">
+                            <VBox alignment="CENTER">
+                                <Text fill="WHITE" text="追加・削除する開口部を" />
+                                <Text fill="WHITE" text="クリックして選択してください" />
+                            </VBox>
+                            <HBox alignment="CENTER" layoutX="34.0" layoutY="106.0" spacing="20">
+                                <Button onAction="#onClickComponentOpeningCancelButton" text="キャンセル" />
+                                <Button onAction="#onClickComponentOpeningApplyButton" text="決定" />
+                            </HBox>
+                        </VBox>
+                    </AnchorPane>
+                </Tab>
+            </TabPane>
+        </Tab>
+    </TabPane>
+    <padding>
+        <Insets left="10.0" top="10.0" />
+    </padding>
+    <stylesheets>
+        <URL value="@../../viewer.css" />
+    </stylesheets>
+</AnchorPane>
