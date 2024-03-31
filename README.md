@@ -17,12 +17,6 @@
 ## 3. 利用手順
 本システムの構築手順及び利用手順については[操作マニュアル](https://project-plateau.github.io/3PLATEAU-Builder/index.html)を参照してください。
 
-https://github.com/Project-PLATEAU/3D-City-Model-Generator
-https://project-plateau.github.io/3D-City-Model-Generator/index.html
-
-https://github.com/Project-PLATEAU/PLATEAU-Builder
-https://project-plateau.github.io/3PLATEAU-Builder/index.html
-
 ## 4. システム概要
 |分類|機能名|機能説明|
 |---|---|---|
