@@ -12,13 +12,13 @@ wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-group = 'org.plateau.citygmleditor'
+group = 'org.plateau.plateaubuilder'
 version = '1.0.0'
 
 ext {
-    mainModuleName = 'CityGMLEditor'
-    mainClassName = 'org.plateau.citygmleditor.citygmleditor.CityGMLEditorApp'
-    launcherClassName = 'org.plateau.citygmleditor.citygmleditor.Launcher'
+    mainModuleName = 'PLATEAUBuilder'
+    mainClassName = 'org.plateau.plateaubuilder.plateaubuilder.PLATEAUBuilderApp'
+    launcherClassName = 'org.plateau.plateaubuilder.plateaubuilder.Launcher'
     javafxVersion = '17.0.10'  //requires JDK11+
 }
 
@@ -185,9 +185,9 @@ tasks.createExe.dependsOn('uberJar')
 
 launch4j() {
     mainClassName = project.mainClassName
-    outputDir = './product/CityGMLEditor'
+    outputDir = './product/PLATEAUBuilder'
     // TODO: jar名変数化
-    jar = '../../libs/CityGMLEditor-1.0.0-no-deps-win.jar'
+    jar = '../../libs/PLATEAUBuilder-1.0.0-no-deps-win.jar'
     headerType = 'gui' // ログを確認したい場合は'console'に設定
     bundledJrePath = './image'
     bundledJre64Bit = true
@@ -196,16 +196,16 @@ launch4j() {
 // JREをコピー
 task copyJre(type: Copy, dependsOn: ['jlink']) {
     from './build/image'
-    into './build/product/CityGMLEditor/image'
+    into './build/product/PLATEAUBuilder/image'
 }
 
 task copyResources(type: Copy) {
-    from 'src/main/resources/org/plateau/citygmleditor/citygmleditor/'
+    from 'src/main/resources/org/plateau/plateaubuilder/plateaubuilder/'
     include 'Locater*'
-    into './build/product/CityGMLEditor/'
+    into './build/product/PLATEAUBuilder/'
 }
 
-// exeファイル一式を`build/product/CityGMLEditor`に生成する
+// exeファイル一式を`build/product/PLATEAUBuilder`に生成する
 task deploy(dependsOn: [
         'uberJar',
         'jlink',

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.ToggleButton?>
+
+<ToggleButton mnemonicParsing="false" prefHeight="30.0" prefWidth="250.0" styleClass="SurfaceButton" xmlns="http://javafx.com/javafx/21">
+    <stylesheets>
+        <URL value="@../../viewer.css" />
+    </stylesheets>
+</ToggleButton>

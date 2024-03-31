@@ -52,17 +52,15 @@
 |ネットワーク|不要|同左|
 
 ## 7. 本リポジトリのフォルダ構成
-本リポジトリのソースコードはsrc/main/java/org/plateau/citygmleditor内に以下のモジュールごとに配置されています。
+本リポジトリのソースコードはsrc/main/java/org/plateau/plateaubuilder内に以下のモジュールごとに配置されています。
 | フォルダ名 | 詳細 |
 | --- | --- |
-|citygmleditor|アプリケーションの初期化処理|
+|plateaubuilder|アプリケーションの初期化処理|
 |citymodel|3D都市モデルの可視化・情報保持|
 |control|3D都市モデルの操作|
-|converters|3Dファイル、CityGML間の変換|
-|exporters|各種ファイルへのエクスポート|
+|io|各種ファイルへのエクスポート・インポート|
 |fxml|UI|
 |geometry|座標系変換|
-|importers|各種ファイルのインポート|
 |validation|品質検査|
 |world|3D都市モデルの配置空間およびそこに配置するGizmo等のオブジェクト定義|
 
@@ -76,5 +74,4 @@
 - 本リポジトリの利用により生じた損失及び損害等について、国土交通省はいかなる責任も負わないものとします。
 
 ## 10. 参考資料
-- PLATEAU WebサイトのUse caseページ「CityGML編集ツール」：
-- 操作マニュアル：https://synesthesias.github.io/PLATEAU-CityGML-Editor/index.html
+- 操作マニュアル：https://project-plateau.github.io/PLATEAU-Builder/index.html
