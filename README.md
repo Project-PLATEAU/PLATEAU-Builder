@@ -15,7 +15,7 @@
 また、広く一般的に簡易なGUIを備えたオープンソースソフトウェアとして開発されています。
 
 ## 3. 利用手順
-本システムの構築手順及び利用手順については[操作マニュアル](https://project-plateau.github.io/3PLATEAU-Builder/index.html)を参照してください。
+本システムの構築手順及び利用手順については[操作マニュアル](https://project-plateau.github.io/PLATEAU-Builder/index.html)を参照してください。
 
 ## 4. システム概要
 |分類|機能名|機能説明|
