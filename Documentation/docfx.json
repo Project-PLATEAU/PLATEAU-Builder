@@ -3,7 +3,7 @@
     ],
     "build": {
         "globalMetadata": {
-            "_appTitle": "CityGML編集ツール",
+            "_appTitle": "PLATEAU Builder",
             "_appFooter": "PLATEAU",
             "_enableSearch": true
         },
@@ -31,7 +31,7 @@
             }
         ],
         "sitemap": {
-            "baseUrl": "https://project-plateau.github.io/PLATEAU-CityGML-Editor",
+            "baseUrl": "https://project-plateau.github.io/PLATEAU-Builder",
             "changefreq": "weekly",
             "fileOptions": {
                 "api/*": {

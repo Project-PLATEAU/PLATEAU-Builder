@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.plateaubuilder.plateaubuilder.fxml.main.HierarchyController">
+     <TitledPane animated="false" collapsible="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="ヒエラルキー" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <contextMenu>
+             <ContextMenu fx:id="hierarchyContextMenu" prefWidth="200.0">
+                 <items>
+                     <MenuItem fx:id="exportGltfMenu" mnemonicParsing="false" onAction="#exportGltf" text="glTFをエクスポート..." />
+                     <MenuItem fx:id="exportObjMenu" mnemonicParsing="false" onAction="#exportObj" text="OBJをエクスポート..." />
+                     <MenuItem fx:id="importGltfMenu" mnemonicParsing="false" onAction="#importGltf" text="glTFをインポート..." />
+                     <MenuItem fx:id="importObjMenu" mnemonicParsing="false" onAction="#importObj" text="OBJをインポート..." />
+                     <MenuItem mnemonicParsing="false" onAction="#hideSelectedViews" text="選択地物を非表示" />
+                     <MenuItem mnemonicParsing="false" onAction="#hideUnselectedViews" text="選択地物以外を非表示" />
+                     <MenuItem mnemonicParsing="false" onAction="#showAllViews" text="全ての地物を表示" />
+                 </items>
+             </ContextMenu>
+         </contextMenu>
+         <TreeTableView fx:id="hierarchyTreeTable" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="300.0" showRoot="false">
+             <columns>
+                 <TreeTableColumn fx:id="idColumn" maxWidth="1.7976931348623157E308" minWidth="200.0" prefWidth="260.0" resizable="false" sortable="false" text="Node" />
+                 <TreeTableColumn fx:id="visibilityColumn" maxWidth="-1.0" minWidth="30.0" prefWidth="50.0" resizable="false" text="Visibility" />
+                 <TreeTableColumn fx:id="nodeColumn" editable="false" minWidth="-Infinity" prefWidth="0.0" resizable="false" sortable="false" text="Id" visible="false" />
+             </columns>
+         </TreeTableView>
+      <font>
+         <Font size="14.0" />
+      </font>
+      <padding>
+         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+      </padding>
+     </TitledPane>
+</AnchorPane>
