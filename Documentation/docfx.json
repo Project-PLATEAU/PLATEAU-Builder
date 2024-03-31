@@ -31,7 +31,7 @@
             }
         ],
         "sitemap": {
-            "baseUrl": "https://project-plateau.github.io/PLATEAU-CityGML-Editor",
+            "baseUrl": "https://project-plateau.github.io/PLATEAU-Builder",
             "changefreq": "weekly",
             "fileOptions": {
                 "api/*": {

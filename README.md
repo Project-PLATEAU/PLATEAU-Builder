@@ -1,11 +1,12 @@
-# PLATEAU Builder
+# PLATEAU Builder（CityGML編集ツール）
 ![スクリーンショット 2024-02-14 171551](./Documentation/resources/Index/index.png)
 
 
 ## 1. 概要
-本リポジトリでは、Project PLATEAUの令和5年度「都市デジタルツインの実現に向けた研究開発及び実証調査業務」（内閣府/研究開発とSociety5.0との橋渡しプログラム（BRIDGE））におけるcm23-08「CityGML編集ツールの開発」において開発した「PLATEAU Builder」のソースコードを公開しています。
+本リポジトリでは、2023年度のProject PLATEAUで開発した「PLATEAU-Builder」のソースコードを公開しています。  
+「PLATEAU-Builder」は、PLATEAUの標準仕様に準拠したCityGMLデータの編集または品質検査を行うためのシステムです。
 
-「PLATEAU Builder」は、PLATEAU標準仕様に準拠したCityGMLデータの編集または品質検査を行うためのシステムです。
+※本プロジェクトは、令和5年度「都市デジタルツインの実現に向けた研究開発及び実証調査業務」（内閣府/研究開発とSociety5.0との橋渡しプログラム（BRIDGE））の一部として実施されました。
 
 ## 2. 「PLATEAU Builder」について
 「PLATEAU Builder」は、3D都市モデルの整備を業務として実施する測量会社等のみならず、3D都市モデルを利用・作成したい個人や専門分野の異なる測量またはGISの専門ではないベンダーにおいても、簡易に3D都市モデルを作成して研究や検証に利用できることを目的として開発いたしました。
@@ -13,7 +14,7 @@
 本システムは、建築物モデルの3D都市モデルデータについて、ジオメトリ・地物定義・空間属性・主題属性を編集する機能や外部で作成した3Dデータオブジェクトで置換する機能といった編集機能に加えて、編集したデータをPLATEAUの標準仕様に準拠した基準で品質検査する機能、PLATEAUの標準仕様に準拠したデータセットとして出力する機能を実装しています。また、広く一般的に簡易なGUIを備えたオープンソースソフトウェアとして開発されています。
 
 ## 3. 利用手順
-本システムの構築手順及び利用手順については[操作マニュアル](https://project-plateau.github.io/PLATEAU-CityGML-Editor/index.html)を参照してください。
+本システムの構築手順及び利用手順については[操作マニュアル](https://project-plateau.github.io/PLATEAU-Builder/index.html)を参照してください。
 
 ## 4. システム概要
 |分類|機能名|機能説明|
@@ -72,4 +73,4 @@
 - 本リポジトリの利用により生じた損失及び損害等について、国土交通省はいかなる責任も負わないものとします。
 
 ## 10. 参考資料
-- 操作マニュアル：https://project-plateau.github.io/PLATEAU-CityGML-Editor/index.html
+- 操作マニュアル：https://project-plateau.github.io/PLATEAU-Builder/index.html

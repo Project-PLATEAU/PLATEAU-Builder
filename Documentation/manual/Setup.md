@@ -13,7 +13,7 @@
 |ネットワーク|不要|同左|
 
 ## 3. インストール手順
-Githubリポジトリの[リリース](https://github.com/Project-PLATEAU/PLATEAU-CityGML-Editor/releases)から最新版のリリースファイルをダウンロードします。
+Githubリポジトリの[リリース](https://github.com/Project-PLATEAU/PLATEAU-Builder/releases)から最新版のリリースファイルをダウンロードします。
 
 ファイル内にあるexeファイルを実行することで本ツールを利用できます。
 
@@ -27,17 +27,17 @@ Githubリポジトリの[リリース](https://github.com/Project-PLATEAU/PLATEA
 ### セットアップ
 以下コマンド等でローカルにクローンします。
 ```
-git clone https://github.com/Project-PLATEAU/PLATEAU-CityGML-Editor
+git clone https://github.com/Project-PLATEAU/PLATEAU-Builder
 ```
 
 ### 実行
-PLATEAU-CityGML-Editorフォルダ内で以下を実行します。
+PLATEAU-Builderフォルダ内で以下を実行します。
 ```
 gradle run
 ```
 
 ### exeファイル生成
-PLATEAU-CityGML-Editorフォルダ内で以下を実行します。
+PLATEAU-Builderフォルダ内で以下を実行します。
 ```
 gradle deploy
 ```
