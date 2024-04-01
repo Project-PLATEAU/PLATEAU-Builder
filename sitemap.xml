@@ -1,20 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://project-plateau.github.io/PLATEAU-CityGML-Editor/index.html</loc>
-    <lastmod>2024-02-15T11:35:29+09:00</lastmod>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/index.html</loc>
+    <lastmod>2024-04-01T11:10:39+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://project-plateau.github.io/PLATEAU-CityGML-Editor/manual/HowToUse.html</loc>
-    <lastmod>2024-02-15T11:35:29+09:00</lastmod>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/HowToUse.html</loc>
+    <lastmod>2024-04-01T11:10:39+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://project-plateau.github.io/PLATEAU-CityGML-Editor/manual/Setup.html</loc>
-    <lastmod>2024-02-15T11:35:29+09:00</lastmod>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/Setup.html</loc>
+    <lastmod>2024-04-01T11:10:39+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

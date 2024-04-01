@@ -5,10 +5,10 @@
         "changefreq": "daily"
       }
     },
-    "baseUrl": "https://project-plateau.github.io/PLATEAU-CityGML-Editor/",
+    "baseUrl": "https://project-plateau.github.io/PLATEAU-Builder/",
     "changefreq": "weekly"
   },
-  "source_base_path": "C:/Users/kazum/Synesthesias/PLATEAU-CityGML-Editor/Documentation",
+  "source_base_path": "C:/Users/kazum/Synesthesias/Repos_PLATEAU/PLATEAU-Builder/Documentation",
   "xrefmap": "xrefmap.yml",
   "files": [
     {
