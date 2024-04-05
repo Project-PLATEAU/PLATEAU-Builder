@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<ToolBar maxWidth="1.7976931348623157E308" minWidth="350.0" prefHeight="40.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.main.ToolbarController">
+    <ToggleButton mnemonicParsing="false" onAction="#onSelect" prefHeight="32.0" prefWidth="32.0" selected="true">
+        <toggleGroup>
+            <!--suppress JavaFxUnresolvedFxIdReference -->
+            <ToggleGroup fx:id="toggleGroup" />
+        </toggleGroup>
+        <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../images/icon_select.png" />
+            </ImageView>
+        </graphic>
+    </ToggleButton>
+    <ToggleButton mnemonicParsing="false" onAction="#onMove" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
+        <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../images/icon_move.png" />
+            </ImageView>
+        </graphic>
+    </ToggleButton>
+    <ToggleButton mnemonicParsing="false" onAction="#onRotation" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
+        <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../images/icon_rotate.png" />
+            </ImageView>
+        </graphic>
+    </ToggleButton>
+    <ToggleButton mnemonicParsing="false" onAction="#onScale" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
+        <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../images/icon_scale.png" />
+            </ImageView>
+        </graphic>
+    </ToggleButton>
+
+    <Separator />
+
+    <ToggleButton fx:id="surfaceViewToggle" mnemonicParsing="false" onAction="#onToggleSurfaceView" prefHeight="32.0" prefWidth="32.0">
+        <tooltip>
+            <Tooltip text="面表示モード" />
+        </tooltip>
+      <graphic>
+         <ImageView fitHeight="20.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_surface.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </ToggleButton>
+
+    <Separator />
+
+    <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" selected="true" userData="1">
+        <toggleGroup>
+            <ToggleGroup fx:id="lodToggleGroup" />
+        </toggleGroup>
+        <tooltip>
+            <Tooltip text="LOD表示切替(1)" />
+        </tooltip>
+      <graphic>
+         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_lod1.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </ToggleButton>
+    <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$lodToggleGroup" userData="2">
+        <tooltip>
+            <Tooltip text="LOD表示切替(2)" />
+        </tooltip>
+      <graphic>
+         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_lod2.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </ToggleButton>
+    <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$lodToggleGroup" userData="3">
+        <tooltip>
+            <Tooltip text="LOD表示切替(3)" />
+        </tooltip>
+      <graphic>
+         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_lod3.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </ToggleButton>
+</ToolBar>

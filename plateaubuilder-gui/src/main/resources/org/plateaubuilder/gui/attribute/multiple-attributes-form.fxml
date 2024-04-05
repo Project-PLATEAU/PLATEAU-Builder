@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import java.net.URL?>
+<BorderPane prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.attribute.MultipleAttributesFormController">
+    <center>
+        <VBox spacing="10" style="-fx-background-color: #3A3A3A;">
+            <TabPane fx:id="tabPane" styleClass="multiple-attributes-tab-pane">
+                <Tab text="dummy">
+                    <Text text="dummy" />
+                </Tab>
+            </TabPane>
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <Button onAction="#handleCancel" prefHeight="30.0" text="キャンセル" />
+                <Button onAction="#handleAdd" prefHeight="30.0" text="追加" />
+            <padding>
+               <Insets left="10.0" right="10.0" />
+            </padding>
+            </HBox>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+        </VBox>
+    </center>
+    <stylesheets>
+        <URL value="@../viewer.css" />
+    </stylesheets>
+</BorderPane>

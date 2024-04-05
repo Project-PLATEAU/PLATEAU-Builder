@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-
-<?import javafx.scene.control.ToggleButton?>
-<ToggleButton fx:id="root" alignment="CENTER_LEFT" mnemonicParsing="false" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateau.plateaubuilder.plateaubuilder.fxml.validation.ValidationLogListItemController">
-</ToggleButton>

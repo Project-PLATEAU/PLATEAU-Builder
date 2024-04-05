@@ -33,7 +33,7 @@ git clone https://github.com/Project-PLATEAU/PLATEAU-Builder
 ### 実行
 PLATEAU-Builderフォルダ内で以下を実行します。
 ```
-gradle run
+gradle plateaubuilder-gui:run
 ```
 
 ### exeファイル生成
@@ -41,6 +41,6 @@ PLATEAU-Builderフォルダ内で以下を実行します。
 ```
 gradle deploy
 ```
-`build/product`配下にexeファイルを含んだ配布用ディレクトリが生成されます。
+`plateaubuilder-gui/build/product`配下にexeファイルを含んだ配布用ディレクトリが生成されます。
 
 

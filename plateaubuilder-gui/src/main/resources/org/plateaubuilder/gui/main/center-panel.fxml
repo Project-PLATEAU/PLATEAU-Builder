@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.main.CenterPanelController">
+   <fx:include source="toolbar.fxml" />
+   <Pane fx:id="subSceneContainer" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+      <fx:include source="../surfacetype/surface-type-editor.fxml" />
+   </Pane>
+</VBox>
