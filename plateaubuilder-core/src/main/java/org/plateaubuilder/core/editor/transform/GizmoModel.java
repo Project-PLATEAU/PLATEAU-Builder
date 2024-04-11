@@ -514,20 +514,20 @@ public class GizmoModel extends Parent {
      * 指定されたノードが木構造内に存在するかどうかを判定します。
      * 
      * @param findNode 検索するノード
-     * @param serchNode 木構造のルートノード
+     * @param searchNode 木構造のルートノード
      * @return ノードが子に存在する場合はtrue、それ以外の場合はfalse
      */
-    private boolean isNodeInTree(Node findNode, Node serchNode) {
-        if (findNode == null || serchNode == null) {
+    private boolean isNodeInTree(Node findNode, Node searchNode) {
+        if (findNode == null || searchNode == null) {
             return false;
         }
         // 同じかチェック
-        if (findNode.equals(serchNode)) {
+        if (findNode.equals(searchNode)) {
             return true;
         }
         // Parentである場合、子ノードを再帰検索
-        if (serchNode instanceof Parent) {
-            Parent parentB = (Parent) serchNode;
+        if (searchNode instanceof Parent) {
+            Parent parentB = (Parent) searchNode;
             for (Node child : parentB.getChildrenUnmodifiable()) {
                 if (isNodeInTree(findNode, child)) {
                     return true;

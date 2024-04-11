@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane style="-fx-background-color: #515151;" stylesheets="..\..\viewer.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.search.SearchDialogController">
+   <children>
+      <DialogPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #515151;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <content>
+            <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="400.0" prefWidth="600.0">
+               <children>
+                  <Label layoutX="20.0" layoutY="31.0" prefWidth="120.0" text="地物型">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="154.0" layoutY="31.0" prefWidth="120.0" text="主題属性">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="274.0" layoutY="31.0" prefWidth="120.0" text="条件">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="394.0" layoutY="31.0" prefWidth="120.0" text="値">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+                  <ScrollPane layoutX="20.0" layoutY="61.0" prefHeight="150.0" style="-fx-background-color: #515151;" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="51.0">
+                     <fx:include source="search-condition.fxml" />
+                  </ScrollPane>
+                  <Button layoutX="20.0" layoutY="215.0" mnemonicParsing="false" text="条件の追加" />
+                  <ToggleButton layoutX="20.0" layoutY="258.0" selected="true" text="すべての条件に一致">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="toggleGroup" />
+                     </toggleGroup></ToggleButton>
+                  <ToggleButton layoutX="132.0" layoutY="258.0" text="いずれかの条件に一致" toggleGroup="$toggleGroup" />
+                  <Button layoutX="20.0" layoutY="317.0" mnemonicParsing="false" text="適用" />
+                  <Button layoutX="80.0" layoutY="317.0" mnemonicParsing="false" text="キャンセル" />
+               </children>
+            </AnchorPane>
+         </content>
+      </DialogPane>
+   </children>
+</AnchorPane>

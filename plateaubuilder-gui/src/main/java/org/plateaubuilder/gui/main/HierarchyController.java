@@ -25,6 +25,7 @@ import org.plateaubuilder.core.io.mesh.exporters.ObjExporter;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.gui.io.mesh.ThreeDimensionsExportDialogController;
 import org.plateaubuilder.gui.io.mesh.ThreeDimensionsImportDialogController;
+import org.plateaubuilder.gui.search.SearchDialogController;
 import org.plateaubuilder.core.world.World;
 
 import java.io.File;
@@ -319,6 +320,10 @@ public class HierarchyController implements Initializable {
         var allViews = World.getActiveInstance().getCityModelGroup().getAllFeatures();
         allViews.forEach(view -> view.setVisible(true));
 
+    }
+
+    public void showSearchDialog() {
+        SearchDialogController.createSearchDialog();
     }
 
     private class TreeItemImpl extends TreeItem<Node> {
