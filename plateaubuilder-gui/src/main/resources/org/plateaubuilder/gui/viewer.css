@@ -155,8 +155,9 @@
     linear-gradient(from 0px 0px to 0px 5px, derive(-fx-control-inner-background, -9%), -fx-control-inner-background);
   -fx-background-insets: 0, 1;
   -fx-background-radius: 3, 2;
-  -fx-control-inner-background: #333333;
-   -fx-prompt-text-fill:grey;
+  -fx-control-inner-background: none;
+   -fx-prompt-text-fill:#646464;
+   -fx-text-inner-color: white;
 }
 .text-field{
     -fx-border-width: 1;
