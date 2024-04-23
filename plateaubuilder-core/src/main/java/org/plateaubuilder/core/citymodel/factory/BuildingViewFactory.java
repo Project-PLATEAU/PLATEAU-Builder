@@ -4,58 +4,58 @@ import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.plateaubuilder.core.citymodel.BuildingView;
 import org.plateaubuilder.core.citymodel.CityModelGroup;
 import org.plateaubuilder.core.citymodel.CityModelView;
+import org.plateaubuilder.core.citymodel.ManagedGMLView;
 import org.plateaubuilder.core.editor.Editor;
 
-public class CityObjectMemberFactory extends AbstractFeatureViewFactory {
-    public CityObjectMemberFactory(CityModelGroup group, CityModelView target) {
+public class BuildingViewFactory
+        extends AbstractFeatureViewFactory<AbstractBuilding, AbstractBuilding> {
+    public BuildingViewFactory(CityModelGroup group, CityModelView target) {
         super(group, target);
     }
 
-    public BuildingView createBuilding(AbstractBuilding gmlObject) {
-        var building = new BuildingView(gmlObject);
-        building.setId(gmlObject.getId());
+    @Override
+    public ManagedGMLView<AbstractBuilding> create(AbstractBuilding gmlObject) {
+        var view = new BuildingView(gmlObject);
+        view.setId(gmlObject.getId());
 
         var lod1SolidFactory = new LOD1SolidFactory(getTarget());
         var lod1Solid = lod1SolidFactory.createLOD1Solid(gmlObject);
-        if (lod1Solid != null)
-            building.setLOD1Solid(lod1Solid);
+        if (lod1Solid != null) {
+            view.setLOD1Solid(lod1Solid);
+        }
 
         var lod2SolidFactory = new LOD2SolidFactory(getTarget());
         var lod2Solid = lod2SolidFactory.createLOD2Solid(gmlObject);
         if (lod2Solid != null) {
-            if (lod1Solid != null)
-                lod1Solid.setVisible(false);
-
-            building.setLOD2Solid(lod2Solid);
+            view.setLOD2Solid(lod2Solid);
         }
 
         var lod3SolidFactory = new LOD3SolidFactory(getTarget());
         var lod3Solid = lod3SolidFactory.createLOD3Solid(gmlObject);
         if (lod3Solid != null) {
-            if (lod1Solid != null)
-                lod1Solid.setVisible(false);
-            if (lod2Solid != null)
-                lod2Solid.setVisible(false);
-            building.setLOD3Solid(lod3Solid);
+            view.setLOD3Solid(lod3Solid);
         }
 
-         // </bldg:outerBuildingInstallation>
+        view.setDefaultVisible();
+
+        // </bldg:outerBuildingInstallation>
         for (var outerBuildingInstallation : gmlObject.getOuterBuildingInstallation()) {
             var geometryFactory = new GeometryFactory(getTarget());
-            var buildingInstallationView = geometryFactory.cretateBuildingInstallationView(outerBuildingInstallation.getObject());
+            var buildingInstallationView = geometryFactory
+                    .cretateBuildingInstallationView(outerBuildingInstallation.getObject());
             if (buildingInstallationView != null) {
-                building.addBuildingInstallationView(buildingInstallationView);
+                view.addBuildingInstallationView(buildingInstallationView);
             }
         }
 
         // <bldg:consistsOfBuildingPart>
         for (var consistsOfBuildingPart : gmlObject.getConsistsOfBuildingPart()) {
-            var buildingPart = createBuilding(consistsOfBuildingPart.getBuildingPart());
-            building.addBuildingPart(buildingPart);
+            var buildingPart = create(consistsOfBuildingPart.getBuildingPart());
+            view.addBuildingPart((BuildingView) buildingPart);
         }
 
-        building.toggleLODView(Editor.getCityModelViewMode().getLOD());
+        view.toggleLODView(Editor.getCityModelViewMode().getLOD());
 
-        return building;
+        return view;
     }
 }

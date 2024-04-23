@@ -1,98 +1,39 @@
 package org.plateaubuilder.core.citymodel.geometry;
 
-import javafx.scene.Parent;
-import javafx.scene.shape.Mesh;
-import javafx.scene.shape.MeshView;
-import javafx.scene.shape.TriangleMesh;
-import javafx.scene.shape.VertexFormat;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.citygml4j.model.gml.geometry.primitives.AbstractSolid;
 import org.plateaubuilder.core.citymodel.CityModelView;
 import org.plateaubuilder.core.editor.surfacetype.BuildingSurfaceTypeView;
-import org.plateaubuilder.core.editor.transform.TransformManipulator;
-import org.plateaubuilder.core.utils3d.polygonmesh.TexCoordBuffer;
-import org.plateaubuilder.core.utils3d.polygonmesh.VertexBuffer;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * LODSolidのインターフェースを表します。
  * これを実装するSolidクラスではSolidの頂点とテクスチャ座標情報が保持され、面情報は各Polygonが保持します。
  */
-public interface ILODSolidView {
+public interface ILODSolidView extends ILODView {
     /**
-     * AbstractSolidを取得します。
-     * @return AbstractSolid
+     * {@code AbstractSolid}を取得します。
+     * 
+     * @return {@code AbstractSolid}
      */
-    public AbstractSolid getAbstractSolid();
+    public AbstractSolid getGmlObject();
 
     /**
-     * 親ノードを取得します。
-     * @return 親ノード
+     * {@code BoundarySurfaceView}の一覧を取得します。
+     * 
+     * @return {@code BoundarySurfaceView}の一覧
      */
-    public Parent getParent();
-
-    /**
-     * {@code PolygonView}の一覧を取得します。
-     * @return {@code PolygonView}の一覧
-     */
-    public ArrayList<PolygonView> getPolygons();
-
-    /**
-     * 頂点バッファを取得します。
-     * @return 頂点バッファ
-     */
-    public VertexBuffer getVertexBuffer();
-
-    /**
-     * MeshViewを取得します。
-     * @return メッシュビュー
-     */
-    public MeshView getMeshView();
-
     default public List<BoundarySurfaceView> getBoundaries() {
         return null;
     }
 
-    default public Mesh getTotalMesh() {
-        if (getMeshView() == null)
-            return null;
-        var mesh = (TriangleMesh)getMeshView().getMesh();
-        var outMesh = new TriangleMesh();
-        outMesh.setVertexFormat(VertexFormat.POINT_NORMAL_TEXCOORD);
-        outMesh.getNormals().addAll(mesh.getNormals());
-        outMesh.getPoints().addAll(mesh.getPoints());
-        outMesh.getTexCoords().addAll(mesh.getTexCoords());
-
-        for (var polygon : getPolygons()) {
-            outMesh.getFaces().addAll(polygon.getFaceBuffer().getBufferAsArray());
-        }
-
-        var smooths = new int[outMesh.getFaces().size() / 9];
-        Arrays.fill(smooths, 1);
-        outMesh.getFaceSmoothingGroups().addAll(smooths);
-
-        return outMesh;
-    }
-
     /**
-     * テクスチャ座標バッファを取得します。
-     * @return テクスチャ座標バッファ
-     */
-    public TexCoordBuffer getTexCoordBuffer();
-
-    /**
+     * {@code BuildingSurfaceTypeView}を取得します。
      * 
+     * @return {@code BuildingSurfaceTypeView}
      */
-    public TransformManipulator getTransformManipulator();
-
     public BuildingSurfaceTypeView getSurfaceTypeView();
-
-    /**
-     * GML、各頂点バッファへ情報を適用
-     */
-    public void reflectGML();
 
     /**
      * 使用しているテクスチャパス

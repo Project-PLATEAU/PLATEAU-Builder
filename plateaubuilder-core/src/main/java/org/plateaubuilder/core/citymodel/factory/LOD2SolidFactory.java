@@ -12,6 +12,7 @@ import org.plateaubuilder.core.citymodel.geometry.PolygonView;
 import org.plateaubuilder.core.world.World;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class LOD2SolidFactory extends GeometryFactory {
@@ -20,16 +21,18 @@ public class LOD2SolidFactory extends GeometryFactory {
     }
 
     public LOD2SolidView createLOD2Solid(AbstractBuilding gmlObject) {
-        if (gmlObject.getLod2Solid() == null)
+        if (gmlObject.getLod2Solid() == null) {
             return null;
+        }
 
         var solid = new LOD2SolidView(gmlObject.getLod2Solid().getObject(), vertexBuffer, texCoordBuffer);
 
         var boundaries = new ArrayList<BoundarySurfaceView>();
 
         for (var boundedBySurface : gmlObject.getBoundedBySurface()) {
-            if (boundedBySurface.getBoundarySurface().getLod2MultiSurface() == null)
+            if (boundedBySurface.getBoundarySurface().getLod2MultiSurface() == null) {
                 continue;
+            }
 
             var boundary = createBoundary(boundedBySurface);
             boundaries.add(boundary);
@@ -38,7 +41,7 @@ public class LOD2SolidFactory extends GeometryFactory {
 
         var polygonsMap = solid.getSurfaceDataPolygonsMap();
         // 1メッシュにつき1マテリアルしか登録できないため、マテリアルごとに別メッシュとして生成
-        for (Map.Entry<SurfaceDataView, ArrayList<PolygonView>> entry : polygonsMap.entrySet()) {
+        for (Map.Entry<SurfaceDataView, List<PolygonView>> entry : polygonsMap.entrySet()) {
             var meshView = new MeshView();
             meshView.setMesh(createTriangleMesh(entry.getValue()));
             if (entry.getKey() == null) {

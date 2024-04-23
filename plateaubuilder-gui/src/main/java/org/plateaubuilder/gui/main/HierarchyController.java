@@ -129,7 +129,7 @@ public class HierarchyController implements Initializable {
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
                 if (selectedItem != null && selectedItem.valueProperty().get() instanceof BuildingView) {
                     var building = (BuildingView)selectedItem.valueProperty().get();
-                    World.getActiveInstance().getCamera().focus(building.getLOD1Solid());
+                    World.getActiveInstance().getCamera().focus(building.getLOD1Solid().getMeshView());
                 }
                 t.consume();
             }

@@ -6,7 +6,7 @@ import org.citygml4j.model.citygml.core.CityModel;
 import org.citygml4j.model.citygml.core.CityObjectMember;
 import org.plateaubuilder.core.citymodel.BuildingView;
 import org.plateaubuilder.core.citymodel.CityModelView;
-import org.plateaubuilder.core.citymodel.factory.CityObjectMemberFactory;
+import org.plateaubuilder.core.citymodel.factory.BuildingViewFactory;
 import org.plateaubuilder.core.world.World;
 
 public class ReplaceBuildingCommand extends AbstractCityGMLUndoableCommand {
@@ -53,7 +53,7 @@ public class ReplaceBuildingCommand extends AbstractCityGMLUndoableCommand {
         cityModelView.removeFeature(group, oldView);
 
         cityObjectMember.setCityObject(newBuilding);
-        var newView = new CityObjectMemberFactory(group, cityModelView).createBuilding(newBuilding);
+        var newView = new BuildingViewFactory(group, cityModelView).create(newBuilding);
         cityModelView.addFeature(group, newView);
     }
 }

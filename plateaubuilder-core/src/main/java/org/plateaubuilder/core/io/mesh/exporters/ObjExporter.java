@@ -1,18 +1,23 @@
 package org.plateaubuilder.core.io.mesh.exporters;
 
-import javafx.scene.paint.PhongMaterial;
-import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
-import org.plateaubuilder.core.citymodel.geometry.PolygonView;
-import org.plateaubuilder.core.io.mesh.AxisDirection;
-import org.plateaubuilder.core.io.mesh.AxisTransformer;
-
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
+import java.util.List;
+
+import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
+import org.plateaubuilder.core.citymodel.geometry.PolygonView;
+import org.plateaubuilder.core.io.mesh.AxisDirection;
+import org.plateaubuilder.core.io.mesh.AxisTransformer;
+
+import javafx.scene.paint.PhongMaterial;
 
 /**
  * A class for exporting a {@link ILODSolidView} to a OBJ file
@@ -130,7 +135,7 @@ public class ObjExporter extends AbstractLodExporter {
         return new ObjectModel(getBuildingId(), faces, lodSolid.getVertexBuffer().getBufferAsArray(), lodSolid.getTexCoordBuffer().getBufferAsArray(true), materialModel);
     }
 
-    private MaterialModel createOrGetMaterial(ArrayList<PolygonView> polygons) {
+    private MaterialModel createOrGetMaterial(List<PolygonView> polygons) {
         for (var polygon : polygons) {
             var surfaceData = polygon.getSurfaceData();
             if (surfaceData == null) continue;

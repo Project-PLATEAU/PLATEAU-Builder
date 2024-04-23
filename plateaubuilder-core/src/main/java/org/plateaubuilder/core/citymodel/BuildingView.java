@@ -1,19 +1,22 @@
 package org.plateaubuilder.core.citymodel;
 
-import javafx.scene.Node;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.geometry.primitives.Envelope;
+import org.plateaubuilder.core.citymodel.geometry.AbstractLODSolidMeshView;
 import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
+import org.plateaubuilder.core.citymodel.geometry.ILODView;
 import org.plateaubuilder.core.citymodel.geometry.LOD1SolidView;
 import org.plateaubuilder.core.citymodel.geometry.LOD2SolidView;
 import org.plateaubuilder.core.citymodel.geometry.LOD3SolidView;
 import org.plateaubuilder.core.editor.Editor;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import javafx.scene.Node;
 
-public class BuildingView extends ManagedGMLView<AbstractBuilding> {
+public class BuildingView extends ManagedGMLView<AbstractBuilding> implements IFeatureView {
     private LOD1SolidView lod1Solid;
     private LOD2SolidView lod2Solid;
     private LOD3SolidView lod3Solid;
@@ -29,17 +32,18 @@ public class BuildingView extends ManagedGMLView<AbstractBuilding> {
     }
 
     public void toggleLODView(int lod) {
-        var solids = new ILODSolidView[] {
+        var meshViews = new AbstractLODSolidMeshView[] {
                 lod1Solid, lod2Solid, lod3Solid
         };
         for (int i = 1; i <= 3; ++i) {
-            var solid = solids[i - 1];
-            if (solid == null)
+            var meshView = meshViews[i - 1];
+            if (meshView == null) {
                 continue;
+            }
 
-            ((Node) solid).setVisible(lod == i);
+            meshView.setVisible(lod == i);
         }
-        
+
         // BuildingInstallation
         for (var buildingInstallationView : buildingInstallationViews) {
             for (int i = 2; i <= 3; i++) {
@@ -51,12 +55,43 @@ public class BuildingView extends ManagedGMLView<AbstractBuilding> {
         }
     }
 
+    public void setDefaultVisible() {
+        if (this.lod3Solid != null) {
+            this.lod3Solid.setVisible(true);
+            if (this.lod2Solid != null) {
+                this.lod2Solid.setVisible(false);
+            }
+            if (this.lod1Solid != null) {
+                this.lod1Solid.setVisible(false);
+            }
+        } else if (this.lod2Solid != null) {
+            this.lod2Solid.setVisible(true);
+            if (this.lod1Solid != null) {
+                this.lod1Solid.setVisible(false);
+            }
+        } else if (this.lod1Solid != null) {
+            this.lod1Solid.setVisible(true);
+        }
+    }
+
+    public Node getNode() {
+        return this;
+    }
+
+    public ILODView getLODView(int lod) {
+        return getSolid(lod);
+    }
+
     public ILODSolidView getSolid(int lod) {
         switch (lod) {
-            case 1: return lod1Solid;
-            case 2: return lod2Solid;
-            case 3: return lod3Solid;
-            default: return null;
+        case 1:
+            return lod1Solid;
+        case 2:
+            return lod2Solid;
+        case 3:
+            return lod3Solid;
+        default:
+            return null;
         }
     }
 
@@ -119,7 +154,7 @@ public class BuildingView extends ManagedGMLView<AbstractBuilding> {
 
         this.getChildren().add(buildingPart);
     }
-    
+
     public Envelope getEnvelope() {
         return this.getGML().getBoundedBy().getEnvelope();
     }

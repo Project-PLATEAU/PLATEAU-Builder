@@ -39,7 +39,7 @@ public class GeometryFactory extends CityGMLFactory {
             buildingInstallationView.setGeometryView(2, lod2Geometry);
             lod2Geometry.getTransformManipulator().updateOrigin();
         }
-        
+
         var lod3Geometry = createGeometryView(gmlObject.getLod3Geometry());
         if (lod3Geometry != null) {
             buildingInstallationView.setGeometryView(3, lod3Geometry);
@@ -48,13 +48,13 @@ public class GeometryFactory extends CityGMLFactory {
 
         return buildingInstallationView;
     }
-    
+
     public GeometryView createGeometryView(GeometryProperty<? extends AbstractGeometry> gmlGeometry) {
         if (gmlGeometry == null)
             return null;
         if(gmlGeometry.getGeometry() == null)
             return null;
-            
+
         var multiSurface = (MultiSurface) gmlGeometry.getGeometry();
         var polygons = new ArrayList<PolygonView>();
         for (var surfaceMember : multiSurface.getSurfaceMember()) {
@@ -72,16 +72,20 @@ public class GeometryFactory extends CityGMLFactory {
     }
 
     protected PolygonView createPolygon(Polygon gmlObject) {
+        return createPolygon(gmlObject, null);
+    }
+
+    protected PolygonView createPolygon(Polygon gmlObject, String targetId) {
         var texCoordOffset = texCoordBuffer.getTexCoordCount();
 
         var polygon = new PolygonView(gmlObject);
 
-        var exterior = createLinearRing((LinearRing) gmlObject.getExterior().getRing());
+        var exterior = createLinearRing((LinearRing) gmlObject.getExterior().getRing(), targetId);
         polygon.setExteriorRing(exterior);
 
         var interiorBuffers = new ArrayList<VertexBuffer>();
         for (var interiorRing : gmlObject.getInterior()) {
-            var interior = createLinearRing((LinearRing) interiorRing.getRing());
+            var interior = createLinearRing((LinearRing) interiorRing.getRing(), targetId);
             polygon.addInteriorRing(interior);
             interiorBuffers.add(interior.getRing());
         }
@@ -114,7 +118,7 @@ public class GeometryFactory extends CityGMLFactory {
         return polygon;
     }
 
-    protected LinearRingView createLinearRing(LinearRing gmlObject) {
+    protected LinearRingView createLinearRing(LinearRing gmlObject, String targetId) {
         List<Double> coordinates = gmlObject.getPosList().toList3d();
 
         var ringVertexBuffer = new VertexBuffer();
@@ -136,7 +140,7 @@ public class GeometryFactory extends CityGMLFactory {
                 gmlObject, vertexBuffer, texCoordBuffer,
                 vertexIndices, texCoordBuffer.getTexCoordCount());
 
-        var surfaceData = findAssociatedSurfaceData(linearRing);
+        var surfaceData = findAssociatedSurfaceData(linearRing, targetId);
         if (surfaceData != null) {
             linearRing.setSurfaceData(surfaceData);
 
@@ -162,14 +166,27 @@ public class GeometryFactory extends CityGMLFactory {
         return linearRing;
     }
 
-    private SurfaceDataView findAssociatedSurfaceData(LinearRingView linearRing) {
+    private SurfaceDataView findAssociatedSurfaceData(LinearRingView linearRing, String targetId) {
         if (getTarget() == null || getTarget().getRGBTextureAppearance() == null)
             return null;
 
         for (var surfaceData : getTarget().getRGBTextureAppearance().getSurfaceData()) {
-            var texCoords = surfaceData.getTextureCoordinatesByRing().get("#" + linearRing.getGMLID());
-            if (texCoords != null)
-                return surfaceData;
+            switch (surfaceData.getSurfaceType()) {
+            case Texture:
+                var texCoords = surfaceData.getTextureCoordinatesByRing().get("#" + linearRing.getGMLID());
+                if (texCoords != null) {
+                    return surfaceData;
+                }
+                break;
+            case X3D:
+                System.out.println(targetId);
+                if (targetId != null && surfaceData.getTargetSet().contains("#" + targetId)) {
+                    return surfaceData;
+                }
+                break;
+            default:
+                break;
+            }
         }
 
         return null;

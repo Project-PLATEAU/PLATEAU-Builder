@@ -1,6 +1,23 @@
 package org.plateaubuilder.core.editor;
 
-import javafx.beans.property.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.citygml4j.model.citygml.core.AbstractCityObject;
+import org.plateaubuilder.core.citymodel.BuildingView;
+import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
+import org.plateaubuilder.core.editor.surfacetype.PolygonSection;
+import org.plateaubuilder.core.world.World;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlySetProperty;
+import javafx.beans.property.SetProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -8,17 +25,6 @@ import javafx.scene.SubScene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.transform.Scale;
-import org.citygml4j.model.citygml.core.AbstractCityObject;
-import org.plateaubuilder.core.citymodel.BuildingView;
-import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
-import org.plateaubuilder.core.editor.surfacetype.PolygonSection;
-import org.plateaubuilder.core.editor.Editor;
-import org.plateaubuilder.core.world.World;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class FeatureSelection {
     private FeatureDragSelector dragSelector;
@@ -111,7 +117,7 @@ public class FeatureSelection {
 
             if (event.getClickCount() == 2) {
                 if (active.get() != null) {
-                    World.getActiveInstance().getCamera().focus(active.get().getLOD1Solid());
+                    World.getActiveInstance().getCamera().focus(active.get().getLOD1Solid().getMeshView());
                 }
                 event.consume();
 

@@ -10,6 +10,8 @@ import org.plateaubuilder.core.citymodel.geometry.LOD1SolidView;
 import org.plateaubuilder.core.citymodel.geometry.PolygonView;
 import org.plateaubuilder.core.world.World;
 
+import javafx.scene.shape.MeshView;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +22,9 @@ public class LOD1SolidFactory extends GeometryFactory {
     }
 
     public LOD1SolidView createLOD1Solid(AbstractBuilding gmlObject) {
-        if (gmlObject.getLod1Solid() == null)
+        if (gmlObject.getLod1Solid() == null) {
             return null;
+        }
 
         var solid = (Solid)gmlObject.getLod1Solid().getObject();
         var exterior = solid.getExterior();
@@ -33,21 +36,23 @@ public class LOD1SolidFactory extends GeometryFactory {
 
         for (SurfaceProperty surfaceMemberElement : surfaceMember) {
             var polygon = (Polygon) surfaceMemberElement.getSurface();
-            if (polygon == null)
+            if (polygon == null) {
                 continue;
+            }
 
             var polygonObject = createPolygon(polygon);
             polygons.add(polygonObject);
         }
 
         var mesh = createTriangleMesh(polygons);
+        var meshView = new MeshView();
+        meshView.setMesh(mesh);
+        meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
 
         var solidView = new LOD1SolidView(solid, vertexBuffer, texCoordBuffer);
         solidView.setPolygons(polygons);
-        solidView.setMesh(mesh);
-        solidView.setMaterial(World.getActiveInstance().getDefaultMaterial());
+        solidView.addMeshView(meshView);
 
         return solidView;
     }
-
 }

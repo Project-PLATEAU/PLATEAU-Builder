@@ -10,7 +10,7 @@ import org.citygml4j.xml.io.CityGMLInputFactory;
 import org.citygml4j.xml.io.reader.CityGMLReader;
 import org.plateaubuilder.core.citymodel.CityModelGroup;
 import org.plateaubuilder.core.citymodel.CityModelView;
-import org.plateaubuilder.core.citymodel.factory.CityModelFactory;
+import org.plateaubuilder.core.citymodel.factory.CityModelViewFactory;
 import org.plateaubuilder.core.geospatial.GeoCoordinate;
 import org.plateaubuilder.core.geospatial.GeoReference;
 import org.plateaubuilder.core.world.World;
@@ -55,8 +55,8 @@ public class GmlImporter {
                 center.alt = 0;
                 world.setGeoReference(new GeoReference(center, epsgCode));
             }
-            var cityModelFactory = new CityModelFactory();
-            cityModelView = cityModelFactory.createCityModel(group, (CityModel) citygml, fileUrl, in.getSchemaHandler());
+            var cityModelViewFactory = new CityModelViewFactory();
+            cityModelView = cityModelViewFactory.createCityModel(group, (CityModel) citygml, fileUrl, in.getSchemaHandler());
         }
         reader.close();
 
