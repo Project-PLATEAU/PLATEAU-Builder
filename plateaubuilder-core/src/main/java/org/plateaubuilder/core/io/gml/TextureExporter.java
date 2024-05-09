@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public class TextureExporter {
     public static void export(String folderPath, CityModelView cityModel) {
-        AppearanceView tempAppearance = cityModel.getRGBTextureAppearance();
+        AppearanceView tempAppearance = cityModel.getAppearance();
         if(tempAppearance == null)
             return;
         ArrayList<SurfaceDataView> tempSurfaceDatas = tempAppearance.getSurfaceData();

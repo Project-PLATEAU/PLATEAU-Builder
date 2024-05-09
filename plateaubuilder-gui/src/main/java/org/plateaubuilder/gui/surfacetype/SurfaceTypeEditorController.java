@@ -227,6 +227,7 @@ public class SurfaceTypeEditorController implements Initializable {
     }
 
     private void refreshTypeList(VBox list, ToggleGroup toggleGroup, PolygonSection section, CityGMLClass defaultClazz) {
+        // TODO: IFeatureView対応
         try {
             for (var toggleButton : list.getChildren()) {
                 ((ToggleButton)toggleButton).setToggleGroup(null);

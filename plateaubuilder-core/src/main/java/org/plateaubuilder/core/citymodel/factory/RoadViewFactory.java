@@ -8,7 +8,7 @@ import org.plateaubuilder.core.citymodel.RoadView;
 import org.plateaubuilder.core.editor.Editor;
 
 public class RoadViewFactory extends AbstractFeatureViewFactory<Road, Road> {
-    protected RoadViewFactory(CityModelGroup group, CityModelView target) {
+    public RoadViewFactory(CityModelGroup group, CityModelView target) {
         super(group, target);
     }
 

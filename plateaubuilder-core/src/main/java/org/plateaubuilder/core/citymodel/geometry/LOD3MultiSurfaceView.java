@@ -1,9 +1,12 @@
 package org.plateaubuilder.core.citymodel.geometry;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import org.citygml4j.model.citygml.transportation.Road;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
+import org.plateaubuilder.core.citymodel.SurfaceDataView;
 import org.plateaubuilder.core.editor.surfacetype.TrafficAreaSurfaceTypeView;
 import org.plateaubuilder.core.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateaubuilder.core.utils3d.polygonmesh.VertexBuffer;
@@ -29,6 +32,38 @@ public class LOD3MultiSurfaceView extends AbstractMultiSurfaceMeshView {
     @Override
     protected TrafficAreaSurfaceTypeView createSurfaceTypeView() {
         return new TrafficAreaSurfaceTypeView(getLOD());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<TrafficAreaView> getTrafficAreaViews() {
+        return trafficAreaViews;
+    }
+
+    public void setTrafficAreaViews(List<TrafficAreaView> trafficAreaViews) {
+        this.trafficAreaViews = trafficAreaViews;
+    }
+
+    public void addSurfaceTypeView(Road road) {
+        var surfaceTypeView = getSurfaceTypeView();
+        getChildren().add(getSurfaceTypeView());
+        surfaceTypeView.setTarget(road, this);
+        surfaceTypeView.updateVisual();
+    }
+
+    public HashMap<SurfaceDataView, List<PolygonView>> getSurfaceDataPolygonsMap() {
+        var map = new HashMap<SurfaceDataView, List<PolygonView>>();
+
+        for (var trafficAreaView : trafficAreaViews) {
+            for (var polygon : trafficAreaView.getPolygons()) {
+                map.computeIfAbsent(polygon.getSurfaceData(), k -> new ArrayList<>());
+                map.get(polygon.getSurfaceData()).add(polygon);
+            }
+        }
+
+        return map;
     }
 
     /**

@@ -16,7 +16,7 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
-import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
+import org.plateaubuilder.core.citymodel.geometry.ILODView;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.io.mesh.importers.Importer3D;
 
@@ -479,7 +479,7 @@ public class GizmoModel extends Parent {
             return;
 
         // GMLに書き戻す
-        ((ILODSolidView) manipulator.getSolidView()).reflectGML();
+        ((ILODView) manipulator.getSolidView()).reflectGML();
     }
 
     /**

@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.citygml4j.model.citygml.core.AbstractCityObject;
-import org.plateaubuilder.core.citymodel.BuildingView;
-import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
+import org.plateaubuilder.core.citymodel.IFeatureView;
+import org.plateaubuilder.core.citymodel.geometry.ILODView;
 import org.plateaubuilder.core.editor.surfacetype.PolygonSection;
 import org.plateaubuilder.core.world.World;
 
@@ -29,10 +29,10 @@ import javafx.scene.transform.Scale;
 public class FeatureSelection {
     private FeatureDragSelector dragSelector;
 
-    private final ObjectProperty<BuildingView> active = new SimpleObjectProperty<>();
+    private final ObjectProperty<IFeatureView> active = new SimpleObjectProperty<>();
     private final ObjectProperty<AbstractCityObject> activeCityObject = new SimpleObjectProperty<>();
     private final ObjectProperty<Node> selectElement = new SimpleObjectProperty<>();
-    private final SetProperty<BuildingView> selectedFeatures = new SimpleSetProperty<>();
+    private final SetProperty<IFeatureView> selectedFeatures = new SimpleSetProperty<>();
     {
         selectedFeatures.addListener((observable, oldValue, newValue) -> {
             if (newValue.isEmpty()) {
@@ -43,9 +43,9 @@ public class FeatureSelection {
                 active.set(feature);
                 activeCityObject.set(feature.getGML());
                 var viewMode = Editor.getCityModelViewMode();
-                var solid = feature.getSolid(viewMode.getLOD());
-                if (solid != null) {
-                    selectElement.set((Node) solid);
+                var lodView = feature.getLODView(viewMode.getLOD());
+                if (lodView != null) {
+                    selectElement.set((Node) lodView);
                 }
             }
 
@@ -87,19 +87,19 @@ public class FeatureSelection {
         viewMode.isSurfaceViewModeProperty().addListener((observable) -> refreshOutLine());
         viewMode.lodProperty().addListener((observable) -> {
             if (active.get() != null) {
-                var solid = active.get().getSolid(viewMode.getLOD());
-                if (solid != null && solid != selectElement.get())
-                    selectElement.set((Node) solid);
+                var lodView = active.get().getLODView(viewMode.getLOD());
+                if (lodView != null && lodView != selectElement.get())
+                    selectElement.set((Node) lodView);
             }
             refreshOutLine();
         });
     }
 
-    public BuildingView getActive() {
+    public IFeatureView getActive() {
         return active.get();
     }
 
-    public ObjectProperty<BuildingView> getActiveFeatureProperty() {
+    public ObjectProperty<IFeatureView> getActiveFeatureProperty() {
         return active;
     }
 
@@ -117,7 +117,7 @@ public class FeatureSelection {
 
             if (event.getClickCount() == 2) {
                 if (active.get() != null) {
-                    World.getActiveInstance().getCamera().focus(active.get().getLOD1Solid().getMeshView());
+                    World.getActiveInstance().getCamera().focus(active.get().getLODView(1).getMeshView());
                 }
                 event.consume();
 
@@ -132,8 +132,8 @@ public class FeatureSelection {
                 newSelectedMesh = World.getActiveInstance().getGizmo().getAttachNode();
             }
 
-            var feature = getBuilding(newSelectedMesh);
-            var element = getLodSolidView(newSelectedMesh);
+            var feature = getFeatureView(newSelectedMesh);
+            var element = getLodView(newSelectedMesh);
 
             if (event.isShiftDown()) {
                 if (!selectedFeatures.isEmpty() && feature != null) {
@@ -154,21 +154,21 @@ public class FeatureSelection {
         });
     }
 
-    public void addSelection(BuildingView feature) {
+    public void addSelection(IFeatureView feature) {
         if (feature == null)
             throw new IllegalArgumentException();
 
         selectedFeatures.add(feature);
     }
 
-    public void unselect(BuildingView feature) {
+    public void unselect(IFeatureView feature) {
         if (!selectedFeatures.contains(feature))
             return;
 
         selectedFeatures.remove(feature);
     }
 
-    public void select(BuildingView... features) {
+    public void select(IFeatureView... features) {
         clear();
 
         if (features.length == 0 || features[0] == null)
@@ -195,16 +195,16 @@ public class FeatureSelection {
         var viewMode = Editor.getCityModelViewMode();
 
         for (var featureView : selectedFeatures) {
-            var solid = featureView.getSolid(viewMode.getLOD());
-            if (solid == null)
+            var lodView = featureView.getLODView(viewMode.getLOD());
+            if (lodView == null)
                 continue;
 
-            outlines.add(createOutline(solid));
+            outlines.add(createOutline(lodView));
         }
         outlineGroup.getChildren().addAll(outlines);
     }
 
-    private Outline createOutline(ILODSolidView solidView) {
+    private Outline createOutline(ILODView solidView) {
         if (solidView == null)
             throw new IllegalArgumentException();
 
@@ -228,18 +228,18 @@ public class FeatureSelection {
         outlines.clear();
     }
 
-    private BuildingView getBuilding(Node node) {
-        while (node != null && !(node instanceof BuildingView)) {
+    private IFeatureView getFeatureView(Node node) {
+        while (node != null && !(node instanceof IFeatureView)) {
             node = node.getParent();
         }
-        return (BuildingView) node;
+        return (IFeatureView) node;
     }
     
-    private ILODSolidView getLodSolidView(Node node) {
-        while (node != null && !(node instanceof ILODSolidView)) {
+    private ILODView getLodView(Node node) {
+        while (node != null && !(node instanceof ILODView)) {
             node = node.getParent();
         }
-        return (ILODSolidView) node;
+        return (ILODView) node;
     }
     
     public void setSelectElement(Node node) {
@@ -278,11 +278,11 @@ public class FeatureSelection {
         return outlineVisibleProperty;
     }
 
-    public ReadOnlySetProperty<BuildingView> selectedFeaturesProperty() {
+    public ReadOnlySetProperty<IFeatureView> selectedFeaturesProperty() {
         return selectedFeatures;
     }
 
-    private Set<BuildingView> preDragSelectedViews;
+    private Set<IFeatureView> preDragSelectedViews;
 
     public void initialize(SubScene subScene) {
         registerClickEvent(subScene);

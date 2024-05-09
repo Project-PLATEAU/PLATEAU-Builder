@@ -19,7 +19,7 @@ import javafx.scene.shape.MeshView;
 
 public class LOD2MultiSurfaceFactory extends GeometryFactory {
 
-    protected LOD2MultiSurfaceFactory(CityModelView target) {
+    public LOD2MultiSurfaceFactory(CityModelView target) {
         super(target);
     }
 
@@ -71,9 +71,7 @@ public class LOD2MultiSurfaceFactory extends GeometryFactory {
             if (polygon == null) {
                 continue;
             }
-
-            // TODO: なぜかIDがセットされていないため、X3DMaterialのIDが特定できない(srsNameやsrsDimensionは取得できるため、citygml4jの不具合かもしれない)
-            var polygonObject = createPolygon(polygon, multiSurface.getId());
+            var polygonObject = createPolygon(polygon, polygon.getId());
             polygons.add(polygonObject);
         }
 

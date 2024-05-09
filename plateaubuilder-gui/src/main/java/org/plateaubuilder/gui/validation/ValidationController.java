@@ -1,7 +1,64 @@
 package org.plateaubuilder.gui.validation;
 
+import static org.plateaubuilder.validation.AppConst.DATE_TIME_FORMAT;
+import static org.plateaubuilder.validation.constant.StandardID.*;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.ResourceBundle;
+import java.util.logging.Logger;
+
+import org.citygml4j.builder.copy.DeepCopyBuilder;
+import org.citygml4j.model.gml.geometry.primitives.Polygon;
+import org.plateaubuilder.core.citymodel.CityModelView;
+import org.plateaubuilder.core.citymodel.IFeatureView;
+import org.plateaubuilder.core.citymodel.factory.CustomGeometryFactory;
+import org.plateaubuilder.core.citymodel.geometry.PolygonView;
+import org.plateaubuilder.core.editor.Editor;
+import org.plateaubuilder.core.world.World;
+import org.plateaubuilder.gui.FileChooserService;
+import org.plateaubuilder.validation.AppConst;
+import org.plateaubuilder.validation.C04CompletenessValidator;
+import org.plateaubuilder.validation.GMLIDCompletenessValidator;
+import org.plateaubuilder.validation.GmlElementError;
+import org.plateaubuilder.validation.IValidator;
+import org.plateaubuilder.validation.L04LogicalConsistencyValidator;
+import org.plateaubuilder.validation.L05LogicalConsistencyValidator;
+import org.plateaubuilder.validation.L06LogicalConsistencyValidator;
+import org.plateaubuilder.validation.L07LogicalConsistencyValidator;
+import org.plateaubuilder.validation.L08LogicalConsistencyValidator;
+import org.plateaubuilder.validation.L09LogicalConsistencyValidator;
+import org.plateaubuilder.validation.L10LogicalConsistencyValidator;
+import org.plateaubuilder.validation.L11LogicalConsistencyValidator;
+import org.plateaubuilder.validation.L12LogicalConsistencyValidator;
+import org.plateaubuilder.validation.L13LogicalConsistencyValidator;
+import org.plateaubuilder.validation.Lbldg01LogicalAccuracyValidator;
+import org.plateaubuilder.validation.Lbldg02LogicalConsistencyValidator;
+import org.plateaubuilder.validation.Standard;
+import org.plateaubuilder.validation.T03ThematicAccuaracyValidator;
+import org.plateaubuilder.validation.Tbldg02ThematicAccuaracyValidator;
+import org.plateaubuilder.validation.ValidationResultMessage;
+import org.plateaubuilder.validation.ValidationResultMessageType;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -26,30 +83,6 @@ import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
-import org.citygml4j.builder.copy.DeepCopyBuilder;
-import org.citygml4j.model.gml.geometry.primitives.Polygon;
-import org.plateaubuilder.core.citymodel.BuildingView;
-import org.plateaubuilder.core.citymodel.CityModelView;
-import org.plateaubuilder.core.citymodel.factory.CustomGeometryFactory;
-import org.plateaubuilder.core.citymodel.geometry.PolygonView;
-import org.plateaubuilder.core.editor.Editor;
-import org.plateaubuilder.gui.FileChooserService;
-import org.plateaubuilder.validation.*;
-import org.plateaubuilder.core.world.World;
-
-import java.io.*;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.logging.Logger;
-
-import static org.plateaubuilder.validation.AppConst.DATE_TIME_FORMAT;
-import static org.plateaubuilder.validation.constant.StandardID.*;
 
 public class ValidationController implements Initializable {
     @FXML
@@ -337,11 +370,11 @@ public class ValidationController implements Initializable {
                     .lookupAll("#" + elementError.getBuildingId())
                     .forEach(node -> {
                         List<PolygonView> polygonViews = new ArrayList<>();
-                        if (((BuildingView) node).getLOD1Solid() != null) {
-                            polygonViews.addAll(((BuildingView) node).getLOD1Solid().getPolygons());
+                        if (((IFeatureView) node).getLODView(1) != null) {
+                            polygonViews.addAll(((IFeatureView) node).getLODView(1).getPolygons());
                         }
-                        if (((BuildingView) node).getLOD2Solid() != null) {
-                            polygonViews.addAll(((BuildingView) node).getLOD2Solid().getPolygons());
+                        if (((IFeatureView) node).getLODView(2) != null) {
+                            polygonViews.addAll(((IFeatureView) node).getLODView(2).getPolygons());
                         }
 
                         polygonViews
@@ -368,8 +401,8 @@ public class ValidationController implements Initializable {
                 continue;
             }
             var node = nodes.iterator().next();
-            var building = (BuildingView) node;
-            Editor.getFeatureSellection().select(building);
+            var featureView = (IFeatureView) node;
+            Editor.getFeatureSellection().select(featureView);
             return;
         }
     }

@@ -17,11 +17,9 @@ public class CityModelViewFactory {
         cityModelView.setId(Paths.get(gmlPath).getFileName().toString());
 
         for (var appearanceMember : gmlObject.getAppearanceMember()) {
-            // TODO: rgbTexture以外のAppearanceがある場合の対応
-
             var appearanceFactory = new AppearanceFactory(cityModelView);
             var appearance = appearanceFactory.createAppearance((AppearanceMember) appearanceMember);
-            cityModelView.setRGBTextureAppearance(appearance);
+            cityModelView.setAppearance(appearance);
         }
 
         for (CityObjectMember cityObjectMember : gmlObject.getCityObjectMember()) {

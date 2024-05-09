@@ -16,7 +16,7 @@ import javafx.scene.shape.MeshView;
 
 public class LOD1MultiSurfaceFactory extends GeometryFactory {
 
-    protected LOD1MultiSurfaceFactory(CityModelView target) {
+    public LOD1MultiSurfaceFactory(CityModelView target) {
         super(target);
     }
 

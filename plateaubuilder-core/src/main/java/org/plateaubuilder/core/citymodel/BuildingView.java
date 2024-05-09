@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.geometry.primitives.Envelope;
+import org.citygml4j.model.gml.measures.Length;
 import org.plateaubuilder.core.citymodel.geometry.AbstractLODSolidMeshView;
 import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
 import org.plateaubuilder.core.citymodel.geometry.ILODView;
@@ -80,6 +81,22 @@ public class BuildingView extends ManagedGMLView<AbstractBuilding> implements IF
 
     public ILODView getLODView(int lod) {
         return getSolid(lod);
+    }
+
+    public void setLODView(int lod, ILODView lodView) {
+        switch (lod) {
+        case 1:
+            setLOD1Solid((LOD1SolidView) lodView);
+            break;
+        case 2:
+            setLOD2Solid((LOD2SolidView) lodView);
+            break;
+        case 3:
+            setLOD3Solid((LOD3SolidView) lodView);
+            break;
+        default:
+            break;
+        }
     }
 
     public ILODSolidView getSolid(int lod) {
@@ -159,6 +176,27 @@ public class BuildingView extends ManagedGMLView<AbstractBuilding> implements IF
         return this.getGML().getBoundedBy().getEnvelope();
     }
 
+    @Override
+    public boolean isSetMeasuredHeight() {
+        return getGML().isSetMeasuredHeight();
+    }
+
+    @Override
+    public Length getMeasuredHeight() {
+        return getGML().getMeasuredHeight();
+    }
+
+    @Override
+    public void setMeasuredHeight(Length length) {
+        getGML().setMeasuredHeight(length);
+    }
+
+    @Override
+    public void unsetMeasuredHeight() {
+        getGML().unsetMeasuredHeight();
+    }
+
+    @Override
     public List<String> getTexturePaths() {
         var paths = new HashSet<String>();
         if (lod2Solid != null) {

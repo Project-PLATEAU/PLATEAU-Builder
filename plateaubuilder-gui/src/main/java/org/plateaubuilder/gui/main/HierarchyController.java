@@ -1,5 +1,26 @@
 package org.plateaubuilder.gui.main;
 
+import java.io.File;
+import java.net.URL;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.plateaubuilder.core.citymodel.CityModelView;
+import org.plateaubuilder.core.citymodel.IFeatureView;
+import org.plateaubuilder.core.citymodel.geometry.GeometryView;
+import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
+import org.plateaubuilder.core.editor.Editor;
+import org.plateaubuilder.core.editor.transform.AutoGeometryAligner;
+import org.plateaubuilder.core.io.mesh.FormatEnum;
+import org.plateaubuilder.core.io.mesh.ThreeDimensionsModelEnum;
+import org.plateaubuilder.core.io.mesh.converters.LODConverterBuilder;
+import org.plateaubuilder.core.io.mesh.exporters.LODExporterBuilder;
+import org.plateaubuilder.core.world.World;
+import org.plateaubuilder.gui.io.mesh.ThreeDimensionsExportDialogController;
+import org.plateaubuilder.gui.io.mesh.ThreeDimensionsImportDialogController;
+import org.plateaubuilder.gui.search.SearchDialogController;
+
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.SetChangeListener;
@@ -7,32 +28,16 @@ import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.shape.MeshView;
-import org.plateaubuilder.core.citymodel.BuildingView;
-import org.plateaubuilder.core.citymodel.CityModelView;
-import org.plateaubuilder.core.citymodel.geometry.GeometryView;
-import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
-import org.plateaubuilder.core.editor.transform.AutoGeometryAligner;
-import org.plateaubuilder.core.io.mesh.ThreeDimensionsModelEnum;
-import org.plateaubuilder.core.io.mesh.converters.Gltf2LodConverter;
-import org.plateaubuilder.core.io.mesh.converters.Obj2LodConverter;
-import org.plateaubuilder.core.io.mesh.exporters.GltfExporter;
-import org.plateaubuilder.core.io.mesh.exporters.ObjExporter;
-import org.plateaubuilder.core.editor.Editor;
-import org.plateaubuilder.gui.io.mesh.ThreeDimensionsExportDialogController;
-import org.plateaubuilder.gui.io.mesh.ThreeDimensionsImportDialogController;
-import org.plateaubuilder.gui.search.SearchDialogController;
-import org.plateaubuilder.core.world.World;
-
-import java.io.File;
-import java.net.URL;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class HierarchyController implements Initializable {
     public TreeTableView<Node> hierarchyTreeTable;
@@ -72,7 +77,7 @@ public class HierarchyController implements Initializable {
 
         hierarchyTreeTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        Editor.getFeatureSellection().selectedFeaturesProperty().addListener((SetChangeListener<? super BuildingView>) change -> {
+        Editor.getFeatureSellection().selectedFeaturesProperty().addListener((SetChangeListener<? super IFeatureView>) change -> {
             Platform.runLater(() -> {
                 if (syncingHierarchy)
                     return;
@@ -105,8 +110,8 @@ public class HierarchyController implements Initializable {
             try {
                 var selectedItems = hierarchyTreeTable.getSelectionModel().getSelectedItems();
                 var selectedFeatures = selectedItems.stream()
-                        .filter((item) -> item.valueProperty().get() instanceof BuildingView)
-                        .map((item) -> (BuildingView) item.valueProperty().get()).toArray(BuildingView[]::new);
+                        .filter((item) -> item.valueProperty().get() instanceof IFeatureView).map((item) -> (IFeatureView) item.valueProperty().get())
+                        .toArray(IFeatureView[]::new);
                 var selection = Editor.getFeatureSellection();
                 selection.select(selectedFeatures);
             } finally {
@@ -119,17 +124,17 @@ public class HierarchyController implements Initializable {
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
                 if (selectedItem != null) {
                     var item = selectedItem.valueProperty().get();
-                    exportGltfMenu.setDisable(!(item instanceof BuildingView));
-                    exportObjMenu.setDisable(!(item instanceof BuildingView));
-                    importGltfMenu.setDisable(!(item instanceof BuildingView));
-                    importObjMenu.setDisable(!(item instanceof BuildingView));
+                    exportGltfMenu.setDisable(!(item instanceof IFeatureView));
+                    exportObjMenu.setDisable(!(item instanceof IFeatureView));
+                    importGltfMenu.setDisable(!(item instanceof IFeatureView));
+                    importObjMenu.setDisable(!(item instanceof IFeatureView));
                 }
             }
             if (t.getButton() == MouseButton.PRIMARY && t.getClickCount() == 2) {
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
-                if (selectedItem != null && selectedItem.valueProperty().get() instanceof BuildingView) {
-                    var building = (BuildingView)selectedItem.valueProperty().get();
-                    World.getActiveInstance().getCamera().focus(building.getLOD1Solid().getMeshView());
+                if (selectedItem != null && selectedItem.valueProperty().get() instanceof IFeatureView) {
+                    var feature = (IFeatureView) selectedItem.valueProperty().get();
+                    World.getActiveInstance().getCamera().focus(feature.getLODView(1).getMeshView());
                 }
                 t.consume();
             }
@@ -153,13 +158,13 @@ public class HierarchyController implements Initializable {
         visibilityColumn.setCellFactory(CheckBoxTreeTableCell.forTreeTableColumn(visibilityColumn));
     }
 
-    private TreeItem<Node> findTreeItem(BuildingView activeFeature) {
+    private TreeItem<Node> findTreeItem(IFeatureView activeFeature) {
         return findTreeItemRecursive(hierarchyTreeTable.getRoot(), activeFeature);
     }
 
-    private TreeItem<Node> findTreeItemRecursive(TreeItem<Node> currentItem, BuildingView activeFeature) {
+    private TreeItem<Node> findTreeItemRecursive(TreeItem<Node> currentItem, IFeatureView activeFeature) {
         Node currentFeature = currentItem.getValue();
-        if (currentFeature instanceof BuildingView && currentFeature.equals(activeFeature)) {
+        if (currentFeature instanceof IFeatureView && currentFeature.equals(activeFeature)) {
             return currentItem;
         }
         for (TreeItem<Node> child : currentItem.getChildren()) {
@@ -181,19 +186,20 @@ public class HierarchyController implements Initializable {
             return;
 
         var item = selectedItem.valueProperty().get();
-        if (!(item instanceof BuildingView))
+        if (!(item instanceof IFeatureView))
             return;
 
-        BuildingView building = (BuildingView)item;
+        IFeatureView featureView = (IFeatureView) item;
         try {
-            var controller = ThreeDimensionsExportDialogController.create(building, ThreeDimensionsModelEnum.GLTF);
+            var controller = ThreeDimensionsExportDialogController.create(featureView, ThreeDimensionsModelEnum.GLTF);
             if (!controller.getDialogResult())
                 return;
 
             var fileUrl = controller.getFileUrl();
-            var solid = controller.getLodSolidView();
+            var lodView = controller.getLodView();
             var option = controller.getExportOption();
-            new GltfExporter(solid, building.getId(), option).export(fileUrl);
+            var exporter = new LODExporterBuilder().lodView(lodView).featureId(featureView.getId()).exportOption(option).format(FormatEnum.gLTF).build();
+            exporter.export(fileUrl);
             java.awt.Desktop.getDesktop().open(new File(fileUrl).getParentFile());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
@@ -210,19 +216,20 @@ public class HierarchyController implements Initializable {
             return;
 
         var item = selectedItem.valueProperty().get();
-        if (!(item instanceof BuildingView))
+        if (!(item instanceof IFeatureView))
             return;
 
-        BuildingView building = (BuildingView)item;
+        IFeatureView featureView = (IFeatureView) item;
         try {
-            var controller = ThreeDimensionsExportDialogController.create(building, ThreeDimensionsModelEnum.OBJ);
+            var controller = ThreeDimensionsExportDialogController.create(featureView, ThreeDimensionsModelEnum.OBJ);
             if (!controller.getDialogResult())
                 return;
 
             var fileUrl = controller.getFileUrl();
-            var solid = controller.getLodSolidView();
+            var lodView = controller.getLodView();
             var option = controller.getExportOption();
-            new ObjExporter(solid, building.getId(), option).export(fileUrl);
+            var exporter = new LODExporterBuilder().lodView(lodView).featureId(featureView.getId()).exportOption(option).format(FormatEnum.OBJ).build();
+            exporter.export(fileUrl);
             java.awt.Desktop.getDesktop().open(new File(fileUrl).getParentFile());
         } catch (Exception ex) {
             Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
@@ -235,24 +242,27 @@ public class HierarchyController implements Initializable {
             return;
 
         var item = selectedItem.valueProperty().get();
-        if (!(item instanceof BuildingView))
+        if (!(item instanceof IFeatureView))
             return;
 
-        BuildingView building = (BuildingView)item;
-        CityModelView cityModelView = (CityModelView)building.getParent();
+        IFeatureView featureView = (IFeatureView) item;
+        CityModelView cityModelView = (CityModelView) featureView.getParent();
         try {
-            ThreeDimensionsImportDialogController controller = ThreeDimensionsImportDialogController.create(building, ThreeDimensionsModelEnum.GLTF);
+            ThreeDimensionsImportDialogController controller = ThreeDimensionsImportDialogController.create(featureView,
+                    ThreeDimensionsModelEnum.GLTF);
             if (!controller.getDialogResult())
                 return;
 
             var fileUrl = controller.getFileUrl();
             var lod = controller.getLod();
             var option = controller.getConvertOption();
-            var convertedCityModel = new Gltf2LodConverter(cityModelView, building, lod, option).convert(fileUrl);
+            var converter = new LODConverterBuilder().cityModelView(cityModelView).featureView(featureView).lod(lod).convertOption(option)
+                    .format(FormatEnum.gLTF).build();
+            var convertedCityModel = converter.convert(fileUrl);
 
             if (!option.isUseGeoReference()) {
                 // 位置合わせ
-                var id = building.getId();
+                var id = featureView.getId();
                 if (lod > 0)
                     AutoGeometryAligner.GeometryAlign(convertedCityModel, id, lod);
             }
@@ -267,25 +277,27 @@ public class HierarchyController implements Initializable {
             return;
 
         var item = selectedItem.valueProperty().get();
-        if (!(item instanceof BuildingView))
+        if (!(item instanceof IFeatureView))
             return;
 
-        BuildingView building = (BuildingView)item;
-        CityModelView cityModelView = (CityModelView)building.getParent();
+        IFeatureView featureView = (IFeatureView) item;
+        CityModelView cityModelView = (CityModelView) featureView.getParent();
         try {
-            ThreeDimensionsImportDialogController controller = ThreeDimensionsImportDialogController.create(building, ThreeDimensionsModelEnum.OBJ);
+            ThreeDimensionsImportDialogController controller = ThreeDimensionsImportDialogController.create(featureView,
+                    ThreeDimensionsModelEnum.OBJ);
             if (!controller.getDialogResult())
                 return;
 
             var fileUrl = controller.getFileUrl();
             var lod = controller.getLod();
             var option = controller.getConvertOption();
-
-            var convertedCityModel = new Obj2LodConverter(cityModelView, building, lod, option).convert(fileUrl);
+            var converter = new LODConverterBuilder().cityModelView(cityModelView).featureView(featureView).lod(lod).convertOption(option)
+                    .format(FormatEnum.OBJ).build();
+            var convertedCityModel = converter.convert(fileUrl);
 
             if (!option.isUseGeoReference()) {
                 // 位置合わせ
-                var id = building.getId();
+                var id = featureView.getId();
                 if (lod > 0)
                     AutoGeometryAligner.GeometryAlign(convertedCityModel, id, lod);
             }
@@ -312,7 +324,7 @@ public class HierarchyController implements Initializable {
         var allViews = World.getActiveInstance().getCityModelGroup().getAllFeatures();
         var selectedViews = Editor.getFeatureSellection().selectedFeaturesProperty().get();
         allViews.stream()
-                .filter(view -> (view instanceof BuildingView) && !selectedViews.contains(view))
+                .filter(view -> (view instanceof IFeatureView) && !selectedViews.contains(view))
                 .forEach(view -> view.setVisible(false));
     }
 

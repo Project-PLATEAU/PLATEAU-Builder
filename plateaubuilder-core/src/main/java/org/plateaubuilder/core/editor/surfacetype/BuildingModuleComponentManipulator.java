@@ -16,17 +16,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class BuildingModuleComponentManipulator {
-    private final AbstractBuilding building;
+    private final AbstractBuilding feature;
     private final int lod;
 
-    public BuildingModuleComponentManipulator(AbstractBuilding building, int lod) {
-        this.building = building;
+    public BuildingModuleComponentManipulator(AbstractBuilding feature, int lod) {
+        this.feature = feature;
         this.lod = lod;
     }
 
     public Map<AbstractSurface, BuildingModuleComponent> getPropertyMap() {
         var map = new HashMap<AbstractSurface, BuildingModuleComponent>();
-        for (var boundedBy : building.getBoundedBySurface()) {
+        for (var boundedBy : feature.getBoundedBySurface()) {
             var boundarySurface = boundedBy.getBoundarySurface();
             if (boundarySurface == null)
                 continue;
@@ -120,7 +120,7 @@ public class BuildingModuleComponentManipulator {
             if (srcProperty instanceof BoundarySurfaceProperty) {
                 var boundedBy = (BoundarySurfaceProperty) srcProperty;
                 var openings = createWindowsForcibly(boundedBy);
-                building.unsetBoundedBySurface(boundedBy);
+                feature.unsetBoundedBySurface(boundedBy);
                 dstProperty.getBoundarySurface().getOpening().addAll(openings);
             } else if (srcProperty instanceof OpeningProperty) {
                 var openingProperty = (OpeningProperty) srcProperty;
@@ -209,7 +209,7 @@ public class BuildingModuleComponentManipulator {
 
         List<BoundarySurfaceProperty> dirtyBoundaries = new ArrayList<>();
 
-        for (var boundedBy : building.getBoundedBySurface()) {
+        for (var boundedBy : feature.getBoundedBySurface()) {
             var isDirty = unsetMultiSurfaceProperty(boundedBy.getBoundarySurface());
             if (lod == 3) {
                 for (var opening : boundedBy.getBoundarySurface().getOpening()) {
@@ -249,7 +249,7 @@ public class BuildingModuleComponentManipulator {
     private AbstractBoundarySurface addNewBoundarySurface(CityGMLClass clazz, List<AbstractSurface> surfaces) {
         var newBoundarySurface = (AbstractBoundarySurface) createCityObjectInstance(clazz);
         setMultiSurfaceProperty(newBoundarySurface, new MultiSurfaceProperty(new MultiSurface(surfaces)));
-        building.addBoundedBySurface(new BoundarySurfaceProperty(newBoundarySurface));
+        feature.addBoundedBySurface(new BoundarySurfaceProperty(newBoundarySurface));
         return newBoundarySurface;
     }
 
@@ -355,7 +355,7 @@ public class BuildingModuleComponentManipulator {
         }
 
         if (!surfaceExists)
-            building.unsetBoundedBySurface(boundedBy);
+            feature.unsetBoundedBySurface(boundedBy);
     }
 
     private void removeSurfaceFromOpening(BoundarySurfaceProperty parentBoundaryProperty, OpeningProperty opening, AbstractSurface sectionSurface) {
@@ -467,9 +467,12 @@ public class BuildingModuleComponentManipulator {
 
     private SolidProperty getSolid() {
         switch (lod) {
-            case 1: return building.getLod1Solid();
-            case 2: return building.getLod2Solid();
-            case 3: return building.getLod3Solid();
+        case 1:
+            return feature.getLod1Solid();
+        case 2:
+            return feature.getLod2Solid();
+        case 3:
+            return feature.getLod3Solid();
             default: throw new OutOfRangeException(lod, 1, 3);
         }
     }
@@ -477,13 +480,13 @@ public class BuildingModuleComponentManipulator {
     private void unsetSolid() {
         switch (lod) {
             case 1:
-                building.unsetLod1Solid();
+                feature.unsetLod1Solid();
                 break;
             case 2:
-                building.unsetLod2Solid();
+                feature.unsetLod2Solid();
                 break;
             case 3:
-                building.unsetLod3Solid();
+                feature.unsetLod3Solid();
                 break;
             default:
                 throw new OutOfRangeException(lod, 1, 3);
@@ -491,7 +494,7 @@ public class BuildingModuleComponentManipulator {
     }
 
     private BoundarySurfaceProperty findParentBoundarySurfaceProperty(OpeningProperty opening) {
-        for (var boundary : building.getBoundedBySurface()) {
+        for (var boundary : feature.getBoundedBySurface()) {
             if (boundary.getBoundarySurface().getOpening() == null)
                 continue;
 

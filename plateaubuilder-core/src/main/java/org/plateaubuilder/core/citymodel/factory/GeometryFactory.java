@@ -1,5 +1,6 @@
 package org.plateaubuilder.core.citymodel.factory;
 
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
 import org.citygml4j.model.citygml.building.BuildingInstallation;
@@ -145,18 +146,24 @@ public class GeometryFactory extends CityGMLFactory {
             linearRing.setSurfaceData(surfaceData);
 
             var texCoords = surfaceData.getTextureCoordinatesByRing().get("#" + linearRing.getGMLID());
-            // tesselate処理でテクスチャ座標数と頂点座標数が一致している必要があるため切り詰め or 0埋め
-            var desiredTexCoordSize = ringVertexBuffer.getVertexCount() * 2;
-            if (texCoords.length > desiredTexCoordSize) {
-                texCoords = Arrays.copyOf(texCoords, desiredTexCoordSize);
-            } else {
-                var copiedTexCoords = new float[desiredTexCoordSize];
-                System.arraycopy(texCoords, 0, copiedTexCoords, 0, desiredTexCoordSize);
-                texCoords = copiedTexCoords;
-                System.out.print("TexCoord size of " + linearRing.getGMLID() + " is less than vertex size. TexCoords will be filled with 0.\n");
-            }
+            if (texCoords != null) {
+                // tesselate処理でテクスチャ座標数と頂点座標数が一致している必要があるため切り詰め or 0埋め
+                var desiredTexCoordSize = ringVertexBuffer.getVertexCount() * 2;
+                if (texCoords.length > desiredTexCoordSize) {
+                    texCoords = Arrays.copyOf(texCoords, desiredTexCoordSize);
+                } else {
+                    var copiedTexCoords = new float[desiredTexCoordSize];
+                    System.arraycopy(texCoords, 0, copiedTexCoords, 0, desiredTexCoordSize);
+                    texCoords = copiedTexCoords;
+                    System.out.print("TexCoord size of " + linearRing.getGMLID() + " is less than vertex size. TexCoords will be filled with 0.\n");
+                }
 
-            texCoordBuffer.addTexCoords(texCoords, true);
+                texCoordBuffer.addTexCoords(texCoords, true);
+            } else {
+                var texCoordCount = ringVertexBuffer.getVertexCount();
+                // UVない場合は0埋め
+                texCoordBuffer.addTexCoords(new float[texCoordCount * 2], false);
+            }
         }else {
             var texCoordCount = ringVertexBuffer.getVertexCount();
             // UVない場合は0埋め
@@ -167,26 +174,41 @@ public class GeometryFactory extends CityGMLFactory {
     }
 
     private SurfaceDataView findAssociatedSurfaceData(LinearRingView linearRing, String targetId) {
-        if (getTarget() == null || getTarget().getRGBTextureAppearance() == null)
+        if (getTarget() == null || getTarget().getAppearance() == null)
             return null;
 
-        for (var surfaceData : getTarget().getRGBTextureAppearance().getSurfaceData()) {
+        SurfaceDataView texture = null;
+        SurfaceDataView x3dMaterial = null;
+        for (var surfaceData : getTarget().getAppearance().getSurfaceData()) {
             switch (surfaceData.getSurfaceType()) {
             case Texture:
                 var texCoords = surfaceData.getTextureCoordinatesByRing().get("#" + linearRing.getGMLID());
                 if (texCoords != null) {
-                    return surfaceData;
+                    texture = surfaceData;
                 }
                 break;
             case X3D:
-                System.out.println(targetId);
                 if (targetId != null && surfaceData.getTargetSet().contains("#" + targetId)) {
-                    return surfaceData;
+                    x3dMaterial = surfaceData;
                 }
                 break;
             default:
                 break;
             }
+        }
+
+        if (texture != null) {
+            if (x3dMaterial != null) {
+                // TODO: linearRingごとにマテリアルが違う場合がある?
+                var textureMaterial = (PhongMaterial) texture.getMaterial();
+                var material = (PhongMaterial) x3dMaterial.getMaterial();
+                material.setDiffuseColor(textureMaterial.getDiffuseColor());
+                material.setSpecularColor(textureMaterial.getSpecularColor());
+                material.setSpecularPower(textureMaterial.getSpecularPower());
+            }
+            return texture;
+        } else if (x3dMaterial != null) {
+            return x3dMaterial;
         }
 
         return null;

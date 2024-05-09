@@ -6,6 +6,9 @@ import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+
+import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.citygml4j.model.citygml.transportation.Road;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.gui.UIConstants;
 
@@ -40,10 +43,10 @@ public class FeatureInfoController implements Initializable {
 
                     for (int lod = 1; lod <= 3; ++lod) {
                         var toggle = toggles.get(lod - 1);
-                        if (oldFeature == null || oldFeature.getSolid(lod) == null)
+                        if (oldFeature == null || oldFeature.getLODView(lod) == null)
                             continue;
 
-                        toggle.selectedProperty().unbindBidirectional(((Node) oldFeature.getSolid(lod)).visibleProperty());
+                        toggle.selectedProperty().unbindBidirectional(((Node) oldFeature.getLODView(lod)).visibleProperty());
                     }
 
                     if (feature == null) {
@@ -55,15 +58,15 @@ public class FeatureInfoController implements Initializable {
 
                     for (int lod = 1; lod <= 3; ++lod) {
                         var toggle = toggles.get(lod - 1);
-                        if (feature.getSolid(lod) == null) {
+                        if (feature.getLODView(lod) == null) {
                             toggle.setVisible(false);
                             continue;
                         }
 
                         toggle.setVisible(true);
-                        if (oldFeature != null && oldFeature.getSolid(lod) != null)
-                            toggle.selectedProperty().unbindBidirectional(((Node)oldFeature.getSolid(lod)).visibleProperty());
-                        toggle.selectedProperty().bindBidirectional(((Node)feature.getSolid(lod)).visibleProperty());
+                        if (oldFeature != null && oldFeature.getLODView(lod) != null)
+                            toggle.selectedProperty().unbindBidirectional(((Node) oldFeature.getLODView(lod)).visibleProperty());
+                        toggle.selectedProperty().bindBidirectional(((Node) feature.getLODView(lod)).visibleProperty());
                     }
                 });
 
@@ -74,7 +77,11 @@ public class FeatureInfoController implements Initializable {
                         return;
 
                     featureIDText.setText("地物ID：" + feature.getId());
-                    featureTypeText.setText("地物型：" + UIConstants.buildingTypeDescription(feature.getCityGMLClass()));
+                    if (feature instanceof AbstractBuilding) {
+                        featureTypeText.setText("地物型：" + UIConstants.buildingTypeDescription(feature.getCityGMLClass()));
+                    } else if (feature instanceof Road) {
+                        featureTypeText.setText("地物型：" + UIConstants.roadTypeDescription(feature.getCityGMLClass()));
+                    }
                 });
     }
 }

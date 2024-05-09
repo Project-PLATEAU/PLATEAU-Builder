@@ -13,8 +13,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.apache.commons.lang3.StringUtils;
-import org.plateaubuilder.core.citymodel.BuildingView;
-import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
+import org.plateaubuilder.core.citymodel.IFeatureView;
+import org.plateaubuilder.core.citymodel.geometry.ILODView;
 import org.plateaubuilder.core.io.mesh.AxisEnum;
 import org.plateaubuilder.core.io.mesh.ThreeDimensionsModelEnum;
 import org.plateaubuilder.core.io.mesh.exporters.ExportOption;
@@ -31,11 +31,11 @@ import java.util.ResourceBundle;
 public class ThreeDimensionsExportDialogController implements Initializable {
     private Stage root;
 
-    private BuildingView buildingView;
+    private IFeatureView featureView;
 
     private String fileUrl;
 
-    private ILODSolidView lodSolidView;
+    private ILODView lodView;
 
     private ExportOption exportOption;
     
@@ -107,20 +107,21 @@ public class ThreeDimensionsExportDialogController implements Initializable {
     }
 
     /**
-     * 3Dエクスポート対象のBuildingViewを設定
-     * @param buildingView
+     * 3Dエクスポート対象のIFeatureViewを設定
+     * 
+     * @param featureView
      */
-    public void setBuildingView(BuildingView buildingView) {
-        this.buildingView = buildingView;
+    public void setFeatureView(IFeatureView featureView) {
+        this.featureView = featureView;
 
         var list = new ArrayList<String>();
-        if (this.buildingView.getLOD1Solid() != null) {
+        if (this.featureView.getLODView(1) != null) {
             list.add("LOD1");
         }
-        if (this.buildingView.getLOD2Solid() != null) {
+        if (this.featureView.getLODView(2) != null) {
             list.add("LOD2");
         }
-        if (this.buildingView.getLOD3Solid() != null) {
+        if (this.featureView.getLODView(3) != null) {
             list.add("LOD3");
         }
         comboBoxLod.getItems().addAll(FXCollections.observableArrayList(list));
@@ -141,11 +142,12 @@ public class ThreeDimensionsExportDialogController implements Initializable {
     }
 
     /**
-     * 3Dエクスポート対象のLodSolidViewを取得
+     * 3Dエクスポート対象のILODViewを取得
+     * 
      * @return
      */
-    public ILODSolidView getLodSolidView() {
-        return lodSolidView;
+    public ILODView getLodView() {
+        return lodView;
     }
 
     /**
@@ -191,13 +193,13 @@ public class ThreeDimensionsExportDialogController implements Initializable {
     public void onSubmit(ActionEvent actionEvent) {
         switch (comboBoxLod.getValue()) {
             case "LOD1":
-                this.lodSolidView = buildingView.getLOD1Solid();
+                this.lodView = this.featureView.getLODView(1);
                 break;
             case "LOD2":
-                this.lodSolidView = buildingView.getLOD2Solid();
+                this.lodView = this.featureView.getLODView(2);
                 break;
             case "LOD3":
-                this.lodSolidView = buildingView.getLOD3Solid();
+                this.lodView = this.featureView.getLODView(3);
                 break;
             default:
                 return;
@@ -224,9 +226,9 @@ public class ThreeDimensionsExportDialogController implements Initializable {
     /**
      * 3Dエクスポートダイアログ表示
      * 
-     * @param buildingView
+     * @param featureView
      */
-    public static ThreeDimensionsExportDialogController create(BuildingView buildingView, ThreeDimensionsModelEnum modelType) {
+    public static ThreeDimensionsExportDialogController create(IFeatureView featureView, ThreeDimensionsModelEnum modelType) {
         try {
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -234,7 +236,7 @@ public class ThreeDimensionsExportDialogController implements Initializable {
             stage.setScene(new Scene(loader.load()));
             var controller = (ThreeDimensionsExportDialogController) loader.getController();
             controller.setRoot(stage);
-            controller.setBuildingView(buildingView);
+            controller.setFeatureView(featureView);
             controller.setModelType(modelType);
             stage.showAndWait();
 

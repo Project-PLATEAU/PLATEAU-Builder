@@ -11,7 +11,7 @@ public class CityModelView extends ManagedGMLView<CityModel> {
 
     private String gmlPath;
 
-    private AppearanceView rgbTextureAppearance;
+    private AppearanceView appearance;
 
     public SchemaHandler getSchemaHandler() { return this.schemaHandler; }
 
@@ -21,20 +21,12 @@ public class CityModelView extends ManagedGMLView<CityModel> {
         this.schemaHandler = schemaHandler;
     }
 
-    public AppearanceView getRGBTextureAppearance() {
-        return this.rgbTextureAppearance;
+    public AppearanceView getAppearance() {
+        return this.appearance;
     }
 
-    public void setRGBTextureAppearance(AppearanceView appearance) {
-        this.rgbTextureAppearance = appearance;
-    }
-
-    public void setRGBTextureAppearances(AppearanceView appearance) {
-        this.rgbTextureAppearance = appearance;
-    }
-
-    public void addRGBTextureAppearances(AppearanceView appearance) {
-        this.rgbTextureAppearance.addSurfaceData(appearance.getSurfaceData());
+    public void setAppearance(AppearanceView appearance) {
+        this.appearance = appearance;
     }
 
     public String getGmlPath() {

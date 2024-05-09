@@ -1,20 +1,22 @@
 package org.plateaubuilder.core.world;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.plateaubuilder.core.citymodel.CityModelGroup;
+import org.plateaubuilder.core.citymodel.CityModelView;
+import org.plateaubuilder.core.citymodel.GMLViewTable;
+import org.plateaubuilder.core.citymodel.IFeatureView;
+import org.plateaubuilder.core.citymodel.ManagedGMLView;
+import org.plateaubuilder.core.editor.transform.GizmoModel;
+import org.plateaubuilder.core.geospatial.GeoReference;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
-import org.plateaubuilder.core.citymodel.BuildingView;
-import org.plateaubuilder.core.citymodel.CityModelGroup;
-import org.plateaubuilder.core.citymodel.CityModelView;
-import org.plateaubuilder.core.citymodel.GMLViewTable;
-import org.plateaubuilder.core.editor.transform.GizmoModel;
-import org.plateaubuilder.core.geospatial.GeoReference;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class World {
     private static World activeInstance;
@@ -114,7 +116,9 @@ public class World {
         return gizmo;
     }
     
-    public void addFeatureView(BuildingView view) {
-        cityGMLViewTable.register(view);
+    public void addFeatureView(IFeatureView view) {
+        if (view instanceof ManagedGMLView<?>) {
+            cityGMLViewTable.register((ManagedGMLView<?>) view);
+        }
     }
 }

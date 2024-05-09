@@ -7,6 +7,7 @@ import org.plateaubuilder.core.citymodel.geometry.ILODView;
 import org.plateaubuilder.core.citymodel.geometry.LOD1MultiSurfaceView;
 import org.plateaubuilder.core.citymodel.geometry.LOD2MultiSurfaceView;
 import org.plateaubuilder.core.citymodel.geometry.LOD3MultiSurfaceView;
+import org.plateaubuilder.core.editor.Editor;
 
 import javafx.scene.Node;
 
@@ -17,6 +18,10 @@ public class RoadView extends ManagedGMLView<Road> implements IFeatureView {
 
     public RoadView(Road gml) {
         super(gml);
+
+        Editor.getCityModelViewMode().lodProperty().addListener((observable, oldValue, newValue) -> {
+            toggleLODView((int) newValue);
+        });
     }
 
     public void toggleLODView(int lod) {
@@ -58,6 +63,16 @@ public class RoadView extends ManagedGMLView<Road> implements IFeatureView {
 
     public ILODView getLODView(int lod) {
         return getMultiSurface(lod);
+    }
+
+    public void setLODView(int lod, ILODView lodView) {
+        if (lodView instanceof LOD1MultiSurfaceView) {
+            setLOD1MultiSurface((LOD1MultiSurfaceView) lodView);
+        } else if (lodView instanceof LOD2MultiSurfaceView) {
+            setLOD2MultiSurface((LOD2MultiSurfaceView) lodView);
+        } else if (lodView instanceof LOD3MultiSurfaceView) {
+            setLOD3MultiSurface((LOD3MultiSurfaceView) lodView);
+        }
     }
 
     public ILODMultiSurfaceView getMultiSurface(int lod) {

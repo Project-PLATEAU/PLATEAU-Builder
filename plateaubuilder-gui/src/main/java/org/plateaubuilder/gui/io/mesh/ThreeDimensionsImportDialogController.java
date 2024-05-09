@@ -13,7 +13,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.apache.commons.lang3.StringUtils;
-import org.plateaubuilder.core.citymodel.BuildingView;
+import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.io.mesh.AxisEnum;
 import org.plateaubuilder.core.io.mesh.ThreeDimensionsModelEnum;
 import org.plateaubuilder.core.io.mesh.converters.ConvertOption;
@@ -31,7 +31,7 @@ import java.util.ResourceBundle;
 public class ThreeDimensionsImportDialogController implements Initializable {
     private Stage root;
 
-    private BuildingView buildingView;
+    private IFeatureView featureView;
 
     private String fileUrl;
 
@@ -117,11 +117,12 @@ public class ThreeDimensionsImportDialogController implements Initializable {
     }
 
     /**
-     * 3Dエクスポート対象のBuildingViewを設定
-     * @param buildingView
+     * 3Dエクスポート対象のIFeatureViewを設定
+     * 
+     * @param featureView
      */
-    public void setBuildingView(BuildingView buildingView) {
-        this.buildingView = buildingView;
+    public void setFeatureView(IFeatureView featureView) {
+        this.featureView = featureView;
         comboBoxLod.getItems().addAll(FXCollections.observableArrayList(Arrays.asList("LOD1", "LOD2", "LOD3")));
     }
 
@@ -234,9 +235,9 @@ public class ThreeDimensionsImportDialogController implements Initializable {
     /**
      * 3Dエクスポートダイアログ表示
      * 
-     * @param buildingView
+     * @param featureView
      */
-    public static ThreeDimensionsImportDialogController create(BuildingView buildingView, ThreeDimensionsModelEnum modelType) {
+    public static ThreeDimensionsImportDialogController create(IFeatureView featureView, ThreeDimensionsModelEnum modelType) {
         try {
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -244,7 +245,7 @@ public class ThreeDimensionsImportDialogController implements Initializable {
             stage.setScene(new Scene(loader.load()));
             var controller = (ThreeDimensionsImportDialogController) loader.getController();
             controller.setRoot(stage);
-            controller.setBuildingView(buildingView);
+            controller.setFeatureView(featureView);
             controller.setModelType(modelType);
             stage.showAndWait();
 

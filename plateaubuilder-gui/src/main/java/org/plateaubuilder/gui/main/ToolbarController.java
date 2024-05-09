@@ -8,7 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
-import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
+import org.plateaubuilder.core.citymodel.geometry.ILODView;
 import org.plateaubuilder.core.editor.transform.GizmoModel;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.world.SceneContent;
@@ -45,7 +45,7 @@ public class ToolbarController implements Initializable {
         var activeFeatureProperty = Editor.getFeatureSellection().getSelectElementProperty();
         activeFeatureProperty.addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                gizmoModel.attachManipulator(((ILODSolidView) newValue).getTransformManipulator());
+                gizmoModel.attachManipulator(((ILODView) newValue).getTransformManipulator());
             }
         });
     }
@@ -96,9 +96,9 @@ public class ToolbarController implements Initializable {
         if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
             if (event.isPrimaryButtonDown() && !mouseDragging) {
                 var result = event.getPickResult();
-                var building = findLODSolidView(result.getIntersectedNode());
-                if (building != null) {
-                    gizmoModel.attachManipulator(((ILODSolidView)building).getTransformManipulator());
+                var lodView = findLODView(result.getIntersectedNode());
+                if (lodView != null) {
+                    gizmoModel.attachManipulator(((ILODView) lodView).getTransformManipulator());
                 }
                 if (gizmoModel.isNodeInGizmo(result.getIntersectedNode())) {
                     gizmoModel.setCurrentGizmo(result.getIntersectedNode());
@@ -176,16 +176,16 @@ public class ToolbarController implements Initializable {
      * @param node 検索対象のノード
      * @return 操作対象のノード
      */
-    private Node findLODSolidView(Node node){
+    private Node findLODView(Node node) {
         if(node == null)
             return null;
 
         // ILODSolidViewインターフェースを実装しているか
-        if(node instanceof ILODSolidView)
+        if (node instanceof ILODView)
             return node;
 
         // 再帰検索
-        return findLODSolidView(node.getParent());
+        return findLODView(node.getParent());
     }
 
     /** サーフェス表示切り替え **/

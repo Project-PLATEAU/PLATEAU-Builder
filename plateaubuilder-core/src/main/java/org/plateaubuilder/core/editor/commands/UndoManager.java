@@ -1,11 +1,12 @@
 package org.plateaubuilder.core.editor.commands;
 
-import javafx.scene.Node;
-import org.plateaubuilder.core.citymodel.BuildingView;
-import org.plateaubuilder.core.editor.Editor;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.plateaubuilder.core.citymodel.IFeatureView;
+import org.plateaubuilder.core.editor.Editor;
+
+import javafx.scene.Node;
 
 public class UndoManager {
     private final int maxHistoryCount;
@@ -70,8 +71,8 @@ public class UndoManager {
         if (target == null)
             return;
 
-        if (target instanceof BuildingView) {
-            Editor.getFeatureSellection().select((BuildingView) target);
+        if (target instanceof IFeatureView) {
+            Editor.getFeatureSellection().select((IFeatureView) target);
         }
     }
 }
