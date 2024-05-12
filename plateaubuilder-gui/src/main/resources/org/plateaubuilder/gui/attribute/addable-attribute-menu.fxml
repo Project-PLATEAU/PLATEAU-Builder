@@ -6,7 +6,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 <?import java.net.URL?>
-<VBox style="-fx-background-color: #444444;" prefWidth="350" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="org.plateaubuilder.gui.attribute.AddingAttributeMenuController">
+<VBox style="-fx-background-color: #444444;" prefWidth="350" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="org.plateaubuilder.gui.attribute.AddableAttributeListPanelController">
     <!-- 検索ボックス -->
     <TextField fx:id="searchField" promptText="Search">
       <VBox.margin>

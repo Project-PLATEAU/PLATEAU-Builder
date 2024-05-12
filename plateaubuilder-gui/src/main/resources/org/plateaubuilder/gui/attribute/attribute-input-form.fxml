@@ -4,12 +4,12 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
-<VBox fx:id="inputAttributeForm" alignment="TOP_LEFT" spacing="10" style="-fx-background-color: #444444;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="org.plateaubuilder.gui.attribute.InputAttributeFormController">
+<VBox fx:id="inputAttributeForm" alignment="TOP_LEFT" spacing="10" style="-fx-background-color: #444444;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="org.plateaubuilder.gui.attribute.AttributeInputFormController">
     <padding>
         <Insets bottom="20" left="20" right="20" top="20" />
     </padding>
 
-    <Label fx:id="name" text="要素名：" />
+    <Label fx:id="nameLabel" text="要素名：" />
     <VBox fx:id="codeSpaceVbox">
         <Label text="■ CodeSpaceの入力" />
         <HBox fx:id="codeSpaceHbox" spacing="10">

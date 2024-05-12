@@ -8,7 +8,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import org.plateaubuilder.core.citymodel.UroAttributeInfo;
+import org.plateaubuilder.core.citymodel.XSDSchemaDocument ;
 import org.plateaubuilder.core.editor.CityModelViewMode;
 import org.plateaubuilder.core.editor.FeatureSelection;
 import org.plateaubuilder.core.editor.commands.UndoManager;
@@ -27,7 +27,7 @@ public class Editor {
     private static AntiAliasing antiAliasing;
     private static CityModelViewMode cityModelViewMode;
     private static SurfaceTypeEditor surfaceTypeEditor;
-    private static UroAttributeInfo uroAttributeInfo;
+    private static XSDSchemaDocument uroSchemaDocument;
     private static String datasetPath;
 
     private static SessionManager sessionManager;
@@ -35,7 +35,6 @@ public class Editor {
     private static FeatureSelection selection;
 
     private static UndoManager undoManager;
-
 
     public static Camera getCamera() {
         return camera;
@@ -81,12 +80,12 @@ public class Editor {
         return surfaceTypeEditor;
     }
 
-    public static org.w3c.dom.Document getUroAttributeDocument() {
-        return uroAttributeInfo.getUroAttributeDocument();
+    public static void settingUroSchemaDocument (String path) {
+        uroSchemaDocument.initialize(path,"uro");
     }
 
-    public static void settingUroAttributeInfo(String path) {
-        uroAttributeInfo.readUroSchemas(path);
+    public static XSDSchemaDocument getUroSchemaDocument () {
+        return uroSchemaDocument;
     }
 
     public static void setDatasetPath(String path) {
@@ -101,7 +100,7 @@ public class Editor {
         stage = newStage;
         sessionManager = SessionManager.createSessionManager("PLATEAUBuilder");
         sessionManager.loadSession();
-        uroAttributeInfo = new UroAttributeInfo();
+        uroSchemaDocument = new XSDSchemaDocument ();
 
         World.setActiveInstance(new World(), new Group());
         light = new Light();
