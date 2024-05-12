@@ -1,5 +1,13 @@
 package org.plateaubuilder.gui.attribute;
 
+import java.util.function.Consumer;
+
+import org.plateaubuilder.core.citymodel.CodeSpaceValue;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -7,13 +15,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
-import org.plateaubuilder.core.citymodel.CodeSpaceValue;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import java.util.function.Consumer;
 
 public class CodeSpaceValueMenuController {
     @FXML
@@ -34,16 +35,13 @@ public class CodeSpaceValueMenuController {
         description.setCellValueFactory(new PropertyValueFactory<>("description"));
         name.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-        // テーブルビューにデータをロードする
         ObservableList<CodeSpaceValue> data = FXCollections.observableArrayList();
-        // データを data に追加
         codeSpaceValueTable.setItems(data);
     }
 
     public void setCodeType(Document document) {
         this.document = document;
-        Node rootNode = this.document.getDocumentElement();
-        NodeList nodeList = rootNode.getChildNodes();
+        NodeList nodeList = this.document.getDocumentElement().getChildNodes();
         ObservableList<CodeSpaceValue> dataList = FXCollections.observableArrayList();
         CodeSpaceValue codeSpaceValue;
         for (int i = 0; i < nodeList.getLength(); i++) {

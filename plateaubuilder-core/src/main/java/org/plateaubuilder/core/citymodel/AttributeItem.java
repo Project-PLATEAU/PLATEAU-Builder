@@ -4,50 +4,57 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class AttributeItem {
-    private StringProperty key;
-    private StringProperty value;
-    private StringProperty uom;
-    private StringProperty codeSpace;
     private boolean isEditable;
+    private AttributeHandler handler;
 
-    public StringProperty keyProperty() {
-        return key;
-    }
+    /**
+     * 属性情報を所持するクラス
+     *
+     * @param handler 属性本体
+     */
+    public AttributeItem(AttributeHandler handler) {
 
-    public StringProperty valueProperty() {
-        return value;
-    }
-
-    public StringProperty uomProperty() {
-        return uom;
-    }
-
-    public StringProperty codeSpaceProperty() {
-        return codeSpace;
-    }
-
-    public boolean isEditable() {
-        return isEditable;
-    }
-
-    public void setEditable(boolean editable) {
-        isEditable = editable;
-    }
-
-    public AttributeItem(String key, String value, String uom, String codeSpace) {
-        this.key = new SimpleStringProperty(key);
-        this.value = new SimpleStringProperty(value);
-        this.uom = new SimpleStringProperty(uom);
-        this.codeSpace = new SimpleStringProperty(codeSpace);
+        this.handler = handler;
         this.isEditable = true;
     }
 
-    public AttributeItem(String key, String value, String uom, String codeSpace, boolean isEditable) {
-        this.key = new SimpleStringProperty(key);
-        this.value = new SimpleStringProperty(value);
-        this.uom = new SimpleStringProperty(uom);
-        this.codeSpace = new SimpleStringProperty(codeSpace);
-        this.isEditable = isEditable;
+    public String getName() {
+        if (handler != null) {
+            return handler.getName();
+        } else {
+            return "null";
+        }
     }
 
+    public String getValue() {
+        return handler.getValue();
+    }
+
+    public void setValue(String value) {
+        handler.setValue(value);
+    }
+
+    public String getUom() {
+        return handler.getUom();
+    }
+
+    public void setUom(String uom) {
+        handler.setUom(uom);
+    }
+
+    public String getCodeSpace() {
+        return handler.getCodeSpace();
+    }
+
+    public void setCodeSpace(String codeSpace) {
+        handler.setCodeSpace(codeSpace);
+    }
+
+    public Object getContent() {
+        return handler.getContent();
+    }
+
+    public String getType() {
+        return handler.getType();
+    }
 }
