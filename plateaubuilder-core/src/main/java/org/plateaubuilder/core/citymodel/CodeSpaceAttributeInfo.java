@@ -11,28 +11,32 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.FileInputStream;
 
-public class CodeListManager {
+public class CodeSpaceAttributeInfo {
     Document codeTypeDocument;
     Document sourceDocument;
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder builder;
+    NodeList dictionaryEntryNodeList;
 
     /**
-     * コードリストの定義ファイルをxmlから読み取り、Nodeとして取得します
+     * readCodeType
+     * CodeTypeのxmlをパースする
      *
-     * @param path コードリストの定義ファイルのパス
+     * @param path CodeTypeのパス
      */
-    public void readCodeList(String path) {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder;
-        NodeList dictionaryEntryNodeList;
+    public void readCodeType(String path) {
         try {
-            // コードリストの定義ファイルからドキュメントを取得
+            // DOMパーサのインスタンスを作成
             DOMParser parser = new DOMParser();
+
+            // XMLファイルをパース
             var fileStream = new FileInputStream(path);
             var inputSource = new InputSource(fileStream);
             parser.parse(inputSource);
-            sourceDocument = parser.getDocument();
 
-            // CodeListの情報格納用の新しいドキュメントを作成
+            // ドキュメントオブジェクトを取得
+            sourceDocument = parser.getDocument();
+            // 新しいXMLドキュメントを作成
             builder = factory.newDocumentBuilder();
             codeTypeDocument = builder.newDocument();
             Element documentRootElement = sourceDocument.getDocumentElement();
@@ -41,7 +45,6 @@ public class CodeListManager {
             codeTypeDocument.appendChild(rootElement);
             dictionaryEntryNodeList = sourceDocument.getElementsByTagName("gml:dictionaryEntry");
 
-            // 対象のコードリストから必要な情報を取得し、ノードリストに追加
             for (int i = 0; i < dictionaryEntryNodeList.getLength(); i++) {
                 Node node = dictionaryEntryNodeList.item(i);
                 Element element = (Element) node;
@@ -70,20 +73,16 @@ public class CodeListManager {
     }
 
     /**
-     * パースしたCodeTypeの要素リストを取得します
+     * getCodeTypeAttributeDocument
+     * パースしたCodeTypeの要素リストを返す
      *
-     * @return パースしたcodeTypeの要素リスト
+     * @return パースしたuroの要素リスト
      */
-    public Document getCodeListDocument() {
+    public Document getCodeTypeDocument() {
         return codeTypeDocument;
     }
 
-    /**
-     * ノードをターミナル上で可視化します
-     * 
-     * @param node  表示対象のノード
-     * @param depth 表示対象のノードの深さ
-     */
+    // ノードを表示するメソッド
     private static void printNode(Node node, int depth) {
         if (node.getNodeType() == Node.ELEMENT_NODE) {
             // インデント用の空白を生成

@@ -1,9 +1,5 @@
 package org.plateaubuilder.gui.attribute;
 
-import java.io.File;
-import java.util.Objects;
-import java.util.function.Consumer;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,13 +7,18 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 
-public class CodeSpaceTypeMenuController {
+import java.io.File;
+import java.util.Objects;
+import java.util.function.Consumer;
+
+public class CodeTypeMenuController {
 
     @FXML
     private ListView<String> codeTypeListView;
     @FXML
     private TextField searchField;
 
+    // 選択されたコードスペースを通知するためのコールバック
     private Consumer<String> onSelectCallback;
     private ObservableList<String> originalListItems = FXCollections.observableArrayList();
 

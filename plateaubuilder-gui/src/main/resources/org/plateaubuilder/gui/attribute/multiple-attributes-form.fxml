@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <?import java.net.URL?>
-<BorderPane prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.attribute.MultipleAttributeInputFormatController">
+<BorderPane prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.attribute.MultipleAttributesFormController">
     <center>
         <VBox spacing="10" style="-fx-background-color: #3A3A3A;">
             <TabPane fx:id="tabPane" styleClass="multiple-attributes-tab-pane">
