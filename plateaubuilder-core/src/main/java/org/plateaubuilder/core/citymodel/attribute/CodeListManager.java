@@ -1,4 +1,4 @@
-package org.plateaubuilder.core.citymodel;
+package org.plateaubuilder.core.citymodel.attribute;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;

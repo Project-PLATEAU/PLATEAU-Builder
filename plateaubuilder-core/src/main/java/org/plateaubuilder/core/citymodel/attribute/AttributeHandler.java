@@ -1,4 +1,4 @@
-package org.plateaubuilder.core.citymodel;
+package org.plateaubuilder.core.citymodel.attribute;
 
 public abstract class AttributeHandler {
     public abstract String getName();

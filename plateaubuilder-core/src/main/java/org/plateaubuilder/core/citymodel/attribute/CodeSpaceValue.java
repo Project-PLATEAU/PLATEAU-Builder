@@ -1,4 +1,4 @@
-package org.plateaubuilder.core.citymodel;
+package org.plateaubuilder.core.citymodel.attribute;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;

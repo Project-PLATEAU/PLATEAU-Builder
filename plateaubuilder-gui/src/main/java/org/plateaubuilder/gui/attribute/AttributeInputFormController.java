@@ -6,11 +6,12 @@ import java.util.ArrayList;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.common.child.ChildList;
-import org.plateaubuilder.core.citymodel.AttributeItem;
+import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
 import org.plateaubuilder.core.citymodel.BuildingView;
-import org.plateaubuilder.core.citymodel.CodeListManager;
-import org.plateaubuilder.core.citymodel.MeasuredHeightManager;
-import org.plateaubuilder.core.citymodel.XSDSchemaDocument;
+import org.plateaubuilder.core.citymodel.IFeatureView;
+import org.plateaubuilder.core.citymodel.attribute.CodeListManager;
+import org.plateaubuilder.core.citymodel.attribute.MeasuredHeightManager;
+import org.plateaubuilder.core.citymodel.attribute.XSDSchemaDocument;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.editor.attribute.AttributeEditor;
 import org.plateaubuilder.core.editor.commands.AbstractCityGMLUndoableCommand;
@@ -315,7 +316,7 @@ public class AttributeInputFormController {
 
         if (addFlag) {
             Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
-                private final BuildingView focusTarget = Editor.getFeatureSellection().getActive();
+                private final IFeatureView focusTarget = Editor.getFeatureSellection().getActive();
                 private final ChildList<ADEComponent> bldgAttributeTreeCache = bldgAttributeTree;
                 private final String addAttributeNameCache = addAttributeName;
                 private final AttributeItem baseAttributeItemCache = baseAttributeItem;
@@ -343,12 +344,12 @@ public class AttributeInputFormController {
 
                 @Override
                 public javafx.scene.Node getRedoFocusTarget() {
-                    return focusTarget;
+                    return focusTarget.getNode();
                 }
 
                 @Override
                 public javafx.scene.Node getUndoFocusTarget() {
-                    return focusTarget;
+                    return focusTarget.getNode();
                 }
             });
             if (requiredChildAttributeList != null && requiredChildAttributeList.size() != 0) {
@@ -357,7 +358,7 @@ public class AttributeInputFormController {
         } else if (editFlag) {
             Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
 
-                private final BuildingView focusTarget = Editor.getFeatureSellection().getActive();
+                private final IFeatureView focusTarget = Editor.getFeatureSellection().getActive();
 
                 private final String oldCodeSpace = AttributeEditor.getCodeSpace(targetAttributeItem);
                 private final String oldUom = AttributeEditor.getUom(targetAttributeItem);
@@ -378,12 +379,12 @@ public class AttributeInputFormController {
 
                 @Override
                 public javafx.scene.Node getRedoFocusTarget() {
-                    return focusTarget;
+                    return focusTarget.getNode();
                 }
 
                 @Override
                 public javafx.scene.Node getUndoFocusTarget() {
-                    return focusTarget;
+                    return focusTarget.getNode();
                 }
 
             });

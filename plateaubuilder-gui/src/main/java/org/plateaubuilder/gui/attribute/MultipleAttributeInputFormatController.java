@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.common.child.ChildList;
-import org.plateaubuilder.core.citymodel.AttributeItem;
+import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
 
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;

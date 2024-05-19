@@ -3,7 +3,7 @@ package org.plateaubuilder.gui.attribute;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.plateaubuilder.core.citymodel.AttributeValue;
+import org.plateaubuilder.core.citymodel.attribute.AttributeValue;
 import org.plateaubuilder.gui.utils.StageController;
 
 import javafx.collections.FXCollections;

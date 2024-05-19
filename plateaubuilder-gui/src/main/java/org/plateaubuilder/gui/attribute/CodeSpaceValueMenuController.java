@@ -2,7 +2,7 @@ package org.plateaubuilder.gui.attribute;
 
 import java.util.function.Consumer;
 
-import org.plateaubuilder.core.citymodel.CodeSpaceValue;
+import org.plateaubuilder.core.citymodel.attribute.CodeSpaceValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

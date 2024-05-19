@@ -1,12 +1,13 @@
-package org.plateaubuilder.core.citymodel;
+package org.plateaubuilder.core.citymodel.attribute;
 
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.plateaubuilder.core.citymodel.IFeatureView;
 
 public class RootAttributeHandler extends AttributeHandler {
-    private AbstractBuilding building;
+    private IFeatureView building;
     private String name = "root";
 
-    public RootAttributeHandler(AbstractBuilding building) {
+    public RootAttributeHandler(IFeatureView building) {
         this.building = building;
     }
 
@@ -49,6 +50,6 @@ public class RootAttributeHandler extends AttributeHandler {
 
     @Override
     public AbstractBuilding getContent() {
-        return building;
+        return (AbstractBuilding) this.building.getGML();
     }
 }

@@ -1,4 +1,4 @@
-package org.plateaubuilder.core.citymodel;
+package org.plateaubuilder.core.citymodel.attribute;
 
 import java.util.ArrayList;
 import org.w3c.dom.Document;

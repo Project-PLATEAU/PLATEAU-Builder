@@ -1,4 +1,4 @@
-package org.plateaubuilder.core.citymodel;
+package org.plateaubuilder.core.citymodel.attribute;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;

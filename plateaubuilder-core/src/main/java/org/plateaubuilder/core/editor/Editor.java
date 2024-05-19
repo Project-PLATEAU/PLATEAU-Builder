@@ -8,7 +8,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import org.plateaubuilder.core.citymodel.XSDSchemaDocument ;
+import org.plateaubuilder.core.citymodel.attribute.XSDSchemaDocument;
 import org.plateaubuilder.core.editor.CityModelViewMode;
 import org.plateaubuilder.core.editor.FeatureSelection;
 import org.plateaubuilder.core.editor.commands.UndoManager;
@@ -80,11 +80,11 @@ public class Editor {
         return surfaceTypeEditor;
     }
 
-    public static void settingUroSchemaDocument (String path) {
-        uroSchemaDocument.initialize(path,"uro");
+    public static void settingUroSchemaDocument(String path) {
+        uroSchemaDocument.initialize(path, "uro");
     }
 
-    public static XSDSchemaDocument getUroSchemaDocument () {
+    public static XSDSchemaDocument getUroSchemaDocument() {
         return uroSchemaDocument;
     }
 
@@ -100,7 +100,7 @@ public class Editor {
         stage = newStage;
         sessionManager = SessionManager.createSessionManager("PLATEAUBuilder");
         sessionManager.loadSession();
-        uroSchemaDocument = new XSDSchemaDocument ();
+        uroSchemaDocument = new XSDSchemaDocument();
 
         World.setActiveInstance(new World(), new Group());
         light = new Light();

@@ -1,4 +1,4 @@
-package org.plateaubuilder.core.citymodel;
+package org.plateaubuilder.core.citymodel.attribute;
 
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.measures.Length;

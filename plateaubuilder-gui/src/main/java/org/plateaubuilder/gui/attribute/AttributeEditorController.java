@@ -9,15 +9,16 @@ import java.util.ResourceBundle;
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.citygml.ade.generic.ADEGenericElement;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.citygml4j.model.citygml.transportation.Road;
 import org.citygml4j.model.common.child.ChildList;
-import org.plateaubuilder.core.citymodel.AttributeItem;
-import org.plateaubuilder.core.citymodel.AttributeValue;
 import org.plateaubuilder.core.citymodel.BuildingView;
-import org.plateaubuilder.core.citymodel.MeasuredHeightHandler;
-import org.plateaubuilder.core.citymodel.MeasuredHeightManager;
-import org.plateaubuilder.core.citymodel.NodeAttributeHandler;
-import org.plateaubuilder.core.citymodel.RootAttributeHandler;
-import org.plateaubuilder.core.citymodel.XSDSchemaDocument;
+import org.plateaubuilder.core.citymodel.IFeatureView;
+import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
+import org.plateaubuilder.core.citymodel.attribute.AttributeValue;
+import org.plateaubuilder.core.citymodel.attribute.MeasuredHeightManager;
+import org.plateaubuilder.core.citymodel.attribute.NodeAttributeHandler;
+import org.plateaubuilder.core.citymodel.attribute.RootAttributeHandler;
+import org.plateaubuilder.core.citymodel.attribute.XSDSchemaDocument;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.editor.attribute.AttributeEditor;
 import org.plateaubuilder.core.editor.attribute.BuildingSchema;
@@ -46,9 +47,9 @@ public class AttributeEditorController implements Initializable {
     public TreeTableView<AttributeItem> attributeTreeTable;
     public TreeTableColumn<AttributeItem, String> keyColumn;
     public TreeTableColumn<AttributeItem, String> valueColumn;
-    private AbstractBuilding selectedBuilding;
+    private IFeatureView selectedFeature;
     private XSDSchemaDocument uroSchemaDocument = Editor.getUroSchemaDocument();
-    private ObjectProperty<BuildingView> activeFeatureProperty;
+    private ObjectProperty<IFeatureView> activeFeatureProperty;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -68,8 +69,7 @@ public class AttributeEditorController implements Initializable {
             } else {
                 selectedTreeItem = attributeTreeTable.getRoot();
             }
-            showAddableAttributePanel(selectedTreeItem,
-                    (ChildList<ADEComponent>) selectedBuilding.getGenericApplicationPropertyOfAbstractBuilding());
+            showAddableAttributePanel(selectedTreeItem, getADEComponents());
         });
 
         // 編集ボタン押下時の挙動
@@ -94,12 +94,12 @@ public class AttributeEditorController implements Initializable {
                     AlertController.showDeleteAlert();
                 } else {
                     Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
-                        private final BuildingView focusTarget = Editor.getFeatureSellection().getActive();
+                        private final javafx.scene.Node focusTarget = Editor.getFeatureSellection().getActive()
+                                .getNode();
                         private final String codeSpaceCache = deleteAttributeItem.getCodeSpace();
                         private final String uomCache = deleteAttributeItem.getUom();
                         private final String valueCache = deleteAttributeItem.getValue();
-                        private final ChildList<ADEComponent> bldgAttributeTreeCache = (ChildList<ADEComponent>) selectedBuilding
-                                .getGenericApplicationPropertyOfAbstractBuilding();
+                        private final ChildList<ADEComponent> bldgAttributeTreeCache = getADEComponents();
                         private final AttributeItem parentAttributeItemCache = parentAttributeItem;
                         private final String deleteAttributeNameCache = deleteAttributeItem.getName();
                         private AttributeItem targetAttributeItem = deleteAttributeItem;
@@ -187,12 +187,12 @@ public class AttributeEditorController implements Initializable {
 
                 if (selectedFeature == null)
                     return null;
-                selectedBuilding = feature.getGML();
                 var root = new TreeItem<>(
-                        new AttributeItem(new RootAttributeHandler(selectedBuilding)));
+                        new AttributeItem(new RootAttributeHandler(selectedFeature)));
                 {
-                    if (selectedBuilding.isSetMeasuredHeight()) {
-                        MeasuredHeightManager.addMeasureHeightToTreeView(selectedBuilding, root);
+                    if (selectedFeature.isSetMeasuredHeight()) {
+                        MeasuredHeightManager.addMeasureHeightToTreeView((AbstractBuilding) selectedFeature.getGML(),
+                                root);
                     }
                 }
                 {
@@ -252,8 +252,8 @@ public class AttributeEditorController implements Initializable {
 
     }
 
-    private void addADEPropertyToTree(AbstractBuilding selectedBuilding, TreeItem<AttributeItem> root) {
-        for (var adeComponent : selectedBuilding.getGenericApplicationPropertyOfAbstractBuilding()) {
+    private void addADEPropertyToTree(IFeatureView selectedFeature, TreeItem<AttributeItem> root) {
+        for (var adeComponent : getADEComponents(selectedFeature)) {
             var adeElement = (ADEGenericElement) adeComponent;
             addXMLElementToTree(adeElement.getContent(), null, root);
         }
@@ -330,8 +330,7 @@ public class AttributeEditorController implements Initializable {
     }
 
     private void showRootAttributeAdditionPanel() {
-        showAddableAttributePanel(attributeTreeTable.getRoot(),
-                (ChildList<ADEComponent>) selectedBuilding.getGenericApplicationPropertyOfAbstractBuilding());
+        showAddableAttributePanel(attributeTreeTable.getRoot(), getADEComponents());
     }
 
     /**
@@ -461,11 +460,26 @@ public class AttributeEditorController implements Initializable {
         return attributeList;
     }
 
+    private ChildList<ADEComponent> getADEComponents() {
+        return getADEComponents(selectedFeature);
+    }
+
+    private static ChildList<ADEComponent> getADEComponents(IFeatureView selectedFeature) {
+        var gml = selectedFeature.getGML();
+        if (gml instanceof AbstractBuilding) {
+            return (ChildList<ADEComponent>) ((AbstractBuilding) gml).getGenericApplicationPropertyOfAbstractBuilding();
+        } else if (gml instanceof Road) {
+            return (ChildList<ADEComponent>) ((Road) gml).getGenericApplicationPropertyOfRoad();
+        }
+
+        return (ChildList<ADEComponent>) new ArrayList<ADEComponent>();
+    }
+
     /**
      * リストビューを更新します
      */
     private void refreshListView() {
-        BuildingView currentSelectedBuilding = activeFeatureProperty.get();
+        BuildingView currentSelectedBuilding = (BuildingView) activeFeatureProperty.get();
         activeFeatureProperty.set(null);
         activeFeatureProperty.set(currentSelectedBuilding);
     }
