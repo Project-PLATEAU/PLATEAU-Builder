@@ -131,7 +131,7 @@ public class CoordinateDialogController implements Initializable {
             var uroSchemaLocation = uroSchema == null ? null : SchemaHelper.getSchemaLocation(uroSchema);
 
             Editor.setDatasetPath(datasetPath.toString());
-            Editor.settingUroAttributeInfo(uroSchemaLocation);
+            Editor.settingUroSchemaDocument(uroSchemaLocation);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
