@@ -1,9 +1,11 @@
 package org.plateaubuilder.gui.main;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.SubScene;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import org.plateaubuilder.core.editor.Editor;
 
 import java.net.URL;
@@ -12,6 +14,9 @@ import java.util.ResourceBundle;
 public class CenterPanelController implements Initializable {
     @FXML
     Pane subSceneContainer;
+
+    @FXML
+    private StackPane adjustPerspective;
 
     @Override
     public void initialize(URL location, ResourceBundle resourceBundle) {
@@ -25,6 +30,16 @@ public class CenterPanelController implements Initializable {
 
         subScene.addListener((o,old,newSubScene) -> {
             setSubScene(newSubScene);
+        });
+
+        // subSceneContainerの幅が変更されたときにadjustを右寄せにする
+        subSceneContainer.widthProperty().addListener((observable, oldValue, newValue) -> {
+            setRightAdjustPerspective(newValue.doubleValue());
+        });
+
+        // レイアウトが完了した後に幅を取得し、右寄せにする
+        Platform.runLater(() -> {
+            setRightAdjustPerspective(subSceneContainer.getWidth());
         });
     }
 
@@ -40,5 +55,15 @@ public class CenterPanelController implements Initializable {
         } else {
             subSceneContainer.getChildren().add(0, subScene);
         }
+    }
+
+    private void setRightAdjustPerspective(double containerWidth) {
+        // StackPaneの幅を取得し、subSceneContainerの幅から引いてオフセットとする
+        double adjustWidth = adjustPerspective.getWidth();
+        double xOffset = containerWidth - adjustWidth;
+
+        // StackPaneの位置をオフセットに設定
+        adjustPerspective.layoutXProperty().unbind();
+        adjustPerspective.setLayoutX(xOffset);
     }
 }

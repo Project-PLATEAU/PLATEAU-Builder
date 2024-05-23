@@ -169,4 +169,39 @@ public class Camera {
         zoom.setX(calculateZoomOffset());
         pitch.setAngle(45);
     }
+
+    /**
+     * ズームアイコンドラッグ
+     * @param deltaMousePosition マウス移動量
+     */
+    public void dragZoom(Vector2D deltaMousePosition) {
+        zoomFactor -= deltaMousePosition.getY() * 0.01;
+        zoom.setX(calculateZoomOffset());
+    }
+
+    /**
+     * パンアイコンドラッグ
+     * @param deltaMousePosition マウス移動量
+     */
+    public void dragPan(Vector2D deltaMousePosition) {
+        // 移動
+        var deltaPosition = yaw.deltaTransform(
+                applyZoomFactor(deltaMousePosition.getY() * 0.5),
+                applyZoomFactor(deltaMousePosition.getX() * 0.5),
+                0
+        );
+        pivotTranslate.setX(pivotTranslate.getX() + deltaPosition.getX());
+        pivotTranslate.setY(pivotTranslate.getY() + deltaPosition.getY());
+        pivotTranslate.setZ(pivotTranslate.getZ() + deltaPosition.getZ());
+    }
+
+    /**
+     * 回転アイコンドラッグ
+     * @param deltaMousePosition マウス移動量
+     */
+    public void dragRotate(Vector2D deltaMousePosition) {
+        // 回転
+        yaw.setAngle(yaw.getAngle() - deltaMousePosition.getX() * 0.6);
+        pitch.setAngle(pitch.getAngle() + deltaMousePosition.getY() * 0.6);
+    }
 }

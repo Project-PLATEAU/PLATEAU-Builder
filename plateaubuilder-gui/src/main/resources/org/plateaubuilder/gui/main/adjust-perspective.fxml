@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="128.0" prefWidth="48.0" spacing="8.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.main.AdjustPerspectiveController">
+   <children>
+      <ImageView fx:id="iconZoom" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/icon_view_zoom.png" />
+         </image>
+      </ImageView>
+      <ImageView fx:id="iconPan" fitHeight="32.0" fitWidth="32.0" layoutX="10.0" layoutY="10.0" pickOnBounds="true">
+         <image>
+            <Image url="@../images/icon_view_pan.png" />
+         </image>
+      </ImageView>
+      <ImageView fx:id="iconRotate" fitHeight="32.0" fitWidth="32.0" layoutX="10.0" layoutY="160.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/icon_view_rotate.png" />
+         </image>
+      </ImageView>
+   </children>
+</VBox>
