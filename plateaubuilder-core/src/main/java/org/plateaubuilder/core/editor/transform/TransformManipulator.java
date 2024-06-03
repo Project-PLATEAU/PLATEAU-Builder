@@ -173,6 +173,24 @@ public class TransformManipulator {
     }
 
     /**
+     * 保持している座標変換の結果のコピーを返します。
+     *
+     * @return 座標変換
+     */
+    public Transform cloneTransformCache() {
+        return transformCache.clone();
+    }
+
+    /**
+     * 保保持している座標変換の結果を更新します。
+     *
+     * @param transform 座標変換
+     */
+    public void setTransformCache(Transform transform) {
+        transformCache = transform;
+    }
+
+    /**
      * 座標変換を追加します。
      * このメソッドは、保持された座標変換に与えられた座標変換を加え結合した結果を保持します。
      * 

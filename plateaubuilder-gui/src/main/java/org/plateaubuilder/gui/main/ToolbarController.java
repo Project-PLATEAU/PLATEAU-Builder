@@ -102,6 +102,7 @@ public class ToolbarController implements Initializable {
                 }
                 if (gizmoModel.isNodeInGizmo(result.getIntersectedNode())) {
                     gizmoModel.setCurrentGizmo(result.getIntersectedNode());
+                    gizmoModel.beginTransform();
                     vecIni = unprojectDirection(event.getSceneX(), event.getSceneY(), sceneContent.getSubScene().getWidth(), sceneContent.getSubScene().getHeight());
                     distance = result.getIntersectedDistance();
                     mouseDragging = true;

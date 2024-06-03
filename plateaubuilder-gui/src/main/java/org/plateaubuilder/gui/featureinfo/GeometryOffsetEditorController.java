@@ -10,6 +10,7 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
+import org.plateaubuilder.core.editor.commands.UndoableCommand;
 import org.plateaubuilder.core.editor.transform.TransformManipulator;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.world.World;
@@ -45,6 +46,20 @@ public class GeometryOffsetEditorController implements Initializable {
     private ChangeListener<Point3D> listenerPosition;
     private ChangeListener<Point3D> listenerRotation;
     private ChangeListener<Point3D> listenerScale;
+
+    private enum Transforms {
+        LOCATE,
+        ROTATE,
+        SCALE
+    }
+
+    private enum Axis {
+        X,
+        Y,
+        Z
+    }
+
+    private final String[][] oldValues = new String[Transforms.values().length][Axis.values().length];
 
     /**
      * FXMLファイルがロードされた際に呼び出される初期化メソッドです。
@@ -115,49 +130,122 @@ public class GeometryOffsetEditorController implements Initializable {
                     };
 
                     manipulator.getScaleProperty().addListener(listenerScale);
+
+                    oldValues[Transforms.LOCATE.ordinal()][Axis.X.ordinal()] = PositionX.getText();
+                    oldValues[Transforms.LOCATE.ordinal()][Axis.Y.ordinal()] = PositionY.getText();
+                    oldValues[Transforms.LOCATE.ordinal()][Axis.Z.ordinal()] = PositionZ.getText();
+                    oldValues[Transforms.ROTATE.ordinal()][Axis.X.ordinal()] = RotationX.getText();
+                    oldValues[Transforms.ROTATE.ordinal()][Axis.Y.ordinal()] = RotationY.getText();
+                    oldValues[Transforms.ROTATE.ordinal()][Axis.Z.ordinal()] = RotationZ.getText();
+                    oldValues[Transforms.SCALE.ordinal()][Axis.X.ordinal()] = ScaleX.getText();
+                    oldValues[Transforms.SCALE.ordinal()][Axis.Y.ordinal()] = ScaleY.getText();
+                    oldValues[Transforms.SCALE.ordinal()][Axis.Z.ordinal()] = ScaleZ.getText();
                 }
             }
         });
-        
-        // 各TextFieldによる入力を反映するためのイベントハンドラを設定
-        PositionX.textProperty().addListener((obs, oldVal, newVal) -> {
-            updateLocateFromTextFields(0, toDouble(newVal));
-            updateGizmo();
+
+        // Enterキーが押されたときのアクションを設定
+        PositionX.setOnAction(event -> {
+            submitValue(Transforms.LOCATE, Axis.X, PositionX.getText());
         });
-        PositionY.textProperty().addListener((obs, oldVal, newVal) -> {
-            updateLocateFromTextFields(1, toDouble(newVal));
-            updateGizmo();
+        PositionY.setOnAction(event -> {
+            submitValue(Transforms.LOCATE, Axis.Y, PositionY.getText());
         });
-        PositionZ.textProperty().addListener((obs, oldVal, newVal) -> {
-            updateLocateFromTextFields(2, toDouble(newVal));
-            updateGizmo();
+        PositionZ.setOnAction(event -> {
+            submitValue(Transforms.LOCATE, Axis.Z, PositionZ.getText());
+        });
+        // フォーカスが外れたときのアクションを設定
+        PositionX.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                submitValue(Transforms.LOCATE, Axis.X, PositionX.getText());
+            }
+        });
+        PositionY.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                submitValue(Transforms.LOCATE, Axis.Y, PositionY.getText());
+            }
+        });
+        PositionZ.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                submitValue(Transforms.LOCATE, Axis.Z, PositionZ.getText());
+            }
         });
 
-        RotationX.textProperty().addListener((obs, oldVal, newVal) -> {
-            updateRotateFromTextFields(0, toDouble(newVal));
-            updateGizmo();
+        // Enterキーが押されたときのアクションを設定
+        RotationX.setOnAction(event -> {
+            submitValue(Transforms.ROTATE, Axis.X, RotationX.getText());
         });
-        RotationY.textProperty().addListener((obs, oldVal, newVal) -> {
-            updateRotateFromTextFields(1, toDouble(newVal));
-            updateGizmo();
+        RotationY.setOnAction(event -> {
+            submitValue(Transforms.ROTATE, Axis.Y, RotationY.getText());
         });
-        RotationZ.textProperty().addListener((obs, oldVal, newVal) -> {
-            updateRotateFromTextFields(2, toDouble(newVal));
-            updateGizmo();
+        RotationZ.setOnAction(event -> {
+            submitValue(Transforms.ROTATE, Axis.Z, RotationZ.getText());
         });
-        
-        ScaleX.textProperty().addListener((obs, oldVal, newVal) -> {
-            updateScaleFromTextFields(0, toDouble(newVal));
-            updateGizmo();
+        // フォーカスが外れたときのアクションを設定
+        RotationX.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                submitValue(Transforms.ROTATE, Axis.X, RotationX.getText());
+            }
         });
-        ScaleY.textProperty().addListener((obs, oldVal, newVal) -> {
-            updateScaleFromTextFields(1, toDouble(newVal));
-            updateGizmo();
+        RotationY.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                submitValue(Transforms.ROTATE, Axis.Y, RotationY.getText());
+            }
         });
-        ScaleZ.textProperty().addListener((obs, oldVal, newVal) -> {
-            updateScaleFromTextFields(2, toDouble(newVal));
-            updateGizmo();
+        RotationZ.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                submitValue(Transforms.ROTATE, Axis.Z, RotationZ.getText());
+            }
         });
+
+        // Enterキーが押されたときのアクションを設定
+        ScaleX.setOnAction(event -> {
+            submitValue(Transforms.SCALE, Axis.X, ScaleX.getText());
+        });
+        ScaleY.setOnAction(event -> {
+            submitValue(Transforms.SCALE, Axis.Y, ScaleY.getText());
+        });
+        ScaleZ.setOnAction(event -> {
+            submitValue(Transforms.SCALE, Axis.Z, ScaleZ.getText());
+        });
+        // フォーカスが外れたときのアクションを設定
+        ScaleX.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                submitValue(Transforms.SCALE, Axis.X, ScaleX.getText());
+            }
+        });
+        ScaleY.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                submitValue(Transforms.SCALE, Axis.Y, ScaleY.getText());
+            }
+        });
+        ScaleZ.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                submitValue(Transforms.SCALE, Axis.Z, ScaleZ.getText());
+            }
+        });
+    }
+
+    private void submitValue(Transforms transforms, Axis axis, String newVal) {
+        if(newVal.equals(oldValues[transforms.ordinal()][axis.ordinal()])) return;
+        // Undo登録
+        addUndoManager(transforms, axis, oldValues[transforms.ordinal()][axis.ordinal()], newVal);
+        // パラメータ反映
+        switch (transforms) {
+            case LOCATE:
+                updateLocateFromTextFields(axis.ordinal(), toDouble(newVal));
+                break;
+            case ROTATE:
+                updateRotateFromTextFields(axis.ordinal(), toDouble(newVal));
+                break;
+            case SCALE:
+                updateScaleFromTextFields(axis.ordinal(), toDouble(newVal));
+                break;
+        }
+        // ギズモ更新
+        updateGizmo();
+
+        oldValues[transforms.ordinal()][axis.ordinal()] = newVal;
     }
 
     /**
@@ -305,5 +393,59 @@ public class GeometryOffsetEditorController implements Initializable {
             return;
 
         World.getActiveInstance().getGizmo().attachManipulator(manipulator);
+    }
+
+    private void addUndoManager(Transforms transforms, Axis axis, String oldValue, String newValue) {
+        Transforms undoTransforms = transforms;
+        Axis undoAxis = axis;
+        String undoOldValue = oldValue;
+        String undoNewValue = newValue;
+
+        Editor.getUndoManager().addCommand(new UndoableCommand() {
+            private final org.plateaubuilder.core.citymodel.IFeatureView focusTarget = Editor.getFeatureSellection().getActive();
+            private final TextField textField = undoTransforms == Transforms.LOCATE ? (undoAxis == Axis.X ? PositionX : undoAxis == Axis.Y ? PositionY : PositionZ) : undoTransforms == Transforms.ROTATE ? (undoAxis == Axis.X ? RotationX : undoAxis == Axis.Y ? RotationY : RotationZ) : (undoAxis == Axis.X ? ScaleX : undoAxis == Axis.Y ? ScaleY : ScaleZ);
+            private final Transforms transforms = undoTransforms;
+            private final Axis axis = undoAxis;
+            private final String oldValue = undoOldValue;
+            private final String newValue = undoNewValue;
+            private final TransformManipulator transformManipulator = manipulator;
+
+            @Override
+            public void redo() {
+                applyTransform(newValue);
+            }
+
+            @Override
+            public void undo() {
+                applyTransform(oldValue);
+            }
+
+            @Override
+            public javafx.scene.Node getRedoFocusTarget() {
+                return focusTarget.getNode();
+            }
+
+            @Override
+            public javafx.scene.Node getUndoFocusTarget() {
+                return focusTarget.getNode();
+            }
+
+            private void applyTransform(String value) {
+                manipulator = transformManipulator;
+                textField.textProperty().set(value);
+                switch(transforms) {
+                    case LOCATE:
+                        updateLocateFromTextFields(axis.ordinal(), toDouble(value));
+                        break;
+                    case ROTATE:
+                        updateRotateFromTextFields(axis.ordinal(), toDouble(value));
+                        break;
+                    case SCALE:
+                        updateScaleFromTextFields(axis.ordinal(), toDouble(value));
+                        break;
+                }
+                updateGizmo();
+            }
+        });
     }
 }

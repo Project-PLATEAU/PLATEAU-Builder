@@ -18,6 +18,7 @@ import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 import org.plateaubuilder.core.citymodel.geometry.ILODView;
 import org.plateaubuilder.core.editor.Editor;
+import org.plateaubuilder.core.editor.commands.UndoableCommand;
 import org.plateaubuilder.core.io.mesh.importers.Importer3D;
 
 import java.io.IOException;
@@ -478,8 +479,93 @@ public class GizmoModel extends Parent {
         if (manipulator == null)
             return;
 
+        if (!isDuringTransfom)
+            return;
+
+        isDuringTransfom = false;
+
+        Editor.getUndoManager().addCommand(new UndoableCommand() {
+            private final org.plateaubuilder.core.citymodel.IFeatureView focusTarget = Editor.getFeatureSellection().getActive();
+            private final TransformManipulator oldManipulator = undoManipulator;
+            private final Point3D oldLocation = undoLocation;
+            private final Point3D oldRotation = undoRotation;
+            private final Point3D oldScale = undoScale;
+            private final Point3D oldOrigin = undoOrigin;
+            private final Transform oldTransformCache = undoTransformCache;
+
+            private final TransformManipulator newManipulator = manipulator;
+            private final Point3D newLocation = manipulator.getLocation();
+            private final Point3D newRotation = manipulator.getRotation();
+            private final Point3D newScale = manipulator.getScale();
+            private final Point3D newOrigin = manipulator.getOrigin();
+            private final Transform newTransformCache = manipulator.cloneTransformCache();
+
+            @Override
+            public void redo() {
+                manipulator = newManipulator;
+                manipulator.updateOrigin(newOrigin);
+                manipulator.setLocation(newLocation);
+                manipulator.setRotation(newRotation);
+                manipulator.setScale(newScale);
+                manipulator.setTransformCache(newTransformCache);
+                applyTransform();
+            }
+
+            @Override
+            public void undo() {
+                manipulator = oldManipulator;
+                manipulator.updateOrigin(oldOrigin);
+                manipulator.setLocation(oldLocation);
+                manipulator.setRotation(oldRotation);
+                manipulator.setScale(oldScale);
+                manipulator.setTransformCache(oldTransformCache);
+                applyTransform();
+            }
+
+            @Override
+            public javafx.scene.Node getRedoFocusTarget() {
+                return focusTarget.getNode();
+            }
+
+            @Override
+            public javafx.scene.Node getUndoFocusTarget() {
+                return focusTarget.getNode();
+            }
+
+            private void applyTransform() {
+                // 建物の座標変換を初期化
+                manipulator.getSolidView().getTransforms().clear();
+                // 建物の座標変換情報から建物の座標変換を作成
+                manipulator.getSolidView().getTransforms().add(manipulator.getTransformCache());
+                // スケールを適用
+                manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), manipulator.getOrigin().getX(), manipulator.getOrigin().getY(), manipulator.getOrigin().getZ()));
+            }
+        });
+
         // GMLに書き戻す
         ((ILODView) manipulator.getSolidView()).reflectGML();
+    }
+
+    private boolean isDuringTransfom = false;
+    private TransformManipulator undoManipulator;
+    private Point3D undoLocation;
+    private Point3D undoRotation;
+    private Point3D undoScale;
+    private Point3D undoOrigin;
+    private Transform undoTransformCache;
+
+    /**
+     * ギズモ操作を開始します。
+     */
+    public void beginTransform() {
+        isDuringTransfom = true;
+
+        undoManipulator = manipulator;
+        undoLocation = manipulator.getLocation();
+        undoRotation = manipulator.getRotation();
+        undoScale = manipulator.getScale();
+        undoOrigin = manipulator.getOrigin();
+        undoTransformCache = manipulator.cloneTransformCache();
     }
 
     /**
