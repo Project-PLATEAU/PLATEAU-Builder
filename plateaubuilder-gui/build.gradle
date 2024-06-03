@@ -9,6 +9,7 @@ ext {
     mainClassName = 'org.plateaubuilder.gui.PLATEAUBuilderApp'
     launcherClassName = 'org.plateaubuilder.gui.Launcher'
     javafxVersion = '17.0.10'  //requires JDK11+
+    gdalInstallDir = 'C:/Program Files/GDAL' // GDALインストール先を指定
 }
 
 dependencies {
@@ -33,14 +34,8 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.0'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.16.0'
 
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-math3
-    implementation 'org.apache.commons:commons-math3:3.6.1'
-
     // https://mvnrepository.com/artifact/org.locationtech.jts/jts
     implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.19.0'
-
-    // https://mvnrepository.com/artifact/org.osgeo/proj4j
-    implementation group: 'org.osgeo', name: 'proj4j', version: '0.1.0'
 
     // https://mvnrepository.com/artifact/xerces/xercesImpl
     implementation ('xerces:xercesImpl:2.12.2') {
@@ -53,6 +48,9 @@ dependencies {
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     implementation 'commons-io:commons-io:2.15.1'
+
+    // https://mvnrepository.com/artifact/org.gdal/gdal
+    implementation group: 'org.gdal', name: 'gdal', version: '3.8.0'
 }
 
 compileJava {
@@ -81,11 +79,17 @@ application {
 //hence the distribution's name should reflect that
 distributions.main.distributionBaseName = project.name + '-' + javafx.platform.classifier
 
+task copyGdalRuntime(type: Copy) {
+    from "${gdalInstallDir}" // コピー元ディレクトリを指定
+    into './gdal' // コピー先ディレクトリを指定
+}
+
 run {
     //args '...'
     //get system properties specified from the command line (for debugging, etc.)
     //and pass them on to the running application's JVM
-    systemProperties = System.getProperties()
+//    systemProperties = System.getProperties()
+    environment "PATH", System.getenv("PATH") + File.pathSeparator + "./gdal"
 
     debugOptions {
         enabled = false
@@ -93,7 +97,7 @@ run {
         server = true
         suspend = false
     }
-}
+}.dependsOn copyGdalRuntime
 
 //make an executable uber jar including all dependencies
 //which should work only for current OS platform
@@ -156,10 +160,32 @@ task copyJre(type: Copy, dependsOn: ['jlink']) {
     into './build/product/PLATEAUBuilder/image'
 }
 
-task copyResources(type: Copy) {
+task copyResources(dependsOn: ['copyLocater', 'copyGdalLib', 'copyGdalDirData', 'copyGdalDirProjlib', 'copyGdalDirLisense']) {
+}
+
+task copyLocater(type: Copy) {
     from 'src/main/resources/org/plateau/plateaubuilder/plateaubuilder/'
     include 'Locater*'
     into './build/product/PLATEAUBuilder/'
+}
+
+// gdalのライブラリをコピー
+task copyGdalLib(type: Copy) {
+    from "${gdalInstallDir}"
+    include '*.dll'
+    into './build/product/PLATEAUBuilder/'
+}
+task copyGdalDirData(type: Copy) {
+    from "${gdalInstallDir}/gdal-data"
+    into './build/product/PLATEAUBuilder/gdal/gdal-data'
+}
+task copyGdalDirProjlib(type: Copy) {
+    from "${gdalInstallDir}/projlib"
+    into './build/product/PLATEAUBuilder/gdal/projlib'
+}
+task copyGdalDirLisense(type: Copy) {
+    from "${gdalInstallDir}/license"
+    into './build/product/PLATEAUBuilder/gdal/license'
 }
 
 // exeファイル一式を`build/product/PLATEAUBuilder`に生成する

@@ -2,34 +2,40 @@ package org.plateaubuilder.core.geospatial;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.osgeo.proj4j.*;
+import org.gdal.gdal.gdal;
+import org.gdal.osr.CoordinateTransformation;
+import org.gdal.osr.SpatialReference;
 import org.plateaubuilder.core.utils3d.geom.Vec3d;
 import org.plateaubuilder.core.utils3d.geom.Vec3f;
 
 public class GeoReference {
-    private final CoordinateTransform projectTransform;
-    private final CoordinateTransform unprojectTransform;
-    private final Vec3d origin;
+    private CoordinateTransformation projectTransform;
+    private CoordinateTransformation unprojectTransform;
+    private Vec3d origin;
     private StringProperty epsgCode = new SimpleStringProperty();
 
     public GeoReference(GeoCoordinate origin, String epsgCode) {
+        // GDALの設定
+        gdal.SetConfigOption("GDAL_DATA", "./gdal/gdal-data");
+        gdal.SetConfigOption("PROJ_LIB", "./gdal/projlib");
+        // GDALの初期化
+        gdal.AllRegister();
+
         // CRSの定義
-        CRSFactory crsFactory = new CRSFactory();
-        // GMLでのSRCはEPSG:4326（緯度経度座標、高さは扱わないためEPSG:6697とほぼ同義）
-        CoordinateReferenceSystem wgs84 = crsFactory.createFromName("EPSG:4326");
-        // TODO: 座標系選択
-        // 投影後のSRCはEPSG:2451（平面直角座標9系）
-        CoordinateReferenceSystem jpr = crsFactory.createFromName(epsgCode);
+        SpatialReference  geo = new SpatialReference();
+        SpatialReference  prj = new SpatialReference();
+
+        geo.ImportFromEPSG(6697);
+        prj.ImportFromEPSG(Integer.parseInt(epsgCode.substring(epsgCode.length() - 4)));
 
         // 座標変換のセットアップ
-        CoordinateTransformFactory ctFactory = new CoordinateTransformFactory();
-        projectTransform = ctFactory.createTransform(wgs84, jpr);
-        unprojectTransform = ctFactory.createTransform(jpr, wgs84);
+        projectTransform = new CoordinateTransformation(geo, prj);
+        unprojectTransform = new CoordinateTransformation(prj, geo);
 
-        var originCoord = new ProjCoordinate(origin.lon, origin.lat);
-        var originXY = new ProjCoordinate();
-        projectTransform.transform(originCoord, originXY);
-        this.origin = new Vec3d(originXY.x, originXY.y, origin.alt);
+        double[] originCoord = {origin.lat, origin.lon, origin.alt};
+
+        projectTransform.TransformPoint(originCoord);
+        this.origin = new Vec3d(originCoord[1], originCoord[0], originCoord[2]);
         setEPSGCode(epsgCode);
     }
 
@@ -39,15 +45,14 @@ public class GeoReference {
      */
     public Vec3f project(GeoCoordinate coordinate) {
         // 変換する座標
-        ProjCoordinate srcCoord = new ProjCoordinate(coordinate.lon, coordinate.lat);
-        ProjCoordinate destCoord = new ProjCoordinate();
+        double[] coord = {coordinate.lat, coordinate.lon, coordinate.alt};
 
         // 座標変換の実行
-        projectTransform.transform(srcCoord, destCoord);
+        projectTransform.TransformPoint(coord);
 
-        var position = new Vec3d(destCoord.x, destCoord.y, coordinate.alt);
+        var position = new Vec3d(coord[1], coord[0], coord[2]);
         position.sub(origin);
-        return new Vec3f((float)position.x, (float)position.y, (float)position.z);
+        return new Vec3f((float) position.x, (float) position.y, (float) position.z);
     }
 
     /**
@@ -59,13 +64,12 @@ public class GeoReference {
         var position3d = new Vec3d(position.x, position.y, position.z);
         position3d.add(origin);
 
-        ProjCoordinate srcCoord = new ProjCoordinate(position3d.x, position3d.y);
-        ProjCoordinate destCoord = new ProjCoordinate();
+        double[] coord = {position3d.y, position3d.x, position3d.z};
 
         // 座標変換の実行
-        unprojectTransform.transform(srcCoord, destCoord);
+        unprojectTransform.TransformPoint(coord);
 
-        return new GeoCoordinate(destCoord.y, destCoord.x, position3d.z);
+        return new GeoCoordinate(coord[0], coord[1], coord[2]);
     }
 
     /**

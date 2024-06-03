@@ -46,7 +46,6 @@ open module plateaubuilder.core {
     requires com.fasterxml.jackson.core;
     requires com.sun.xml.fastinfoset;
     requires commons.math3;
-    requires proj4j;
     requires vecmath;
     requires com.sun.xml.bind;
     requires xercesImpl;
