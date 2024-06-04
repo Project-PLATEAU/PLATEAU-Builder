@@ -23,11 +23,13 @@ import org.citygml4j.model.gml.basicTypes.Code;
 import org.plateaubuilder.core.io.mesh.AxisTransformer;
 import org.plateaubuilder.core.io.mesh.converters.model.TriangleModel;
 
+import de.javagl.jgltf.impl.v1.Node;
 import de.javagl.jgltf.model.AccessorData;
 import de.javagl.jgltf.model.AccessorModel;
 import de.javagl.jgltf.model.GltfModel;
 import de.javagl.jgltf.model.ImageModel;
 import de.javagl.jgltf.model.MaterialModel;
+import de.javagl.jgltf.model.NodeModel;
 import de.javagl.jgltf.model.TextureModel;
 import de.javagl.jgltf.model.io.GltfModelReader;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
@@ -77,54 +79,61 @@ public class GltfHandler extends Abstract3DFormatHandler {
         Map<String, List<TriangleModel>> triangleModelsMap = new HashMap<>();
         var sceneModel = _gltfModel.getSceneModels().get(0);
         for (var nodeModel : sceneModel.getNodeModels()) {
-            for (var meshModel : nodeModel.getMeshModels()) {
-                for (var meshPrimitiveModel : meshModel.getMeshPrimitiveModels()) {
-                    AccessorModel indices = meshPrimitiveModel.getIndices();
-
-                    var faces = createPolygonFaces(indices.getAccessorData());
-                    float[] vertices = null;
-                    float[] uvs = null;
-                    Map<String, AccessorModel> attributes = meshPrimitiveModel.getAttributes();
-                    for (Entry<String, AccessorModel> entry : attributes.entrySet()) {
-                        AccessorModel accessorModel = entry.getValue();
-                        AccessorData accessorData = accessorModel.getAccessorData();
-                        switch (entry.getKey()) {
-                        case "POSITION":
-                            vertices = createPolygonVertices(accessorData);
-                            break;
-                        case "TEXCOORD_0":
-                            uvs = createUVs(accessorData);
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-
-                    for (int i = 0; i < vertices.length; i += 3) {
-                        var convertedPoint = convertVertexAxis(vertices[i], vertices[i + 1], vertices[i + 2]);
-                        vertices[i] = convertedPoint.x;
-                        vertices[i + 1] = convertedPoint.y;
-                        vertices[i + 2] = convertedPoint.z;
-                    }
-
-                    for (var i = 0; i < faces.length; i += 6) {
-                        var triangleModel = new TriangleModel(faces, i, vertices, uvs);
-
-                        // 不正な三角形は除外する
-                        if (triangleModel.isValid()) {
-                            var materialModel = meshPrimitiveModel.getMaterialModel();
-                            var materialName = materialModel.getName();
-                            if (!triangleModelsMap.containsKey(materialName)) {
-                                triangleModelsMap.put(materialName, new LinkedList<>());
-                            }
-                            triangleModelsMap.get(materialName).add(triangleModel);
-                        }
-                    }
-                }
+            createTriangleModelsMap(nodeModel, triangleModelsMap);
+            for (var childNodeModel : nodeModel.getChildren()) {
+                createTriangleModelsMap(childNodeModel, triangleModelsMap);
             }
         }
 
         return triangleModelsMap;
+    }
+
+    private void createTriangleModelsMap(NodeModel nodeModel, Map<String, List<TriangleModel>> triangleModelsMap) {
+        for (var meshModel : nodeModel.getMeshModels()) {
+            for (var meshPrimitiveModel : meshModel.getMeshPrimitiveModels()) {
+                AccessorModel indices = meshPrimitiveModel.getIndices();
+
+                var faces = createPolygonFaces(indices.getAccessorData());
+                float[] vertices = null;
+                float[] uvs = null;
+                Map<String, AccessorModel> attributes = meshPrimitiveModel.getAttributes();
+                for (Entry<String, AccessorModel> entry : attributes.entrySet()) {
+                    AccessorModel accessorModel = entry.getValue();
+                    AccessorData accessorData = accessorModel.getAccessorData();
+                    switch (entry.getKey()) {
+                    case "POSITION":
+                        vertices = createPolygonVertices(accessorData);
+                        break;
+                    case "TEXCOORD_0":
+                        uvs = createUVs(accessorData);
+                        break;
+                    default:
+                        break;
+                    }
+                }
+
+                for (int i = 0; i < vertices.length; i += 3) {
+                    var convertedPoint = convertVertexAxis(vertices[i], vertices[i + 1], vertices[i + 2]);
+                    vertices[i] = convertedPoint.x;
+                    vertices[i + 1] = convertedPoint.y;
+                    vertices[i + 2] = convertedPoint.z;
+                }
+
+                for (var i = 0; i < faces.length; i += 6) {
+                    var triangleModel = new TriangleModel(faces, i, vertices, uvs, meshModel.getName());
+
+                    // 不正な三角形は除外する
+                    if (triangleModel.isValid()) {
+                        var materialModel = meshPrimitiveModel.getMaterialModel();
+                        var materialName = materialModel.getName();
+                        if (!triangleModelsMap.containsKey(materialName)) {
+                            triangleModelsMap.put(materialName, new LinkedList<>());
+                        }
+                        triangleModelsMap.get(materialName).add(triangleModel);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -135,21 +144,28 @@ public class GltfHandler extends Abstract3DFormatHandler {
         Map<String, AbstractSurfaceData> surfaceMap = new HashMap<>();
         var sceneModel = _gltfModel.getSceneModels().get(0);
         for (var nodeModel : sceneModel.getNodeModels()) {
-            for (var meshModel : nodeModel.getMeshModels()) {
-                for (var meshPrimitiveModel : meshModel.getMeshPrimitiveModels()) {
-                    var materialModel = meshPrimitiveModel.getMaterialModel();
-                    var materialName = materialModel.getName();
-                    if (surfaceMap.containsKey(materialName))
-                        continue;
-                    var parameterizedTexture = createParameterizedTexture(materialModel, surfaceMap);
-                    if (parameterizedTexture == null)
-                        continue;
-                    surfaceMap.put(materialName, parameterizedTexture);
-                }
+            createSurfaceData(nodeModel, surfaceMap);
+            for (var childNodeModel : nodeModel.getChildren()) {
+                createSurfaceData(childNodeModel, surfaceMap);
             }
         }
 
         return surfaceMap;
+    }
+
+    private void createSurfaceData(NodeModel nodeModel, Map<String, AbstractSurfaceData> surfaceMap) {
+        for (var meshModel : nodeModel.getMeshModels()) {
+            for (var meshPrimitiveModel : meshModel.getMeshPrimitiveModels()) {
+                var materialModel = meshPrimitiveModel.getMaterialModel();
+                var materialName = materialModel.getName();
+                if (surfaceMap.containsKey(materialName))
+                    continue;
+                var parameterizedTexture = createParameterizedTexture(materialModel, surfaceMap);
+                if (parameterizedTexture == null)
+                    continue;
+                surfaceMap.put(materialName, parameterizedTexture);
+            }
+        }
     }
 
     private int[] createPolygonFaces(AccessorData accessorData) {

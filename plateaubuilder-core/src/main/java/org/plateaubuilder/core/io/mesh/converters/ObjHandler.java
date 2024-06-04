@@ -73,7 +73,7 @@ public class ObjHandler extends Abstract3DFormatHandler {
             var coords = triangleMesh.getTexCoords();
             List<TriangleModel> triangleModels = new LinkedList<>();
             for (var i = 0; i < faces.size(); i += 6) {
-                var triangleModel = new TriangleModel(faces, i, vertices, coords, true);
+                var triangleModel = new TriangleModel(faces, i, vertices, coords, true, meshKey);
 
                 // 不正な三角形は除外する
                 if (triangleModel.isValid()) {
@@ -121,7 +121,7 @@ public class ObjHandler extends Abstract3DFormatHandler {
 
         String texturePath = null;
         var codes = _gmlFileName.split("_");
-        if (codes.length == 5) {
+        if (codes.length >= 4) {
             texturePath = String.format("%s_%s_%s_appearance/%s", codes[0], codes[1], codes[2], fileName);
         } else {
             texturePath = fileName;

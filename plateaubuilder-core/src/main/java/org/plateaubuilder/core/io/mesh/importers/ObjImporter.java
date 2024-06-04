@@ -151,7 +151,7 @@ public class ObjImporter {
         String key = "default";
         while ((line = br.readLine()) != null) {
             try {
-                if (line.startsWith("g ") || line.equals("g")) {
+                if (line.startsWith("g ") || line.equals("g") || line.startsWith("o ") || line.equals("o")) {
                     addMesh(key);
                     key = line.length() > 2 ? line.substring(2) : "default";
                     log("key = " + key);

@@ -3,6 +3,7 @@ package org.plateaubuilder.core.citymodel.geometry;
 import java.util.Arrays;
 import java.util.List;
 
+import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.editor.transform.TransformManipulator;
 import org.plateaubuilder.core.utils3d.polygonmesh.TexCoordBuffer;
 import org.plateaubuilder.core.utils3d.polygonmesh.VertexBuffer;
@@ -62,6 +63,19 @@ public interface ILODView {
      * 
      */
     public TransformManipulator getTransformManipulator();
+
+    /**
+     * この{@code ILODView}を保持する{@code IFeatureView}を取得します。
+     * 
+     * @return {@code IFeatureView}
+     */
+    default public IFeatureView getFeatureView() {
+        var parent = getParent();
+        if (parent instanceof IFeatureView) {
+            return (IFeatureView) parent;
+        }
+        return null;
+    }
 
     /**
      * メッシュを取得します。

@@ -181,7 +181,7 @@ public class ToolbarController implements Initializable {
         if(node == null)
             return null;
 
-        // ILODSolidViewインターフェースを実装しているか
+        // ILODViewインターフェースを実装しているか
         if (node instanceof ILODView)
             return node;
 

@@ -42,11 +42,14 @@ public abstract class AbstractCityGMLFeatureUndoableCommand<T extends AbstractCi
     private void replace(CityModel cityModel, T oldFeature, T newFeature) {
         CityObjectMember cityObjectMember = null;
         for (var member : cityModel.getCityObjectMember()) {
-            if (member.getCityObject() == oldFeature)
+            if (member.getCityObject() == oldFeature) {
                 cityObjectMember = member;
+                break;
+            }
         }
-        if (cityObjectMember == null)
+        if (cityObjectMember == null) {
             throw new RuntimeException();
+        }
 
         var group = World.getActiveInstance().getCityModelGroup();
         var cityModelView = (CityModelView) group.findView(cityModel);

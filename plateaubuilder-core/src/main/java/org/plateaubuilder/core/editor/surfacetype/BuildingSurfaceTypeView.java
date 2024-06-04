@@ -25,13 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 public class BuildingSurfaceTypeView extends MeshView {
-    private final List<PolygonSection> faceBufferSections = new ArrayList<>();
+    private final int lod;
     private AbstractBuilding building;
     private ILODSolidView solid;
-
     private final FaceBuffer faceBuffer = new FaceBuffer();
-
-    private int lod;
+    private final List<PolygonSection> faceBufferSections = new ArrayList<>();
 
     public BuildingSurfaceTypeView(int lod) {
         this.lod = lod;

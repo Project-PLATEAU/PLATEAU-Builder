@@ -20,6 +20,7 @@ import javafx.scene.shape.MeshView;
  */
 abstract public class AbstractLODMeshView<TGML extends AbstractGML, TMesh extends MeshView> extends Parent {
     private final TGML gmlObject;
+    private final int lod;
     private VertexBuffer vertexBuffer;
     private final TexCoordBuffer texCoordBuffer;
     private final List<MeshView> meshViews = new ArrayList<>();
@@ -30,11 +31,13 @@ abstract public class AbstractLODMeshView<TGML extends AbstractGML, TMesh extend
      * AbstractLODMeshViewクラスの新しいインスタンスを初期化します。
      * 
      * @param gmlObject      メッシュビューに関連付けられたGMLオブジェクト
+     * @param lod            メッシュのLOD
      * @param vertexBuffer   メッシュの頂点バッファ
      * @param texCoordBuffer メッシュのテクスチャ座標バッファ
      */
-    public AbstractLODMeshView(TGML gmlObject, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
+    public AbstractLODMeshView(TGML gmlObject, int lod, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
         this.gmlObject = gmlObject;
+        this.lod = lod;
         this.vertexBuffer = vertexBuffer;
         this.texCoordBuffer = texCoordBuffer;
         this.surfaceTypeView = createSurfaceTypeView();
@@ -55,6 +58,15 @@ abstract public class AbstractLODMeshView<TGML extends AbstractGML, TMesh extend
      */
     public TGML getGmlObject() {
         return gmlObject;
+    }
+
+    /**
+     * メッシュのLODを取得します。
+     * 
+     * @return メッシュのLOD
+     */
+    public int getLOD() {
+        return lod;
     }
 
     /**
@@ -103,13 +115,6 @@ abstract public class AbstractLODMeshView<TGML extends AbstractGML, TMesh extend
         meshViews.add(meshView);
     }
 
-    private void toggleSurfaceView(boolean isVisible) {
-        for (var meshView : meshViews) {
-            meshView.setVisible(!isVisible);
-        }
-        surfaceTypeView.setVisible(isVisible);
-    }
-
     /**
      * サーフェスタイプのメッシュビューを取得します。
      * 
@@ -129,11 +134,33 @@ abstract public class AbstractLODMeshView<TGML extends AbstractGML, TMesh extend
     }
 
     /**
-     * メッシュのLODを取得します。
-     * 
-     * @return メッシュのLOD
+     * 変更内容をGMLへ反映します。
      */
-    abstract public int getLOD();
+    public void reflectGML() {
+        var transformManipulator = getTransformManipulator();
+        for (var polygon : getPolygons()) {
+            var coordinates = polygon.getExteriorRing().getOriginCoords();
+            polygon.getExteriorRing().getGML().getPosList().setValue(transformManipulator.unprojectTransforms(coordinates));
+
+            for (var interiorRing : polygon.getInteriorRings()) {
+                var coordinatesInteriorRing = interiorRing.getOriginCoords();
+                polygon.getExteriorRing().getGML().getPosList().setValue(transformManipulator.unprojectTransforms(coordinatesInteriorRing));
+            }
+        }
+        var vertexBuffer = new VertexBuffer();
+        var vertices = transformManipulator.unprojectVertexTransforms(getVertexBuffer().getVertices());
+        for (var vertex : vertices) {
+            vertexBuffer.addVertex(vertex);
+        }
+        setVertexBuffer(vertexBuffer);
+    }
+
+    private void toggleSurfaceView(boolean isVisible) {
+        for (var meshView : meshViews) {
+            meshView.setVisible(!isVisible);
+        }
+        surfaceTypeView.setVisible(isVisible);
+    }
 
     /**
      * サーフェスタイプのメッシュビューを作成します。
@@ -141,4 +168,11 @@ abstract public class AbstractLODMeshView<TGML extends AbstractGML, TMesh extend
      * @return サーフェスタイプのメッシュビュー
      */
     abstract protected TMesh createSurfaceTypeView();
+
+    /**
+     * メッシュビューに関連付けられたPolygonViewのリストを取得します。
+     * 
+     * @return メッシュビューに関連付けられたPolygonViewのリスト
+     */
+    abstract public List<? extends PolygonView> getPolygons();
 }

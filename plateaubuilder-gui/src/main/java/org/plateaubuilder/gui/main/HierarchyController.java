@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 import org.plateaubuilder.core.citymodel.CityModelView;
 import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.geometry.GeometryView;
-import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
+import org.plateaubuilder.core.citymodel.geometry.ILODView;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.editor.transform.AutoGeometryAligner;
 import org.plateaubuilder.core.io.mesh.FormatEnum;
@@ -344,7 +344,7 @@ public class HierarchyController implements Initializable {
             super(node);
             if (node instanceof Parent) {
                 for (Node n : ((Parent) node).getChildrenUnmodifiable()) {
-                    if (n instanceof MeshView || n instanceof ILODSolidView) {
+                    if (n instanceof MeshView || n instanceof ILODView) {
                         if (!(n instanceof GeometryView))
                             continue;
                     }

@@ -1,21 +1,21 @@
 package org.plateaubuilder.core.editor.surfacetype;
 
-import org.citygml4j.model.citygml.transportation.Road;
+import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.plateaubuilder.core.citymodel.geometry.ILODMultiSurfaceView;
 
 import javafx.scene.shape.MeshView;
 
-public class TrafficAreaSurfaceTypeView extends MeshView {
+public class MultiSurfaceTypeView extends MeshView {
     private int lod;
-    private Road road;
+    private AbstractCityObject target;
     private ILODMultiSurfaceView multiSurface;
 
-    public TrafficAreaSurfaceTypeView(int lod) {
+    public MultiSurfaceTypeView(int lod) {
         this.lod = lod;
     }
 
-    public void setTarget(Road road, ILODMultiSurfaceView multiSurface) {
-        this.road = road;
+    public void setTarget(AbstractCityObject target, ILODMultiSurfaceView multiSurface) {
+        this.target = target;
         this.multiSurface = multiSurface;
     }
 

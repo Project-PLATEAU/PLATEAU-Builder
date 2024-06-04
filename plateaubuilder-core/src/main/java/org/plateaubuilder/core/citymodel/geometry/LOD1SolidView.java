@@ -11,12 +11,7 @@ public class LOD1SolidView extends AbstractLODSolidMeshView {
     private ArrayList<PolygonView> polygons;
 
     public LOD1SolidView(AbstractSolid gmlObject, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
-        super(gmlObject, vertexBuffer, texCoordBuffer);
-    }
-
-    @Override
-    public int getLOD() {
-        return 1;
+        super(gmlObject, 1, vertexBuffer, texCoordBuffer);
     }
 
     @Override

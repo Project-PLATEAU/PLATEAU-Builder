@@ -28,6 +28,17 @@ public interface IFeatureView {
         return getNode().getParent();
     }
 
+    default CityModelView getCityModelView() {
+        var parent = getNode().getParent();
+        if (parent instanceof CityModelView) {
+            return (CityModelView) parent;
+        } else if (parent instanceof IFeatureView) {
+            return ((IFeatureView) parent).getCityModelView();
+        }
+
+        return null;
+    }
+
     // TODO: 暫定で追加した(ほかのGMLのプロパティによっては共通化する)
     default boolean isSetMeasuredHeight() {
         return false;

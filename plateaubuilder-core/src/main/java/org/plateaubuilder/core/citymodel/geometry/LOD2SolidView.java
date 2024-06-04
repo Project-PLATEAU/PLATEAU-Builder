@@ -15,15 +15,7 @@ public class LOD2SolidView extends AbstractLODSolidMeshView {
     private List<BoundarySurfaceView> boundaries;
 
     public LOD2SolidView(AbstractSolid gmlObject, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
-        super(gmlObject, vertexBuffer, texCoordBuffer);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getLOD() {
-        return 2;
+        super(gmlObject, 2, vertexBuffer, texCoordBuffer);
     }
 
     /**
@@ -44,7 +36,7 @@ public class LOD2SolidView extends AbstractLODSolidMeshView {
 
     public void addSurfaceTypeView(AbstractBuilding building) {
         var surfaceTypeView = getSurfaceTypeView();
-        getChildren().add(getSurfaceTypeView());
+        getChildren().add(surfaceTypeView);
         surfaceTypeView.setTarget(building, this);
         surfaceTypeView.updateVisual();
     }

@@ -10,7 +10,7 @@ import org.plateaubuilder.core.citymodel.factory.BuildingViewFactory;
 public class ReplaceBuildingCommand extends AbstractCityGMLFeatureUndoableCommand<AbstractBuilding> {
 
     public ReplaceBuildingCommand(CityModel cityModel, AbstractBuilding oldFeature, AbstractBuilding newFeature) {
-        super(cityModel, null, null);
+        super(cityModel, oldFeature, newFeature);
     }
 
     @Override

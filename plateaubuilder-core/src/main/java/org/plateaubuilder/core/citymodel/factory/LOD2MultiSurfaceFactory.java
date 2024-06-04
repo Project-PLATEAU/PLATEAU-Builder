@@ -4,15 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.citygml4j.model.citygml.transportation.Road;
-import org.citygml4j.model.citygml.transportation.TrafficAreaProperty;
+import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
 import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
 import org.plateaubuilder.core.citymodel.CityModelView;
 import org.plateaubuilder.core.citymodel.SurfaceDataView;
+import org.plateaubuilder.core.citymodel.geometry.AbstractMultiSurfaceMeshView;
 import org.plateaubuilder.core.citymodel.geometry.LOD2MultiSurfaceView;
 import org.plateaubuilder.core.citymodel.geometry.PolygonView;
-import org.plateaubuilder.core.citymodel.geometry.TrafficAreaView;
 import org.plateaubuilder.core.world.World;
 
 import javafx.scene.shape.MeshView;
@@ -23,46 +22,16 @@ public class LOD2MultiSurfaceFactory extends GeometryFactory {
         super(target);
     }
 
-    public LOD2MultiSurfaceView createLOD2MultiSurface(Road gmlObject) {
-        if (gmlObject.getLod2MultiSurface() == null) {
-            return null;
-        }
+    public LOD2MultiSurfaceView createLOD2MultiSurface(MultiSurface multiSurface) {
+        var multiSurfaceView = new LOD2MultiSurfaceView(multiSurface, vertexBuffer, texCoordBuffer);
+        multiSurfaceView.setPolygons(createPolygonViews(multiSurface));
 
-        var multiSurfaceView = new LOD2MultiSurfaceView(gmlObject.getLod2MultiSurface().getObject(), vertexBuffer, texCoordBuffer);
-
-        var trafficAreaViews = new ArrayList<TrafficAreaView>();
-
-        for (var trafficArea : gmlObject.getTrafficArea()) {
-            if (trafficArea.getTrafficArea().getLod2MultiSurface() == null) {
-                continue;
-            }
-
-            var trafficAreaView = createTrafficArea(trafficArea);
-            trafficAreaViews.add(trafficAreaView);
-        }
-        multiSurfaceView.setTrafficAreaViews(trafficAreaViews);
-
-        var polygonsMap = multiSurfaceView.getSurfaceDataPolygonsMap();
-        // 1メッシュにつき1マテリアルしか登録できないため、マテリアルごとに別メッシュとして生成
-        for (Map.Entry<SurfaceDataView, List<PolygonView>> entry : polygonsMap.entrySet()) {
-            var meshView = new MeshView();
-            meshView.setMesh(createTriangleMesh(entry.getValue()));
-            if (entry.getKey() == null) {
-                meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
-            } else {
-                meshView.setMaterial(entry.getKey().getMaterial());
-            }
-            multiSurfaceView.addMeshView(meshView);
-        }
-
-        multiSurfaceView.addSurfaceTypeView(gmlObject);
+        setMaterial(multiSurfaceView);
 
         return multiSurfaceView;
     }
 
-    private TrafficAreaView createTrafficArea(TrafficAreaProperty trafficArea) {
-        var trafficAreaView = new TrafficAreaView(trafficArea.getTrafficArea());
-        var multiSurface = trafficArea.getTrafficArea().getLod2MultiSurface().getMultiSurface();
+    private List<PolygonView> createPolygonViews(MultiSurface multiSurface) {
         List<SurfaceProperty> surfaceMember = multiSurface.getSurfaceMember();
 
         var polygons = new ArrayList<PolygonView>();
@@ -75,7 +44,21 @@ public class LOD2MultiSurfaceFactory extends GeometryFactory {
             polygons.add(polygonObject);
         }
 
-        trafficAreaView.setPolygons(polygons);
-        return trafficAreaView;
+        return polygons;
+    }
+
+    private void setMaterial(AbstractMultiSurfaceMeshView multiSurfaceView) {
+        var polygonsMap = multiSurfaceView.getSurfaceDataPolygonsMap();
+        // 1メッシュにつき1マテリアルしか登録できないため、マテリアルごとに別メッシュとして生成
+        for (Map.Entry<SurfaceDataView, List<PolygonView>> entry : polygonsMap.entrySet()) {
+            var meshView = new MeshView();
+            meshView.setMesh(createTriangleMesh(entry.getValue()));
+            if (entry.getKey() == null) {
+                meshView.setMaterial(World.getActiveInstance().getDefaultMaterial());
+            } else {
+                meshView.setMaterial(entry.getKey().getMaterial());
+            }
+            multiSurfaceView.addMeshView(meshView);
+        }
     }
 }

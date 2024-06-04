@@ -19,7 +19,7 @@ public class BoundarySurfaceView extends GMLView<AbstractBoundarySurface> {
         return polygons;
     }
 
-    public void setPolygons(ArrayList<PolygonView> polygons) {
+    public void setPolygons(List<PolygonView> polygons) {
         this.polygons = polygons;
     }
 

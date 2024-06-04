@@ -1,24 +1,25 @@
 package org.plateaubuilder.core.editor.transform;
 
-import javafx.geometry.Point3D;
-import javafx.scene.Node;
-import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
-import javafx.scene.transform.Translate;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.locationtech.jts.algorithm.ConvexHull;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.plateaubuilder.core.citymodel.BuildingView;
 import org.plateaubuilder.core.citymodel.CityModelView;
-import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
+import org.plateaubuilder.core.citymodel.IFeatureView;
+import org.plateaubuilder.core.citymodel.geometry.ILODView;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.geospatial.GeoCoordinate;
 import org.plateaubuilder.core.utils3d.geom.Vec3f;
 import org.plateaubuilder.core.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
+import javafx.geometry.Point3D;
+import javafx.scene.Node;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Transform;
+import javafx.scene.transform.Translate;
 
 public class AutoGeometryAligner {
     /**
@@ -29,28 +30,28 @@ public class AutoGeometryAligner {
      * @param lod 調整対象のLOD
      */
     public static void GeometryAlign(CityModelView convertedCityModel, String id, int lod) {
-        ILODSolidView lod1SolidView = null;
-        ILODSolidView lodNSolidView = null;
-        for (var building : convertedCityModel.getChildrenUnmodifiable()) {
-            if (!building.getId().equals(id))
+        ILODView lod1View = null;
+        ILODView lodNView = null;
+        for (var feature : convertedCityModel.getChildrenUnmodifiable()) {
+            if (!feature.getId().equals(id))
                 continue;
-            var buildingView = (BuildingView) building;
-            lod1SolidView = buildingView.getLOD1Solid();
+            var featureView = (IFeatureView) feature;
+            lod1View = featureView.getLODView(1);
             switch (lod) {
                 case 2:
-                    lodNSolidView = buildingView.getLOD2Solid();
+                    lodNView = featureView.getLODView(2);
                     break;
                 case 3:
-                    lodNSolidView = buildingView.getLOD3Solid();
+                    lodNView = featureView.getLODView(3);
                     break;
             }
         }
-        if ((lod1SolidView == null) || (lodNSolidView == null)) {
+        if ((lod1View == null) || (lodNView == null)) {
             return;
         }
-        var lod1Vertices = lod1SolidView.getVertexBuffer().getVertices();
+        var lod1Vertices = lod1View.getVertexBuffer().getVertices();
         var lod1Geometry = createJTSGeometry(lod1Vertices);
-        var lodNVertices = lodNSolidView.getVertexBuffer().getVertices();
+        var lodNVertices = lodNView.getVertexBuffer().getVertices();
         var lodNgeometry = createJTSGeometry(lodNVertices);
         if ((lod1Geometry == null) || (lodNgeometry == null))
             return;
@@ -87,9 +88,9 @@ public class AutoGeometryAligner {
         var fixangle = angles.get(index2);
         
         // 反映
-        var manipulator = lodNSolidView.getTransformManipulator();
+        var manipulator = lodNView.getTransformManipulator();
 
-        var translateHeight = new Translate(0, 0, lod1SolidView.getTransformManipulator().getOrigin().getZ() - manipulator.getOrigin().getZ());
+        var translateHeight = new Translate(0, 0, lod1View.getTransformManipulator().getOrigin().getZ() - manipulator.getOrigin().getZ());
         var fixRotate = new Rotate(fixangle, lodNPoint.x, lodNPoint.y, 0, Rotate.Z_AXIS);
         
         manipulator.addTransformCache(translateHeight);
@@ -97,14 +98,15 @@ public class AutoGeometryAligner {
         manipulator.addTransformCache(fixRotate);
 
         manipulator.updateOrigin(new Point3D(lodNPoint.x, lodNPoint.y, manipulator.getOrigin().getZ()));
-        manipulator.setLocation(new Point3D(lod1Point.x - lodNPoint.x, lod1Point.y - lodNPoint.y, lod1SolidView.getTransformManipulator().getOrigin().getZ() - manipulator.getOrigin().getZ()));
+        manipulator.setLocation(new Point3D(lod1Point.x - lodNPoint.x, lod1Point.y - lodNPoint.y,
+                lod1View.getTransformManipulator().getOrigin().getZ() - manipulator.getOrigin().getZ()));
         manipulator.setRotation(new Point3D(0.0, 0.0, fixangle));
 
-        ((Node)lodNSolidView).getTransforms().clear();
-        ((Node)lodNSolidView).getTransforms().add(manipulator.getTransformCache());
-        lodNSolidView.reflectGML();
+        ((Node) lodNView).getTransforms().clear();
+        ((Node) lodNView).getTransforms().add(manipulator.getTransformCache());
+        lodNView.reflectGML();
 
-        Editor.getFeatureSellection().setSelectElement((Node) lodNSolidView);
+        Editor.getFeatureSellection().setSelectElement((Node) lodNView);
     }
     
     /**

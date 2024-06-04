@@ -131,8 +131,8 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
         return _cityModelView;
     }
 
-    protected Polygon createPolygon(org.locationtech.jts.geom.Polygon jtsPolygon, TriangleModel groundTriangle, AbstractSurfaceData surfaceData,
-            boolean isCreateId) {
+    protected Polygon createPolygon(org.locationtech.jts.geom.Polygon jtsPolygon, AbstractSurfaceData surfaceData, boolean isCreateId,
+            TriangleModel groundTriangle) {
         Polygon polygon = new Polygon();
         polygon.setId(String.format("poly_%s", UUID.randomUUID().toString()));
         var jtsExteriorRing = jtsPolygon.getExteriorRing();
@@ -153,10 +153,10 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
             applyLOD1Surface(polygon);
             break;
         case 2:
-            applyLOD2Surface(polygon, groundTriangle, surfaceData, jtsPolygon);
+            applyLOD2Surface(polygon, surfaceData, jtsPolygon, groundTriangle);
             break;
         case 3:
-            applyLOD3Surface(polygon, groundTriangle, surfaceData, jtsPolygon);
+            applyLOD3Surface(polygon, surfaceData, jtsPolygon, groundTriangle);
             break;
         default:
             throw new IllegalArgumentException("Unsupported LOD");
@@ -282,14 +282,15 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
         List<List<TriangleModel>> sameTrianglesList = new ArrayList<>();
         {
             List<TriangleModel> sameNormalList = new ArrayList<>();
-            for (var i = 1; i < triangleModels.size(); i++) {
-
-                // 精度向上のためGroundSurfaceは特別扱いして先に判定する
-                // 地面の基準となる三角形の平面との角度が0度で、平面が同じものをグループ化
-                var triangleModel = triangleModels.get(i);
-                double angle = Math.toDegrees(groundTriangle.getNormal().angle(triangleModel.getNormal()));
-                if (angle == 0 && groundTriangle.isSamePlane(triangleModel)) {
-                    sameNormalList.add(triangleModel);
+            if (groundTriangle != null) {
+                for (var i = 1; i < triangleModels.size(); i++) {
+                    // 精度向上のためGroundSurfaceは特別扱いして先に判定する
+                    // 地面の基準となる三角形の平面との角度が0度で、平面が同じものをグループ化
+                    var triangleModel = triangleModels.get(i);
+                    double angle = Math.toDegrees(groundTriangle.getNormal().angle(triangleModel.getNormal()));
+                    if (angle == 0 && groundTriangle.isSamePlane(triangleModel)) {
+                        sameNormalList.add(triangleModel);
+                    }
                 }
             }
             if (sameNormalList.size() > 0) {
@@ -313,6 +314,33 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
                 var triangleModel = triangleModels.get(i);
                 var angle = baseTriangle.getNormal().angle(triangleModel.getNormal());
                 if (angle == 0 && baseTriangle.isSamePlane(triangleModel)) {
+                    sameNormalList.add(triangleModel);
+                }
+            }
+            sameTrianglesList.add(sameNormalList);
+
+            // 三角形のリストから削除
+            for (var sameTriangle : sameNormalList) {
+                triangleModels.remove(sameTriangle);
+            }
+        }
+
+        return sameTrianglesList;
+    }
+
+    protected List<List<TriangleModel>> createSameNameTrianglesList(List<TriangleModel> triangleModels) {
+        List<List<TriangleModel>> sameTrianglesList = new ArrayList<>();
+
+        // 三角形のリストが空になるまでループ
+        while (triangleModels.size() > 0) {
+            var baseTriangle = triangleModels.get(0);
+            List<TriangleModel> sameNormalList = new ArrayList<>();
+            sameNormalList.add(baseTriangle);
+
+            // 最初に見つかった三角形と同じ名前の三角形をグループ化
+            for (var i = 1; i < triangleModels.size(); i++) {
+                var triangleModel = triangleModels.get(i);
+                if (baseTriangle.getName().equals(triangleModel.getName())) {
                     sameNormalList.add(triangleModel);
                 }
             }
@@ -536,13 +564,13 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
         return matchPolygon;
     }
 
-    protected void toGmlPolygonList(org.locationtech.jts.geom.Geometry jtsGeometry, TriangleModel groundTriangle, AbstractSurfaceData surfaceData,
-            boolean isCreateId) {
+    protected void toGmlPolygonList(org.locationtech.jts.geom.Geometry jtsGeometry, AbstractSurfaceData surfaceData, boolean isCreateId,
+            TriangleModel groundTriangle) {
         if (jtsGeometry.getGeometryType().equals(org.locationtech.jts.geom.Geometry.TYPENAME_POLYGON)) {
-            createPolygon((org.locationtech.jts.geom.Polygon) jtsGeometry, groundTriangle, surfaceData, isCreateId);
+            createPolygon((org.locationtech.jts.geom.Polygon) jtsGeometry, surfaceData, isCreateId, groundTriangle);
         } else if (jtsGeometry.getGeometryType().equals(org.locationtech.jts.geom.Geometry.TYPENAME_MULTIPOLYGON)) {
             for (var i = 0; i < jtsGeometry.getNumGeometries(); i++) {
-                toGmlPolygonList(jtsGeometry.getGeometryN(i), groundTriangle, surfaceData, isCreateId);
+                toGmlPolygonList(jtsGeometry.getGeometryN(i), surfaceData, isCreateId, groundTriangle);
             }
         } else {
             System.out.println(String.format("Error toGmlPolygonList: GeometryType:%s", jtsGeometry.getGeometryType()));
@@ -570,7 +598,7 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
                 }
             }
             if (!found) {
-                System.out.println("not found textureCoord → search by distance");
+                // System.out.println("not found textureCoord → search by distance");
 
                 // 同一頂点が見つからなかったら距離で判定する
                 var minDistance = Double.MAX_VALUE;
@@ -590,7 +618,7 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
                 // 最も距離が近い頂点を採用する
                 textureCoordinatesList.add((double) minDistanceUv.x);
                 textureCoordinatesList.add((double) minDistanceUv.y);
-                System.out.println(String.format("minDistance:%f", minDistance));
+                // System.out.println(String.format("minDistance:%f", minDistance));
             }
         }
 
@@ -614,8 +642,8 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
     }
 
     protected AppearanceView createAppearanceView(Appearance appearance, Map<String, AbstractSurfaceData> surfaceMap) {
-        var surfaceDataProperty = new SurfaceDataProperty();
         for (var surface : surfaceMap.values()) {
+            var surfaceDataProperty = new SurfaceDataProperty();
             surfaceDataProperty.setSurfaceData(surface);
             appearance.getSurfaceDataMember().add(surfaceDataProperty);
         }
@@ -651,6 +679,27 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
         return groundTriangle;
     }
 
+    protected void removeTexture(Appearance appearance, Set<String> hrefSet) {
+        var removeTextureList = new ArrayList<ParameterizedTexture>();
+        var surfaceDataMemberList = appearance.getSurfaceDataMember();
+        for (var surfaceDataMember : surfaceDataMemberList) {
+            if (surfaceDataMember.getSurfaceData() instanceof ParameterizedTexture) {
+                // 同じURIを持つParameterizedTextureを特定する
+                ParameterizedTexture original = (ParameterizedTexture) surfaceDataMember.getSurfaceData();
+                for (var originalTarget : original.getTarget()) {
+                    if (hrefSet.contains(originalTarget.getUri())) {
+                        removeTextureList.add(original);
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (var removeTexture : removeTextureList) {
+            surfaceDataMemberList.removeIf(surfaceDataMember -> surfaceDataMember.getSurfaceData() == removeTexture);
+        }
+    }
+
     protected void initialize(String fileUrl) throws Exception {
         _formatHandler.initialize(fileUrl);
     }
@@ -671,9 +720,9 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
 
     abstract protected void applyLOD1Surface(Polygon polygon);
 
-    abstract protected void applyLOD2Surface(Polygon polygon, TriangleModel groundTriangle, AbstractSurfaceData texture,
-            org.locationtech.jts.geom.Polygon jtsPolygon);
+    abstract protected void applyLOD2Surface(Polygon polygon, AbstractSurfaceData texture, org.locationtech.jts.geom.Polygon jtsPolygon,
+            TriangleModel groundTriangle);
 
-    abstract protected void applyLOD3Surface(Polygon polygon, TriangleModel groundTriangle, AbstractSurfaceData texture,
-            org.locationtech.jts.geom.Polygon jtsPolygon);
+    abstract protected void applyLOD3Surface(Polygon polygon, AbstractSurfaceData texture, org.locationtech.jts.geom.Polygon jtsPolygon,
+            TriangleModel groundTriangle);
 }

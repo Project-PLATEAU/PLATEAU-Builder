@@ -1,5 +1,14 @@
 package org.plateaubuilder.gui.featureinfo;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import org.plateaubuilder.core.citymodel.geometry.ILODView;
+import org.plateaubuilder.core.editor.Editor;
+import org.plateaubuilder.core.editor.commands.UndoableCommand;
+import org.plateaubuilder.core.editor.transform.TransformManipulator;
+import org.plateaubuilder.core.world.World;
+
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -9,14 +18,6 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
-import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
-import org.plateaubuilder.core.editor.commands.UndoableCommand;
-import org.plateaubuilder.core.editor.transform.TransformManipulator;
-import org.plateaubuilder.core.editor.Editor;
-import org.plateaubuilder.core.world.World;
-
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class GeometryOffsetEditorController implements Initializable {
     @FXML
@@ -72,8 +73,8 @@ public class GeometryOffsetEditorController implements Initializable {
         Editor.getFeatureSellection().getSelectElementProperty().addListener((ov, oldSelectElement, newSelectElement) -> {
             // 以前のギズモの操作対象に設定されたリスナーハンドルを削除
             if (oldSelectElement != null) {
-                if (oldSelectElement instanceof ILODSolidView) {
-                    var oldManipulator = ((ILODSolidView) oldSelectElement).getTransformManipulator();
+                if (oldSelectElement instanceof ILODView) {
+                    var oldManipulator = ((ILODView) oldSelectElement).getTransformManipulator();
 
                     if (listenerPosition != null)
                         oldManipulator.getLocationProperty().removeListener(listenerPosition);
@@ -87,8 +88,8 @@ public class GeometryOffsetEditorController implements Initializable {
             }
 
             if (newSelectElement != null) {
-                if (newSelectElement instanceof ILODSolidView) {
-                    manipulator = ((ILODSolidView) newSelectElement).getTransformManipulator();
+                if (newSelectElement instanceof ILODView) {
+                    manipulator = ((ILODView) newSelectElement).getTransformManipulator();
 
                     // 各TextFieldに現在の値を設定
                     PositionX.textProperty().set(toString(manipulator.getLocation().getX()));
@@ -316,11 +317,12 @@ public class GeometryOffsetEditorController implements Initializable {
         manipulator.setLocation(new Point3D(locationX, locationY, locationZ));
 
         // 建物の座標変換を初期化
-        manipulator.getSolidView().getTransforms().clear();
+        manipulator.getLODView().getTransforms().clear();
         // 建物の座標変換情報から建物の座標変換を作成
-        manipulator.getSolidView().getTransforms().add(manipulator.getTransformCache());
+        manipulator.getLODView().getTransforms().add(manipulator.getTransformCache());
         // スケールを適用
-        manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        manipulator.getLODView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(),
+                pivot.getX(), pivot.getY(), pivot.getZ()));
     }
     
     /**
@@ -351,11 +353,12 @@ public class GeometryOffsetEditorController implements Initializable {
         manipulator.addTransformCache(rotate);
 
         // 建物の座標変換を初期化
-        manipulator.getSolidView().getTransforms().clear();
+        manipulator.getLODView().getTransforms().clear();
         // 建物の座標変換情報から建物の座標変換を作成
-        manipulator.getSolidView().getTransforms().add(manipulator.getTransformCache());
+        manipulator.getLODView().getTransforms().add(manipulator.getTransformCache());
         // スケールを適用
-        manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        manipulator.getLODView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(),
+                pivot.getX(), pivot.getY(), pivot.getZ()));
     }
 
     /**
@@ -377,11 +380,12 @@ public class GeometryOffsetEditorController implements Initializable {
         manipulator.setScale(new Point3D(scaleX, scaleY, scaleZ));
 
         // 建物の座標変換を初期化
-        manipulator.getSolidView().getTransforms().clear();
+        manipulator.getLODView().getTransforms().clear();
         // 建物の座標変換情報から建物の座標変換を作成
-        manipulator.getSolidView().getTransforms().add(manipulator.getTransformCache());
+        manipulator.getLODView().getTransforms().add(manipulator.getTransformCache());
         // スケールを適用
-        manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        manipulator.getLODView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(),
+                pivot.getX(), pivot.getY(), pivot.getZ()));
     }
     
     /**

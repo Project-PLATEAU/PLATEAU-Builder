@@ -23,13 +23,13 @@ public class RoadViewFactory extends AbstractFeatureViewFactory<Road, Road> {
             view.setLOD1MultiSurface(lod1MultiSurface);
         }
 
-        var lod2MultiSurfaceFactory = new LOD2MultiSurfaceFactory(getTarget());
+        var lod2MultiSurfaceFactory = new LOD2RoadMultiSurfaceFactory(getTarget());
         var lod2MultiSurface = lod2MultiSurfaceFactory.createLOD2MultiSurface(gmlObject);
         if (lod2MultiSurface != null) {
             view.setLOD2MultiSurface(lod2MultiSurface);
         }
 
-        var lod3MultiSurfaceFactory = new LOD3MultiSurfaceFactory(getTarget());
+        var lod3MultiSurfaceFactory = new LOD3RoadMultiSurfaceFactory(getTarget());
         var lod3MultiSurface = lod3MultiSurfaceFactory.createLOD3MultiSurface(gmlObject);
         if (lod3MultiSurface != null) {
             view.setLOD3MultiSurface(lod3MultiSurface);

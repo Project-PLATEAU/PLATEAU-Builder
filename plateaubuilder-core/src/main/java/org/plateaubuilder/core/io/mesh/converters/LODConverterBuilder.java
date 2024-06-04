@@ -105,9 +105,9 @@ public class LODConverterBuilder {
 
     private AbstractLODConverter buildLODConverter(Abstract3DFormatHandler formatHandler) {
         if (featureView instanceof BuildingView) {
-            return new LODSolidConverter(cityModelView, (BuildingView) featureView, lod, convertOption, formatHandler);
+            return new LODBuildingConverter(cityModelView, (BuildingView) featureView, lod, convertOption, formatHandler);
         } else if (featureView instanceof RoadView) {
-            return new LODMultiSurfaceConverter(cityModelView, (RoadView) featureView, lod, convertOption, formatHandler);
+            return new LODRoadConverter(cityModelView, (RoadView) featureView, lod, convertOption, formatHandler);
         } else {
             throw new NotImplementedException(featureView.getClass().getName() + " is not supported.");
         }

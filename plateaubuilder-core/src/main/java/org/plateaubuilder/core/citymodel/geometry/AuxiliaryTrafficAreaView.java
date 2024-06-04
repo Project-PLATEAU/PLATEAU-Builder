@@ -3,7 +3,7 @@ package org.plateaubuilder.core.citymodel.geometry;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.citygml4j.model.citygml.transportation.TrafficArea;
+import org.citygml4j.model.citygml.transportation.AuxiliaryTrafficArea;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
 import org.plateaubuilder.core.citymodel.GMLView;
 import org.plateaubuilder.core.editor.surfacetype.MultiSurfaceTypeView;
@@ -13,11 +13,11 @@ import org.plateaubuilder.core.utils3d.polygonmesh.VertexBuffer;
 
 import javafx.scene.shape.MeshView;
 
-public class TrafficAreaView extends GMLView<TrafficArea> implements ILODMultiSurfaceView {
+public class AuxiliaryTrafficAreaView extends GMLView<AuxiliaryTrafficArea> implements ILODMultiSurfaceView {
     private List<PolygonView> polygons = new ArrayList<>();
     private AbstractMultiSurfaceMeshView multiSurfaceMeshView;
 
-    public TrafficAreaView(TrafficArea gml) {
+    public AuxiliaryTrafficAreaView(AuxiliaryTrafficArea gml) {
         super(gml);
     }
 

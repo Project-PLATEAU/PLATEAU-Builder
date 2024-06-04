@@ -3,7 +3,6 @@ package org.plateaubuilder.core.io.mesh.converters;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.citygml4j.builder.copy.DeepCopyBuilder;
@@ -38,13 +37,13 @@ import org.plateaubuilder.core.editor.commands.ReplaceBuildingCommand;
 import org.plateaubuilder.core.editor.surfacetype.BuildingModuleComponentManipulator;
 import org.plateaubuilder.core.io.mesh.converters.model.TriangleModel;
 
-public class LODSolidConverter extends AbstractLODConverter<BuildingView, AbstractBuilding> {
+public class LODBuildingConverter extends AbstractLODConverter<BuildingView, AbstractBuilding> {
 
     private ArrayList<AbstractBoundarySurface> _boundedBy = new ArrayList<AbstractBoundarySurface>();
 
     private CompositeSurface _compositeSurface = new CompositeSurface();
 
-    public LODSolidConverter(CityModelView cityModelView, BuildingView featureView, int lod, ConvertOption convertOption,
+    public LODBuildingConverter(CityModelView cityModelView, BuildingView featureView, int lod, ConvertOption convertOption,
             Abstract3DFormatHandler formatHandler) {
         super(cityModelView, featureView, lod, convertOption, formatHandler);
     }
@@ -65,7 +64,7 @@ public class LODSolidConverter extends AbstractLODConverter<BuildingView, Abstra
 
             // gmlのPolygonに変換
             for (var jtsPolygon : jtsPolygonList) {
-                toGmlPolygonList(jtsPolygon, null, null, false);
+                toGmlPolygonList(jtsPolygon, null, false, null);
             }
         }
 
@@ -104,7 +103,7 @@ public class LODSolidConverter extends AbstractLODConverter<BuildingView, Abstra
 
             // gmlのPolygonに変換
             for (var jtsPolygon : jtsPolygonList) {
-                toGmlPolygonList(jtsPolygon, groundTriangle, textureMap.get(meshKey), true);
+                toGmlPolygonList(jtsPolygon, textureMap.get(meshKey), true, groundTriangle);
             }
         }
 
@@ -148,7 +147,7 @@ public class LODSolidConverter extends AbstractLODConverter<BuildingView, Abstra
 
             // gmlのPolygonに変換
             for (var jtsPolygon : jtsPolygonList) {
-                toGmlPolygonList(jtsPolygon, groundTriangle, surfaceMap.get(meshKey), true);
+                toGmlPolygonList(jtsPolygon, surfaceMap.get(meshKey), true, groundTriangle);
             }
         }
 
@@ -175,23 +174,23 @@ public class LODSolidConverter extends AbstractLODConverter<BuildingView, Abstra
      * {@inheritDoc}
      */
     @Override
-    protected void applyLOD2Surface(Polygon polygon, TriangleModel groundTriangle, AbstractSurfaceData surfaceData,
-            org.locationtech.jts.geom.Polygon jtsPolygon) {
-        applyBoundarySurfaces(polygon, groundTriangle, surfaceData, jtsPolygon, 2);
+    protected void applyLOD2Surface(Polygon polygon, AbstractSurfaceData surfaceData, org.locationtech.jts.geom.Polygon jtsPolygon,
+            TriangleModel groundTriangle) {
+        applyBoundarySurfaces(polygon, surfaceData, jtsPolygon, groundTriangle, 2);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void applyLOD3Surface(Polygon polygon, TriangleModel groundTriangle, AbstractSurfaceData surfaceData,
-            org.locationtech.jts.geom.Polygon jtsPolygon) {
-        applyBoundarySurfaces(polygon, groundTriangle, surfaceData, jtsPolygon, 3);
+    protected void applyLOD3Surface(Polygon polygon, AbstractSurfaceData surfaceData, org.locationtech.jts.geom.Polygon jtsPolygon,
+            TriangleModel groundTriangle) {
+        applyBoundarySurfaces(polygon, surfaceData, jtsPolygon, groundTriangle, 3);
     }
 
     @SuppressWarnings("unchecked")
-    private void applyBoundarySurfaces(Polygon polygon, TriangleModel groundTriangle, AbstractSurfaceData surfaceData,
-            org.locationtech.jts.geom.Polygon jtsPolygon, int lod) {
+    private void applyBoundarySurfaces(Polygon polygon, AbstractSurfaceData surfaceData, org.locationtech.jts.geom.Polygon jtsPolygon,
+            TriangleModel groundTriangle, int lod) {
         // lod2Solid
         // 保持しておいたTriangleModelを取得する
         List<TriangleModel> userDataList = (List<TriangleModel>) jtsPolygon.getUserData();
@@ -238,45 +237,45 @@ public class LODSolidConverter extends AbstractLODConverter<BuildingView, Abstra
     }
 
     private void createLOD2(AbstractBuilding feature) {
-        var newBuilding = (Building) feature.copy(new DeepCopyBuilder());
+        var newFeature = (Building) feature.copy(new DeepCopyBuilder());
 
         // 古いsurfaceを削除
-        new BuildingModuleComponentManipulator(newBuilding, 2).clearSolidIncludingBoundaries();
+        new BuildingModuleComponentManipulator(newFeature, 2).clearSolidIncludingBoundaries();
 
         // lod2Solid
         Solid solid = new Solid();
         solid.setExterior(new SurfaceProperty(_compositeSurface));
         SolidProperty solidProperty = new SolidProperty(solid);
-        newBuilding.setLod2Solid(solidProperty);
+        newFeature.setLod2Solid(solidProperty);
 
         // boundedBy
-        var boundedBySurface = newBuilding.getBoundedBySurface();
+        var boundedBySurface = newFeature.getBoundedBySurface();
         for (var boundarySurface : _boundedBy) {
             boundedBySurface.add(new BoundarySurfaceProperty(boundarySurface));
         }
 
-        Editor.getUndoManager().addCommand(new ReplaceBuildingCommand(getCityModelView().getGML(), feature, newBuilding));
+        Editor.getUndoManager().addCommand(new ReplaceBuildingCommand(getCityModelView().getGML(), feature, newFeature));
     }
 
     private void createLOD3(AbstractBuilding feature) {
-        var newBuilding = (Building) feature.copy(new DeepCopyBuilder());
+        var newFeature = (Building) feature.copy(new DeepCopyBuilder());
 
         // 古いsurfaceを削除
-        new BuildingModuleComponentManipulator(newBuilding, 3).clearSolidIncludingBoundaries();
+        new BuildingModuleComponentManipulator(newFeature, 3).clearSolidIncludingBoundaries();
 
         // lod3Solid
         Solid solid = new Solid();
         solid.setExterior(new SurfaceProperty(_compositeSurface));
         SolidProperty solidProperty = new SolidProperty(solid);
-        newBuilding.setLod3Solid(solidProperty);
+        newFeature.setLod3Solid(solidProperty);
 
         // boundedBy
-        var boundedBySurface = newBuilding.getBoundedBySurface();
+        var boundedBySurface = newFeature.getBoundedBySurface();
         for (var boundarySurface : _boundedBy) {
             boundedBySurface.add(new BoundarySurfaceProperty(boundarySurface));
         }
 
-        Editor.getUndoManager().addCommand(new ReplaceBuildingCommand(getCityModelView().getGML(), feature, newBuilding));
+        Editor.getUndoManager().addCommand(new ReplaceBuildingCommand(getCityModelView().getGML(), feature, newFeature));
     }
 
     private AbstractBoundarySurface createBoundarySurface(Polygon polygon, TriangleModel triangle, TriangleModel groundTriangle, int lod) {
@@ -317,28 +316,28 @@ public class LODSolidConverter extends AbstractLODConverter<BuildingView, Abstra
     }
 
     private void removeTexture(Appearance appearance) {
-        Solid solid;
+        Solid gmlObject;
         var lod = getLOD();
         var featureView = getFeatureView();
         switch (lod) {
         case 2:
-            var lod2SolidView = (LOD2SolidView) featureView.getLODView(lod);
-            if (lod2SolidView == null)
+            var lod2View = (LOD2SolidView) featureView.getLODView(lod);
+            if (lod2View == null)
                 return;
 
-            solid = (Solid) lod2SolidView.getGmlObject();
+            gmlObject = (Solid) lod2View.getGmlObject();
             break;
         case 3:
-            var lod3SolidView = (LOD3SolidView) featureView.getLODView(lod);
-            if (lod3SolidView == null)
+            var lod3View = (LOD3SolidView) featureView.getLODView(lod);
+            if (lod3View == null)
                 return;
 
-            solid = (Solid) lod3SolidView.getGmlObject();
+            gmlObject = (Solid) lod3View.getGmlObject();
             break;
         default:
             throw new IllegalArgumentException("Unsupported LOD");
         }
-        var compositeSurface = (CompositeSurface) solid.getExterior().getObject();
+        var compositeSurface = (CompositeSurface) gmlObject.getExterior().getObject();
 
         // もともと参照していたテクスチャを削除する
         var hrefSet = new HashSet<String>();
@@ -346,26 +345,5 @@ public class LODSolidConverter extends AbstractLODConverter<BuildingView, Abstra
             hrefSet.add(surfaceMember.getHref());
         }
         removeTexture(appearance, hrefSet);
-    }
-
-    private void removeTexture(Appearance appearance, Set<String> hrefSet) {
-        var removeTextureList = new ArrayList<ParameterizedTexture>();
-        var surfaceDataMemberList = appearance.getSurfaceDataMember();
-        for (var surfaceDataMember : surfaceDataMemberList) {
-            if (surfaceDataMember.getSurfaceData() instanceof ParameterizedTexture) {
-                // LOD2SolidのCompositeSurfaceのhrefと同じURIを持つParameterizedTextureを特定する
-                ParameterizedTexture original = (ParameterizedTexture) surfaceDataMember.getSurfaceData();
-                for (var originalTarget : original.getTarget()) {
-                    if (hrefSet.contains(originalTarget.getUri())) {
-                        removeTextureList.add(original);
-                        break;
-                    }
-                }
-            }
-        }
-
-        for (var removeTexture : removeTextureList) {
-            surfaceDataMemberList.removeIf(surfaceDataMember -> surfaceDataMember.getSurfaceData() == removeTexture);
-        }
     }
 }

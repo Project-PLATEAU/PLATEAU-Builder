@@ -20,7 +20,7 @@ import java.util.List;
  * LODSolid継承クラスで保持することでギズモによる操作が可能になります。
  */
 public class TransformManipulator {
-    private Node solid;
+    private Node lodView;
 
     private ObjectProperty<Point3D> location = new SimpleObjectProperty<>();
     private ObjectProperty<Point3D> rotation = new SimpleObjectProperty<>();
@@ -36,7 +36,7 @@ public class TransformManipulator {
      * @param node 操作対象ノード
      */
     public TransformManipulator(Node node) {
-        solid = node;
+        lodView = node;
 
         this.location.set(new Point3D(0, 0, 0));
         this.rotation.set(new Point3D(0, 0, 0));
@@ -50,8 +50,8 @@ public class TransformManipulator {
      * 
      * @return 操作対象ノード
      */
-    public Node getSolidView() {
-        return solid;
+    public Node getLODView() {
+        return lodView;
     }
 
     /**
@@ -140,7 +140,7 @@ public class TransformManipulator {
      * このメソッドは、操作対象のバウンディングボックス底面中心を求め原点座標として保持します。
      */
     public void updateOrigin() {
-        BoundingBox bb = (BoundingBox) solid.getBoundsInParent();
+        BoundingBox bb = (BoundingBox) lodView.getBoundsInParent();
         origin = new Point3D(bb.getCenterX(), bb.getCenterY(), bb.getMinZ());
     }
 

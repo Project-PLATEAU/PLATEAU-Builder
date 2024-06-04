@@ -15,15 +15,7 @@ public class LOD3SolidView extends AbstractLODSolidMeshView {
     private ArrayList<BoundarySurfaceView> boundaries;
 
     public LOD3SolidView(AbstractSolid gmlObject, VertexBuffer vertexBuffer, TexCoordBuffer texCoordBuffer) {
-        super(gmlObject, vertexBuffer, texCoordBuffer);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getLOD() {
-        return 3;
+        super(gmlObject, 3, vertexBuffer, texCoordBuffer);
     }
 
     /**

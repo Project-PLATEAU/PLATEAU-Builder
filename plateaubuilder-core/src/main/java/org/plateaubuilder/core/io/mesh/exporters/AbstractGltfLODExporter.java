@@ -182,8 +182,15 @@ abstract public class AbstractGltfLODExporter<T extends ILODView> extends Abstra
         var textureModel = new DefaultTextureModel();
         textureModel.setImageModel(imageModel);
 
+        var diffuseColor = material.getDiffuseColor();
+        // MaterialBuilder には specularColor がない
+        // var specularColor = material.getSpecularColor();
+        // PhongMaterial には emissiveColor がない
+        // var diffuseColaor = material.getEmissiveColor();
+
         MaterialBuilder materialBuilder = MaterialBuilder.create();
-        materialBuilder.setBaseColorFactor(0.9f, 0.9f, 0.9f, 1.0f);
+
+        materialBuilder.setBaseColorFactor((float) diffuseColor.getRed(), (float) diffuseColor.getGreen(), (float) diffuseColor.getBlue(), 1.0f);
         materialBuilder.setDoubleSided(true);
         materialBuilder.setBaseColorTexture(textureModel, 0);
 

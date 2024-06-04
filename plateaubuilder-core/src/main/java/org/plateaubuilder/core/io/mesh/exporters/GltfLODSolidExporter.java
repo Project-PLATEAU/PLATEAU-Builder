@@ -7,6 +7,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.plateaubuilder.core.citymodel.geometry.ILODSolidView;
 import org.plateaubuilder.core.citymodel.geometry.LOD1SolidView;
 import org.plateaubuilder.core.citymodel.geometry.LOD2SolidView;
+import org.plateaubuilder.core.citymodel.geometry.LOD3SolidView;
 
 import de.javagl.jgltf.model.impl.DefaultMeshModel;
 import de.javagl.jgltf.model.impl.DefaultMeshPrimitiveModel;
@@ -36,6 +37,8 @@ public class GltfLODSolidExporter extends AbstractGltfLODExporter<ILODSolidView>
             return createSceneModel((LOD1SolidView) lodView);
         } else if (lodView instanceof LOD2SolidView) {
             return createSceneModel((LOD2SolidView) lodView);
+        } else if (lodView instanceof LOD3SolidView) {
+            return createSceneModel((LOD3SolidView) lodView);
         } else {
             throw new NotImplementedException(lodView.getClass().getName() + " is not supported.");
         }
@@ -70,6 +73,28 @@ public class GltfLODSolidExporter extends AbstractGltfLODExporter<ILODSolidView>
             for (var polygon : boundary.getPolygons()) {
                 MaterialModelV2 materialModel = createOrGetMaterialModel(materialMap, polygon);
                 DefaultMeshPrimitiveModel meshPrimitiveModel = createMeshPrimitive(lod2Solid, polygon, materialModel);
+                meshPrimitiveModel.setMaterialModel(materialModel);
+                meshModel.addMeshPrimitiveModel(meshPrimitiveModel);
+            }
+        }
+
+        nodeModel.addMeshModel(meshModel);
+        sceneModel.addNode(nodeModel);
+
+        return sceneModel;
+    }
+
+    private DefaultSceneModel createSceneModel(LOD3SolidView lod3Solid) {
+        DefaultSceneModel sceneModel = new DefaultSceneModel();
+        Map<String, MaterialModelV2> materialMap = new HashMap<>();
+        DefaultNodeModel nodeModel = new DefaultNodeModel();
+        DefaultMeshModel meshModel = new DefaultMeshModel();
+        meshModel.setName(getFeatureId());
+
+        for (var boundary : lod3Solid.getBoundaries()) {
+            for (var polygon : boundary.getPolygons()) {
+                MaterialModelV2 materialModel = createOrGetMaterialModel(materialMap, polygon);
+                DefaultMeshPrimitiveModel meshPrimitiveModel = createMeshPrimitive(lod3Solid, polygon, materialModel);
                 meshPrimitiveModel.setMaterialModel(materialModel);
                 meshModel.addMeshPrimitiveModel(meshPrimitiveModel);
             }

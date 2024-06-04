@@ -11,6 +11,7 @@ public class TriangleModel {
     private Point3f[] _vertices = new Point3f[3];
     private Point2f[] _uvs = new Point2f[3];
     private Vector3f _normal = new Vector3f();
+    private String _name;
 
     private TriangleModel() {
         _vertices[0] = new Point3f(0, 0, 0);
@@ -21,6 +22,10 @@ public class TriangleModel {
     }
 
     public TriangleModel(int[] faces, int startIndex, float[] vertices, float[] uvs) {
+        this(faces, startIndex, vertices, uvs, null);
+    }
+
+    public TriangleModel(int[] faces, int startIndex, float[] vertices, float[] uvs, String name) {
         for (var i = 0; i < 3; i++) {
             var vertexIndex = faces[startIndex + i * 2];
             var uvIndex = faces[startIndex + i * 2 + 1];
@@ -31,17 +36,22 @@ public class TriangleModel {
                 _uvs[i] = new Point2f(0, 1);
             }
         }
+        _name = name;
         initNormal();
     }
 
     public TriangleModel(ObservableFaceArray faces, int startIndex, ObservableFloatArray vertices, ObservableFloatArray uvs, boolean invertFace) {
+        this(faces, startIndex, vertices, uvs, invertFace, null);
+    }
+
+    public TriangleModel(ObservableFaceArray faces, int startIndex, ObservableFloatArray vertices, ObservableFloatArray uvs, boolean invertFace, String name) {
         for (var i = 0; i < 3; i++) {
             var vertexIndex = faces.get(startIndex + (invertFace ? 2 - i : i) * 2);
             var uvIndex = faces.get(startIndex + (invertFace ? 2 - i : i) * 2 + 1);
             _vertices[i] = new Point3f(vertices.get(vertexIndex * 3), vertices.get(vertexIndex * 3 + 1), vertices.get(vertexIndex * 3 + 2));
             _uvs[i] = new Point2f(uvs.get(uvIndex * 2), 1 - uvs.get(uvIndex * 2 + 1));
         }
-
+        _name = name;
         initNormal();
     }
 
@@ -109,5 +119,9 @@ public class TriangleModel {
 
     public static TriangleModel CreateGroundTriangle() {
         return new TriangleModel();
+    }
+
+    public String getName() {
+        return _name;
     }
 }

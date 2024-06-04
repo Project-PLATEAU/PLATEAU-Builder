@@ -1,30 +1,25 @@
 package org.plateaubuilder.core.io.mesh.exporters;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class ObjectModel {
     private String name;
-    private MaterialModel materialModel;
-    private int[] faces;
     private float[] vertices;
     private float[] uvs;
+    private Map<String, MaterialModel> materialModelsMap = new HashMap<>();
+    private Map<String, int[]> facesMap = new HashMap<>();
 
-    public ObjectModel(String name, int[] faces, float[] vertices, float[] uvs, MaterialModel materialModel) {
+    public ObjectModel(String name, float[] vertices, float[] uvs) {
         this.name = name;
-        this.faces = faces;
         this.vertices = vertices;
         this.uvs = uvs;
-        this.materialModel = materialModel;
     }
 
     public String getName() {
         return name;
-    }
-
-    public MaterialModel getMaterial() {
-        return materialModel;
-    }
-
-    public int[] getFaces() {
-        return faces;
     }
 
     public float[] getVertices() {
@@ -33,5 +28,30 @@ public class ObjectModel {
 
     public float[] getUVs() {
         return uvs;
+    }
+
+    public int getVertexCount() {
+        return vertices.length / 3;
+    }
+
+    public int getUVCount() {
+        return uvs.length / 2;
+    }
+
+    public List<String> getMaterialNames() {
+        return new ArrayList<String>(materialModelsMap.keySet());
+    }
+
+    public MaterialModel getMaterial(String name) {
+        return materialModelsMap.get(name);
+    }
+
+    public int[] getFaces(String name) {
+        return facesMap.get(name);
+    }
+
+    public void addMaterialFaces(String name, MaterialModel materialModel, int[] faces) {
+        materialModelsMap.put(name, materialModel);
+        facesMap.put(name, faces);
     }
 }

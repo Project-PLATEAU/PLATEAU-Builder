@@ -1,5 +1,14 @@
 package org.plateaubuilder.core.editor.transform;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.plateaubuilder.core.citymodel.geometry.ILODView;
+import org.plateaubuilder.core.editor.Editor;
+import org.plateaubuilder.core.editor.commands.UndoableCommand;
+import org.plateaubuilder.core.io.mesh.importers.Importer3D;
+
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Point3D;
 import javafx.scene.DepthTest;
@@ -16,14 +25,6 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
-import org.plateaubuilder.core.citymodel.geometry.ILODView;
-import org.plateaubuilder.core.editor.Editor;
-import org.plateaubuilder.core.editor.commands.UndoableCommand;
-import org.plateaubuilder.core.io.mesh.importers.Importer3D;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class GizmoModel extends Parent {
     public enum ControlMode {
@@ -321,7 +322,7 @@ public class GizmoModel extends Parent {
     public Node getAttachNode() {
         if (manipulator == null)
             return null;
-        return manipulator.getSolidView();
+        return manipulator.getLODView();
     }
 
     /**
@@ -457,11 +458,12 @@ public class GizmoModel extends Parent {
         }
 
         // 建物の座標変換を初期化
-        manipulator.getSolidView().getTransforms().clear();
+        manipulator.getLODView().getTransforms().clear();
         // 建物の座標変換情報から建物の座標変換を作成
-        manipulator.getSolidView().getTransforms().add(manipulator.getTransformCache());
+        manipulator.getLODView().getTransforms().add(manipulator.getTransformCache());
         // スケールを適用
-        manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        manipulator.getLODView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(),
+                pivot.getX(), pivot.getY(), pivot.getZ()));
 
         // ギズモの座標変換を初期化
         getTransforms().clear();
@@ -534,16 +536,17 @@ public class GizmoModel extends Parent {
 
             private void applyTransform() {
                 // 建物の座標変換を初期化
-                manipulator.getSolidView().getTransforms().clear();
+                manipulator.getLODView().getTransforms().clear();
                 // 建物の座標変換情報から建物の座標変換を作成
-                manipulator.getSolidView().getTransforms().add(manipulator.getTransformCache());
+                manipulator.getLODView().getTransforms().add(manipulator.getTransformCache());
                 // スケールを適用
-                manipulator.getSolidView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), manipulator.getOrigin().getX(), manipulator.getOrigin().getY(), manipulator.getOrigin().getZ()));
+                manipulator.getLODView().getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(),
+                        manipulator.getScale().getZ(), manipulator.getOrigin().getX(), manipulator.getOrigin().getY(), manipulator.getOrigin().getZ()));
             }
         });
 
         // GMLに書き戻す
-        ((ILODView) manipulator.getSolidView()).reflectGML();
+        ((ILODView) manipulator.getLODView()).reflectGML();
     }
 
     private boolean isDuringTransfom = false;
