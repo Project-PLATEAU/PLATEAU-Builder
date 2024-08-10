@@ -1,6 +1,7 @@
 package org.plateaubuilder.core.citymodel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.citygml4j.model.citygml.core.AbstractCityObject;
@@ -37,6 +38,10 @@ public interface IFeatureView {
         }
 
         return null;
+    }
+
+    default List<String> getSupportedLODTypes() {
+        return Arrays.asList("LOD1", "LOD2", "LOD3");
     }
 
     // TODO: 暫定で追加した(ほかのGMLのプロパティによっては共通化する)

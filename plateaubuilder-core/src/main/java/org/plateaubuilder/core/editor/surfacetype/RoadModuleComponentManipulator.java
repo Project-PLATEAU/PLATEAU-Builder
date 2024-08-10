@@ -12,16 +12,13 @@ import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurfaceProperty;
 import org.citygml4j.model.gml.geometry.primitives.AbstractSurface;
 
-public class RoadModuleComponentManipulator {
-    private final Road feature;
-    private final int lod;
-
+public class RoadModuleComponentManipulator extends AbstractModuleComponentManipulator<Road> {
     public RoadModuleComponentManipulator(Road feature, int lod) {
-        this.feature = feature;
-        this.lod = lod;
+        super(feature, lod);
     }
 
     public void clear() {
+        var feature = getFeature();
         List<AbstractSurface> surfaces = getSurfaces(getMultiSurface());
         for (var trafficArea : feature.getTrafficArea()) {
             var multiSurfaceProperty = getMultiSurface(trafficArea);
@@ -50,6 +47,8 @@ public class RoadModuleComponentManipulator {
     }
 
     private MultiSurfaceProperty getMultiSurface() {
+        var feature = getFeature();
+        var lod = getLod();
         switch (lod) {
         case 1:
             return feature.getLod1MultiSurface();
@@ -66,6 +65,7 @@ public class RoadModuleComponentManipulator {
         if (trafficAreaProperty == null || trafficAreaProperty.getTrafficArea() == null) {
             return null;
         }
+        var lod = getLod();
         switch (lod) {
         case 1:
             return null;
@@ -82,6 +82,7 @@ public class RoadModuleComponentManipulator {
         if (auxiliaryTrafficAreaProperty == null || auxiliaryTrafficAreaProperty.getAuxiliaryTrafficArea() == null) {
             return null;
         }
+        var lod = getLod();
         switch (lod) {
         case 1:
             return null;
@@ -95,6 +96,8 @@ public class RoadModuleComponentManipulator {
     }
 
     private void unsetMultiSurface() {
+        var feature = getFeature();
+        var lod = getLod();
         switch (lod) {
         case 1:
             feature.unsetLod1MultiSurface();

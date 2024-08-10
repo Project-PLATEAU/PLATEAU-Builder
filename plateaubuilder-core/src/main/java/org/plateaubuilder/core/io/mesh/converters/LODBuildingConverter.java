@@ -14,7 +14,6 @@ import org.citygml4j.model.citygml.appearance.TextureAssociation;
 import org.citygml4j.model.citygml.building.AbstractBoundarySurface;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.building.BoundarySurfaceProperty;
-import org.citygml4j.model.citygml.building.Building;
 import org.citygml4j.model.citygml.building.GroundSurface;
 import org.citygml4j.model.citygml.building.OuterCeilingSurface;
 import org.citygml4j.model.citygml.building.RoofSurface;
@@ -29,7 +28,6 @@ import org.citygml4j.model.gml.geometry.primitives.SolidProperty;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
 import org.plateaubuilder.core.citymodel.BuildingView;
 import org.plateaubuilder.core.citymodel.CityModelView;
-import org.plateaubuilder.core.citymodel.factory.LOD1SolidFactory;
 import org.plateaubuilder.core.citymodel.geometry.LOD2SolidView;
 import org.plateaubuilder.core.citymodel.geometry.LOD3SolidView;
 import org.plateaubuilder.core.editor.Editor;
@@ -46,120 +44,6 @@ public class LODBuildingConverter extends AbstractLODConverter<BuildingView, Abs
     public LODBuildingConverter(CityModelView cityModelView, BuildingView featureView, int lod, ConvertOption convertOption,
             Abstract3DFormatHandler formatHandler) {
         super(cityModelView, featureView, lod, convertOption, formatHandler);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void convertLOD1() throws Exception {
-        // 各フォーマットの実装から三角形のリストを作成
-        var triangleModelsMap = createTriangleModelsMap();
-
-        for (var meshKey : triangleModelsMap.keySet()) {
-            var trianglesList = triangleModelsMap.get(meshKey);
-
-            // 三角形を結合
-            List<org.locationtech.jts.geom.Polygon> jtsPolygonList = createPolygonList(trianglesList);
-
-            // gmlのPolygonに変換
-            for (var jtsPolygon : jtsPolygonList) {
-                toGmlPolygonList(jtsPolygon, null, false, null);
-            }
-        }
-
-        // cityObjectを差し替える
-        var cityObject = getFeatureView().getGML();
-        createLOD1(cityObject);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void convertLOD2() throws Exception {
-        // 各フォーマットの実装からテクスチャを作成
-        var textureMap = createSurfaceData();
-
-        // 各フォーマットの実装から三角形のリストを作成
-        var triangleModelsMap = createTriangleModelsMap();
-
-        // 各フォーマットの実装から地面の基準となる三角形を特定する
-        var groundTriangle = getGroundTriangle(triangleModelsMap);
-
-        for (var meshKey : triangleModelsMap.keySet()) {
-            // 同一平面の三角形をグループ化
-            var samePlaneTrianglesList = createSamePlaneTrianglesList(triangleModelsMap.get(meshKey), groundTriangle);
-
-            // テクスチャの座標が離れているものを分割する
-            var trianglesList = splitByTexture(samePlaneTrianglesList);
-            // var trianglesList = samePlaneTrianglesList;
-
-            // グループ化したポリゴンごとに結合
-            List<org.locationtech.jts.geom.Polygon> jtsPolygonList = new ArrayList<>();
-            for (var triangles : trianglesList) {
-                jtsPolygonList.addAll(createPolygonList(triangles));
-            }
-
-            // gmlのPolygonに変換
-            for (var jtsPolygon : jtsPolygonList) {
-                toGmlPolygonList(jtsPolygon, textureMap.get(meshKey), true, groundTriangle);
-            }
-        }
-
-        // ParameterizedTextureを差し替える
-        var appearance = getAppearanceView().getGML();
-        var appearanceView = createAppearanceView(appearance, textureMap);
-        removeTexture(appearance);
-        getCityModelView().setAppearance(appearanceView);
-
-        // cityObjectを差し替える
-        var cityObject = getFeatureView().getGML();
-        createLOD2(cityObject);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void convertLOD3() throws Exception {
-        // 各フォーマットの実装からSurfaceを作成
-        var surfaceMap = createSurfaceData();
-
-        // 各フォーマットの実装から三角形のリストを作成
-        var triangleModelsMap = createTriangleModelsMap();
-
-        // 各フォーマットの実装から地面の基準となる三角形を特定する
-        var groundTriangle = getGroundTriangle(triangleModelsMap);
-
-        for (var meshKey : triangleModelsMap.keySet()) {
-            // 同一平面の三角形をグループ化
-            var samePlaneTrianglesList = createSamePlaneTrianglesList(triangleModelsMap.get(meshKey), groundTriangle);
-
-            // テクスチャの座標が離れているものを分割する
-            var trianglesList = splitByTexture(samePlaneTrianglesList);
-
-            // グループ化したポリゴンごとに結合
-            List<org.locationtech.jts.geom.Polygon> jtsPolygonList = new ArrayList<>();
-            for (var triangles : trianglesList) {
-                jtsPolygonList.addAll(createPolygonList(triangles));
-            }
-
-            // gmlのPolygonに変換
-            for (var jtsPolygon : jtsPolygonList) {
-                toGmlPolygonList(jtsPolygon, surfaceMap.get(meshKey), true, groundTriangle);
-            }
-        }
-
-        // ParameterizedTextureを差し替える
-        var appearance = getAppearanceView().getGML();
-        var appearanceView = createAppearanceView(appearance, surfaceMap);
-        removeTexture(appearance);
-        getCityModelView().setAppearance(appearanceView);
-
-        // cityObjectを差し替える
-        var cityObject = getFeatureView().getGML();
-        createLOD3(cityObject);
     }
 
     /**
@@ -226,18 +110,33 @@ public class LODBuildingConverter extends AbstractLODConverter<BuildingView, Abs
         }
     }
 
-    private void createLOD1(AbstractBuilding feature) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void createLOD1(BuildingView feature) {
+        var oldFeature = feature.getGML();
+        var newFeature = (AbstractBuilding) oldFeature.copy(new DeepCopyBuilder());
+
+        // 古いsurfaceを削除
+        new BuildingModuleComponentManipulator(newFeature, 1).clearSolidIncludingBoundaries();
+
         // lod1Solid
         Solid solid = new Solid();
         solid.setExterior(new SurfaceProperty(_compositeSurface));
         SolidProperty solidProperty = new SolidProperty(solid);
-        feature.setLod1Solid(solidProperty);
+        newFeature.setLod1Solid(solidProperty);
 
-        getFeatureView().setLODView(1, new LOD1SolidFactory(getCityModelView()).createLOD1Solid(feature));
+        Editor.getUndoManager().addCommand(new ReplaceBuildingCommand(getCityModelView().getGML(), oldFeature, newFeature));
     }
 
-    private void createLOD2(AbstractBuilding feature) {
-        var newFeature = (Building) feature.copy(new DeepCopyBuilder());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void createLOD2(BuildingView feature) {
+        var oldFeature = feature.getGML();
+        var newFeature = (AbstractBuilding) oldFeature.copy(new DeepCopyBuilder());
 
         // 古いsurfaceを削除
         new BuildingModuleComponentManipulator(newFeature, 2).clearSolidIncludingBoundaries();
@@ -254,11 +153,16 @@ public class LODBuildingConverter extends AbstractLODConverter<BuildingView, Abs
             boundedBySurface.add(new BoundarySurfaceProperty(boundarySurface));
         }
 
-        Editor.getUndoManager().addCommand(new ReplaceBuildingCommand(getCityModelView().getGML(), feature, newFeature));
+        Editor.getUndoManager().addCommand(new ReplaceBuildingCommand(getCityModelView().getGML(), oldFeature, newFeature));
     }
 
-    private void createLOD3(AbstractBuilding feature) {
-        var newFeature = (Building) feature.copy(new DeepCopyBuilder());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void createLOD3(BuildingView feature) {
+        var oldFeature = feature.getGML();
+        var newFeature = (AbstractBuilding) oldFeature.copy(new DeepCopyBuilder());
 
         // 古いsurfaceを削除
         new BuildingModuleComponentManipulator(newFeature, 3).clearSolidIncludingBoundaries();
@@ -275,7 +179,7 @@ public class LODBuildingConverter extends AbstractLODConverter<BuildingView, Abs
             boundedBySurface.add(new BoundarySurfaceProperty(boundarySurface));
         }
 
-        Editor.getUndoManager().addCommand(new ReplaceBuildingCommand(getCityModelView().getGML(), feature, newFeature));
+        Editor.getUndoManager().addCommand(new ReplaceBuildingCommand(getCityModelView().getGML(), oldFeature, newFeature));
     }
 
     private AbstractBoundarySurface createBoundarySurface(Polygon polygon, TriangleModel triangle, TriangleModel groundTriangle, int lod) {
@@ -315,7 +219,11 @@ public class LODBuildingConverter extends AbstractLODConverter<BuildingView, Abs
         return boundarySurface;
     }
 
-    private void removeTexture(Appearance appearance) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void removeTexture(Appearance appearance) {
         Solid gmlObject;
         var lod = getLOD();
         var featureView = getFeatureView();

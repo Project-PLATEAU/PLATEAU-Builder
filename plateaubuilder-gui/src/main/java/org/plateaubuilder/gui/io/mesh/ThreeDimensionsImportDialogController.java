@@ -78,16 +78,16 @@ public class ThreeDimensionsImportDialogController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Callback<ListView<AxisEnum>, ListCell<AxisEnum>> cellFactory
-                = (ListView<AxisEnum> param) -> new ListCell<AxisEnum>() {
-            @Override
-            protected void updateItem(AxisEnum item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item != null && !empty) {
-                    setText(item.getDisplayName());
-                }
-            }
-        };
+        Callback<ListView<AxisEnum>, ListCell<AxisEnum>> cellFactory = (
+                ListView<AxisEnum> param) -> new ListCell<AxisEnum>() {
+                    @Override
+                    protected void updateItem(AxisEnum item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item != null && !empty) {
+                            setText(item.getDisplayName());
+                        }
+                    }
+                };
         ObservableList<AxisEnum> list = FXCollections.observableArrayList(AxisEnum.values());
         comboBoxAxisEast.getItems().addAll(list);
         comboBoxAxisEast.setButtonCell(cellFactory.call(null));
@@ -110,6 +110,7 @@ public class ThreeDimensionsImportDialogController implements Initializable {
 
     /**
      * FXMLのStageを設定
+     * 
      * @param stage
      */
     public void setRoot(Stage stage) {
@@ -123,7 +124,7 @@ public class ThreeDimensionsImportDialogController implements Initializable {
      */
     public void setFeatureView(IFeatureView featureView) {
         this.featureView = featureView;
-        comboBoxLod.getItems().addAll(FXCollections.observableArrayList(Arrays.asList("LOD1", "LOD2", "LOD3")));
+        comboBoxLod.getItems().addAll(FXCollections.observableArrayList(featureView.getSupportedLODTypes()));
     }
 
     /*
@@ -142,6 +143,7 @@ public class ThreeDimensionsImportDialogController implements Initializable {
 
     /**
      * 3Dエクスポート対象のLODを取得
+     * 
      * @return
      */
     public int getLod() {
@@ -150,6 +152,7 @@ public class ThreeDimensionsImportDialogController implements Initializable {
 
     /**
      * ConvertOptionを取得
+     * 
      * @return
      */
     public ConvertOption getConvertOption() {
@@ -158,6 +161,7 @@ public class ThreeDimensionsImportDialogController implements Initializable {
 
     /**
      * ダイアログ結果を取得
+     * 
      * @return
      */
     public boolean getDialogResult() {
@@ -166,10 +170,12 @@ public class ThreeDimensionsImportDialogController implements Initializable {
 
     /**
      * 出力先選択時イベント
+     * 
      * @param actionEvent
      */
     public void onSelectFile(ActionEvent actionEvent) {
-        var extensions = modelType == ThreeDimensionsModelEnum.OBJ ? new String[] {"*.obj"} : new String[] {"*.gltf", "*.glb"};
+        var extensions = modelType == ThreeDimensionsModelEnum.OBJ ? new String[] { "*.obj" }
+                : new String[] { "*.gltf", "*.glb" };
         var file = FileChooserService.showOpenDialog(SessionManager.GLTF_FILE_PATH_PROPERTY, extensions);
         if (file == null) {
             return;
@@ -180,6 +186,7 @@ public class ThreeDimensionsImportDialogController implements Initializable {
 
     /**
      * エクスポートボタン選択時イベント
+     * 
      * @param actionEvent
      */
     public void onSubmit(ActionEvent actionEvent) {
@@ -201,7 +208,8 @@ public class ThreeDimensionsImportDialogController implements Initializable {
             return;
         }
 
-        var optionBuilder = new ConvertOptionBuilder().wallThreshold(Double.parseDouble(textFieldWallThreshold.getText()));
+        var optionBuilder = new ConvertOptionBuilder()
+                .wallThreshold(Double.parseDouble(textFieldWallThreshold.getText()));
         var useGeoReference = paneUseGeoReference.isVisible();
         optionBuilder
                 .axisEast(comboBoxAxisEast.getValue())
@@ -210,10 +218,10 @@ public class ThreeDimensionsImportDialogController implements Initializable {
         if (useGeoReference) {
             var origin = World.getActiveInstance().getGeoReference().getOrigin();
             optionBuilder
-                .offset(new Vec3d(
-                    origin.x - Double.parseDouble(textFieldEast.getText()),
-                    origin.y - Double.parseDouble(textFieldNorth.getText()),
-                    origin.z - Double.parseDouble(textFieldTop.getText())));
+                    .offset(new Vec3d(
+                            origin.x - Double.parseDouble(textFieldEast.getText()),
+                            origin.y - Double.parseDouble(textFieldNorth.getText()),
+                            origin.z - Double.parseDouble(textFieldTop.getText())));
         }
 
         this.convertOption = optionBuilder.build();
@@ -237,11 +245,13 @@ public class ThreeDimensionsImportDialogController implements Initializable {
      * 
      * @param featureView
      */
-    public static ThreeDimensionsImportDialogController create(IFeatureView featureView, ThreeDimensionsModelEnum modelType) {
+    public static ThreeDimensionsImportDialogController create(IFeatureView featureView,
+            ThreeDimensionsModelEnum modelType) {
         try {
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
-            FXMLLoader loader = new FXMLLoader(ThreeDimensionsImportDialogController.class.getResource("3d-import-dialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                    ThreeDimensionsImportDialogController.class.getResource("3d-import-dialog.fxml"));
             stage.setScene(new Scene(loader.load()));
             var controller = (ThreeDimensionsImportDialogController) loader.getController();
             controller.setRoot(stage);

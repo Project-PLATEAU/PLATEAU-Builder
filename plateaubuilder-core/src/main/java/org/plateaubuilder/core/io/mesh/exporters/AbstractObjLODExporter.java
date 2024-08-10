@@ -181,16 +181,22 @@ abstract public class AbstractObjLODExporter<T extends ILODView> extends Abstrac
             return materialMap.get(phongMaterial);
         }
 
-        var materialModel = createMaterialModel(phongMaterial);
+        var diffuseMap = phongMaterial.getDiffuseMap();
+        MaterialModel materialModel = null;
+        if (diffuseMap != null) {
+            materialModel = createMaterialModel(phongMaterial, diffuseMap.getUrl());
+        } else {
+            materialModel = createMaterialModel(phongMaterial);
+        }
         materialMap.put(phongMaterial, materialModel);
 
         return materialModel;
     }
 
-    private MaterialModel createMaterialModel(PhongMaterial material) {
+    private MaterialModel createMaterialModel(PhongMaterial material, String url) {
         File materialPath = null;
         try {
-            materialPath = new File(new URI(material.getDiffuseMap().getUrl()).getPath());
+            materialPath = new File(new URI(url).getPath());
         } catch (URISyntaxException e) {
             e.printStackTrace();
             return null;
@@ -199,6 +205,16 @@ abstract public class AbstractObjLODExporter<T extends ILODView> extends Abstrac
         var name = fileName.substring(0, fileName.lastIndexOf("."));
 
         var materialModel = new MaterialModel(name, fileName, materialPath.toString());
+        materialModel.setDiffuseColor(material.getDiffuseColor());
+        materialModel.setSpecularColor(material.getSpecularColor());
+        // PhongMaterial には emissiveColor がない
+        // materialModel.setEmissiveColor(material.getEmissiveColor());
+
+        return materialModel;
+    }
+
+    private MaterialModel createMaterialModel(PhongMaterial material) {
+        var materialModel = new MaterialModel(String.format("%d", material.hashCode()));
         materialModel.setDiffuseColor(material.getDiffuseColor());
         materialModel.setSpecularColor(material.getSpecularColor());
         // PhongMaterial には emissiveColor がない

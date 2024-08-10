@@ -22,6 +22,9 @@ public class LOD1MultiSurfaceView extends AbstractMultiSurfaceMeshView {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HashMap<SurfaceDataView, List<PolygonView>> getSurfaceDataPolygonsMap() {
         throw new UnsupportedOperationException("Unimplemented method 'getSurfaceDataPolygonsMap'");

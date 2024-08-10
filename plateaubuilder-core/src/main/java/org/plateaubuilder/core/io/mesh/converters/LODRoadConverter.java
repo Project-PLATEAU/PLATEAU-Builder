@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.citygml4j.builder.copy.DeepCopyBuilder;
 import org.citygml4j.model.citygml.appearance.AbstractSurfaceData;
@@ -24,7 +23,6 @@ import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
 import org.plateaubuilder.core.citymodel.CityModelView;
 import org.plateaubuilder.core.citymodel.RoadView;
-import org.plateaubuilder.core.citymodel.factory.LOD1MultiSurfaceFactory;
 import org.plateaubuilder.core.citymodel.geometry.LOD2RoadMultiSurfaceView;
 import org.plateaubuilder.core.citymodel.geometry.LOD3RoadMultiSurfaceView;
 import org.plateaubuilder.core.editor.Editor;
@@ -32,38 +30,12 @@ import org.plateaubuilder.core.editor.commands.ReplaceRoadCommand;
 import org.plateaubuilder.core.editor.surfacetype.RoadModuleComponentManipulator;
 import org.plateaubuilder.core.io.mesh.converters.model.TriangleModel;
 
-public class LODRoadConverter extends AbstractLODConverter<RoadView, Road> {
-
-    private List<Polygon> _polygons = new ArrayList<>();
+public class LODRoadConverter extends AbstractLODMultiSurfaceConverter<RoadView, Road> {
     private Map<String, List<Polygon>> trafficPolygons = new HashMap<>();
     private Map<String, List<Polygon>> auxiliaryTrafficAreaPolygons = new HashMap<>();
 
     public LODRoadConverter(CityModelView cityModelView, RoadView featureView, int lod, ConvertOption convertOption, Abstract3DFormatHandler formatHandler) {
         super(cityModelView, featureView, lod, convertOption, formatHandler);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void convertLOD1() throws Exception {
-        // 各フォーマットの実装から三角形のリストを作成
-        var triangleModelsMap = createTriangleModelsMap();
-
-        for (var meshKey : triangleModelsMap.keySet()) {
-            var trianglesList = triangleModelsMap.get(meshKey);
-
-            // 三角形を結合
-            List<org.locationtech.jts.geom.Polygon> jtsPolygonList = createPolygonList(trianglesList);
-
-            // gmlのPolygonに変換
-            for (var jtsPolygon : jtsPolygonList) {
-                toGmlPolygonList(jtsPolygon, null, false, null);
-            }
-        }
-
-        // cityObjectを差し替える
-        createLOD1(getFeatureView());
     }
 
     /**
@@ -94,7 +66,8 @@ public class LODRoadConverter extends AbstractLODConverter<RoadView, Road> {
         }
 
         // ParameterizedTextureを差し替える
-        var appearance = getAppearanceView().getGML();
+        var oldAppearanceView = getAppearanceView();
+        var appearance = oldAppearanceView != null ? oldAppearanceView.getGML() : new Appearance();
         var appearanceView = createAppearanceView(appearance, surfaceMap);
         removeTexture(appearance);
         getCityModelView().setAppearance(appearanceView);
@@ -131,7 +104,8 @@ public class LODRoadConverter extends AbstractLODConverter<RoadView, Road> {
         }
 
         // ParameterizedTextureを差し替える
-        var appearance = getAppearanceView().getGML();
+        var oldAppearanceView = getAppearanceView();
+        var appearance = oldAppearanceView != null ? oldAppearanceView.getGML() : new Appearance();
         var appearanceView = createAppearanceView(appearance, surfaceMap);
         removeTexture(appearance);
         getCityModelView().setAppearance(appearanceView);
@@ -144,29 +118,7 @@ public class LODRoadConverter extends AbstractLODConverter<RoadView, Road> {
      * {@inheritDoc}
      */
     @Override
-    protected void applyLOD1Surface(Polygon polygon) {
-        _polygons.add(polygon);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void applyLOD2Surface(Polygon polygon, AbstractSurfaceData surfaceData, org.locationtech.jts.geom.Polygon jtsPolygon,
-            TriangleModel groundTriangle) {
-        applySurface(polygon, surfaceData, jtsPolygon, groundTriangle);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void applyLOD3Surface(Polygon polygon, AbstractSurfaceData surfaceData, org.locationtech.jts.geom.Polygon jtsPolygon,
-            TriangleModel groundTriangle) {
-        applySurface(polygon, surfaceData, jtsPolygon, groundTriangle);
-    }
-
-    private void applySurface(Polygon polygon, AbstractSurfaceData surfaceData, org.locationtech.jts.geom.Polygon jtsPolygon, TriangleModel groundTriangle) {
+    protected void applySurface(Polygon polygon, AbstractSurfaceData surfaceData, org.locationtech.jts.geom.Polygon jtsPolygon, TriangleModel groundTriangle) {
         var userData = jtsPolygon.getUserData();
         if (userData instanceof List<?>) {
             var userDataList = (List<TriangleModel>) userData;
@@ -208,14 +160,16 @@ public class LODRoadConverter extends AbstractLODConverter<RoadView, Road> {
                 }
             }
         }
-        _polygons.add(polygon);
+        getPolygons().add(polygon);
     }
 
-    private void removeTexture(Appearance appearance) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void removeTexture(Appearance appearance) {
         // もともと参照していたテクスチャを削除する
         var hrefSet = new HashSet<String>();
-
-        MultiSurface gmlObject;
         var lod = getLOD();
         var featureView = getFeatureView();
         switch (lod) {
@@ -254,27 +208,33 @@ public class LODRoadConverter extends AbstractLODConverter<RoadView, Road> {
         removeTexture(appearance, hrefSet);
     }
 
-    private void collectHref(Set<String> hrefSet, MultiSurface multiSurface) {
-        for (var surfaceMember : multiSurface.getSurfaceMember()) {
-            hrefSet.add(surfaceMember.getHref());
-        }
-    }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void createLOD1(RoadView feature) {
+        var oldFeature = feature.getGML();
+        var newFeature = (Road) oldFeature.copy(new DeepCopyBuilder());
 
-    private void createLOD1(RoadView feature) {
-        var currentFeature = feature.getGML();
+        // 古いsurfaceを削除
+        new RoadModuleComponentManipulator(newFeature, 1).clear();
 
         // lod1MultiSurface
         MultiSurface multiSurface = new MultiSurface();
-        for (var polygon : _polygons) {
+        for (var polygon : getPolygons()) {
             multiSurface.addSurfaceMember(new SurfaceProperty(polygon));
         }
         MultiSurfaceProperty multiSurfaceProperty = new MultiSurfaceProperty(multiSurface);
-        currentFeature.setLod1MultiSurface(multiSurfaceProperty);
+        newFeature.setLod1MultiSurface(multiSurfaceProperty);
 
-        getFeatureView().setLODView(1, new LOD1MultiSurfaceFactory(getCityModelView()).createLOD1MultiSurface(currentFeature));
+        Editor.getUndoManager().addCommand(new ReplaceRoadCommand(getCityModelView().getGML(), oldFeature, newFeature));
     }
 
-    private void createLOD2(RoadView feature) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void createLOD2(RoadView feature) {
         var oldFeature = feature.getGML();
         var newFeature = (Road) oldFeature.copy(new DeepCopyBuilder());
 
@@ -284,7 +244,7 @@ public class LODRoadConverter extends AbstractLODConverter<RoadView, Road> {
         // lod2MultiSurface
         {
             MultiSurface multiSurface = new MultiSurface();
-            for (var polygon : _polygons) {
+            for (var polygon : getPolygons()) {
                 multiSurface.addSurfaceMember(new SurfaceProperty(polygon));
             }
 
@@ -324,7 +284,11 @@ public class LODRoadConverter extends AbstractLODConverter<RoadView, Road> {
         Editor.getUndoManager().addCommand(new ReplaceRoadCommand(getCityModelView().getGML(), oldFeature, newFeature));
     }
 
-    private void createLOD3(RoadView feature) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void createLOD3(RoadView feature) {
         var oldFeature = feature.getGML();
         var newFeature = (Road) oldFeature.copy(new DeepCopyBuilder());
 
@@ -334,7 +298,7 @@ public class LODRoadConverter extends AbstractLODConverter<RoadView, Road> {
         // lod3MultiSurface
         {
             MultiSurface multiSurface = new MultiSurface();
-            for (var polygon : _polygons) {
+            for (var polygon : getPolygons()) {
                 multiSurface.addSurfaceMember(new SurfaceProperty(polygon));
             }
 

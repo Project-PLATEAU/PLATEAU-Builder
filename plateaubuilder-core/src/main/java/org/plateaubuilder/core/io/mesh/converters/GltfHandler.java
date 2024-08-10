@@ -18,12 +18,13 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.citygml4j.model.citygml.appearance.AbstractSurfaceData;
+import org.citygml4j.model.citygml.appearance.Color;
 import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
+import org.citygml4j.model.citygml.appearance.X3DMaterial;
 import org.citygml4j.model.gml.basicTypes.Code;
 import org.plateaubuilder.core.io.mesh.AxisTransformer;
 import org.plateaubuilder.core.io.mesh.converters.model.TriangleModel;
 
-import de.javagl.jgltf.impl.v1.Node;
 import de.javagl.jgltf.model.AccessorData;
 import de.javagl.jgltf.model.AccessorModel;
 import de.javagl.jgltf.model.GltfModel;
@@ -160,10 +161,10 @@ public class GltfHandler extends Abstract3DFormatHandler {
                 var materialName = materialModel.getName();
                 if (surfaceMap.containsKey(materialName))
                     continue;
-                var parameterizedTexture = createParameterizedTexture(materialModel, surfaceMap);
-                if (parameterizedTexture == null)
+                var surfaceData = createSurfaceData(materialModel, surfaceMap);
+                if (surfaceData == null)
                     continue;
-                surfaceMap.put(materialName, parameterizedTexture);
+                surfaceMap.put(materialName, surfaceData);
             }
         }
     }
@@ -209,13 +210,19 @@ public class GltfHandler extends Abstract3DFormatHandler {
         return uvs;
     }
 
-    private ParameterizedTexture createParameterizedTexture(MaterialModel materialModel, Map<String, AbstractSurfaceData> surfaceMap) {
-        var materialName = materialModel.getName();
+    private AbstractSurfaceData createSurfaceData(MaterialModel materialModel, Map<String, AbstractSurfaceData> surfaceMap) {
         MaterialModelV2 materialModelV2 = (MaterialModelV2) materialModel;
         TextureModel textureModel = materialModelV2.getBaseColorTexture();
-        if (textureModel == null)
-            return null;
+        if (textureModel != null) {
+            return createParameterizedTexture(materialModelV2, surfaceMap, textureModel);
+        } else {
+            return createX3DMaterial(materialModelV2, surfaceMap);
+        }
+    }
 
+    private ParameterizedTexture createParameterizedTexture(MaterialModelV2 materialModel, Map<String, AbstractSurfaceData> surfaceMap,
+            TextureModel textureModel) {
+        var materialName = materialModel.getName();
         ImageModel imageModel = textureModel.getImageModel();
         String imageURI = getAppearancePath(imageModel, materialName);
 
@@ -225,6 +232,22 @@ public class GltfHandler extends Abstract3DFormatHandler {
         surfaceMap.put(materialName, parameterizedTexture);
 
         return parameterizedTexture;
+    }
+
+    private X3DMaterial createX3DMaterial(MaterialModelV2 materialModel, Map<String, AbstractSurfaceData> surfaceMap) {
+        X3DMaterial x3dMaterial = new X3DMaterial();
+        var baseColorFactor = materialModel.getBaseColorFactor();
+        if (baseColorFactor != null) {
+            Color color = new Color();
+            color.setRed((double) baseColorFactor[0]);
+            color.setGreen((double) baseColorFactor[1]);
+            color.setBlue((double) baseColorFactor[2]);
+            x3dMaterial.setDiffuseColor(color);
+
+            return x3dMaterial;
+        } else {
+            return null;
+        }
     }
 
     private String getAppearancePath(ImageModel imageModel, String materialName) {

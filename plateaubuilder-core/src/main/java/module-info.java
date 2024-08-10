@@ -4,6 +4,7 @@ import org.plateaubuilder.core.io.mesh.importers.ObjOrPolyObjImporter;
 open module plateaubuilder.core {
     exports org.plateaubuilder.core.editor;
     exports org.plateaubuilder.core.citymodel;
+    exports org.plateaubuilder.core.citymodel.citygml;
     exports org.plateaubuilder.core.editor.attribute;
     exports org.plateaubuilder.core.editor.commands;
     exports org.plateaubuilder.core.citymodel.geometry;

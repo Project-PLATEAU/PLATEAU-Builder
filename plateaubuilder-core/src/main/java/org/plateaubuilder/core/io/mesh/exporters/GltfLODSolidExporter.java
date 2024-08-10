@@ -16,7 +16,7 @@ import de.javagl.jgltf.model.impl.DefaultSceneModel;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
 
 /**
- * GltfLODSolidExporterは、LODSolidViewをGltf形式でエクスポートするための機能を提供します。
+ * GltfLODSolidExporterは、ILODSolidViewをGltf形式でエクスポートするための機能を提供します。
  */
 public class GltfLODSolidExporter extends AbstractGltfLODExporter<ILODSolidView> {
 

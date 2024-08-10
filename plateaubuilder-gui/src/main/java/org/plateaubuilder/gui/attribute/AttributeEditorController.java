@@ -9,9 +9,13 @@ import java.util.ResourceBundle;
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.citygml.ade.generic.ADEGenericElement;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.citygml4j.model.citygml.cityfurniture.CityFurniture;
+import org.citygml4j.model.citygml.landuse.LandUse;
 import org.citygml4j.model.citygml.transportation.Road;
+import org.citygml4j.model.citygml.vegetation.PlantCover;
+import org.citygml4j.model.citygml.vegetation.SolitaryVegetationObject;
+import org.citygml4j.model.citygml.waterbody.WaterBody;
 import org.citygml4j.model.common.child.ChildList;
-import org.plateaubuilder.core.citymodel.BuildingView;
 import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
 import org.plateaubuilder.core.citymodel.attribute.AttributeValue;
@@ -19,6 +23,7 @@ import org.plateaubuilder.core.citymodel.attribute.MeasuredHeightManager;
 import org.plateaubuilder.core.citymodel.attribute.NodeAttributeHandler;
 import org.plateaubuilder.core.citymodel.attribute.RootAttributeHandler;
 import org.plateaubuilder.core.citymodel.attribute.XSDSchemaDocument;
+import org.plateaubuilder.core.citymodel.citygml.ADEGenericComponent;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.editor.attribute.AttributeEditor;
 import org.plateaubuilder.core.editor.attribute.BuildingSchema;
@@ -470,6 +475,18 @@ public class AttributeEditorController implements Initializable {
             return (ChildList<ADEComponent>) ((AbstractBuilding) gml).getGenericApplicationPropertyOfAbstractBuilding();
         } else if (gml instanceof Road) {
             return (ChildList<ADEComponent>) ((Road) gml).getGenericApplicationPropertyOfRoad();
+        } else if (gml instanceof LandUse) {
+            return (ChildList<ADEComponent>) ((LandUse) gml).getGenericApplicationPropertyOfLandUse();
+        } else if (gml instanceof WaterBody) {
+            return (ChildList<ADEComponent>) ((WaterBody) gml).getGenericApplicationPropertyOfWaterBody();
+        } else if (gml instanceof SolitaryVegetationObject) {
+            return (ChildList<ADEComponent>) ((SolitaryVegetationObject) gml).getGenericApplicationPropertyOfSolitaryVegetationObject();
+        } else if (gml instanceof PlantCover) {
+            return (ChildList<ADEComponent>) ((PlantCover) gml).getGenericApplicationPropertyOfPlantCover();
+        } else if (gml instanceof CityFurniture) {
+            return (ChildList<ADEComponent>) ((CityFurniture) gml).getGenericApplicationPropertyOfCityFurniture();
+        } else if (gml instanceof ADEGenericComponent) {
+            return (ChildList<ADEComponent>) ((ADEGenericComponent) gml).getGenericApplicationPropertyOfADEGenericComponent();
         }
 
         return (ChildList<ADEComponent>) new ArrayList<ADEComponent>();
@@ -479,8 +496,8 @@ public class AttributeEditorController implements Initializable {
      * リストビューを更新します
      */
     private void refreshListView() {
-        BuildingView currentSelectedBuilding = (BuildingView) activeFeatureProperty.get();
+        IFeatureView currentSelectedFeature = (IFeatureView) activeFeatureProperty.get();
         activeFeatureProperty.set(null);
-        activeFeatureProperty.set(currentSelectedBuilding);
+        activeFeatureProperty.set(currentSelectedFeature);
     }
 }

@@ -3,10 +3,16 @@ package org.plateaubuilder.core.io.mesh.converters;
 import java.nio.file.Paths;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.plateaubuilder.core.citymodel.ADEGenericComponentView;
 import org.plateaubuilder.core.citymodel.BuildingView;
+import org.plateaubuilder.core.citymodel.CityFurnitureView;
 import org.plateaubuilder.core.citymodel.CityModelView;
 import org.plateaubuilder.core.citymodel.IFeatureView;
+import org.plateaubuilder.core.citymodel.LandUseView;
+import org.plateaubuilder.core.citymodel.PlantCoverView;
 import org.plateaubuilder.core.citymodel.RoadView;
+import org.plateaubuilder.core.citymodel.SolitaryVegetationObjectView;
+import org.plateaubuilder.core.citymodel.WaterBodyView;
 import org.plateaubuilder.core.io.mesh.AxisDirection;
 import org.plateaubuilder.core.io.mesh.AxisTransformer;
 import org.plateaubuilder.core.io.mesh.FormatEnum;
@@ -108,6 +114,18 @@ public class LODConverterBuilder {
             return new LODBuildingConverter(cityModelView, (BuildingView) featureView, lod, convertOption, formatHandler);
         } else if (featureView instanceof RoadView) {
             return new LODRoadConverter(cityModelView, (RoadView) featureView, lod, convertOption, formatHandler);
+        } else if (featureView instanceof LandUseView) {
+            return new LODLandUseConverter(cityModelView, (LandUseView) featureView, lod, convertOption, formatHandler);
+        } else if (featureView instanceof WaterBodyView) {
+            return new LODWaterBodyConverter(cityModelView, (WaterBodyView) featureView, lod, convertOption, formatHandler);
+        } else if (featureView instanceof SolitaryVegetationObjectView) {
+            return new LODSolitaryVegetationObjectConverter(cityModelView, (SolitaryVegetationObjectView) featureView, lod, convertOption, formatHandler);
+        } else if (featureView instanceof PlantCoverView) {
+            return new LODPlantCoverConverter(cityModelView, (PlantCoverView) featureView, lod, convertOption, formatHandler);
+        } else if (featureView instanceof CityFurnitureView) {
+            return new LODCityFurnitureConverter(cityModelView, (CityFurnitureView) featureView, lod, convertOption, formatHandler);
+        } else if (featureView instanceof ADEGenericComponentView) {
+            return new LODADEGenericComponentConverter(cityModelView, (ADEGenericComponentView) featureView, lod, convertOption, formatHandler);
         } else {
             throw new NotImplementedException(featureView.getClass().getName() + " is not supported.");
         }

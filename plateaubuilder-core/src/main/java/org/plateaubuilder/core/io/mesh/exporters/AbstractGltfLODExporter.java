@@ -159,21 +159,29 @@ abstract public class AbstractGltfLODExporter<T extends ILODView> extends Abstra
             return defaultMaterialModel;
 
         PhongMaterial phongMaterial = (PhongMaterial) material;
-        var url = phongMaterial.getDiffuseMap().getUrl();
-        if (materialMap.containsKey(url)) {
-            materialModel = materialMap.get(url);
+        var diffuseMap = phongMaterial.getDiffuseMap();
+
+        // ParameterizedTexture
+        if (diffuseMap != null) {
+            var url = diffuseMap.getUrl();
+            if (materialMap.containsKey(url)) {
+                materialModel = materialMap.get(url);
+            } else {
+                materialModel = createMaterial(phongMaterial, url);
+                materialMap.put(url, materialModel);
+            }
+            // X3DMaterial
         } else {
             materialModel = createMaterial(phongMaterial);
-            materialMap.put(url, materialModel);
         }
 
         return materialModel;
     }
 
-    protected MaterialModelV2 createMaterial(PhongMaterial material) {
+    protected MaterialModelV2 createMaterial(PhongMaterial material, String url) {
         File materialFile = null;
         try {
-            materialFile = new File(new URI(material.getDiffuseMap().getUrl()).getPath());
+            materialFile = new File(new URI(url).getPath());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -196,6 +204,25 @@ abstract public class AbstractGltfLODExporter<T extends ILODView> extends Abstra
 
         MaterialModelV2 materialModelV2 = materialBuilder.build();
         materialModelV2.setName(materialFile.getName());
+
+        return materialModelV2;
+    }
+
+    protected MaterialModelV2 createMaterial(PhongMaterial material) {
+
+        var diffuseColor = material.getDiffuseColor();
+        // MaterialBuilder には specularColor がない
+        // var specularColor = material.getSpecularColor();
+        // PhongMaterial には emissiveColor がない
+        // var diffuseColaor = material.getEmissiveColor();
+
+        MaterialBuilder materialBuilder = MaterialBuilder.create();
+
+        materialBuilder.setBaseColorFactor((float) diffuseColor.getRed(), (float) diffuseColor.getGreen(), (float) diffuseColor.getBlue(), 1.0f);
+        materialBuilder.setDoubleSided(true);
+
+        MaterialModelV2 materialModelV2 = materialBuilder.build();
+        materialModelV2.setName(String.format("%d", material.hashCode()));
 
         return materialModelV2;
     }

@@ -45,7 +45,7 @@ abstract public class AbstractMultiSurfaceMeshView extends AbstractLODMeshView<M
 
     public void addSurfaceTypeView(AbstractCityObject cityObject) {
         var surfaceTypeView = getSurfaceTypeView();
-        getChildren().add(getSurfaceTypeView());
+        getChildren().add(surfaceTypeView);
         surfaceTypeView.setTarget(cityObject, this);
         surfaceTypeView.updateVisual();
     }

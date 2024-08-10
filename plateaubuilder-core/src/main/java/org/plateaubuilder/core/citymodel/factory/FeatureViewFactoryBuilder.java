@@ -42,6 +42,16 @@ public class FeatureViewFactoryBuilder {
             return new BuildingViewFactory(this.cityModelGroup, this.cityModelView);
         } else if (this.cityObject.getCityGMLClass() == CityGMLClass.ROAD) {
             return new RoadViewFactory(this.cityModelGroup, this.cityModelView);
+        } else if (this.cityObject.getCityGMLClass() == CityGMLClass.LAND_USE) {
+            return new LandUseViewFactory(this.cityModelGroup, this.cityModelView);
+        } else if (this.cityObject.getCityGMLClass() == CityGMLClass.WATER_BODY) {
+            return new WaterBodyViewFactory(this.cityModelGroup, this.cityModelView);
+        } else if (this.cityObject.getCityGMLClass() == CityGMLClass.SOLITARY_VEGETATION_OBJECT) {
+            return new SolitaryVegetationObjectViewFactory(this.cityModelGroup, this.cityModelView);
+        } else if (this.cityObject.getCityGMLClass() == CityGMLClass.PLANT_COVER) {
+            return new PlantCoverViewFactory(this.cityModelGroup, this.cityModelView);
+        } else if (this.cityObject.getCityGMLClass() == CityGMLClass.CITY_FURNITURE) {
+            return new CityFurnitureViewFactory(this.cityModelGroup, this.cityModelView);
         } else {
             throw new IllegalArgumentException(
                     String.format("Unsupported CityGML class: %s", this.cityObject.getCityGMLClass()));

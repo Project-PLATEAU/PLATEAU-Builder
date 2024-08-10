@@ -14,3 +14,6 @@ target
 
 # 自動生成される入出力ファイル
 /validation-*
+
+# 自動でコピーされるGDALライブラリ
+/plateaubuilder-gui/gdal

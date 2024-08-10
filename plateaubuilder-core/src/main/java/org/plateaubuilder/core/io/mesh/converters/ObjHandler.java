@@ -11,12 +11,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.citygml4j.model.citygml.appearance.AbstractSurfaceData;
+import org.citygml4j.model.citygml.appearance.Color;
 import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
+import org.citygml4j.model.citygml.appearance.X3DMaterial;
 import org.citygml4j.model.gml.basicTypes.Code;
 import org.plateaubuilder.core.io.mesh.AxisTransformer;
 import org.plateaubuilder.core.io.mesh.converters.model.TriangleModel;
 import org.plateaubuilder.core.io.mesh.importers.ObjImporter;
 
+import javafx.scene.image.Image;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.TriangleMesh;
@@ -97,25 +100,29 @@ public class ObjHandler extends Abstract3DFormatHandler {
             Material material = _objImporter.getMaterial(meshKey);
             if (surfaceMap.containsKey(meshKey))
                 continue;
-            ParameterizedTexture parameterizedTexture = createParameterizedTexture(meshKey, material);
-            if (parameterizedTexture == null)
+            var surfaceData = createSurfaceData(meshKey, material);
+            if (surfaceData == null)
                 continue;
-            surfaceMap.put(meshKey, parameterizedTexture);
+            surfaceMap.put(meshKey, surfaceData);
         }
 
         return surfaceMap;
     }
 
-    private ParameterizedTexture createParameterizedTexture(String materialName, Material material) throws IOException, URISyntaxException {
+    private AbstractSurfaceData createSurfaceData(String materialName, Material material) throws IOException, URISyntaxException {
         if (!(material instanceof PhongMaterial))
             return null;
         PhongMaterial phongMaterial = (PhongMaterial) material;
 
         var image = phongMaterial.getDiffuseMap();
-        if (image == null) {
-            return null;
+        if (image != null) {
+            return createParameterizedTexture(phongMaterial, image);
+        } else {
+            return createX3DMaterial(phongMaterial);
         }
+    }
 
+    private ParameterizedTexture createParameterizedTexture(PhongMaterial phongMaterial, Image image) throws IOException, URISyntaxException {
         var path = Paths.get(new URL(image.getUrl()).toURI());
         var fileName = path.getFileName().toString();
 
@@ -132,5 +139,21 @@ public class ObjHandler extends Abstract3DFormatHandler {
         parameterizedTexture.setMimeType(new Code(Files.probeContentType(path)));
 
         return parameterizedTexture;
+    }
+
+    private X3DMaterial createX3DMaterial(PhongMaterial phongMaterial) throws IOException, URISyntaxException {
+        X3DMaterial x3dMaterial = new X3DMaterial();
+        var diffuseColor = phongMaterial.getDiffuseColor();
+        if (diffuseColor != null) {
+            Color color = new Color();
+            color.setRed(diffuseColor.getRed());
+            color.setGreen(diffuseColor.getGreen());
+            color.setBlue(diffuseColor.getBlue());
+            x3dMaterial.setDiffuseColor(color);
+
+            return x3dMaterial;
+        } else {
+            return null;
+        }
     }
 }

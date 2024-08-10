@@ -3,6 +3,8 @@ package org.plateaubuilder.core.io.mesh.converters;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +19,10 @@ import org.citygml4j.model.citygml.appearance.Appearance;
 import org.citygml4j.model.citygml.appearance.AppearanceMember;
 import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
 import org.citygml4j.model.citygml.appearance.SurfaceDataProperty;
+import org.citygml4j.model.citygml.appearance.TexCoordList;
+import org.citygml4j.model.citygml.appearance.TextureAssociation;
 import org.citygml4j.model.citygml.appearance.TextureCoordinates;
+import org.citygml4j.model.citygml.appearance.X3DMaterial;
 import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.citygml.core.CityModel;
 import org.citygml4j.model.gml.geometry.primitives.AbstractRing;
@@ -65,6 +70,7 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
 
     private Abstract3DFormatHandler _formatHandler;
 
+    private List<Polygon> _polygons = new ArrayList<>();
 
     public AbstractLODConverter(CityModelView cityModelView, T featureView, int lod, ConvertOption convertOption, Abstract3DFormatHandler formatHandler) {
         _cityModelView = cityModelView;
@@ -81,7 +87,6 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
     protected org.locationtech.jts.geom.GeometryFactory getGeometryFactory() {
         return _geometryFactory;
     }
-
 
     protected CityModelView getCityModelView() {
         return _cityModelView;
@@ -111,6 +116,10 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
         return _geoReference;
     }
 
+    protected List<Polygon> getPolygons() {
+        return _polygons;
+    }
+
     public CityModelView convert(String fileUrl) throws Exception {
         // 各フォーマット用の初期化
         initialize(fileUrl);
@@ -129,6 +138,107 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
             throw new IllegalArgumentException("Unsupported LOD");
         }
         return _cityModelView;
+    }
+
+    protected void convertLOD1() throws Exception {
+        // 各フォーマットの実装から三角形のリストを作成
+        var triangleModelsMap = createTriangleModelsMap();
+
+        for (var meshKey : triangleModelsMap.keySet()) {
+            var trianglesList = triangleModelsMap.get(meshKey);
+
+            // 三角形を結合
+            List<org.locationtech.jts.geom.Polygon> jtsPolygonList = createPolygonList(trianglesList);
+
+            // gmlのPolygonに変換
+            for (var jtsPolygon : jtsPolygonList) {
+                toGmlPolygonList(jtsPolygon, null, false, null);
+            }
+        }
+
+        // cityObjectを差し替える
+        createLOD1(getFeatureView());
+    }
+
+    protected void convertLOD2() throws Exception {
+        // 各フォーマットの実装からテクスチャを作成
+        var textureMap = createSurfaceData();
+
+        // 各フォーマットの実装から三角形のリストを作成
+        var triangleModelsMap = createTriangleModelsMap();
+
+        // 各フォーマットの実装から地面の基準となる三角形を特定する
+        var groundTriangle = getGroundTriangle(triangleModelsMap);
+
+        for (var meshKey : triangleModelsMap.keySet()) {
+            // 同一平面の三角形をグループ化
+            var samePlaneTrianglesList = createSamePlaneTrianglesList(triangleModelsMap.get(meshKey), groundTriangle);
+
+            // テクスチャの座標が離れているものを分割する
+            var trianglesList = splitByTexture(samePlaneTrianglesList);
+            // var trianglesList = samePlaneTrianglesList;
+
+            // グループ化したポリゴンごとに結合
+            List<org.locationtech.jts.geom.Polygon> jtsPolygonList = new ArrayList<>();
+            for (var triangles : trianglesList) {
+                jtsPolygonList.addAll(createPolygonList(triangles));
+            }
+
+            // gmlのPolygonに変換
+            for (var jtsPolygon : jtsPolygonList) {
+                toGmlPolygonList(jtsPolygon, textureMap.get(meshKey), true, groundTriangle);
+            }
+        }
+
+        // ParameterizedTextureを差し替える
+        var oldAppearanceView = getAppearanceView();
+        var appearance = oldAppearanceView != null ? oldAppearanceView.getGML() : new Appearance();
+        var appearanceView = createAppearanceView(appearance, textureMap);
+        removeTexture(appearance);
+        getCityModelView().setAppearance(appearanceView);
+
+        // cityObjectを差し替える
+        createLOD2(getFeatureView());
+    }
+
+    protected void convertLOD3() throws Exception {
+        // 各フォーマットの実装からSurfaceを作成
+        var surfaceMap = createSurfaceData();
+
+        // 各フォーマットの実装から三角形のリストを作成
+        var triangleModelsMap = createTriangleModelsMap();
+
+        // 各フォーマットの実装から地面の基準となる三角形を特定する
+        var groundTriangle = getGroundTriangle(triangleModelsMap);
+
+        for (var meshKey : triangleModelsMap.keySet()) {
+            // 同一平面の三角形をグループ化
+            var samePlaneTrianglesList = createSamePlaneTrianglesList(triangleModelsMap.get(meshKey), groundTriangle);
+
+            // テクスチャの座標が離れているものを分割する
+            var trianglesList = splitByTexture(samePlaneTrianglesList);
+
+            // グループ化したポリゴンごとに結合
+            List<org.locationtech.jts.geom.Polygon> jtsPolygonList = new ArrayList<>();
+            for (var triangles : trianglesList) {
+                jtsPolygonList.addAll(createPolygonList(triangles));
+            }
+
+            // gmlのPolygonに変換
+            for (var jtsPolygon : jtsPolygonList) {
+                toGmlPolygonList(jtsPolygon, surfaceMap.get(meshKey), true, groundTriangle);
+            }
+        }
+
+        // ParameterizedTextureを差し替える
+        var oldAppearanceView = getAppearanceView();
+        var appearance = oldAppearanceView != null ? oldAppearanceView.getGML() : new Appearance();
+        var appearanceView = createAppearanceView(appearance, surfaceMap);
+        removeTexture(appearance);
+        getCityModelView().setAppearance(appearanceView);
+
+        // cityObjectを差し替える
+        createLOD3(getFeatureView());
     }
 
     protected Polygon createPolygon(org.locationtech.jts.geom.Polygon jtsPolygon, AbstractSurfaceData surfaceData, boolean isCreateId,
@@ -406,6 +516,22 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
         if (trianglePolygonList.size() == 0) {
             return invalidPolygonList;
         }
+
+        // 最初に見つかった三角形を基準に距離が近い順にソートする
+        // これをやらないと広域かつ細かく分割されている三角形を結合したときに、結合に時間がかかる
+        var basePolygon = trianglePolygonList.get(0);
+        Comparator<org.locationtech.jts.geom.Polygon> comparator = new Comparator<org.locationtech.jts.geom.Polygon>() {
+            @Override
+            public int compare(org.locationtech.jts.geom.Polygon o1, org.locationtech.jts.geom.Polygon o2) {
+                var d1 = basePolygon.distance(o1);
+                var d2 = basePolygon.distance(o1);
+                if (d1 == d2) {
+                    return 0;
+                }
+                return d1 < d2 ? -1 : 1;
+            }
+        };
+        Collections.sort(trianglePolygonList, comparator);
 
         org.locationtech.jts.geom.Geometry geometry = null;
         for (var trianglePolygon : trianglePolygonList) {
@@ -712,17 +838,59 @@ abstract public class AbstractLODConverter<T extends IFeatureView, TGML extends 
         return _formatHandler.createSurfaceData();
     }
 
-    abstract protected void convertLOD1() throws Exception;
+    protected void applyLOD1Surface(Polygon polygon) {
+        _polygons.add(polygon);
+    }
 
-    abstract protected void convertLOD2() throws Exception;
+    protected void applyLOD2Surface(Polygon polygon, AbstractSurfaceData surfaceData, org.locationtech.jts.geom.Polygon jtsPolygon,
+            TriangleModel groundTriangle) {
+        applySurface(polygon, surfaceData, jtsPolygon, groundTriangle);
+    }
 
-    abstract protected void convertLOD3() throws Exception;
+    protected void applyLOD3Surface(Polygon polygon, AbstractSurfaceData surfaceData, org.locationtech.jts.geom.Polygon jtsPolygon,
+            TriangleModel groundTriangle) {
+        applySurface(polygon, surfaceData, jtsPolygon, groundTriangle);
+    }
 
-    abstract protected void applyLOD1Surface(Polygon polygon);
+    protected void applySurface(Polygon polygon, AbstractSurfaceData surfaceData, org.locationtech.jts.geom.Polygon jtsPolygon, TriangleModel groundTriangle) {
+        var userData = jtsPolygon.getUserData();
+        if (userData instanceof List<?>) {
+            var userDataList = (List<TriangleModel>) userData;
+            if (surfaceData != null) {
+                if (surfaceData instanceof ParameterizedTexture) {
+                    var texture = (ParameterizedTexture) surfaceData;
+                    TexCoordList texCoordList = new TexCoordList();
+                    var textureCoordinates = createTextureCoordinates(polygon.getExterior().getRing(), texture, jtsPolygon.getExteriorRing(), userDataList);
+                    if (textureCoordinates != null) {
+                        texCoordList.addTextureCoordinates(textureCoordinates);
+                    }
+                    for (var i = 0; i < polygon.getInterior().size(); i++) {
+                        var interiorTextureCoordinates = createTextureCoordinates(polygon.getInterior().get(i).getRing(), texture,
+                                jtsPolygon.getInteriorRingN(i), userDataList);
+                        if (interiorTextureCoordinates != null) {
+                            texCoordList.addTextureCoordinates(interiorTextureCoordinates);
+                        }
+                    }
 
-    abstract protected void applyLOD2Surface(Polygon polygon, AbstractSurfaceData texture, org.locationtech.jts.geom.Polygon jtsPolygon,
-            TriangleModel groundTriangle);
+                    TextureAssociation textureAssociation = new TextureAssociation(texCoordList);
+                    textureAssociation.setUri(String.format("#%s", polygon.getId()));
+                    texture.addTarget(textureAssociation);
+                } else if (surfaceData instanceof X3DMaterial) {
+                    var x3dMaterial = (X3DMaterial) surfaceData;
+                    x3dMaterial.addTarget(String.format("#%s", polygon.getId()));
+                } else {
+                    throw new IllegalArgumentException("Unsupported SurfaceData");
+                }
+            }
+        }
+        _polygons.add(polygon);
+    }
 
-    abstract protected void applyLOD3Surface(Polygon polygon, AbstractSurfaceData texture, org.locationtech.jts.geom.Polygon jtsPolygon,
-            TriangleModel groundTriangle);
+    abstract protected void createLOD1(T feature);
+
+    abstract protected void createLOD2(T feature);
+
+    abstract protected void createLOD3(T feature);
+
+    abstract protected void removeTexture(Appearance appearance);
 }
