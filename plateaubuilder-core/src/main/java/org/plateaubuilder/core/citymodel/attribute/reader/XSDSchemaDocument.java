@@ -1,6 +1,8 @@
-package org.plateaubuilder.core.citymodel.attribute;
+package org.plateaubuilder.core.citymodel.attribute.reader;
 
 import java.util.ArrayList;
+
+import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

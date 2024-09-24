@@ -1,4 +1,4 @@
-package org.plateaubuilder.core.citymodel.attribute;
+package org.plateaubuilder.core.citymodel.attribute.reader;
 
 import java.io.InputStream;
 import java.net.URL;

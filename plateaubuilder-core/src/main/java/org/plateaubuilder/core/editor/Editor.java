@@ -1,21 +1,21 @@
 package org.plateaubuilder.core.editor;
 
-import javafx.fxml.FXMLLoader;
+import org.plateaubuilder.core.citymodel.attribute.reader.XSDSchemaDocument;
+import org.plateaubuilder.core.editor.commands.UndoManager;
+import org.plateaubuilder.core.editor.surfacetype.SurfaceTypeEditor;
+import org.plateaubuilder.core.world.AntiAliasing;
+import org.plateaubuilder.core.world.Camera;
+import org.plateaubuilder.core.world.CoordinateGrid;
+import org.plateaubuilder.core.world.Light;
+import org.plateaubuilder.core.world.SceneContent;
+import org.plateaubuilder.core.world.World;
+
 import javafx.scene.Group;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import org.plateaubuilder.core.citymodel.attribute.XSDSchemaDocument;
-import org.plateaubuilder.core.editor.CityModelViewMode;
-import org.plateaubuilder.core.editor.FeatureSelection;
-import org.plateaubuilder.core.editor.commands.UndoManager;
-import org.plateaubuilder.core.editor.surfacetype.SurfaceTypeEditor;
-import org.plateaubuilder.core.world.*;
-
-import java.util.Objects;
 
 public class Editor {
     private static Stage stage;

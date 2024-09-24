@@ -43,4 +43,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.gdal/gdal
     implementation group: 'org.gdal', name: 'gdal', version: '3.8.0'
+
+    implementation 'org.glassfish:javax.json:1.1.4'
 }

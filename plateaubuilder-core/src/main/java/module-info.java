@@ -22,6 +22,9 @@ open module plateaubuilder.core {
     exports org.plateaubuilder.core.geospatial;
     exports org.plateaubuilder.core.utils3d.polygonmesh;
     exports org.plateaubuilder.core.citymodel.attribute;
+    exports org.plateaubuilder.core.citymodel.attribute.manager;
+    exports org.plateaubuilder.core.citymodel.attribute.wrapper;
+    exports org.plateaubuilder.core.citymodel.attribute.reader;
 
     requires java.desktop;
     requires java.logging;

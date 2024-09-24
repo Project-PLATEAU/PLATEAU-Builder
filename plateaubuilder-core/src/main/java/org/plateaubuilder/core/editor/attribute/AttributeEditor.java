@@ -1,6 +1,5 @@
 package org.plateaubuilder.core.editor.attribute;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,18 +9,12 @@ import org.citygml4j.model.citygml.ade.generic.ADEGenericElement;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.common.child.ChildList;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
-import org.plateaubuilder.core.citymodel.attribute.MeasuredHeightHandler;
-import org.plateaubuilder.core.citymodel.attribute.MeasuredHeightManager;
-import org.plateaubuilder.core.citymodel.attribute.NodeAttributeHandler;
+import org.plateaubuilder.core.citymodel.attribute.manager.BuildingSchemaManager;
+import org.plateaubuilder.core.citymodel.attribute.wrapper.NodeAttributeHandler;
 import org.plateaubuilder.core.editor.Editor;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 public class AttributeEditor {
     /**
@@ -36,60 +29,59 @@ public class AttributeEditor {
             String codeSpace, String uom,
             ChildList<ADEComponent> bldgAttributeTree) {
         AttributeItem addedAttributeItem = null;
-        ArrayList<ArrayList<String>> childAttributeList = Editor.getUroSchemaDocument().getElementList(
-                baseAttributeItem.getName(),
-                false,
-                null, "uro");
-        String addAttributeType;
+        if (addAttributeName.split(":")[0].matches("uro")) {
+            ArrayList<ArrayList<String>> childAttributeList = Editor.getUroSchemaDocument().getElementList(
+                    baseAttributeItem.getName(),
+                    false,
+                    null, "uro");
+            String addAttributeType;
 
-        if (addAttributeName.matches(MeasuredHeightManager.getName())) {
-            addAttributeType = MeasuredHeightManager.getType();
-        } else {
             addAttributeType = Editor.getUroSchemaDocument().getType(addAttributeName, baseAttributeItem.getName(),
                     "uro");
-        }
 
-        // 追加する属性に合わせて、追加処理を実施
-        if (addAttributeName.matches((MeasuredHeightManager.getName()))) {
-            AbstractBuilding building = (AbstractBuilding) baseAttributeItem.getContent();
-            MeasuredHeightManager.setMeasuredHeight(building, value, uom);
-            addedAttributeItem = new AttributeItem(new MeasuredHeightHandler(building));
-        } else if (baseAttributeItem.getName().matches("root")) {
-            var adeComponent = bldgAttributeTree.get(0);
-            Element newElement = createNewElement(((ADEGenericElement) adeComponent).getContent().getOwnerDocument(),
-                    value, uom, codeSpace, addAttributeName);
-            ADEGenericElement newAdeElement = new ADEGenericElement(newElement);
-            bldgAttributeTree.add(bldgAttributeTree.size(), (ADEComponent) newAdeElement);
+            // 追加する属性に合わせて、追加処理を実施
+            if (baseAttributeItem.getName().matches("root")) {
+                var adeComponent = bldgAttributeTree.get(0);
+                Element newElement = createNewElement(
+                        ((ADEGenericElement) adeComponent).getContent().getOwnerDocument(),
+                        value, uom, codeSpace, addAttributeName);
+                ADEGenericElement newAdeElement = new ADEGenericElement(newElement);
+                bldgAttributeTree.add(bldgAttributeTree.size(), (ADEComponent) newAdeElement);
 
-            // 型要素があるかどうかを確認し、あれば追加
-            for (int i = 0; i < childAttributeList.size(); i++) {
-                if (!childAttributeList.get(i).isEmpty() && childAttributeList.get(i).get(3) != null) {
-                    if (hasTypeElement("uro:" + childAttributeList.get(i).get(3), addAttributeName)) {
-                        Element newChildElement = createNewElement(
-                                ((ADEGenericElement) adeComponent).getContent().getOwnerDocument(), "", "", "",
-                                "uro:" + childAttributeList.get(i).get(3));
-                        newAdeElement.getContent().appendChild(newChildElement);
+                // 型要素があるかどうかを確認し、あれば追加
+                for (int i = 0; i < childAttributeList.size(); i++) {
+                    if (!childAttributeList.get(i).isEmpty() && childAttributeList.get(i).get(3) != null) {
+                        if (hasTypeElement("uro:" + childAttributeList.get(i).get(3), addAttributeName)) {
+                            Element newChildElement = createNewElement(
+                                    ((ADEGenericElement) adeComponent).getContent().getOwnerDocument(), "", "", "",
+                                    "uro:" + childAttributeList.get(i).get(3));
+                            newAdeElement.getContent().appendChild(newChildElement);
+                        }
                     }
                 }
-            }
-            addedAttributeItem = new AttributeItem(new NodeAttributeHandler((Node) newElement, addAttributeType));
-        } else {
-            Element newElement = createNewElement(((Node) baseAttributeItem.getContent()).getOwnerDocument(), value,
-                    uom,
-                    codeSpace,
-                    addAttributeName);
-            if (((Node) baseAttributeItem.getContent()).getFirstChild() != null) {
-                if (hasTypeElement(baseAttributeItem.getName(),
-                        ((Element) ((Node) baseAttributeItem.getContent()).getFirstChild()).getTagName())) {
-                    ((Node) baseAttributeItem.getContent()).getFirstChild().appendChild(newElement);
+                addedAttributeItem = new AttributeItem(new NodeAttributeHandler((Node) newElement, addAttributeType));
+            } else {
+                Element newElement = createNewElement(((Node) baseAttributeItem.getContent()).getOwnerDocument(), value,
+                        uom,
+                        codeSpace,
+                        addAttributeName);
+                if (((Node) baseAttributeItem.getContent()).getFirstChild() != null) {
+                    if (hasTypeElement(baseAttributeItem.getName(),
+                            ((Element) ((Node) baseAttributeItem.getContent()).getFirstChild()).getTagName())) {
+                        ((Node) baseAttributeItem.getContent()).getFirstChild().appendChild(newElement);
+                    } else {
+                        ((Node) baseAttributeItem.getContent()).appendChild(newElement);
+                    }
                 } else {
                     ((Node) baseAttributeItem.getContent()).appendChild(newElement);
                 }
-            } else {
-                ((Node) baseAttributeItem.getContent()).appendChild(newElement);
+                addedAttributeItem = new AttributeItem(new NodeAttributeHandler((Node) newElement, addAttributeType));
+                sortElement(baseAttributeItem, childAttributeList);
             }
-            addedAttributeItem = new AttributeItem(new NodeAttributeHandler((Node) newElement, addAttributeType));
-            sortElement(baseAttributeItem, childAttributeList);
+        } else {
+            BuildingSchemaManager.addAttribute((AbstractBuilding) baseAttributeItem.getContent(), addAttributeName,
+                    value);
+
         }
         return addedAttributeItem;
     }
@@ -124,27 +116,29 @@ public class AttributeEditor {
     public static void removeAttribute(String removeAttributeName, AttributeItem parentAttributeItem,
             AttributeItem removeAttributeItem,
             ChildList<ADEComponent> bldgAttributeTree) {
-        if (removeAttributeName.matches(MeasuredHeightManager.getName())) {
-            MeasuredHeightManager.removeMeasuredHeight((AbstractBuilding) parentAttributeItem.getContent());
-        } else if (parentAttributeItem.getName() == "root") {
-            ADEComponent targetAttributeComponent = null;
-            Node removeAttributeNode = (Node) removeAttributeItem.getContent();
+        if (removeAttributeName.split(":")[0].matches("uro")) {
+            if (parentAttributeItem.getName() == "root") {
+                ADEComponent targetAttributeComponent = null;
+                Node removeAttributeNode = (Node) removeAttributeItem.getContent();
 
-            for (var adeComponent : bldgAttributeTree) {
-                Node targetNode = ((ADEGenericElement) adeComponent).getContent();
-                if (targetNode == removeAttributeNode)
-                    targetAttributeComponent = adeComponent;
-            }
-            if (targetAttributeComponent != null)
-                bldgAttributeTree.remove(targetAttributeComponent);
-        } else {
-            Node parentNode = (Node) parentAttributeItem.getContent();
-            Node targetNode = (Node) removeAttributeItem.getContent();
-            if (hasTypeElement(parentNode.getNodeName(), parentNode.getFirstChild().getNodeName())) {
-                parentNode.getFirstChild().removeChild(targetNode);
+                for (var adeComponent : bldgAttributeTree) {
+                    Node targetNode = ((ADEGenericElement) adeComponent).getContent();
+                    if (targetNode == removeAttributeNode)
+                        targetAttributeComponent = adeComponent;
+                }
+                if (targetAttributeComponent != null)
+                    bldgAttributeTree.remove(targetAttributeComponent);
             } else {
-                parentNode.removeChild(targetNode);
+                Node parentNode = (Node) parentAttributeItem.getContent();
+                Node targetNode = (Node) removeAttributeItem.getContent();
+                if (hasTypeElement(parentNode.getNodeName(), parentNode.getFirstChild().getNodeName())) {
+                    parentNode.getFirstChild().removeChild(targetNode);
+                } else {
+                    parentNode.removeChild(targetNode);
+                }
             }
+        } else {
+            removeAttributeItem.remove();
         }
     }
 

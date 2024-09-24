@@ -6,16 +6,16 @@ import java.util.ArrayList;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.common.child.ChildList;
-import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
-import org.plateaubuilder.core.citymodel.BuildingView;
 import org.plateaubuilder.core.citymodel.IFeatureView;
-import org.plateaubuilder.core.citymodel.attribute.CodeListManager;
-import org.plateaubuilder.core.citymodel.attribute.MeasuredHeightManager;
-import org.plateaubuilder.core.citymodel.attribute.XSDSchemaDocument;
+import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
+import org.plateaubuilder.core.citymodel.attribute.manager.BuildingSchemaManager;
+import org.plateaubuilder.core.citymodel.attribute.reader.*;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.editor.attribute.AttributeEditor;
 import org.plateaubuilder.core.editor.commands.AbstractCityGMLUndoableCommand;
+import org.plateaubuilder.gui.utils.AlertController;
 import org.plateaubuilder.gui.utils.StageController;
+import org.plateaubuilder.validation.AttributeValidator;
 import org.w3c.dom.Node;
 
 import javafx.event.ActionEvent;
@@ -26,6 +26,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class AttributeInputFormController {
 
@@ -41,6 +42,7 @@ public class AttributeInputFormController {
     private ChildList<ADEComponent> bldgAttributeTree;
     private String addAttributeName;
     private String codeSpacePath;
+    private String addAttributeType;
     private Runnable onAddButtonPressed, onCancelButtonPressed;
     private boolean editFlag = false, addFlag = false;
     private ArrayList<ArrayList<String>> requiredChildAttributeList, childAttributeList;
@@ -87,25 +89,30 @@ public class AttributeInputFormController {
     /**
      * UIの初期設定を実施し、フォームを表示します。
      */
-    private void configureForm(String attributeName, String addAttributeName,
+    private void configureForm(String parentAttributeName, String addAttributeName,
             ArrayList<String> treeViewChildItemList, Parent form, String formTitle) {
         uroSchemaDocument = Editor.getUroSchemaDocument();
-        String addAttributeType = null;
 
         if (addFlag) {
-            if (addAttributeName.matches(MeasuredHeightManager.getName())) {
-                addAttributeType = MeasuredHeightManager.getType();
+            if (addAttributeName.split(":")[0].matches("uro")) {
+                addAttributeType = uroSchemaDocument.getType(addAttributeName, parentAttributeName, "uro");
+                requiredChildAttributeList = uroSchemaDocument.getElementList(addAttributeName, true,
+                        treeViewChildItemList,
+                        "uro");
             } else {
-                addAttributeType = uroSchemaDocument.getType(addAttributeName, attributeName, "uro");
+                if (parentAttributeName.matches("root")) {
+                    addAttributeType = BuildingSchemaManager.getAttributeType(addAttributeName.split(":")[1]);
+                } else {
+                    addAttributeType = BuildingSchemaManager.getChildAttributeType(parentAttributeName.split(":")[1],
+                            addAttributeName.split(":")[1]);
+                }
             }
-            requiredChildAttributeList = uroSchemaDocument.getElementList(addAttributeName, true,
-                    treeViewChildItemList,
-                    "uro");
+
         } else {
             addAttributeType = targetAttributeItem.getType();
         }
 
-        childAttributeList = uroSchemaDocument.getElementList(attributeName, false, null, "uro");
+        childAttributeList = uroSchemaDocument.getElementList(parentAttributeName, false, null, "uro");
         configureInputBoxVisibility(addAttributeType);
 
         stageController = new StageController(form, formTitle);
@@ -145,8 +152,7 @@ public class AttributeInputFormController {
 
         // 属性値入力BOXの表示設定
         if (addFlag) {
-            if (baseAttributeItem.getName().matches("root") && childAttributeList.isEmpty()
-                    && !addAttributeName.matches(MeasuredHeightManager.getName())) {
+            if (baseAttributeItem.getName().matches("root") && childAttributeList.isEmpty()) {
                 valueVbox.setManaged(false);
                 valueVbox.setVisible(false);
             }
@@ -188,13 +194,13 @@ public class AttributeInputFormController {
         final Parent finalValueRoot = valueRoot;
         final StageController codeValueStageController = new StageController(finalValueRoot, "codeSpace値の入力");
 
-        CodeListManager codeListManager = new CodeListManager();
+        CodeListReader CodeListReader = new CodeListReader();
         // codeTypeMenuControllerで表示されるメニューにおいて、選択行為がされたら呼び出される
         codeSpaceTypeMenuController.setOnSelectCallback(selectedCodeSpace -> {
             setCodeSpaceField(selectedCodeSpace);
             codeSpacePath = "../../codelists/" + selectedCodeSpace;
-            codeListManager.readCodeList(codeListDirPath + "\\" + selectedCodeSpace);
-            codeSpaceValueMenuController.setCodeType(codeListManager.getCodeListDocument());
+            CodeListReader.readCodeList(codeListDirPath + "\\" + selectedCodeSpace);
+            codeSpaceValueMenuController.setCodeType(CodeListReader.getCodeListDocument());
 
             codeValueStageController.showStage();
             codeTypeStageController.closeStage();
@@ -225,9 +231,9 @@ public class AttributeInputFormController {
         }
 
         final CodeSpaceValueMenuController codeSpaceValueMenuController = valueLoader.getController();
-        CodeListManager codeListManager = new CodeListManager();
-        codeListManager.readCodeList(codeSpacePath);
-        codeSpaceValueMenuController.setCodeType(codeListManager.getCodeListDocument());
+        CodeListReader CodeListReader = new org.plateaubuilder.core.citymodel.attribute.reader.CodeListReader();
+        CodeListReader.readCodeList(codeSpacePath);
+        codeSpaceValueMenuController.setCodeType(CodeListReader.getCodeListDocument());
 
         StageController stageController = new StageController(valueRoot, "codeSpace値の入力");
         stageController.showStage();
@@ -314,80 +320,87 @@ public class AttributeInputFormController {
         String uom = uomField.getText();
         String value = valueField.getText();
 
-        if (addFlag) {
-            Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
-                private final IFeatureView focusTarget = Editor.getFeatureSellection().getActive();
-                private final ChildList<ADEComponent> bldgAttributeTreeCache = bldgAttributeTree;
-                private final String addAttributeNameCache = addAttributeName;
-                private final AttributeItem baseAttributeItemCache = baseAttributeItem;
+        if (AttributeValidator.checkValue(value, addAttributeType)) {
+            if (addFlag) {
+                Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
+                    private final IFeatureView focusTarget = Editor.getFeatureSellection().getActive();
+                    private final ChildList<ADEComponent> bldgAttributeTreeCache = bldgAttributeTree;
+                    private final String addAttributeNameCache = addAttributeName;
+                    private final AttributeItem baseAttributeItemCache = baseAttributeItem;
 
-                private final String newCodeSpace = codeSpacePath;
-                private final String newUom = uom;
-                private final String newValue = value;
+                    private final String newCodeSpace = codeSpacePath;
+                    private final String newUom = uom;
+                    private final String newValue = value;
 
-                private Node addedNode;
-                private AttributeItem addedAttributeItem;
+                    private Node addedNode;
+                    private AttributeItem addedAttributeItem;
 
-                @Override
-                public void redo() {
-                    baseAttributeItem = AttributeEditor.addAttribute(baseAttributeItemCache, addAttributeNameCache,
-                            newValue,
-                            newCodeSpace, newUom, bldgAttributeTreeCache);
-                    addedAttributeItem = baseAttributeItem;
+                    @Override
+                    public void redo() {
+                        baseAttributeItem = AttributeEditor.addAttribute(baseAttributeItemCache, addAttributeNameCache,
+                                newValue,
+                                newCodeSpace, newUom, bldgAttributeTreeCache);
+                        addedAttributeItem = baseAttributeItem;
+                    }
+
+                    @Override
+                    public void undo() {
+                        AttributeEditor.removeAttribute(addAttributeNameCache, baseAttributeItemCache,
+                                addedAttributeItem,
+                                bldgAttributeTreeCache);
+                    }
+
+                    @Override
+                    public javafx.scene.Node getRedoFocusTarget() {
+                        return focusTarget.getNode();
+                    }
+
+                    @Override
+                    public javafx.scene.Node getUndoFocusTarget() {
+                        return focusTarget.getNode();
+                    }
+                });
+                if (requiredChildAttributeList != null && requiredChildAttributeList.size() != 0) {
+                    showMultipleAttributeInputForm(requiredChildAttributeList);
                 }
+            } else if (editFlag) {
+                Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
 
-                @Override
-                public void undo() {
-                    AttributeEditor.removeAttribute(addAttributeNameCache, baseAttributeItemCache, addedAttributeItem,
-                            bldgAttributeTreeCache);
-                }
+                    private final IFeatureView focusTarget = Editor.getFeatureSellection().getActive();
 
-                @Override
-                public javafx.scene.Node getRedoFocusTarget() {
-                    return focusTarget.getNode();
-                }
+                    private final String oldCodeSpace = AttributeEditor.getCodeSpace(targetAttributeItem);
+                    private final String oldUom = AttributeEditor.getUom(targetAttributeItem);
+                    private final String oldValue = AttributeEditor.getValue(targetAttributeItem);
+                    private final String newCodeSpace = codeSpace;
+                    private final String newUom = uom;
+                    private final String newValue = value;
 
-                @Override
-                public javafx.scene.Node getUndoFocusTarget() {
-                    return focusTarget.getNode();
-                }
-            });
-            if (requiredChildAttributeList != null && requiredChildAttributeList.size() != 0) {
-                showMultipleAttributeInputForm(requiredChildAttributeList);
+                    @Override
+                    public void redo() {
+                        AttributeEditor.editAttribute(targetAttributeItem, newCodeSpace, newUom, newValue);
+                    }
+
+                    @Override
+                    public void undo() {
+                        AttributeEditor.editAttribute(targetAttributeItem, oldCodeSpace, oldUom, oldValue);
+                    }
+
+                    @Override
+                    public javafx.scene.Node getRedoFocusTarget() {
+                        return focusTarget.getNode();
+                    }
+
+                    @Override
+                    public javafx.scene.Node getUndoFocusTarget() {
+                        return focusTarget.getNode();
+                    }
+
+                });
             }
-        } else if (editFlag) {
-            Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
-
-                private final IFeatureView focusTarget = Editor.getFeatureSellection().getActive();
-
-                private final String oldCodeSpace = AttributeEditor.getCodeSpace(targetAttributeItem);
-                private final String oldUom = AttributeEditor.getUom(targetAttributeItem);
-                private final String oldValue = AttributeEditor.getValue(targetAttributeItem);
-                private final String newCodeSpace = codeSpace;
-                private final String newUom = uom;
-                private final String newValue = value;
-
-                @Override
-                public void redo() {
-                    AttributeEditor.editAttribute(targetAttributeItem, newCodeSpace, newUom, newValue);
-                }
-
-                @Override
-                public void undo() {
-                    AttributeEditor.editAttribute(targetAttributeItem, oldCodeSpace, oldUom, oldValue);
-                }
-
-                @Override
-                public javafx.scene.Node getRedoFocusTarget() {
-                    return focusTarget.getNode();
-                }
-
-                @Override
-                public javafx.scene.Node getUndoFocusTarget() {
-                    return focusTarget.getNode();
-                }
-
-            });
+        } else {
+            Stage stage = (Stage) addButton.getScene().getWindow();
+            AlertController.showValueAlert(addAttributeType, stage);
+            return;
         }
         if (onAddButtonPressed != null) {
             onAddButtonPressed.run();

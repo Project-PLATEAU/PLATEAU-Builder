@@ -181,7 +181,8 @@ public class ADEGenericComponent extends AbstractCityObject implements ADEGeneri
         if (isSetGenericApplicationPropertyOfADEGenericComponent()) {
             for (ADEComponent ade : getGenericApplicationPropertyOfADEGenericComponent()) {
                 if (ade.getADEClass() == ADEClass.MODEL_OBJECT)
-                    boundedBy.updateEnvelope(ADEBoundingBoxHelper.calcBoundedBy((ADEModelObject) ade, options).getEnvelope());
+                    boundedBy.updateEnvelope(
+                            ADEBoundingBoxHelper.calcBoundedBy((ADEModelObject) ade, options).getEnvelope());
             }
         }
 

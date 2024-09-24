@@ -1,4 +1,4 @@
-package org.plateaubuilder.core.citymodel.attribute;
+package org.plateaubuilder.core.citymodel.attribute.reader;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -11,7 +11,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.FileInputStream;
 
-public class CodeListManager {
+/**
+ * コードリストの定義ファイルからの読み取りを行います。
+ */
+public class CodeListReader {
     Document codeTypeDocument;
     Document sourceDocument;
 

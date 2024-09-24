@@ -1,60 +1,71 @@
 package org.plateaubuilder.core.citymodel.attribute;
 
+import org.plateaubuilder.core.citymodel.attribute.wrapper.AttributeHandler;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+/**
+ * Editor上で地物が持つ属性情報を操作するためのクラス
+ */
 public class AttributeItem {
-    private boolean isEditable;
-    private AttributeHandler handler;
+
+    private AttributeHandler attributeHandler;
+    private Boolean isEditable;
 
     /**
-     * 属性情報を所持するクラス
-     *
-     * @param handler 属性本体
+     * * @param attributeHandler 属性
      */
-    public AttributeItem(AttributeHandler handler) {
-
-        this.handler = handler;
+    public AttributeItem(AttributeHandler attributeHandler) {
+        this.attributeHandler = attributeHandler;
         this.isEditable = true;
     }
 
     public String getName() {
-        if (handler != null) {
-            return handler.getName();
+        if (attributeHandler != null) {
+            return attributeHandler.getName();
         } else {
             return "null";
         }
     }
 
     public String getValue() {
-        return handler.getValue();
+        return attributeHandler.getValue();
     }
 
     public void setValue(String value) {
-        handler.setValue(value);
+        attributeHandler.setValue(value);
     }
 
     public String getUom() {
-        return handler.getUom();
+        return attributeHandler.getUom();
     }
 
     public void setUom(String uom) {
-        handler.setUom(uom);
+        attributeHandler.setUom(uom);
     }
 
     public String getCodeSpace() {
-        return handler.getCodeSpace();
+        return attributeHandler.getCodeSpace();
     }
 
     public void setCodeSpace(String codeSpace) {
-        handler.setCodeSpace(codeSpace);
+        attributeHandler.setCodeSpace(codeSpace);
     }
 
     public Object getContent() {
-        return handler.getContent();
+        return attributeHandler.getContent();
     }
 
     public String getType() {
-        return handler.getType();
+        return attributeHandler.getType();
+    }
+
+    public void remove() {
+        attributeHandler.remove();
+    }
+
+    public void add() {
+        attributeHandler.add();
     }
 }

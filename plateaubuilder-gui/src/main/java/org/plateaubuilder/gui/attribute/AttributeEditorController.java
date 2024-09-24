@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
-import org.citygml4j.model.citygml.ade.generic.ADEGenericElement;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.cityfurniture.CityFurniture;
 import org.citygml4j.model.citygml.landuse.LandUse;
@@ -19,20 +18,17 @@ import org.citygml4j.model.common.child.ChildList;
 import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
 import org.plateaubuilder.core.citymodel.attribute.AttributeValue;
-import org.plateaubuilder.core.citymodel.attribute.MeasuredHeightManager;
-import org.plateaubuilder.core.citymodel.attribute.NodeAttributeHandler;
-import org.plateaubuilder.core.citymodel.attribute.RootAttributeHandler;
-import org.plateaubuilder.core.citymodel.attribute.XSDSchemaDocument;
+import org.plateaubuilder.core.citymodel.attribute.manager.BuildingSchemaManager;
+import org.plateaubuilder.core.citymodel.attribute.reader.XSDSchemaDocument;
+import org.plateaubuilder.core.citymodel.attribute.wrapper.RootAttributeHandler;
 import org.plateaubuilder.core.citymodel.citygml.ADEGenericComponent;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.editor.attribute.AttributeEditor;
+import org.plateaubuilder.core.editor.attribute.AttributeTreeBuilder;
 import org.plateaubuilder.core.editor.attribute.BuildingSchema;
 import org.plateaubuilder.core.editor.commands.AbstractCityGMLUndoableCommand;
 import org.plateaubuilder.gui.utils.AlertController;
 import org.plateaubuilder.validation.AttributeValidator;
-import org.w3c.dom.CharacterData;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
@@ -55,6 +51,7 @@ public class AttributeEditorController implements Initializable {
     private IFeatureView selectedFeature;
     private XSDSchemaDocument uroSchemaDocument = Editor.getUroSchemaDocument();
     private ObjectProperty<IFeatureView> activeFeatureProperty;
+    private AttributeTreeBuilder attributeTreeBuilder = new AttributeTreeBuilder();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -153,7 +150,7 @@ public class AttributeEditorController implements Initializable {
                     } else {
                         // 項目が存在する場合のみ、チェックを行う。
                         TreeItem<AttributeItem> parentItem = getTreeItem().getParent();
-                        String parentKey = parentItem != null ? parentItem.getValue().getName() : null;
+                        String parentKey = parentItem != null ? parentItem.getValue().getName() : "";
                         if (!uroSchemaDocument.isDeletable(item.getName(), parentKey, "uro")) {
                             setStyle("-fx-background-color: grey;");
                         } else {
@@ -194,15 +191,8 @@ public class AttributeEditorController implements Initializable {
                     return null;
                 var root = new TreeItem<>(
                         new AttributeItem(new RootAttributeHandler(selectedFeature)));
-                {
-                    if (selectedFeature.isSetMeasuredHeight()) {
-                        MeasuredHeightManager.addMeasureHeightToTreeView((AbstractBuilding) selectedFeature.getGML(),
-                                root);
-                    }
-                }
-                {
-                    addADEPropertyToTree(selectedFeature, root);
-                }
+                AttributeTreeBuilder.bldgAddAttributeTree(selectedFeature, root);
+                AttributeTreeBuilder.addADEPropertyToTree(selectedFeature, root);
                 root.setExpanded(true);
                 return root;
             }
@@ -249,85 +239,12 @@ public class AttributeEditorController implements Initializable {
                     }
                 });
             } else {
-                AlertController.showChangeAlert(type);
+                AlertController.showValueAlert(type, null);
                 attributeItem.setValue(event.getOldValue());
                 attributeTreeTable.refresh();
             }
         });
 
-    }
-
-    private void addADEPropertyToTree(IFeatureView selectedFeature, TreeItem<AttributeItem> root) {
-        for (var adeComponent : getADEComponents(selectedFeature)) {
-            var adeElement = (ADEGenericElement) adeComponent;
-            addXMLElementToTree(adeElement.getContent(), null, root);
-        }
-    }
-
-    private void addXMLElementToTree(Node node, Node parentNode, TreeItem<AttributeItem> root) {
-        // 子が末尾の要素であるかチェック
-        String nodeTagName = ((Element) node).getTagName().toLowerCase();
-        String parentNodeTagName = "";
-        String uom = ((Element) node).getAttribute("uom");
-        String codeSpace = ((Element) node).getAttribute("codeSpace");
-        String type = null;
-
-        if (parentNode != null) {
-            parentNodeTagName = ((Element) parentNode).getTagName().toLowerCase();
-            type = uroSchemaDocument.getType(node.getNodeName(), parentNode.getNodeName(), "uro");
-        } else {
-            type = uroSchemaDocument.getType(node.getNodeName(), null, "uro");
-        }
-
-        if (node.getChildNodes().getLength() == 1 && node.getFirstChild() instanceof CharacterData) {
-            if (parentNode != null && nodeTagName.equals(parentNodeTagName))
-                return;
-            // 子の内容を属性値として登録して再帰処理を終了
-            AttributeItem attributeItem = new AttributeItem(new NodeAttributeHandler(node, type));
-
-            var item = new TreeItem<>(attributeItem);
-            root.getChildren().add(item);
-            return;
-        }
-
-        var item = new TreeItem<>(
-                new AttributeItem(new NodeAttributeHandler(node, type)));
-        item.setExpanded(true);
-
-        // XMLの子要素を再帰的に追加
-        var children = node.getChildNodes();
-        for (int i = 0; i < children.getLength(); ++i) {
-            var childNode = children.item(i);
-
-            // ここでの文字列要素はタブ・改行なので飛ばす
-            if (childNode instanceof CharacterData)
-                continue;
-
-            // 親ノードのタグ名と同じであれば、そのノードは無視
-            if (parentNode != null && nodeTagName.equals(parentNodeTagName)) {
-                addXMLElementToTree(childNode, node, root);
-            } else {
-                addXMLElementToTree(childNode, node, item);
-            }
-        }
-        if (parentNode != null && nodeTagName.equals(parentNodeTagName))
-            return;
-        root.getChildren().add(item);
-    }
-
-    private static ADEComponent getRootADEComponent(ChildList<ADEComponent> adeComponents, Node node) {
-        var parentNodes = new ArrayList<Node>();
-        while (node.getParentNode() != null) {
-            parentNodes.add(node);
-            node = node.getParentNode();
-        }
-        for (var adeComponent : adeComponents) {
-            var adeElement = (ADEGenericElement) adeComponent;
-            Node content = adeElement.getContent();
-            if (parentNodes.contains(content))
-                return adeComponent;
-        }
-        return null;
     }
 
     public void onClickAddButton() {
@@ -382,10 +299,13 @@ public class AttributeEditorController implements Initializable {
 
         // 追加済みの子要素の名前を取得
         final ArrayList<String> treeViewChildItemList = extractChildAttributeNames(selectedTreeItem);
+
+        /* Uro用 */
         ArrayList<ArrayList<String>> addableUroAttributeList = uroSchemaDocument.getElementList(keyAttributeName, false,
                 treeViewChildItemList, "uro");
+        ArrayList<String> addableBldgAttributeList = BuildingSchemaManager.getBldgAttributeName(keyAttributeName,
+                treeViewChildItemList);
         addableUroAttributeList.addAll(getBuildingElementList());
-
         // 追加可能な属性がない場合はエラー表示
         if (addableUroAttributeList.size() == 0) {
             AlertController.showAddAlert();
@@ -394,6 +314,11 @@ public class AttributeEditorController implements Initializable {
         List<AttributeValue> addAttributeList = new ArrayList<>();
         for (ArrayList<String> attribute : addableUroAttributeList) {
             addAttributeList.add(new AttributeValue(attribute.get(0), attribute.get(2)));
+        }
+
+        /* bldg用 */
+        for (String attribute : addableBldgAttributeList) {
+            addAttributeList.add(new AttributeValue(attribute, ""));
         }
 
         // 追加する属性の選択画面を表示
@@ -415,14 +340,14 @@ public class AttributeEditorController implements Initializable {
                 // 追加する属性の情報を入力するフォームを表示
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("attribute-input-form.fxml"));
                 Parent formRoot = loader.load();
-                AttributeInputFormController addAttributeFormController = loader.getController();
+                AttributeInputFormController attributeInputFormController = loader.getController();
 
                 // 追加ボタンが押されたことを検知するコールバックを設定
-                addAttributeFormController.setOnAddButtonPressedCallback(() -> {
+                attributeInputFormController.setOnAddButtonPressedCallback(() -> {
                     refreshListView();
                 });
                 // 情報入力用フォームのコントローラーを初期化
-                addAttributeFormController.initialize(finalSelectedAttributeItem,
+                attributeInputFormController.initialize(finalSelectedAttributeItem,
                         addAttributeName,
                         treeViewChildItemList,
                         bldgAttributeTree, formRoot);
@@ -480,13 +405,15 @@ public class AttributeEditorController implements Initializable {
         } else if (gml instanceof WaterBody) {
             return (ChildList<ADEComponent>) ((WaterBody) gml).getGenericApplicationPropertyOfWaterBody();
         } else if (gml instanceof SolitaryVegetationObject) {
-            return (ChildList<ADEComponent>) ((SolitaryVegetationObject) gml).getGenericApplicationPropertyOfSolitaryVegetationObject();
+            return (ChildList<ADEComponent>) ((SolitaryVegetationObject) gml)
+                    .getGenericApplicationPropertyOfSolitaryVegetationObject();
         } else if (gml instanceof PlantCover) {
             return (ChildList<ADEComponent>) ((PlantCover) gml).getGenericApplicationPropertyOfPlantCover();
         } else if (gml instanceof CityFurniture) {
             return (ChildList<ADEComponent>) ((CityFurniture) gml).getGenericApplicationPropertyOfCityFurniture();
         } else if (gml instanceof ADEGenericComponent) {
-            return (ChildList<ADEComponent>) ((ADEGenericComponent) gml).getGenericApplicationPropertyOfADEGenericComponent();
+            return (ChildList<ADEComponent>) ((ADEGenericComponent) gml)
+                    .getGenericApplicationPropertyOfADEGenericComponent();
         }
 
         return (ChildList<ADEComponent>) new ArrayList<ADEComponent>();

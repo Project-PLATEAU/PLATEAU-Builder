@@ -1,13 +1,17 @@
-package org.plateaubuilder.core.citymodel.attribute;
+package org.plateaubuilder.core.citymodel.attribute.wrapper;
 
-import org.w3c.dom.Node;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
+/**
+ * uomなどのElementで操作を行う属性の情報を操作するためのクラス
+ */
 public class NodeAttributeHandler extends AttributeHandler {
     private Node node;
     private String type;
 
     public NodeAttributeHandler(Node node, String type) {
+        super(node, type);
         this.node = node;
         this.type = type;
     }

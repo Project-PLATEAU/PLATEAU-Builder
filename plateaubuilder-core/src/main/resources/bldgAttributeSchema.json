@@ -1,0 +1,94 @@
+{
+    "description": {
+        "name": "gml:description",
+        "type": "gml:StringOrRefType",
+        "min": "0",
+        "max": "1"
+    },
+    "name": {
+        "name": "gml:name",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "creationDate": {
+        "name": "core:creationDate",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "terminationDate": {
+        "name": "core:terminationDate",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "class": {
+        "name": "bldg:class",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "usage": {
+        "name": "bldg:usage",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "unbounded"
+    },
+    "yearOfConstruction": {
+        "name": "bldg:yearOfConstruction",
+        "type": "xs:gYear",
+        "min": "0",
+        "max": "1"
+    },
+    "yearOfDemolition": {
+        "name": "bldg:yearOfDemolition",
+        "type": "xs:gYear",
+        "min": "0",
+        "max": "1"
+    },
+    "roofType": {
+        "name": "bldg:roofType",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "measuredHeight": {
+        "name": "bldg:measuredHeight",
+        "type": "gml:LengthType",
+        "min": "0",
+        "max": "1"
+    },
+    "storeysAboveGround": {
+        "name": "bldg:storeysAboveGround",
+        "type": "xs:nonNegativeInteger",
+        "min": "0",
+        "max": "1"
+    },
+    "storeysBelowGround": {
+        "name": "bldg:storeysBelowGround",
+        "type": "xs:nonNegativeInteger",
+        "min": "0",
+        "max": "1"
+    },
+    "address": {
+        "name": "bldg:address",
+        "type": "core:Address",
+        "min": "0",
+        "max": "unbounded",
+        "children": {
+            "LocalityName": {
+                "name": "xAL:LocalityName",
+                "type": "sample",
+                "min": "0",
+                "max": "1"
+            },
+            "CountryName": {
+                "name": "xAL:CountryName",
+                "type": "sample",
+                "min": "0",
+                "max": "1"
+            }
+        }
+    }
+}
