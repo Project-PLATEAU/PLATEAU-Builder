@@ -7,7 +7,7 @@
 <?import java.net.URL?>
 <AnchorPane fx:id="rightSidePanel" maxHeight="1.7976931348623157E308" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
     <VBox maxHeight="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <TabPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="278.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <TabPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="306.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
             <Tab>
                 <graphic>
                     <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
@@ -39,6 +39,14 @@
                     </ImageView>
                 </graphic>
                 <fx:include source="../settings/camera-settings.fxml" />
+            </Tab>
+            <Tab>
+                <graphic>
+                    <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
+                        <Image url="@../images/icon_basemap.png" />
+                    </ImageView>
+                </graphic>
+                <fx:include source="../featureinfo/baseMap-info.fxml"/>
             </Tab>
         </TabPane>
     </VBox>

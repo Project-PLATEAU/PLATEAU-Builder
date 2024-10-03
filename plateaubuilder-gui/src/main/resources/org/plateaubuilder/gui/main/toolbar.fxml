@@ -92,4 +92,16 @@
          </ImageView>
       </graphic>
     </ToggleButton>
+    <ToggleButton fx:id="baseMapToggle" mnemonicParsing="false" onAction="#onToggleShowBaseMap" prefHeight="32.0" prefWidth="32.0">
+        <tooltip>
+            <Tooltip text="ベースマップ表示モード" />
+        </tooltip>
+        <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                <image>
+                    <Image url="@../images/icon_basemap.png" />
+                </image>
+            </ImageView>
+        </graphic>
+    </ToggleButton>
 </ToolBar>

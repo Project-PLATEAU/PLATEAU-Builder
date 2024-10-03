@@ -197,6 +197,14 @@ public class ToolbarController implements Initializable {
         Editor.getCityModelViewMode().toggleSurfaceViewMode(surfaceViewToggle.isSelected());
     }
 
+    /** ベースマップ表示切り替え **/
+
+    public ToggleButton baseMapToggle;
+
+    public void onToggleShowBaseMap() {
+        Editor.getXyzTile().toggleBaseMapMode(baseMapToggle.isSelected());
+    }
+
     /** LOD表示切り替え **/
     public ToggleGroup lodToggleGroup;
 

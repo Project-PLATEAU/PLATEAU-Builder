@@ -31,6 +31,7 @@
  */
 package org.plateaubuilder.core.world;
 
+import javafx.animation.PauseTransition;
 import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
 import javafx.scene.Node;
@@ -40,7 +41,9 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
+import javafx.util.Duration;
 import org.locationtech.jts.math.Vector2D;
+import org.plateaubuilder.core.editor.Editor;
 
 /**
  * Cameraクラスは、シーンにおけるカメラの動きとインタラクションを処理します。
@@ -61,7 +64,7 @@ public class Camera {
     private static final double baseZoomDistance = 400f;
 
     private Vector2D lastMousePosition;
-
+    private PauseTransition pause;
     public Camera() {
         // CAMERA
         camera.setNearClip(1.0); // TODO: Workaround as per RT-31255
@@ -112,6 +115,13 @@ public class Camera {
             pivotTranslate.setX(pivotTranslate.getX() + deltaPosition.getX());
             pivotTranslate.setY(pivotTranslate.getY() + deltaPosition.getY());
             pivotTranslate.setZ(pivotTranslate.getZ() + deltaPosition.getZ());
+            if (pause == null) {
+                pause = new PauseTransition(Duration.millis(200));
+                pause.setOnFinished(e -> {
+                    Editor.getXyzTile().loadImagesAfterCameraMove();
+                });
+            }
+            pause.playFromStart();
         } else if (event.isSecondaryButtonDown()) {
             // 回転
             yaw.setAngle(yaw.getAngle() - deltaMousePosition.getX() * modifier * 0.6);
@@ -120,6 +130,13 @@ public class Camera {
     };
 
     private final EventHandler<ScrollEvent> scrollEventHandler = event -> {
+        if (pause == null) {
+            pause = new PauseTransition(Duration.millis(200));
+            pause.setOnFinished(e -> {
+                Editor.getXyzTile().loadImagesAfterCameraMove();
+            });
+        }
+        pause.playFromStart();
         // ズームイン・アウト
         zoomFactor += event.getDeltaY() * 0.01;
         zoom.setX(calculateZoomOffset());

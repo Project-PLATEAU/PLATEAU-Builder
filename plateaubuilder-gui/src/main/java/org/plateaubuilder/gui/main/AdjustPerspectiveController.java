@@ -6,6 +6,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import org.locationtech.jts.math.Vector2D;
+import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.world.Camera;
 import org.plateaubuilder.core.world.World;
 
@@ -99,12 +100,12 @@ public class AdjustPerspectiveController implements Initializable {
      */
     private final EventHandler<MouseEvent> mouseEventHandler = event -> {
         isDragging = false;
-
         if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
             if (reserveIcon == SelectIcons.NONE){
                 IconControlZoom.resetIcon();
                 IconControlPan.resetIcon();
                 IconControlRotate.resetIcon();
+                Editor.getXyzTile().loadImagesAfterCameraMove();
             }
         }
 

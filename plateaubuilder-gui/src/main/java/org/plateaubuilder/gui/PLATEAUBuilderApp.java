@@ -58,7 +58,7 @@ public class PLATEAUBuilderApp extends Application {
         var scene = new Scene(
                 FXMLLoader.<Parent>load(
                         Objects.requireNonNull(getClass().getResource("main.fxml"))),
-                1024, 600, true);
+                1052, 600, true);
 
         Editor.registerScene(scene);
     }

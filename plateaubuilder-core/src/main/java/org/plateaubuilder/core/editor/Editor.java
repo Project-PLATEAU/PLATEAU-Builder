@@ -16,6 +16,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.plateaubuilder.core.basemap.XyzTile;
 
 public class Editor {
     private static Stage stage;
@@ -35,6 +36,8 @@ public class Editor {
     private static FeatureSelection selection;
 
     private static UndoManager undoManager;
+
+    private static XyzTile xyzTile;
 
     public static Camera getCamera() {
         return camera;
@@ -96,6 +99,10 @@ public class Editor {
         return datasetPath;
     }
 
+    public static XyzTile getXyzTile() {
+        return xyzTile;
+    }
+
     public static void initialize(Stage newStage) throws Exception {
         stage = newStage;
         sessionManager = SessionManager.createSessionManager("PLATEAUBuilder");
@@ -123,6 +130,8 @@ public class Editor {
         selection = new FeatureSelection();
 
         undoManager = new UndoManager(20);
+
+        xyzTile = new XyzTile();
 
     }
 

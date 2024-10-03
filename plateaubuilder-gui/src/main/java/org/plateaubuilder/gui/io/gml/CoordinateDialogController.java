@@ -117,11 +117,14 @@ public class CoordinateDialogController implements Initializable {
         try {
             CityModelGroup group = new CityModelGroup();
             World.getActiveInstance().getCityModels().clear();
+            Editor.getXyzTile().clearBaseMap();
             for (var gmlFile : gmlFiles) {
                 var cityModel = GmlImporter.loadGml(group, gmlFile.toString(), code);
+                Editor.getXyzTile().loadAllBasemapImages(cityModel.getGML().getBoundedBy().getEnvelope());
                 group.addCityModel(cityModel);
                 World.getActiveInstance().addCityModel(cityModel);
             }
+            Editor.getXyzTile().updateBasemapVisibility();
             World.getActiveInstance().setCityModelGroup(group);
 
             var datasetPath = Paths.get(World.getActiveInstance().getCityModels().get(0).getGmlPath()).getParent().getParent().getParent();

@@ -25,6 +25,7 @@ open module plateaubuilder.core {
     exports org.plateaubuilder.core.citymodel.attribute.manager;
     exports org.plateaubuilder.core.citymodel.attribute.wrapper;
     exports org.plateaubuilder.core.citymodel.attribute.reader;
+    exports org.plateaubuilder.core.basemap;
 
     requires java.desktop;
     requires java.logging;
