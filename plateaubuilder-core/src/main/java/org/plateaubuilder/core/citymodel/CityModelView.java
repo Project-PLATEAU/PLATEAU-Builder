@@ -37,10 +37,10 @@ public class CityModelView extends ManagedGMLView<CityModel> {
         this.gmlPath = gmlPath;
     }
 
-    public List<BuildingView> getCityObjectMembersUnmodifiable() {
+    public List<IFeatureView> getCityObjectMembersUnmodifiable() {
         return getChildrenUnmodifiable()
                 .stream()
-                .map((node) -> (BuildingView)node)
+                .map((node) -> (IFeatureView) node)
                 .collect(Collectors.toList());
     }
 }

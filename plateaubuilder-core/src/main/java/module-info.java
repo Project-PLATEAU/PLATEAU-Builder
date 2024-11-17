@@ -7,6 +7,8 @@ open module plateaubuilder.core {
     exports org.plateaubuilder.core.citymodel.citygml;
     exports org.plateaubuilder.core.editor.attribute;
     exports org.plateaubuilder.core.editor.commands;
+    exports org.plateaubuilder.core.editor.filters;
+    exports org.plateaubuilder.core.editor.filters.expressions;
     exports org.plateaubuilder.core.citymodel.geometry;
     exports org.plateaubuilder.core.world;
     exports org.plateaubuilder.core.io.gml;

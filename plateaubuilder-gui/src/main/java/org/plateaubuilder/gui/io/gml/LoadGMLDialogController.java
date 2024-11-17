@@ -5,6 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import org.plateaubuilder.core.citymodel.helpers.SchemaHelper;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.io.gml.GmlImporter;
 import org.plateaubuilder.core.world.World;
@@ -53,6 +55,17 @@ public class LoadGMLDialogController {
             for (var gmlFile : gmlFiles) {
                 var cityModelView = GmlImporter.loadGml(group, gmlFile.toString(), World.getActiveInstance().getGeoReference().getEPSGCode());
                 Editor.getXyzTile().loadAllBasemapImages(cityModelView.getGML().getBoundedBy().getEnvelope());
+
+                // urfスキーマが読み込まれていない場合は読み込みを試行する
+                if (Editor.getUrfSchemaDocument() == null) {
+                    var schemaHandler = cityModelView.getSchemaHandler();
+                    var urfSchema = SchemaHelper.getUrfSchema(schemaHandler);
+                    var urfSchemaLocation = urfSchema == null ? null : SchemaHelper.getSchemaLocation(urfSchema);
+                    if (urfSchemaLocation != null) {
+                        Editor.settingUrfSchemaDocument(urfSchemaLocation);
+                    }
+                }
+
                 group.addCityModel(cityModelView);
                 // ツリー更新
                 group.fireChangeEvent();

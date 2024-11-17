@@ -395,28 +395,7 @@ public class AttributeEditorController implements Initializable {
     }
 
     private static ChildList<ADEComponent> getADEComponents(IFeatureView selectedFeature) {
-        var gml = selectedFeature.getGML();
-        if (gml instanceof AbstractBuilding) {
-            return (ChildList<ADEComponent>) ((AbstractBuilding) gml).getGenericApplicationPropertyOfAbstractBuilding();
-        } else if (gml instanceof Road) {
-            return (ChildList<ADEComponent>) ((Road) gml).getGenericApplicationPropertyOfRoad();
-        } else if (gml instanceof LandUse) {
-            return (ChildList<ADEComponent>) ((LandUse) gml).getGenericApplicationPropertyOfLandUse();
-        } else if (gml instanceof WaterBody) {
-            return (ChildList<ADEComponent>) ((WaterBody) gml).getGenericApplicationPropertyOfWaterBody();
-        } else if (gml instanceof SolitaryVegetationObject) {
-            return (ChildList<ADEComponent>) ((SolitaryVegetationObject) gml)
-                    .getGenericApplicationPropertyOfSolitaryVegetationObject();
-        } else if (gml instanceof PlantCover) {
-            return (ChildList<ADEComponent>) ((PlantCover) gml).getGenericApplicationPropertyOfPlantCover();
-        } else if (gml instanceof CityFurniture) {
-            return (ChildList<ADEComponent>) ((CityFurniture) gml).getGenericApplicationPropertyOfCityFurniture();
-        } else if (gml instanceof ADEGenericComponent) {
-            return (ChildList<ADEComponent>) ((ADEGenericComponent) gml)
-                    .getGenericApplicationPropertyOfADEGenericComponent();
-        }
-
-        return (ChildList<ADEComponent>) new ArrayList<ADEComponent>();
+        return (ChildList<ADEComponent>) selectedFeature.getADEComponents();
     }
 
     /**

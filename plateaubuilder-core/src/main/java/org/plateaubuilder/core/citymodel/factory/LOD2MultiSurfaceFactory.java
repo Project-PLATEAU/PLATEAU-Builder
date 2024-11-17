@@ -52,6 +52,9 @@ public class LOD2MultiSurfaceFactory extends GeometryFactory {
                 var compositeSurface = (CompositeSurface) surface;
                 for (var surfaceProperty : compositeSurface.getSurfaceMember()) {
                     var polygon = (Polygon) surfaceProperty.getSurface();
+                    if (polygon == null) {
+                        continue;
+                    }
                     var polygonObject = createPolygon(polygon, compositeSurface.getId());
                     polygons.add(polygonObject);
                 }

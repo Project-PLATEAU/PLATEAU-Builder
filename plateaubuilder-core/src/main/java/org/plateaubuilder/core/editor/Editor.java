@@ -1,5 +1,7 @@
 package org.plateaubuilder.core.editor;
 
+import org.plateaubuilder.core.basemap.XyzTile;
+import org.plateaubuilder.core.citymodel.attribute.AttributeSchema;
 import org.plateaubuilder.core.citymodel.attribute.reader.XSDSchemaDocument;
 import org.plateaubuilder.core.editor.commands.UndoManager;
 import org.plateaubuilder.core.editor.surfacetype.SurfaceTypeEditor;
@@ -16,7 +18,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import org.plateaubuilder.core.basemap.XyzTile;
 
 public class Editor {
     private static Stage stage;
@@ -29,6 +30,8 @@ public class Editor {
     private static CityModelViewMode cityModelViewMode;
     private static SurfaceTypeEditor surfaceTypeEditor;
     private static XSDSchemaDocument uroSchemaDocument;
+    private static XSDSchemaDocument urfSchemaDocument;
+    private static AttributeSchema attributeSchema = new AttributeSchema();
     private static String datasetPath;
 
     private static SessionManager sessionManager;
@@ -91,6 +94,18 @@ public class Editor {
         return uroSchemaDocument;
     }
 
+    public static void settingUrfSchemaDocument(String path) {
+        urfSchemaDocument.initialize(path, "urf");
+    }
+
+    public static XSDSchemaDocument getUrfSchemaDocument() {
+        return urfSchemaDocument;
+    }
+
+    public static AttributeSchema getAttributeSchema() {
+        return attributeSchema;
+    }
+
     public static void setDatasetPath(String path) {
         datasetPath = path;
     }
@@ -108,6 +123,7 @@ public class Editor {
         sessionManager = SessionManager.createSessionManager("PLATEAUBuilder");
         sessionManager.loadSession();
         uroSchemaDocument = new XSDSchemaDocument();
+        urfSchemaDocument = new XSDSchemaDocument();
 
         World.setActiveInstance(new World(), new Group());
         light = new Light();

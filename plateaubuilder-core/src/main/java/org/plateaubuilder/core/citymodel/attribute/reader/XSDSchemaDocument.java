@@ -1,14 +1,35 @@
 package org.plateaubuilder.core.citymodel.attribute.reader;
 
-import java.util.ArrayList;
+import static java.util.Map.entry;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.citygml4j.model.gml.basicTypes.Code;
+import org.citygml4j.model.gml.basicTypes.Measure;
+import org.citygml4j.model.gml.measures.Length;
+import org.plateaubuilder.core.citymodel.attribute.Attribute;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import net.opengis.gml.StringOrRefType;
+
 public class XSDSchemaDocument {
+    private static final Map<String, Class> typeMap = Map.ofEntries(entry("xs:string", String.class), entry("xs:integer", Integer.class),
+            entry("xs:double", Double.class), entry("xs:gYear", LocalDate.class), entry("xs:date", ZonedDateTime.class), entry("xs:boolean", Boolean.class),
+            entry("xs:anyURI", String.class), entry("gml:CodeType", Code.class), entry("gml:LengthType", Length.class), entry("gml:MeasureType", Measure.class),
+            entry("gml:StringOrRefType", StringOrRefType.class));
+
+    private static final Set<String> ignoreTypes = Set.of("urf:TargetPropertyType", "gml:MultiSurfacePropertyType", "gml:MultiCurvePropertyType",
+            "gml:MultiPointPropertyType", "urf:BoundaryPropertyType");
+
     Document xsdDocument;
 
     public void initialize(String path, String type) {
@@ -254,6 +275,99 @@ public class XSDSchemaDocument {
             return false;
         }
         return true;
+    }
+
+    public List<Attribute> getGenericApplicationProperties(String namespace, String substitutionGroupName) {
+        Node rootNode = xsdDocument.getDocumentElement();
+        NodeList nodeList = rootNode.getChildNodes();
+
+        var targetSubstitutionGroup = String.format("%s:%s", namespace, substitutionGroupName);
+        var properties = new ArrayList<Attribute>();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+                var substitutionGroup = element.getAttribute("substitutionGroup");
+                if (targetSubstitutionGroup.equals(substitutionGroup)) {
+                    var name = element.getAttribute("name");
+                    var minOccurs = element.getAttribute("minOccurs");
+                    var maxOccurs = element.getAttribute("maxOccurs");
+                    var type = element.getAttribute("type");
+
+                    var attribute = new Attribute("uro", name, minOccurs, maxOccurs, typeMap.get(type));
+                    properties.add(attribute);
+                    getGenericApplicationProperties(element, properties, attribute);
+                }
+            }
+        }
+
+        return properties;
+    }
+
+    private void getGenericApplicationProperties(Element element, List<Attribute> properties, Attribute parent) {
+        NodeList nodeList = element.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element childElement = (Element) node;
+                var name = childElement.getAttribute("name");
+                var minOccurs = childElement.getAttribute("minOccurs");
+                var maxOccurs = childElement.getAttribute("maxOccurs");
+                var type = childElement.getAttribute("type");
+
+                var attribute = new Attribute("uro", name, minOccurs, maxOccurs, typeMap.get(type));
+                properties.add(attribute);
+                if (parent != null) {
+                    parent.addChild(attribute);
+                }
+                getGenericApplicationProperties(childElement, properties, attribute);
+            }
+        }
+    }
+
+    public List<Attribute> getUrfAttributes(String featureType) {
+        var targetType = String.format("%sType", featureType);
+        Node rootNode = xsdDocument.getDocumentElement();
+        NodeList nodeList = rootNode.getChildNodes();
+
+        var properties = new ArrayList<Attribute>();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+                var type = element.getAttribute("type");
+                if (type.equals(targetType)) {
+                    getUrfAttributes(element, properties, null);
+                }
+            }
+        }
+
+        return properties;
+    }
+
+    private void getUrfAttributes(Element element, List<Attribute> properties, Attribute parent) {
+        NodeList nodeList = element.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element childElement = (Element) node;
+                var name = childElement.getAttribute("name");
+                var minOccurs = childElement.getAttribute("minOccurs");
+                var maxOccurs = childElement.getAttribute("maxOccurs");
+                var type = childElement.getAttribute("type");
+
+                if (ignoreTypes.contains(type)) {
+                    continue;
+                }
+
+                var attribute = new Attribute("urf", name, minOccurs, maxOccurs, typeMap.get(type));
+                properties.add(attribute);
+                if (parent != null) {
+                    parent.addChild(attribute);
+                }
+                getUrfAttributes(childElement, properties, attribute);
+            }
+        }
     }
 
     /**

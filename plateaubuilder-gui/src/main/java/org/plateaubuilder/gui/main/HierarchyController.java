@@ -2,9 +2,11 @@ package org.plateaubuilder.gui.main;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.plateaubuilder.core.citymodel.CityModelView;
 import org.plateaubuilder.core.citymodel.IFeatureView;
@@ -25,9 +27,12 @@ import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
@@ -52,7 +57,15 @@ public class HierarchyController implements Initializable {
     public MenuItem hideSelectedViews;
     public MenuItem hideUnselectedViews;
 
+    @FXML
+    Button buttonShowSearchDialog;
+
+    @FXML
+    Button buttonClearFilter;
+
     private boolean syncingHierarchy = false;
+
+    private SearchDialogController searchDialogController;
 
     private void constructTree() {
         var group = World.getActiveInstance().getCityModelGroup();
@@ -62,6 +75,7 @@ public class HierarchyController implements Initializable {
         for (var item : hierarchyTreeTable.getRoot().getChildren()) {
             item.setExpanded(true);
         }
+        closeSearchDialog();
     }
 
     @Override
@@ -335,7 +349,83 @@ public class HierarchyController implements Initializable {
     }
 
     public void showSearchDialog() {
-        SearchDialogController.createSearchDialog();
+        var group = World.getActiveInstance().getCityModelGroup();
+        if (group == null) {
+            return;
+        }
+        var allViews = group.getAllFeatures();
+        if (allViews == null || allViews.isEmpty()) {
+            return;
+        }
+
+        var featureList = new ArrayList<IFeatureView>();
+        allViews.forEach(view -> {
+            if (view instanceof IFeatureView) {
+                featureList.add((IFeatureView) view);
+            }
+        });
+        var typeList = featureList.stream().map(f -> f.getFeatureType()).distinct().sorted().collect(Collectors.toList());
+
+        if (searchDialogController == null) {
+            var controller = SearchDialogController.createSearchDialog(typeList, featureList);
+            controller.setOnCloseAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent e) {
+                    try {
+                        if (!controller.getDialogResult()) {
+                            return;
+                        }
+                        var filter = controller.getFilter();
+                        if (filter == null) {
+                            return;
+                        }
+
+                        featureList.forEach(view -> {
+                            var filtered = !filter.evaluate(view);
+                            view.setFiltered(filtered);
+                            if (filtered) {
+                                view.setVisible(false);
+                            }
+                        });
+                        hierarchyTreeTable.rootProperty().set(new HierarchyController.FilterTreeItemImpl(group));
+                        buttonClearFilter.setDisable(false);
+                    } finally {
+                        searchDialogController = null;
+                    }
+                }
+            });
+            searchDialogController = controller;
+        }
+
+        searchDialogController.show();
+    }
+
+    public void clearFilter() {
+        var group = World.getActiveInstance().getCityModelGroup();
+        if (group != null) {
+            hierarchyTreeTable.rootProperty().set(new HierarchyController.TreeItemImpl(group));
+        }
+        for (var item : hierarchyTreeTable.getRoot().getChildren()) {
+            item.setExpanded(true);
+        }
+
+        buttonClearFilter.setDisable(true);
+
+        var allViews = group.getAllFeatures();
+        if (allViews == null || allViews.isEmpty()) {
+            return;
+        }
+        allViews.forEach(view -> {
+            if (view instanceof IFeatureView) {
+                ((IFeatureView) view).setVisible(true);
+            }
+        });
+    }
+
+    public void closeSearchDialog() {
+        if (searchDialogController != null) {
+            searchDialogController.close();
+        }
     }
 
     private class TreeItemImpl extends TreeItem<Node> {
@@ -349,6 +439,29 @@ public class HierarchyController implements Initializable {
                             continue;
                     }
                     getChildren().add(new HierarchyController.TreeItemImpl(n));
+                }
+            }
+        }
+    }
+
+    private class FilterTreeItemImpl extends TreeItem<Node> {
+
+        public FilterTreeItemImpl(Node node) {
+            super(node);
+            if (node instanceof Parent) {
+                for (Node n : ((Parent) node).getChildrenUnmodifiable()) {
+                    if (!(n instanceof CityModelView)) {
+                        continue;
+                    }
+                    for (Node g : ((Parent) n).getChildrenUnmodifiable()) {
+                        if (!(g instanceof IFeatureView)) {
+                            continue;
+                        }
+                        if (((IFeatureView) g).isFiltered()) {
+                            continue;
+                        }
+                        getChildren().add(new HierarchyController.FilterTreeItemImpl(g));
+                    }
                 }
             }
         }

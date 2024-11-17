@@ -3,6 +3,8 @@ package org.plateaubuilder.core.citymodel;
 import org.citygml4j.model.gml.base.AbstractGML;
 
 public abstract class ManagedGMLView<T extends AbstractGML> extends GMLView<T> {
+    private boolean filtered = false;
+
     public ManagedGMLView(T gml) {
         super(gml);
     }
@@ -17,5 +19,13 @@ public abstract class ManagedGMLView<T extends AbstractGML> extends GMLView<T> {
         getChildren().remove(view);
         group.removeView(view);
         group.fireChangeEvent();
+    }
+
+    public boolean isFiltered() {
+        return filtered;
+    }
+
+    public void setFiltered(boolean filtered) {
+        this.filtered = filtered;
     }
 }

@@ -1,5 +1,19 @@
 package org.plateaubuilder.gui.io.gml;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Objects;
+import java.util.ResourceBundle;
+
+import org.plateaubuilder.core.citymodel.CityModelGroup;
+import org.plateaubuilder.core.citymodel.helpers.SchemaHelper;
+import org.plateaubuilder.core.editor.Editor;
+import org.plateaubuilder.core.io.gml.GmlImporter;
+import org.plateaubuilder.core.world.World;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -13,19 +27,6 @@ import javafx.scene.control.ListView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.plateaubuilder.core.citymodel.CityModelGroup;
-import org.plateaubuilder.core.citymodel.helpers.SchemaHelper;
-import org.plateaubuilder.core.editor.Editor;
-import org.plateaubuilder.core.io.gml.GmlImporter;
-import org.plateaubuilder.core.world.World;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Objects;
-import java.util.ResourceBundle;
 
 public class CoordinateDialogController implements Initializable {
     private Stage root;
@@ -132,9 +133,15 @@ public class CoordinateDialogController implements Initializable {
             var schemaHandler = cityModelView.getSchemaHandler();
             var uroSchema = SchemaHelper.getUroSchema(schemaHandler);
             var uroSchemaLocation = uroSchema == null ? null : SchemaHelper.getSchemaLocation(uroSchema);
+            var urfSchema = SchemaHelper.getUrfSchema(schemaHandler);
+            var urfSchemaLocation = urfSchema == null ? null : SchemaHelper.getSchemaLocation(urfSchema);
 
             Editor.setDatasetPath(datasetPath.toString());
             Editor.settingUroSchemaDocument(uroSchemaLocation);
+            if (urfSchemaLocation != null) {
+                Editor.settingUrfSchemaDocument(urfSchemaLocation);
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

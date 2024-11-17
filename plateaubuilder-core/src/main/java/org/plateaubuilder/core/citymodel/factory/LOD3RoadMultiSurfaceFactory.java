@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.citygml4j.model.citygml.transportation.Road;
 import org.citygml4j.model.gml.geometry.aggregates.MultiSurface;
+import org.citygml4j.model.gml.geometry.complexes.CompositeSurface;
 import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.citygml4j.model.gml.geometry.primitives.SurfaceProperty;
 import org.plateaubuilder.core.citymodel.CityModelView;
@@ -85,12 +86,22 @@ public class LOD3RoadMultiSurfaceFactory extends GeometryFactory {
 
         var polygons = new ArrayList<PolygonView>();
         for (SurfaceProperty surfaceMemberElement : surfaceMember) {
-            var polygon = (Polygon) surfaceMemberElement.getSurface();
-            if (polygon == null) {
-                continue;
+            var surface = surfaceMemberElement.getSurface();
+            if (surface instanceof Polygon) {
+                var polygon = (Polygon) surface;
+                var polygonObject = createPolygon(polygon, polygon.getId());
+                polygons.add(polygonObject);
+            } else if (surface instanceof CompositeSurface) {
+                var compositeSurface = (CompositeSurface) surface;
+                for (var surfaceProperty : compositeSurface.getSurfaceMember()) {
+                    var polygon = (Polygon) surfaceProperty.getSurface();
+                    if (polygon == null) {
+                        continue;
+                    }
+                    var polygonObject = createPolygon(polygon, compositeSurface.getId());
+                    polygons.add(polygonObject);
+                }
             }
-            var polygonObject = createPolygon(polygon, polygon.getId());
-            polygons.add(polygonObject);
         }
 
         return polygons;

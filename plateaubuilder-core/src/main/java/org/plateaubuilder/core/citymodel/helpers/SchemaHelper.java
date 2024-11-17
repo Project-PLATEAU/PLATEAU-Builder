@@ -40,4 +40,21 @@ public class SchemaHelper {
 
         return null;
     }
+
+    public static Schema getUrfSchema(SchemaHandler schemaHandler) {
+        var nss = schemaHandler.getTargetNamespaces();
+        for (var ns : nss) {
+            var schema = schemaHandler.getSchema(ns);
+            var uri = schema.getNamespaceURI();
+            var location = getSchemaLocation(schema);
+
+            if (uri == null || location == null)
+                continue;
+
+            if (uri.contains("iur/urf") && (location.startsWith("file") || location.startsWith("http")))
+                return schema;
+        }
+
+        return null;
+    }
 }

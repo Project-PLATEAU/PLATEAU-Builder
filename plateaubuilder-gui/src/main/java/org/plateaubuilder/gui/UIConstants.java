@@ -50,7 +50,7 @@ public class UIConstants {
             case ROAD: return "道路(tran:Road)";
             case SQUARE: return "SQUARE";
             case TRACK: return "TRACK";
-            case TRAFFIC_AREA: return "通行可能な領域(ran::TrafficArea)";
+            case TRAFFIC_AREA: return "通行可能な領域(tran::TrafficArea)";
             case AUXILIARY_TRAFFIC_AREA_PROPERTY: return "補助する役割をもつ領域(tran::AuxiliaryTrafficAre)";
             case TRAFFIC_AREA_PROPERTY: return "TRAFFIC_AREA_PROPERTY";
         }
@@ -149,7 +149,7 @@ public class UIConstants {
     public static final String cityFurnitureTypeDescription(CityGMLClass clazz) {
         switch (clazz) {
         case CITY_FURNITURE:
-            return "都市設備(frn:CityFurniture )";
+            return "都市設備(frn:CityFurniture)";
         }
 
         throw new IllegalArgumentException();
