@@ -3,19 +3,21 @@ package org.plateaubuilder.core.citymodel.attribute.wrapper;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.plateaubuilder.core.citymodel.attribute.manager.ModelType;
 
 /**
  * YearOfConstruction属性の追加・削除などの操作処理の実体を持つクラス
  */
 public class YearOfConstructionWrapper extends AbstractAttributeWrapper {
-    public YearOfConstructionWrapper() {
-        initialize("yearOfConstruction");
+    public YearOfConstructionWrapper(ModelType modelType) {
+        initialize(modelType, "yearOfConstruction");
     }
 
     @Override
     public String getValue(Object obj) {
         AbstractBuilding building = (AbstractBuilding) obj;
-        return String.valueOf(building.getYearOfConstruction());
+        LocalDate yearOfConstruction = building.getYearOfConstruction();
+        return yearOfConstruction != null ? String.valueOf(yearOfConstruction.getYear()) : "";
     }
 
     @Override

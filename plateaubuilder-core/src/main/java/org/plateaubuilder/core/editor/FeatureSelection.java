@@ -1,9 +1,6 @@
 package org.plateaubuilder.core.editor;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.plateaubuilder.core.citymodel.IFeatureView;
@@ -68,7 +65,6 @@ public class FeatureSelection {
 
     private final ObjectProperty<List<PolygonSection>> activeSection = new SimpleObjectProperty<>();
 
-
     private BooleanProperty enabled = new SimpleBooleanProperty();
     {
         enabled.set(true);
@@ -99,6 +95,10 @@ public class FeatureSelection {
         return active.get();
     }
 
+    public Set<IFeatureView> getSelectedFeatures() {
+        return new HashSet<>(selectedFeatures);
+    }
+
     public ObjectProperty<IFeatureView> getActiveFeatureProperty() {
         return active;
     }
@@ -110,9 +110,6 @@ public class FeatureSelection {
     public void registerClickEvent(SubScene scene) {
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
             if (!enabled.get())
-                return;
-
-            if (!event.isPrimaryButtonDown())
                 return;
 
             if (event.getClickCount() == 2) {
@@ -146,11 +143,10 @@ public class FeatureSelection {
                     else
                         addSelection(feature);
                 }
-            } else {
+            } else if (!event.isSecondaryButtonDown() || selectedFeatures.size() <= 1) {
                 select(feature);
-
-                selectElement.set((Node) element);
             }
+            selectElement.set((Node) element);
         });
     }
 
@@ -218,7 +214,8 @@ public class FeatureSelection {
         var pivot = manipulator.getOrigin();
         outline.getTransforms().add(manipulator.getTransformCache());
         // スケールを適用
-        outline.getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(), manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
+        outline.getTransforms().add(new Scale(manipulator.getScale().getX(), manipulator.getScale().getY(),
+                manipulator.getScale().getZ(), pivot.getX(), pivot.getY(), pivot.getZ()));
 
         return outline;
     }
@@ -234,14 +231,14 @@ public class FeatureSelection {
         }
         return (IFeatureView) node;
     }
-    
+
     private ILODView getLodView(Node node) {
         while (node != null && !(node instanceof ILODView)) {
             node = node.getParent();
         }
         return (ILODView) node;
     }
-    
+
     public void setSelectElement(Node node) {
         selectElement.set(node);
     }
@@ -249,7 +246,7 @@ public class FeatureSelection {
     public Node getSelectElement() {
         return selectElement.get();
     }
-    
+
     public ObjectProperty<Node> getSelectElementProperty() {
         return selectElement;
     }

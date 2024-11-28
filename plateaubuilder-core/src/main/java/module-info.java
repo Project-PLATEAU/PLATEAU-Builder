@@ -27,6 +27,8 @@ open module plateaubuilder.core {
     exports org.plateaubuilder.core.citymodel.attribute.manager;
     exports org.plateaubuilder.core.citymodel.attribute.wrapper;
     exports org.plateaubuilder.core.citymodel.attribute.reader;
+    exports org.plateaubuilder.core.io.csv.exporters;
+    exports org.plateaubuilder.core.io.csv.importers;
     exports org.plateaubuilder.core.basemap;
 
     requires java.desktop;
@@ -58,6 +60,7 @@ open module plateaubuilder.core {
     requires xercesImpl;
     requires com.fasterxml.jackson.databind;
     requires org.apache.commons.io;
+    requires com.opencsv;
 
     provides Importer with
             ObjOrPolyObjImporter;

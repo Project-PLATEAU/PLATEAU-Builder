@@ -1,4 +1,5 @@
 open module plateaubuilder.gui {
+    exports org.plateaubuilder.gui.io.csv;
     requires java.desktop;
     requires java.logging;
     requires java.xml;

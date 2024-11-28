@@ -1,15 +1,19 @@
 package org.plateaubuilder.core.citymodel.attribute.reader;
 
+import java.io.FileInputStream;
+import java.util.ArrayList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.apache.xerces.parsers.DOMParser;
+import org.plateaubuilder.core.citymodel.attribute.CodeSpaceValue;
+import org.plateaubuilder.core.editor.Editor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.FileInputStream;
 
 /**
  * コードリストの定義ファイルからの読み取りを行います。
@@ -28,16 +32,17 @@ public class CodeListReader {
         DocumentBuilder builder;
         NodeList dictionaryEntryNodeList;
         try {
+            // CodeListの情報格納用の新しいドキュメントを作成
+            builder = factory.newDocumentBuilder();
+            codeTypeDocument = builder.newDocument();
+            
             // コードリストの定義ファイルからドキュメントを取得
             DOMParser parser = new DOMParser();
             var fileStream = new FileInputStream(path);
             var inputSource = new InputSource(fileStream);
             parser.parse(inputSource);
             sourceDocument = parser.getDocument();
-
-            // CodeListの情報格納用の新しいドキュメントを作成
-            builder = factory.newDocumentBuilder();
-            codeTypeDocument = builder.newDocument();
+            
             Element documentRootElement = sourceDocument.getDocumentElement();
 
             Element rootElement = codeTypeDocument.createElement("codeType");
@@ -79,6 +84,33 @@ public class CodeListReader {
      */
     public Document getCodeListDocument() {
         return codeTypeDocument;
+    }
+
+    /**
+     * コードリストの定義ファイルから値を取得します。
+     *
+     * @param name コードリストの定義ファイルの名前
+     */
+    public ArrayList<String> getCodeListValue(String name, String datasetPath) {
+        ArrayList<String> valueList = new ArrayList<String>();
+        readCodeList(datasetPath + "\\codelists" + "\\" + name);
+        NodeList nodeList = codeTypeDocument.getDocumentElement().getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+                valueList.add(getElementTextContentByTagName(element, "gml:name"));
+            }
+        }
+        return valueList;
+    }
+
+    private String getElementTextContentByTagName(Element parentElement, String tagName) {
+        NodeList nodes = parentElement.getElementsByTagName(tagName);
+        if (nodes.getLength() > 0) {
+            return nodes.item(0).getTextContent();
+        }
+        return ""; // タグが存在しない場合は空文字を返す
     }
 
     /**

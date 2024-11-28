@@ -27,6 +27,21 @@ import javafx.scene.control.ListView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import org.citygml4j.util.internal.xml.SystemIDResolver;
+import org.plateaubuilder.core.citymodel.CityModelGroup;
+import org.plateaubuilder.core.citymodel.helpers.SchemaHelper;
+import org.plateaubuilder.core.editor.Editor;
+import org.plateaubuilder.core.io.gml.GmlImporter;
+import org.plateaubuilder.core.world.World;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
+import java.util.ResourceBundle;
 
 public class CoordinateDialogController implements Initializable {
     private Stage root;
@@ -35,7 +50,7 @@ public class CoordinateDialogController implements Initializable {
 
     @FXML
     private ComboBox<CoordinateCodesEnum> comboboxCoordinateCodes;
-    
+
     /**
      * CoordinateCodesEnumは、座標系のコードを表す列挙型です。
      */
@@ -109,7 +124,7 @@ public class CoordinateDialogController implements Initializable {
      */
     public void onSubmit(ActionEvent actionEvent) {
         var codeEnum = comboboxCoordinateCodes.getValue();
-        if(codeEnum == null)
+        if (codeEnum == null)
             codeEnum = CoordinateCodesEnum.EPSG6677;
         var buffer = new StringBuffer(codeEnum.toString());
         buffer.insert(4, ":");
@@ -128,7 +143,10 @@ public class CoordinateDialogController implements Initializable {
             Editor.getXyzTile().updateBasemapVisibility();
             World.getActiveInstance().setCityModelGroup(group);
 
-            var datasetPath = Paths.get(World.getActiveInstance().getCityModels().get(0).getGmlPath()).getParent().getParent().getParent();
+            Path datasetPath = Paths.get(World.getActiveInstance().getCityModels().get(0).getGmlPath());
+            while (datasetPath != null && !datasetPath.getFileName().toString().equals("udx")) {
+                datasetPath = datasetPath.getParent();
+            }
             var cityModelView = World.getActiveInstance().getCityModels().get(0);
             var schemaHandler = cityModelView.getSchemaHandler();
             var uroSchema = SchemaHelper.getUroSchema(schemaHandler);
@@ -136,7 +154,7 @@ public class CoordinateDialogController implements Initializable {
             var urfSchema = SchemaHelper.getUrfSchema(schemaHandler);
             var urfSchemaLocation = urfSchema == null ? null : SchemaHelper.getSchemaLocation(urfSchema);
 
-            Editor.setDatasetPath(datasetPath.toString());
+            Editor.setDatasetPath(datasetPath.getParent().toString());
             Editor.settingUroSchemaDocument(uroSchemaLocation);
             if (urfSchemaLocation != null) {
                 Editor.settingUrfSchemaDocument(urfSchemaLocation);
@@ -151,21 +169,21 @@ public class CoordinateDialogController implements Initializable {
     /**
      * FXMLファイルがロードされた際に呼び出される初期化メソッドです。
      * 
-     * @param location FXMLファイルのURL
+     * @param location  FXMLファイルのURL
      * @param resources ロケール固有のリソースバンドル
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Callback<ListView<CoordinateCodesEnum>, ListCell<CoordinateCodesEnum>> cellFactory
-                = (ListView<CoordinateCodesEnum> param) -> new ListCell<CoordinateCodesEnum>() {
-            @Override
-            protected void updateItem(CoordinateCodesEnum item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item != null && !empty) {
-                    setText(item.getName());
-                }
-            }
-        };
+        Callback<ListView<CoordinateCodesEnum>, ListCell<CoordinateCodesEnum>> cellFactory = (
+                ListView<CoordinateCodesEnum> param) -> new ListCell<CoordinateCodesEnum>() {
+                    @Override
+                    protected void updateItem(CoordinateCodesEnum item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item != null && !empty) {
+                            setText(item.getName());
+                        }
+                    }
+                };
         ObservableList<CoordinateCodesEnum> list = FXCollections.observableArrayList(CoordinateCodesEnum.values());
         comboboxCoordinateCodes.getItems().addAll(list);
         comboboxCoordinateCodes.setButtonCell(cellFactory.call(null));

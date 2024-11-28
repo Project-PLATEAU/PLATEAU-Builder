@@ -50,6 +50,7 @@
                  <items>
                      <MenuItem fx:id="exportGltfMenu" mnemonicParsing="false" onAction="#exportGltf" text="glTFをエクスポート..." />
                      <MenuItem fx:id="exportObjMenu" mnemonicParsing="false" onAction="#exportObj" text="OBJをエクスポート..." />
+                     <MenuItem fx:id="exportCsvMenu" mnemonicParsing="false" onAction="#exportCsv" text="CSVをエクスポート..." />
                      <MenuItem fx:id="importGltfMenu" mnemonicParsing="false" onAction="#importGltf" text="glTFをインポート..." />
                      <MenuItem fx:id="importObjMenu" mnemonicParsing="false" onAction="#importObj" text="OBJをインポート..." />
                      <MenuItem mnemonicParsing="false" onAction="#hideSelectedViews" text="選択地物を非表示" />

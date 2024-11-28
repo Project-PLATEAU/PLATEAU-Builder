@@ -18,7 +18,8 @@ import org.citygml4j.model.common.child.ChildList;
 import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
 import org.plateaubuilder.core.citymodel.attribute.AttributeValue;
-import org.plateaubuilder.core.citymodel.attribute.manager.BuildingSchemaManager;
+import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManager;
+import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManagerFactory;
 import org.plateaubuilder.core.citymodel.attribute.reader.XSDSchemaDocument;
 import org.plateaubuilder.core.citymodel.attribute.wrapper.RootAttributeHandler;
 import org.plateaubuilder.core.citymodel.citygml.ADEGenericComponent;
@@ -52,6 +53,7 @@ public class AttributeEditorController implements Initializable {
     private XSDSchemaDocument uroSchemaDocument = Editor.getUroSchemaDocument();
     private ObjectProperty<IFeatureView> activeFeatureProperty;
     private AttributeTreeBuilder attributeTreeBuilder = new AttributeTreeBuilder();
+    private AttributeSchemaManager attributeSchemaManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -187,12 +189,14 @@ public class AttributeEditorController implements Initializable {
             protected TreeItem<AttributeItem> computeValue() {
                 selectedFeature = activeFeatureProperty.get();
 
-                if (selectedFeature == null)
+                if (selectedFeature != null) {
+                    attributeSchemaManager = AttributeSchemaManagerFactory.getSchemaManager(selectedFeature.getGML());
+                } else {
                     return null;
+                }
                 var root = new TreeItem<>(
                         new AttributeItem(new RootAttributeHandler(selectedFeature)));
-                AttributeTreeBuilder.bldgAddAttributeTree(selectedFeature, root);
-                AttributeTreeBuilder.addADEPropertyToTree(selectedFeature, root);
+                AttributeTreeBuilder.attributeToTree(selectedFeature, root);
                 root.setExpanded(true);
                 return root;
             }
@@ -303,9 +307,10 @@ public class AttributeEditorController implements Initializable {
         /* Uro用 */
         ArrayList<ArrayList<String>> addableUroAttributeList = uroSchemaDocument.getElementList(keyAttributeName, false,
                 treeViewChildItemList, "uro");
-        ArrayList<String> addableBldgAttributeList = BuildingSchemaManager.getBldgAttributeName(keyAttributeName,
+        ArrayList<String> addableBldgAttributeList = attributeSchemaManager.getAttributeNameList(keyAttributeName,
                 treeViewChildItemList);
         addableUroAttributeList.addAll(getBuildingElementList());
+
         // 追加可能な属性がない場合はエラー表示
         if (addableUroAttributeList.size() == 0) {
             AlertController.showAddAlert();

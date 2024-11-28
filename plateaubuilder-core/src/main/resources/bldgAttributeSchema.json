@@ -57,7 +57,8 @@
         "name": "bldg:measuredHeight",
         "type": "gml:LengthType",
         "min": "0",
-        "max": "1"
+        "max": "1",
+        "uom": "m"
     },
     "storeysAboveGround": {
         "name": "bldg:storeysAboveGround",
@@ -75,17 +76,17 @@
         "name": "bldg:address",
         "type": "core:Address",
         "min": "0",
-        "max": "unbounded",
+        "max": "1",
         "children": {
             "LocalityName": {
                 "name": "xAL:LocalityName",
-                "type": "sample",
+                "type": "gml:StringOrRefType",
                 "min": "0",
                 "max": "1"
             },
             "CountryName": {
                 "name": "xAL:CountryName",
-                "type": "sample",
+                "type": "gml:StringOrRefType",
                 "min": "0",
                 "max": "1"
             }

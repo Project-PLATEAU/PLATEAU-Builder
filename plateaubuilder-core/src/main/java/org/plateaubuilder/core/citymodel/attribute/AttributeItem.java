@@ -1,5 +1,6 @@
 package org.plateaubuilder.core.citymodel.attribute;
 
+import org.citygml4j.util.internal.xml.SystemIDResolver;
 import org.plateaubuilder.core.citymodel.attribute.wrapper.AttributeHandler;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -65,7 +66,7 @@ public class AttributeItem {
         attributeHandler.remove();
     }
 
-    public void add() {
-        attributeHandler.add();
-    }
+    // public void add() {
+    // attributeHandler.add();
+    // }
 }

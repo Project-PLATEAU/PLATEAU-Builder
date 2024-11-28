@@ -2,13 +2,14 @@ package org.plateaubuilder.core.citymodel.attribute.wrapper;
 
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.basicTypes.Code;
+import org.plateaubuilder.core.citymodel.attribute.manager.ModelType;
 
 /**
  * RoofType属性の追加・削除などの操作処理の実体を持つクラス
  */
 public class RoofTypeWrapper extends AbstractAttributeWrapper {
-    public RoofTypeWrapper() {
-        initialize("roofType");
+    public RoofTypeWrapper(ModelType modelType) {
+        initialize(modelType, "roofType");
     }
 
     @Override

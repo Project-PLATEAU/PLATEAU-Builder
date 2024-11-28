@@ -5,13 +5,14 @@ import org.citygml4j.model.citygml.core.AddressProperty;
 import org.citygml4j.model.xal.AddressDetails;
 import org.citygml4j.model.xal.CountryName;
 import org.citygml4j.model.xal.LocalityName;
+import org.plateaubuilder.core.citymodel.attribute.manager.ModelType;
 
 /**
  * Address属性の追加・削除などの操作処理の実体を持つクラス
  */
 public class AddressWrapper extends AbstractAttributeWrapper {
-    public AddressWrapper() {
-        initialize("address");
+    public AddressWrapper(ModelType modelType) {
+        initialize(modelType, "address");
     }
 
     @Override

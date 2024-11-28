@@ -3,13 +3,14 @@ package org.plateaubuilder.core.citymodel.attribute.wrapper;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.basicTypes.DoubleOrNull;
 import org.citygml4j.model.gml.basicTypes.MeasureOrNullList;
+import org.plateaubuilder.core.citymodel.attribute.manager.ModelType;
 
 /**
  * StoreysBelowGround属性の追加・削除などの操作処理の実体を持つクラス
  */
 public class StoreysBelowGroundWrapper extends AbstractAttributeWrapper {
-    public StoreysBelowGroundWrapper() {
-        initialize("storeysBelowGround");
+    public StoreysBelowGroundWrapper(ModelType modelType) {
+        initialize(modelType, "storeysBelowGround");
     }
 
     @Override
@@ -27,14 +28,12 @@ public class StoreysBelowGroundWrapper extends AbstractAttributeWrapper {
     @Override
     public void remove(Object obj) {
         AbstractBuilding building = (AbstractBuilding) obj;
-        building.unsetStoreyHeightsBelowGround();
+        building.unsetStoreysBelowGround();
     }
 
     @Override
     public void add(Object obj, String value) {
         AbstractBuilding building = (AbstractBuilding) obj;
-        MeasureOrNullList storeyHeights = new MeasureOrNullList();
-        storeyHeights.addDoubleOrNull(new DoubleOrNull(Double.parseDouble(value)));
-        building.setStoreyHeightsBelowGround(storeyHeights);
+        building.setStoreysBelowGround(Integer.parseInt(value));
     }
 }

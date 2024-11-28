@@ -8,7 +8,7 @@ public class BuildingSchema {
     private Map<String, String> typeMap = new HashMap<>();
 
     public BuildingSchema() {
-        typeMap.put("measuredHeight", "gml:MeasureType");
+        // typeMap.put("measuredHeight", "gml:MeasureType");
     }
 
     public String getType(String tagName) {

@@ -11,13 +11,14 @@ import org.citygml4j.model.xal.AddressDetails;
 import org.citygml4j.model.xal.Country;
 import org.citygml4j.model.xal.CountryName;
 import org.citygml4j.model.xal.LocalityName;
+import org.plateaubuilder.core.citymodel.attribute.manager.ModelType;
 
 /**
  * CountryName属性の追加・削除などの操作処理の実体を持つクラス
  */
 public class CountryNameWrapper extends AbstractAttributeWrapper {
-    public CountryNameWrapper() {
-        initialize("CountryName", "address");
+    public CountryNameWrapper(ModelType modelType) {
+        initialize(modelType, "CountryName", "address");
     }
 
     @Override

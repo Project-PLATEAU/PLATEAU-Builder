@@ -11,13 +11,14 @@ import org.citygml4j.model.xal.AddressDetails;
 import org.citygml4j.model.xal.Country;
 import org.citygml4j.model.xal.Locality;
 import org.citygml4j.model.xal.LocalityName;
+import org.plateaubuilder.core.citymodel.attribute.manager.ModelType;
 
 /**
  * LocalityName属性の追加・削除などの操作処理の実体を持つクラス
  */
 public class LocalityNameWrapper extends AbstractAttributeWrapper {
-    public LocalityNameWrapper() {
-        initialize("LocalityName", "address");
+    public LocalityNameWrapper(ModelType modelType) {
+        initialize(modelType, "LocalityName", "address");
     }
 
     @Override

@@ -1,7 +1,8 @@
 package org.plateaubuilder.core.citymodel.attribute.wrapper;
 
-import org.citygml4j.model.citygml.building.AbstractBuilding;
-import org.plateaubuilder.core.citymodel.attribute.manager.BuildingSchemaManager;
+import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManager;
+import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManagerFactory;
+import org.plateaubuilder.core.citymodel.attribute.manager.ModelType;
 
 /**
  * 各属性ごとの追加・削除などの処理を実装するクラスの抽象クラス
@@ -15,26 +16,38 @@ public abstract class AbstractAttributeWrapper {
     /**
      * 属性情報を初期化する
      * 
+     * @param modelType     地物の型
      * @param attributeName 属性名
      */
-    protected void initialize(String attributeName) {
-        this.name = BuildingSchemaManager.getAttributeName(attributeName);
-        this.type = BuildingSchemaManager.getAttributeType(attributeName);
-        this.min = BuildingSchemaManager.getAttributeMin(attributeName);
-        this.max = BuildingSchemaManager.getAttributeMax(attributeName);
+    protected void initialize(ModelType modelType, String attributeName) {
+        AttributeSchemaManager schemaManager = AttributeSchemaManagerFactory.getSchemaManager(modelType);
+        initialize(schemaManager, attributeName);
     }
 
     /**
      * 属性情報を初期化する
      * 
+     * @param modelType           地物の型
      * @param attributeName       属性名
      * @param parentAttributeName 親属性名
      */
-    protected void initialize(String attributeName, String parentAttributeName) {
-        this.name = BuildingSchemaManager.getChildAttributeName(parentAttributeName, attributeName);
-        this.type = BuildingSchemaManager.getChildAttributeType(parentAttributeName, attributeName);
-        this.min = BuildingSchemaManager.getChildAttributeMax(parentAttributeName, attributeName);
-        this.max = BuildingSchemaManager.getChildAttributeMin(parentAttributeName, attributeName);
+    protected void initialize(ModelType modelType, String attributeName, String parentAttributeName) {
+        AttributeSchemaManager schemaManager = AttributeSchemaManagerFactory.getSchemaManager(modelType);
+        initialize(schemaManager, attributeName, parentAttributeName);
+    }
+
+    protected void initialize(AttributeSchemaManager schemaManager, String attributeName) {
+        this.name = schemaManager.getAttributeName(attributeName);
+        this.type = schemaManager.getAttributeType(attributeName);
+        this.min = schemaManager.getAttributeMin(attributeName);
+        this.max = schemaManager.getAttributeMax(attributeName);
+    }
+
+    protected void initialize(AttributeSchemaManager schemaManager, String attributeName, String parentAttributeName) {
+        this.name = schemaManager.getChildAttributeName(parentAttributeName, attributeName);
+        this.type = schemaManager.getChildAttributeType(parentAttributeName, attributeName);
+        this.min = schemaManager.getChildAttributeMin(parentAttributeName, attributeName);
+        this.max = schemaManager.getChildAttributeMax(parentAttributeName, attributeName);
     }
 
     public String getName() {

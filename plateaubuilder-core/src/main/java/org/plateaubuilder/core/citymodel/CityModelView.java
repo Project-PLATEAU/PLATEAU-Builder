@@ -13,7 +13,9 @@ public class CityModelView extends ManagedGMLView<CityModel> {
 
     private AppearanceView appearance;
 
-    public SchemaHandler getSchemaHandler() { return this.schemaHandler; }
+    public SchemaHandler getSchemaHandler() {
+        return this.schemaHandler;
+    }
 
     public CityModelView(CityModel gmlObject, SchemaHandler schemaHandler) {
         super(gmlObject);
@@ -41,6 +43,14 @@ public class CityModelView extends ManagedGMLView<CityModel> {
         return getChildrenUnmodifiable()
                 .stream()
                 .map((node) -> (IFeatureView) node)
+                .collect(Collectors.toList());
+    }
+    
+  public List<IFeatureView> getFeatureViews() {
+        return getChildrenUnmodifiable()
+                .stream()
+                .filter(node -> node instanceof IFeatureView) // IFeatureViewのインスタンスにフィルタリング
+                .map(node -> (IFeatureView) node) // IFeatureViewにキャスト
                 .collect(Collectors.toList());
     }
 }

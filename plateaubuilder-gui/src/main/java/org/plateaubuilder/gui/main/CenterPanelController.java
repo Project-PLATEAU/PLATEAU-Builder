@@ -1,15 +1,25 @@
 package org.plateaubuilder.gui.main;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.SubScene;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import org.apache.commons.lang3.ObjectUtils;
 import org.plateaubuilder.core.editor.Editor;
+import org.plateaubuilder.core.io.csv.exporters.CSVExporter;
+import org.plateaubuilder.gui.io.csv.CsvExportDialogController;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CenterPanelController implements Initializable {
     @FXML
@@ -17,6 +27,12 @@ public class CenterPanelController implements Initializable {
 
     @FXML
     private StackPane adjustPerspective;
+
+    @FXML
+    private ContextMenu hierarchyContextMenu;
+
+    @FXML
+    private MenuItem exportCsvMenu;
 
     @Override
     public void initialize(URL location, ResourceBundle resourceBundle) {
@@ -41,6 +57,7 @@ public class CenterPanelController implements Initializable {
         Platform.runLater(() -> {
             setRightAdjustPerspective(subSceneContainer.getWidth());
         });
+        Editor.getSceneContent().getSubScene().addEventHandler(MouseEvent.MOUSE_PRESSED, mouseEventHandler);
     }
 
     private void setSubScene(SubScene subScene) {
@@ -65,5 +82,24 @@ public class CenterPanelController implements Initializable {
         // StackPaneの位置をオフセットに設定
         adjustPerspective.layoutXProperty().unbind();
         adjustPerspective.setLayoutX(xOffset);
+    }
+    private final EventHandler<MouseEvent> mouseEventHandler = event -> {
+        if (event.isSecondaryButtonDown() && !ObjectUtils.isEmpty(Editor.getFeatureSellection().getSelectedFeatures())) {
+            hierarchyContextMenu.show(Editor.getSceneContent().getSubScene(),event.getScreenX(), event.getScreenY());
+        }
+    };
+
+    public void exportCsv(ActionEvent actionEvent) {
+        try {
+            CsvExportDialogController controller = CsvExportDialogController.create(false);
+            if (!controller.getDialogResult())
+                return;
+            String fileUrl = controller.getFileUrl();
+            CSVExporter exporter = new CSVExporter(false);
+            exporter.export(fileUrl);
+            java.awt.Desktop.getDesktop().open(new File(fileUrl).getParentFile());
+        } catch (Exception ex) {
+            Logger.getLogger(TopPanelController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

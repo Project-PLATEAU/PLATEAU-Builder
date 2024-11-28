@@ -1,0 +1,32 @@
+{
+    "description": {
+        "name": "gml:description",
+        "type": "gml:StringOrRefType",
+        "min": "0",
+        "max": "1"
+    },
+    "name": {
+        "name": "gml:name",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "creationDate": {
+        "name": "core:creationDate",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "terminationDate": {
+        "name": "core:terminationDate",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "class": {
+        "name": "luse:class",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    }
+}

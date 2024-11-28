@@ -8,8 +8,11 @@ import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.common.child.ChildList;
 import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
+import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManager;
+import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManagerFactory;
 import org.plateaubuilder.core.citymodel.attribute.manager.BuildingSchemaManager;
-import org.plateaubuilder.core.citymodel.attribute.reader.*;
+import org.plateaubuilder.core.citymodel.attribute.reader.CodeListReader;
+import org.plateaubuilder.core.citymodel.attribute.reader.XSDSchemaDocument;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.editor.attribute.AttributeEditor;
 import org.plateaubuilder.core.editor.commands.AbstractCityGMLUndoableCommand;
@@ -45,11 +48,15 @@ public class AttributeInputFormController {
     private String addAttributeType;
     private Runnable onAddButtonPressed, onCancelButtonPressed;
     private boolean editFlag = false, addFlag = false;
-    private ArrayList<ArrayList<String>> requiredChildAttributeList, childAttributeList;
+    private ArrayList<ArrayList<String>> requiredChildAttributeList,
+            childAttributeList = new ArrayList<ArrayList<String>>();
     private XSDSchemaDocument uroSchemaDocument = Editor.getUroSchemaDocument();
     private AttributeItem targetAttributeItem, baseAttributeItem;
     private ArrayList<String> treeViewChildItemList;
     private StageController stageController;
+    private AttributeSchemaManager attributeSchemaManager = AttributeSchemaManagerFactory
+            .getSchemaManager(Editor.getFeatureSellection().getActiveFeatureProperty().get().getGML());
+    private MultipleAttributeInputFormatController multipleAttributeInputFormatController;
 
     /**
      * 属性追加用フォームを表示するための初期設定を行います
@@ -99,29 +106,28 @@ public class AttributeInputFormController {
                 requiredChildAttributeList = uroSchemaDocument.getElementList(addAttributeName, true,
                         treeViewChildItemList,
                         "uro");
+                childAttributeList = uroSchemaDocument.getElementList(addAttributeName, false, null, "uro");
             } else {
                 if (parentAttributeName.matches("root")) {
-                    addAttributeType = BuildingSchemaManager.getAttributeType(addAttributeName.split(":")[1]);
+                    addAttributeType = attributeSchemaManager.getAttributeType(addAttributeName.split(":")[1]);
                 } else {
-                    addAttributeType = BuildingSchemaManager.getChildAttributeType(parentAttributeName.split(":")[1],
+                    addAttributeType = attributeSchemaManager.getChildAttributeType(parentAttributeName.split(":")[1],
                             addAttributeName.split(":")[1]);
                 }
             }
-
         } else {
             addAttributeType = targetAttributeItem.getType();
         }
 
-        childAttributeList = uroSchemaDocument.getElementList(parentAttributeName, false, null, "uro");
         configureInputBoxVisibility(addAttributeType);
 
-        stageController = new StageController(form, formTitle);
+        // 追加必須の子属性を持つ場合は親要素の処理をスキップ
+        if (requiredChildAttributeList != null && !requiredChildAttributeList.isEmpty()) {
+            handleAdd();
+            return;
+        }
         if (form != null) {
-            // 追加必須の子属性を持つ場合は親要素の処理をスキップ
-            if (requiredChildAttributeList != null && !requiredChildAttributeList.isEmpty()) {
-                handleAdd();
-                return;
-            }
+            stageController = new StageController(form, formTitle);
             stageController.showStage();
         }
     }
@@ -133,10 +139,14 @@ public class AttributeInputFormController {
         // codeType入力BOXの表示設定
         if (addAttributeType.matches("gml:CodeType")) {
             valueField.setDisable(true);
-            if (editFlag)
-                setCodeSpaceField(
-                        AttributeEditor.getCodeSpace(targetAttributeItem)
-                                .substring(AttributeEditor.getCodeSpace(targetAttributeItem).lastIndexOf("/") + 1));
+            if (editFlag) {
+                String codeSpace = AttributeEditor.getCodeSpace(targetAttributeItem);
+                if (codeSpace != null) {
+                    setCodeSpaceField(codeSpace.substring(codeSpace.lastIndexOf("/") + 1));
+                } else {
+                    setCodeSpaceField(""); // デフォルト値を設定
+                }
+            }
         } else {
             setVisibility(codeSpaceVbox, false);
         }
@@ -152,7 +162,7 @@ public class AttributeInputFormController {
 
         // 属性値入力BOXの表示設定
         if (addFlag) {
-            if (baseAttributeItem.getName().matches("root") && childAttributeList.isEmpty()) {
+            if (!childAttributeList.isEmpty()) {
                 valueVbox.setManaged(false);
                 valueVbox.setVisible(false);
             }
@@ -231,9 +241,10 @@ public class AttributeInputFormController {
         }
 
         final CodeSpaceValueMenuController codeSpaceValueMenuController = valueLoader.getController();
-        CodeListReader CodeListReader = new org.plateaubuilder.core.citymodel.attribute.reader.CodeListReader();
-        CodeListReader.readCodeList(codeSpacePath);
-        codeSpaceValueMenuController.setCodeType(CodeListReader.getCodeListDocument());
+        CodeListReader codeListReader = new org.plateaubuilder.core.citymodel.attribute.reader.CodeListReader();
+        codeListReader.readCodeList(codeSpacePath);
+
+        codeSpaceValueMenuController.setCodeType(codeListReader.getCodeListDocument());
 
         StageController stageController = new StageController(valueRoot, "codeSpace値の入力");
         stageController.showStage();
@@ -319,7 +330,6 @@ public class AttributeInputFormController {
         String codeSpace = codeSpaceField.getText();
         String uom = uomField.getText();
         String value = valueField.getText();
-
         if (AttributeValidator.checkValue(value, addAttributeType)) {
             if (addFlag) {
                 Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
@@ -360,9 +370,6 @@ public class AttributeInputFormController {
                         return focusTarget.getNode();
                     }
                 });
-                if (requiredChildAttributeList != null && requiredChildAttributeList.size() != 0) {
-                    showMultipleAttributeInputForm(requiredChildAttributeList);
-                }
             } else if (editFlag) {
                 Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
 
@@ -398,15 +405,24 @@ public class AttributeInputFormController {
                 });
             }
         } else {
+
             Stage stage = (Stage) addButton.getScene().getWindow();
             AlertController.showValueAlert(addAttributeType, stage);
             return;
         }
+        if (this.multipleAttributeInputFormatController != null) {
+            this.multipleAttributeInputFormatController.notifyFormCompleted(addAttributeName);
+        }
+        if (requiredChildAttributeList != null && requiredChildAttributeList.size() != 0) {
+            showMultipleAttributeInputForm(requiredChildAttributeList);
+        }
+
         if (onAddButtonPressed != null) {
             onAddButtonPressed.run();
         }
-        if (stageController != null)
+        if (stageController != null) {
             stageController.closeStage();
+        }
     }
 
     /**
@@ -417,17 +433,19 @@ public class AttributeInputFormController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("multiple-attribute-input-format.fxml"));
             Parent root = loader.load();
             MultipleAttributeInputFormatController multipleAttributeInputFormatController = loader.getController();
+            StageController stageController = new StageController(root, baseAttributeItem.getName() + " 配下の必須属性の入力");
             multipleAttributeInputFormatController.loadAttributeForms(baseAttributeItem, treeViewChildItemList,
-                    requiredChildAttributeList, bldgAttributeTree);
-            StageController stageController = new StageController(root, "必須属性の入力");
-
-            stageController.showStage();
-            // ウィンドウを閉じるリクエストがあったときのイベントハンドラを設定
-            stageController.getStage().setOnHidden(event -> {
-                onAddButtonPressed.run();
-            });
+                    requiredChildAttributeList, bldgAttributeTree, stageController);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setMultipleAttributeController(MultipleAttributeInputFormatController controller) {
+        this.multipleAttributeInputFormatController = controller;
+    }
+
+    public boolean isSkipped() {
+        return requiredChildAttributeList != null && !requiredChildAttributeList.isEmpty();
     }
 }

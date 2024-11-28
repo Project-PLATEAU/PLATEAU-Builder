@@ -1,7 +1,13 @@
 package org.plateaubuilder.core.citymodel.attribute.reader;
 
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,6 +22,7 @@ import org.xml.sax.InputSource;
 public class XSDSchemaReader {
     Document xsdDocument;
     Document sourceDocument;
+    private Set<String> visited = new HashSet<>(); // 既に訪問した型を追跡
 
     /**
      * スキーマ情報をxmlから読み取り、Documentとして格納します
@@ -64,15 +71,23 @@ public class XSDSchemaReader {
                             (Element) importedNode);
                 }
             }
+
+            // ノード構造をファイルに保存
+            // saveNodeToDesktop(xsdDocument.getDocumentElement());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // printNode(xsdDocument.getDocumentElement(), 0);
         return xsdDocument;
     }
 
     // <xs:complexType>に対する処理
     private void traverseComplexType(NodeList complexTypeNodeList, String type, Element parentElement) {
+        // 既に訪問済みの型であれば、再帰を防止
+        if (visited.contains(type)) {
+            return;
+        }
+        visited.add(type); // 訪問済みリストに追加
         for (int i = 0; i < complexTypeNodeList.getLength(); i++) {
             Node node = complexTypeNodeList.item(i);
             Element element = (Element) node;
@@ -91,6 +106,7 @@ public class XSDSchemaReader {
                 }
             }
         }
+        visited.remove(type); // 再帰から戻った際に訪問済みリストから削除
     }
 
     // <xs:extension>に対する処理
@@ -113,44 +129,73 @@ public class XSDSchemaReader {
         for (int j = 0; j < elementNodeList.getLength(); j++) {
             Node elementNode = elementNodeList.item(j);
             Element element = (Element) elementNode;
-
             if (type != null) {
                 if (element.getAttribute("name").equals(type)) {
                     elementType = element.getAttribute("type").substring(4);
                     NodeList complexTypeNodeList = sourceDocument.getElementsByTagName("xs:complexType");
-                    if (element.getAttribute("name") != "") {
+                    if (element.getAttribute("name") != "" && !element.getAttribute("abstract").matches("true")) {
                         Node importedNode = xsdDocument.importNode(elementNode, false);
                         String annotation = getAnnotation(elementNode);
                         Element importedElement = (Element) importedNode;
                         parentElement.setAttribute("annotation", annotation);
                         parentElement.appendChild(importedElement);
+                        traverseSubstitutionGroup(element.getAttribute("name").substring(4),
+                                sourceDocument.getElementsByTagName("xs:element"),
+                                (Element) importedNode);
                         traverseComplexType(complexTypeNodeList, elementType, (Element) importedNode);
                     }
                 }
             } else {
+                // <xs:element ref="uro:DataQualityAttribute"/>
                 String ref = element.getAttribute("ref");
-                String substitutionGroup = element.getAttribute("substitutionGroup");
                 elementType = element.getAttribute("type");
-                if (substitutionGroup.length() != 0) {
-                    elementType = elementType.substring(4);
-                    NodeList complexTypeNodeList = sourceDocument.getElementsByTagName("xs:complexType");
-                    traverseComplexType(complexTypeNodeList, elementType, parentElement);
-                }
                 if (ref.length() != 0) {
                     ref = element.getAttribute("ref").substring(4);
                     NodeList newElementNodeList = sourceDocument.getElementsByTagName("xs:element");
                     traverseElement(newElementNodeList, ref, parentElement);
+                    traverseSubstitutionGroup(ref,
+                            newElementNodeList,
+                            parentElement);
                 }
-                if (element.getAttribute("name") != "") {
+                if (element.getAttribute("name") != "" && !element.getAttribute("abstract").matches("true")) {
                     Node importedNode = xsdDocument.importNode(elementNode, false);
                     Element importedElement = (Element) importedNode;
                     String annotation = getAnnotation(elementNode);
                     importedElement.setAttribute("annotation", annotation);
                     parentElement.appendChild(importedElement);
+                    if (elementType.length() != 0 && elementType.startsWith("uro:")) {
+                        NodeList complexTypeNodeList = sourceDocument.getElementsByTagName("xs:complexType");
+                        traverseComplexType(complexTypeNodeList, elementType.substring(4), importedElement);
+                    }
                 }
             }
         }
+    }
 
+    // <substitutionGroup>に対する処理
+    private void traverseSubstitutionGroup(String targetName, NodeList elementNodeList, Element parentElement) {
+        for (int j = 0; j < elementNodeList.getLength(); j++) {
+            Element element = (Element) elementNodeList.item(j);
+            if (element.getAttribute("substitutionGroup").length() != 0
+                    && targetName.matches(element.getAttribute("substitutionGroup").substring(4))) {
+                if (!element.getAttribute("abstract").matches("true")) {
+                    Node elementNode = element;
+                    Node importedNode = xsdDocument.importNode(elementNode, false);
+                    Element importedElement = (Element) importedNode;
+                    parentElement.appendChild(importedElement);
+
+                    traverseComplexType(sourceDocument.getElementsByTagName("xs:complexType"),
+                            element.getAttribute("type").substring(4), importedElement);
+                    traverseSubstitutionGroup(element.getAttribute("name"),
+                            sourceDocument.getElementsByTagName("xs:element"), importedElement);
+                } else {
+                    traverseComplexType(sourceDocument.getElementsByTagName("xs:complexType"),
+                            element.getAttribute("type").substring(4), parentElement);
+                    traverseSubstitutionGroup(element.getAttribute("name"),
+                            sourceDocument.getElementsByTagName("xs:element"), parentElement);
+                }
+            }
+        }
     }
 
     private String getAnnotation(Node node) {
@@ -167,5 +212,68 @@ public class XSDSchemaReader {
             }
         }
         return "null";
+    }
+
+    /**
+     * ノードの構造をファイルに出力します
+     * 
+     * @param node   出力対象のノード
+     * @param depth  ノードの深さ
+     * @param writer ファイル出力用のBufferedWriter
+     * @throws IOException ファイル書き込み時のエラー
+     */
+    private static void printNode(Node node, int depth, BufferedWriter writer) throws IOException {
+        if (node.getNodeType() == Node.ELEMENT_NODE) {
+            // インデント用の空白を生成
+            String indent = new String(new char[depth * 2]).replace("\0", " ");
+            Element element = (Element) node;
+
+            // ノードの情報を文字列として構築
+            String nodeInfo = String.format("%sTag Name: %s   Node Name: %s   ___   Parent TagName: %s%n",
+                    indent,
+                    element.getTagName(),
+                    element.getAttribute("name"),
+                    element.getParentNode().getNodeName());
+
+            // ファイルに書き込み
+            writer.write(nodeInfo);
+
+            // 子ノードがあれば、それぞれに対してこのメソッドを再帰的に呼び出す
+            NodeList childNodes = node.getChildNodes();
+            for (int i = 0; i < childNodes.getLength(); i++) {
+                printNode(childNodes.item(i), depth + 1, writer);
+            }
+        }
+    }
+
+    /**
+     * ノード構造をデスクトップに保存します
+     * 
+     * @param rootNode 出力対象のルートノード
+     */
+    private static void saveNodeToDesktop(Node rootNode) {
+        // デスクトップのパスを取得
+        String desktopPath = System.getProperty("user.home") + File.separator + "Desktop";
+
+        // タイムスタンプを含むファイル名を生成
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String fileName = String.format("node_structure_%s.txt", timestamp);
+
+        // 出力ファイルのフルパスを構築
+        Path filePath = Paths.get(desktopPath, fileName);
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath.toFile()))) {
+            // ファイルヘッダー情報を書き込み
+            writer.write("XSD Node Structure - Generated at: " + timestamp + "\n");
+            writer.write("----------------------------------------\n\n");
+
+            // ノード構造を出力
+            printNode(rootNode, 0, writer);
+
+            System.out.println("Node structure has been saved to: " + filePath);
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

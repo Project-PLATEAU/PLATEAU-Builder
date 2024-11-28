@@ -45,10 +45,6 @@ public class XSDSchemaDocument {
             Node childNode = nodeList.item(i);
             if (childNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) childNode;
-                // 大文字で始まるノードを削除対象に追加
-                if (Character.isUpperCase(element.getAttribute("name").charAt(0))) {
-                    removeNodeList.add(childNode);
-                }
                 // abstract="true"属性を持つノードを削除対象に追加
                 if (element.getAttribute("abstract").equals("true")) {
                     removeNodeList.add(childNode);
@@ -119,9 +115,9 @@ public class XSDSchemaDocument {
             // 追加対象の基準となる親要素を取得
             Node rootNode = xsdDocument.getDocumentElement();
             Element targetElement = (Element) rootNode;
-            NodeList elementNodeList = rootNode.getChildNodes();
+            // NodeList elementNodeList = rootNode.getChildNodes();
+            NodeList elementNodeList = targetElement.getElementsByTagName("xs:element");
             targetName = targetName.substring(4);
-
             for (int i = 0; i < elementNodeList.getLength(); i++) {
                 Node node = elementNodeList.item(i);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -131,10 +127,10 @@ public class XSDSchemaDocument {
                     }
                 }
             }
+
             if (!targetElement.getTagName().equals(type)) {
                 // 基準となる要素の子要素を取得
-                NodeList targetNodeList = targetElement.getElementsByTagName("xs:element");
-
+                NodeList targetNodeList = targetElement.getChildNodes();
                 for (int j = 0; j < targetNodeList.getLength(); j++) {
                     Node node = targetNodeList.item(j);
                     Element element = (Element) node;
@@ -146,32 +142,31 @@ public class XSDSchemaDocument {
                             }
                         }
                     }
-                    if (!targetName.toLowerCase().matches(element.getAttribute("name").toLowerCase())) {
-                        String maxOccurs = element.getAttribute("maxOccurs");
-                        int max;
-                        if (maxOccurs.equals("unbounded")) {
-                            max = Integer.MAX_VALUE;
-                        } else if (maxOccurs == "") {
-                            max = 1;
-                        } else {
-                            max = Integer.parseInt(maxOccurs);
-                        }
-                        if (count < max) {
-                            ArrayList<String> attributeSet = new ArrayList<>();
-                            if (required) {
-                                if (element.getAttribute("minOccurs") == ""
-                                        || Integer.parseInt(element.getAttribute("minOccurs")) > 0) {
-                                    attributeSet.add(type + ":" + element.getAttribute("name"));
-                                    attributeSet.add(element.getAttribute("type"));
-                                    attributeSet.add(element.getAttribute("annotation"));
-                                    attributeList.add(attributeSet);
-                                }
-                            } else {
+
+                    String maxOccurs = element.getAttribute("maxOccurs");
+                    int max;
+                    if (maxOccurs.equals("unbounded")) {
+                        max = Integer.MAX_VALUE;
+                    } else if (maxOccurs == "") {
+                        max = 1;
+                    } else {
+                        max = Integer.parseInt(maxOccurs);
+                    }
+                    if (count < max) {
+                        ArrayList<String> attributeSet = new ArrayList<>();
+                        if (required) {
+                            if (element.getAttribute("minOccurs") == ""
+                                    || Integer.parseInt(element.getAttribute("minOccurs")) > 0) {
                                 attributeSet.add(type + ":" + element.getAttribute("name"));
                                 attributeSet.add(element.getAttribute("type"));
                                 attributeSet.add(element.getAttribute("annotation"));
                                 attributeList.add(attributeSet);
                             }
+                        } else {
+                            attributeSet.add(type + ":" + element.getAttribute("name"));
+                            attributeSet.add(element.getAttribute("type"));
+                            attributeSet.add(element.getAttribute("annotation"));
+                            attributeList.add(attributeSet);
                         }
                     }
                 }
@@ -368,6 +363,48 @@ public class XSDSchemaDocument {
                 getUrfAttributes(childElement, properties, attribute);
             }
         }
+    }
+
+    /**
+     * 指定された属性名の階層構造がXSDスキーマに存在するかを確認します
+     *
+     * @param names 属性名の階層構造を表す配列
+     * @return 属性が存在する場合はtrue、存在しない場合はfalse
+     */
+    public boolean validateAttributeHierarchy(List<String> names) {
+        if (names == null || names.isEmpty()) {
+            return false;
+        }
+
+        Node currentNode = xsdDocument.getDocumentElement();
+
+        // 各階層の属性を順番にチェック
+        for (String name : names) {
+            boolean found = false;
+            NodeList children = currentNode.getChildNodes();
+
+            // 現在の階層の子ノードから対象の属性を探す
+            for (int i = 0; i < children.getLength(); i++) {
+                Node child = children.item(i);
+                if (child.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) child;
+                    String elementName = name.contains(":") ? name : "uro:" + name;
+
+                    if (elementName.equals("uro:" + element.getAttribute("name"))) {
+                        currentNode = child; // 次の階層の検索用に現在のノードを更新
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            // 属性が見つからなかった場合
+            if (!found) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

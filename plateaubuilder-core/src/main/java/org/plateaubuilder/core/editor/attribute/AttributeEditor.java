@@ -7,8 +7,11 @@ import java.util.Comparator;
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.citygml.ade.generic.ADEGenericElement;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.common.child.ChildList;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
+import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManager;
+import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManagerFactory;
 import org.plateaubuilder.core.citymodel.attribute.manager.BuildingSchemaManager;
 import org.plateaubuilder.core.citymodel.attribute.wrapper.NodeAttributeHandler;
 import org.plateaubuilder.core.editor.Editor;
@@ -27,8 +30,9 @@ public class AttributeEditor {
      */
     public static AttributeItem addAttribute(AttributeItem baseAttributeItem, String addAttributeName, String value,
             String codeSpace, String uom,
-            ChildList<ADEComponent> bldgAttributeTree) {
+            ChildList<ADEComponent> addedAttributeTree) {
         AttributeItem addedAttributeItem = null;
+        AttributeSchemaManager attributeSchemaManager;
         if (addAttributeName.split(":")[0].matches("uro")) {
             ArrayList<ArrayList<String>> childAttributeList = Editor.getUroSchemaDocument().getElementList(
                     baseAttributeItem.getName(),
@@ -41,47 +45,44 @@ public class AttributeEditor {
 
             // 追加する属性に合わせて、追加処理を実施
             if (baseAttributeItem.getName().matches("root")) {
-                var adeComponent = bldgAttributeTree.get(0);
+                var adeComponent = addedAttributeTree.get(0);
                 Element newElement = createNewElement(
                         ((ADEGenericElement) adeComponent).getContent().getOwnerDocument(),
                         value, uom, codeSpace, addAttributeName);
-                ADEGenericElement newAdeElement = new ADEGenericElement(newElement);
-                bldgAttributeTree.add(bldgAttributeTree.size(), (ADEComponent) newAdeElement);
 
-                // 型要素があるかどうかを確認し、あれば追加
-                for (int i = 0; i < childAttributeList.size(); i++) {
-                    if (!childAttributeList.get(i).isEmpty() && childAttributeList.get(i).get(3) != null) {
-                        if (hasTypeElement("uro:" + childAttributeList.get(i).get(3), addAttributeName)) {
-                            Element newChildElement = createNewElement(
-                                    ((ADEGenericElement) adeComponent).getContent().getOwnerDocument(), "", "", "",
-                                    "uro:" + childAttributeList.get(i).get(3));
-                            newAdeElement.getContent().appendChild(newChildElement);
-                        }
-                    }
-                }
+                ADEGenericElement newAdeElement = new ADEGenericElement(newElement);
+
+                addedAttributeTree.add(addedAttributeTree.size(), (ADEComponent) newAdeElement);
+
+                // // 型要素があるかどうかを確認し、あれば追加
+                // for (int i = 0; i < childAttributeList.size(); i++) {
+                // if (!childAttributeList.get(i).isEmpty() && childAttributeList.get(i).get(3)
+                // != null) {
+                // if (hasTypeElement("uro:" + childAttributeList.get(i).get(3),
+                // addAttributeName)) {
+                // Element newChildElement = createNewElement(
+                // ((ADEGenericElement) adeComponent).getContent().getOwnerDocument(), "", "",
+                // "",
+                // "uro:" + childAttributeList.get(i).get(3));
+                // newAdeElement.getContent().appendChild(newChildElement);
+                // }
+                // }
+                // }
                 addedAttributeItem = new AttributeItem(new NodeAttributeHandler((Node) newElement, addAttributeType));
             } else {
                 Element newElement = createNewElement(((Node) baseAttributeItem.getContent()).getOwnerDocument(), value,
                         uom,
                         codeSpace,
                         addAttributeName);
-                if (((Node) baseAttributeItem.getContent()).getFirstChild() != null) {
-                    if (hasTypeElement(baseAttributeItem.getName(),
-                            ((Element) ((Node) baseAttributeItem.getContent()).getFirstChild()).getTagName())) {
-                        ((Node) baseAttributeItem.getContent()).getFirstChild().appendChild(newElement);
-                    } else {
-                        ((Node) baseAttributeItem.getContent()).appendChild(newElement);
-                    }
-                } else {
-                    ((Node) baseAttributeItem.getContent()).appendChild(newElement);
-                }
+                ((Node) baseAttributeItem.getContent()).appendChild(newElement);
                 addedAttributeItem = new AttributeItem(new NodeAttributeHandler((Node) newElement, addAttributeType));
                 sortElement(baseAttributeItem, childAttributeList);
             }
         } else {
-            BuildingSchemaManager.addAttribute((AbstractBuilding) baseAttributeItem.getContent(), addAttributeName,
+            attributeSchemaManager = AttributeSchemaManagerFactory
+                    .getSchemaManager(Editor.getFeatureSellection().getActiveFeatureProperty().get().getGML());
+            attributeSchemaManager.addAttribute((AbstractCityObject) baseAttributeItem.getContent(), addAttributeName,
                     value);
-
         }
         return addedAttributeItem;
     }
@@ -115,19 +116,19 @@ public class AttributeEditor {
      */
     public static void removeAttribute(String removeAttributeName, AttributeItem parentAttributeItem,
             AttributeItem removeAttributeItem,
-            ChildList<ADEComponent> bldgAttributeTree) {
+            ChildList<ADEComponent> addedAttributeTree) {
         if (removeAttributeName.split(":")[0].matches("uro")) {
             if (parentAttributeItem.getName() == "root") {
                 ADEComponent targetAttributeComponent = null;
                 Node removeAttributeNode = (Node) removeAttributeItem.getContent();
 
-                for (var adeComponent : bldgAttributeTree) {
+                for (var adeComponent : addedAttributeTree) {
                     Node targetNode = ((ADEGenericElement) adeComponent).getContent();
                     if (targetNode == removeAttributeNode)
                         targetAttributeComponent = adeComponent;
                 }
                 if (targetAttributeComponent != null)
-                    bldgAttributeTree.remove(targetAttributeComponent);
+                    addedAttributeTree.remove(targetAttributeComponent);
             } else {
                 Node parentNode = (Node) parentAttributeItem.getContent();
                 Node targetNode = (Node) removeAttributeItem.getContent();
@@ -149,7 +150,7 @@ public class AttributeEditor {
             return false;
     }
 
-    private static Element createNewElement(org.w3c.dom.Document document, String value, String uom, String codeSpace,
+    public static Element createNewElement(org.w3c.dom.Document document, String value, String uom, String codeSpace,
             String attributeName) {
         String namespaceURI = Editor.getUroSchemaDocument().getXSDDocument().getDocumentElement()
                 .getAttribute("xmlns:uro");
@@ -171,7 +172,6 @@ public class AttributeEditor {
      * 要素をソートして地物情報に反映します
      */
     private static void sortElement(AttributeItem baseAttributeItem, ArrayList<ArrayList<String>> childAttributeList) {
-
         NodeList targetNodeList = null;
         ArrayList<String> sortOrder = new ArrayList<>();
         Element parentElement = null;
@@ -188,15 +188,14 @@ public class AttributeEditor {
         targetNodeList = parentElement.getChildNodes();
         Node childNode = targetNodeList.item(0);
         Element childElement = (Element) childNode;
-        if (childElement.getTagName().toLowerCase().equals(parentElement.getTagName().toLowerCase())) {
-            targetNodeList = childNode.getChildNodes();
-            parentElement = childElement;
-        }
 
         ArrayList<Node> sortedNodes = new ArrayList<>();
         if (targetNodeList != null) {
             for (int i = 0; i < targetNodeList.getLength(); i++) {
-                sortedNodes.add(targetNodeList.item(i));
+                Node node = targetNodeList.item(i);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    sortedNodes.add(node);
+                }
             }
             // ソート
             Collections.sort(sortedNodes, new Comparator<Node>() {

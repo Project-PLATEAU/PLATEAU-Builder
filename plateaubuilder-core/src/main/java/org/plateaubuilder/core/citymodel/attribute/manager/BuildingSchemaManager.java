@@ -4,12 +4,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.citygml.core.AddressProperty;
 import org.citygml4j.model.xal.Country;
 import org.plateaubuilder.core.citymodel.IFeatureView;
@@ -29,23 +32,18 @@ import org.plateaubuilder.core.citymodel.attribute.wrapper.StoreysBelowGroundWra
 import org.plateaubuilder.core.citymodel.attribute.wrapper.TerminationDateWrapper;
 import org.plateaubuilder.core.citymodel.attribute.wrapper.UsageWrapper;
 import org.plateaubuilder.core.citymodel.attribute.wrapper.YearOfConstructionWrapper;
+import org.plateaubuilder.core.citymodel.attribute.wrapper.YearOfDemolitionWrapper;
 
 import javafx.scene.control.TreeItem;
 
 /**
  * Bldg（地物）に対する属性の追加や削除、表示などを行うためのクラス
  */
-public class BuildingSchemaManager {
-        private static JsonObject attributeConfig;
-
+public class BuildingSchemaManager implements AttributeSchemaManager {
+        private static final JsonObject ATTRIBUTE_BUILDING_CONFIG;
+        private static final ModelType modelType = ModelType.BUILDING;
         static {
-                try (InputStream fis = BuildingSchemaManager.class
-                                .getResourceAsStream("/bldgAttributeSchema.json");
-                                JsonReader reader = Json.createReader(new InputStreamReader(fis))) {
-                        attributeConfig = reader.readObject();
-                } catch (Exception e) {
-                        e.printStackTrace();
-                }
+                ATTRIBUTE_BUILDING_CONFIG = loadSchema("/bldgAttributeSchema.json");
         }
 
         /**
@@ -54,82 +52,85 @@ public class BuildingSchemaManager {
          * @param selectedFeature 地物
          * @param root            TreeItemのルート
          */
-        public static void addAttributeToTreeView(IFeatureView selectedFeature,
+        public void addAttributeToTreeView(IFeatureView selectedFeature,
                         TreeItem<AttributeItem> root) {
-
                 AbstractBuilding selectedBuilding = (AbstractBuilding) selectedFeature.getGML();
 
                 if (selectedBuilding.isSetDescription()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding,
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
                                                         getAttributeName("description")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetName()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding, getAttributeName("name")));
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
+                                                        getAttributeName("name")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetCreationDate()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding,
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
                                                         getAttributeName("creationDate")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetTerminationDate()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding,
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
                                                         getAttributeName("terminationDate")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetClazz()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding, getAttributeName("class")));
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
+                                                        getAttributeName("class")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetUsage()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding, getAttributeName("usage")));
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
+                                                        getAttributeName("usage")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetYearOfConstruction()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding,
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
                                                         getAttributeName("yearOfConstruction")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetYearOfDemolition()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding,
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
                                                         getAttributeName("yearOfDemolition")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetRoofType()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding, getAttributeName("roofType")));
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
+                                                        getAttributeName("roofType")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetMeasuredHeight()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding,
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
                                                         getAttributeName("measuredHeight")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetStoreysAboveGround()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding,
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
                                                         getAttributeName("storeysAboveGround")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetStoreysBelowGround()) {
                         var attributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding,
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
                                                         getAttributeName("storeysBelowGround")));
                         root.getChildren().add(new TreeItem<>(attributeItem));
                 }
                 if (selectedBuilding.isSetAddress()) {
                         var addressAttributeItem = new AttributeItem(
-                                        new AttributeHandler(selectedBuilding,
+                                        new AttributeHandler<AbstractBuilding>(selectedBuilding,
                                                         getAttributeName("address")));
                         TreeItem addressTreeItem = new TreeItem<>(addressAttributeItem);
                         AddressProperty addressProperty = selectedBuilding.getAddress().get(0);
@@ -140,7 +141,7 @@ public class BuildingSchemaManager {
                                                 .getAddressDetails().getCountry();
                                 if (country.isSetCountryName()) {
                                         var countryAttributeItem = new TreeItem<>(
-                                                        new AttributeItem(new AttributeHandler(
+                                                        new AttributeItem(new AttributeHandler<AbstractBuilding>(
                                                                         selectedBuilding,
                                                                         getChildAttributeName("address",
                                                                                         "CountryName"))));
@@ -148,7 +149,7 @@ public class BuildingSchemaManager {
                                 }
                                 if (country.isSetLocality()) {
                                         var localityAttributeItem = new TreeItem<>(
-                                                        new AttributeItem(new AttributeHandler(
+                                                        new AttributeItem(new AttributeHandler<AbstractBuilding>(
                                                                         selectedBuilding,
                                                                         getChildAttributeName("address",
                                                                                         "LocalityName"))));
@@ -160,44 +161,54 @@ public class BuildingSchemaManager {
                 }
         }
 
-        public static String getAttributeName(String attributeKey) {
-                return attributeConfig.getJsonObject(attributeKey).getString("name");
+        public String getAttributeName(String attributeKey) {
+                return ATTRIBUTE_BUILDING_CONFIG.getJsonObject(attributeKey).getString("name");
         }
 
-        public static String getAttributeType(String attributeKey) {
-                return attributeConfig.getJsonObject(attributeKey).getString("type");
+        public String getAttributeType(String attributeKey) {
+                return ATTRIBUTE_BUILDING_CONFIG.getJsonObject(attributeKey).getString("type");
         }
 
-        public static String getAttributeMin(String attributeKey) {
-                return attributeConfig.getJsonObject(attributeKey).getString("min");
+        public String getAttributeMin(String attributeKey) {
+                return ATTRIBUTE_BUILDING_CONFIG.getJsonObject(attributeKey).getString("min");
         }
 
-        public static String getAttributeMax(String attributeKey) {
-                return attributeConfig.getJsonObject(attributeKey).getString("max");
+        public String getAttributeMax(String attributeKey) {
+                return ATTRIBUTE_BUILDING_CONFIG.getJsonObject(attributeKey).getString("max");
         }
 
-        public static String getChildAttributeName(String parentAttributeKey, String childAttributeName) {
+        public String getAttributeUom(String attributeKey) {
+                JsonObject attributeObject = ATTRIBUTE_BUILDING_CONFIG.getJsonObject(attributeKey);
+
+                if (attributeObject != null && attributeObject.containsKey("uom")) {
+                        return attributeObject.getString("uom");
+                } else {
+                        return null;
+                }
+        }
+
+        public String getChildAttributeName(String parentAttributeKey, String childAttributeName) {
                 JsonObject childObject = getChildAttribute(parentAttributeKey, childAttributeName);
                 return childObject != null ? childObject.getString("name") : null;
         }
 
-        public static String getChildAttributeType(String parentAttributeKey, String childAttributeName) {
+        public String getChildAttributeType(String parentAttributeKey, String childAttributeName) {
                 JsonObject childObject = getChildAttribute(parentAttributeKey, childAttributeName);
                 return childObject != null ? childObject.getString("type") : null;
         }
 
-        public static String getChildAttributeMin(String parentAttributeKey, String childAttributeName) {
+        public String getChildAttributeMin(String parentAttributeKey, String childAttributeName) {
                 JsonObject childObject = getChildAttribute(parentAttributeKey, childAttributeName);
                 return childObject != null ? childObject.getString("min") : null;
         }
 
-        public static String getChildAttributeMax(String parentAttributeKey, String childAttributeName) {
+        public String getChildAttributeMax(String parentAttributeKey, String childAttributeName) {
                 JsonObject childObject = getChildAttribute(parentAttributeKey, childAttributeName);
                 return childObject != null ? childObject.getString("max") : null;
         }
 
-        private static JsonObject getChildAttribute(String parentAttributeKey, String childKey) {
-                JsonObject attributeObject = attributeConfig.getJsonObject(parentAttributeKey);
+        private JsonObject getChildAttribute(String parentAttributeKey, String childKey) {
+                JsonObject attributeObject = ATTRIBUTE_BUILDING_CONFIG.getJsonObject(parentAttributeKey);
                 if (attributeObject != null && attributeObject.containsKey("children")) {
                         JsonObject children = attributeObject.getJsonObject("children");
                         if (children != null && children.containsKey(childKey)) {
@@ -214,7 +225,7 @@ public class BuildingSchemaManager {
          * @param addedAttributeNames 追加済の属性の名前リスト
          * @return addableAttributeNameList 追加可能な属性の名前リスト
          */
-        public static ArrayList<String> getBldgAttributeName(String parentAttributeName,
+        public ArrayList<String> getAttributeNameList(String parentAttributeName,
                         ArrayList<String> addedAttributeNames) {
                 ArrayList<String> addableAttributeNameList = new ArrayList<>();
                 if (parentAttributeName.matches("root")) {
@@ -240,10 +251,10 @@ public class BuildingSchemaManager {
          *
          * @return parentNames 属性の名前リスト
          */
-        public static ArrayList<String> getParentNames() {
+        public ArrayList<String> getParentNames() {
                 ArrayList<String> attributeNames = new ArrayList<>();
-                for (String key : attributeConfig.keySet()) {
-                        JsonObject parentObject = attributeConfig.getJsonObject(key);
+                for (String key : ATTRIBUTE_BUILDING_CONFIG.keySet()) {
+                        JsonObject parentObject = ATTRIBUTE_BUILDING_CONFIG.getJsonObject(key);
                         if (parentObject != null && parentObject.containsKey("name")) {
                                 attributeNames.add(parentObject.getString("name"));
                         }
@@ -258,10 +269,15 @@ public class BuildingSchemaManager {
          * @param addedAttributeNames 追加済の属性の名前リスト
          * @return childNames 追加可能な子属性の名前リスト
          */
-        public static ArrayList<String> getChildNames(String parentAttributeName,
+        public ArrayList<String> getChildNames(String parentAttributeName,
                         ArrayList<String> addedAttributeNames) {
                 ArrayList<String> childNames = new ArrayList<>();
-                JsonObject parentObject = attributeConfig.getJsonObject(parentAttributeName);
+
+                JsonObject parentObject = ATTRIBUTE_BUILDING_CONFIG.getJsonObject(parentAttributeName);
+
+                if (parentObject == null) {
+                        return childNames;
+                }
                 JsonObject childrenObject = parentObject.getJsonObject("children");
                 for (String childKey : childrenObject.keySet()) {
                         JsonObject childObject = childrenObject.getJsonObject(childKey);
@@ -281,56 +297,105 @@ public class BuildingSchemaManager {
         /**
          * 地物に属性を追加します
          *
-         * @param building         地物（AbstractBuilding）
+         * @param model            地物
          * @param addAttributeName 属性名
          * @param value            値
          */
-        public static void addAttribute(AbstractBuilding building, String addAttributeName, String value) {
+        public void addAttribute(AbstractCityObject model, String addAttributeName, String value) {
+                AbstractBuilding building = (AbstractBuilding) model;
                 switch (addAttributeName) {
                         case "gml:description":
-                                new DescriptionWrapper().add(building, value);
+                                new DescriptionWrapper(modelType).add(building, value);
                                 break;
                         case "gml:name":
-                                new NameWrapper().add(building, value);
+                                new NameWrapper(modelType).add(building, value);
                                 break;
                         case "core:creationDate":
-                                new CreationDateWrapper().add(building, value);
+                                new CreationDateWrapper(modelType).add(building, value);
                                 break;
                         case "core:terminationDate":
-                                new TerminationDateWrapper().add(building, value);
+                                new TerminationDateWrapper(modelType).add(building, value);
                                 break;
                         case "bldg:class":
-                                new ClazzWrapper().add(building, value);
+                                new ClazzWrapper(modelType).add(building, value);
                                 break;
                         case "bldg:usage":
-                                new UsageWrapper().add(building, value);
+                                new UsageWrapper(modelType).add(building, value);
                                 break;
                         case "bldg:yearOfConstruction":
-                                new YearOfConstructionWrapper().add(building, value);
+                                new YearOfConstructionWrapper(modelType).add(building, value);
+                                break;
+                        case "bldg:yearOfDemolition":
+                                new YearOfDemolitionWrapper(modelType).add(building, value);
                                 break;
                         case "bldg:roofType":
-                                new RoofTypeWrapper().add(building, value);
+                                new RoofTypeWrapper(modelType).add(building, value);
                                 break;
                         case "bldg:measuredHeight":
-                                new MeasuredHeightWrapper().add(building, value);
+                                new MeasuredHeightWrapper(modelType).add(building, value);
                                 break;
                         case "bldg:storeysBelowGround":
-                                new StoreysBelowGroundWrapper().add(building, value);
+                                new StoreysBelowGroundWrapper(modelType).add(building, value);
                                 break;
                         case "bldg:storeysAboveGround":
-                                new StoreysAboveGroundWrapper().add(building, value);
+                                new StoreysAboveGroundWrapper(modelType).add(building, value);
                                 break;
                         case "bldg:address":
-                                new AddressWrapper().add(building, value);
+                                new AddressWrapper(modelType).add(building, value);
                                 break;
                         case "xAL:CountryName":
-                                new CountryNameWrapper().add(building, value);
+                                new CountryNameWrapper(modelType).add(building, value);
                                 break;
                         case "xAL:LocalityName":
-                                new LocalityNameWrapper().add(building, value);
+                                new LocalityNameWrapper(modelType).add(building, value);
                                 break;
                         default:
                                 return;
                 }
+        }
+
+        // スキーマをロードするメソッド
+        private static JsonObject loadSchema(String path) {
+                try (InputStream fis = BuildingSchemaManager.class.getResourceAsStream(path);
+                                JsonReader reader = Json.createReader(new InputStreamReader(fis))) {
+                        if (fis == null) {
+                                throw new IllegalStateException(path + " not found");
+                        }
+                        return reader.readObject();
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        return Json.createObjectBuilder().build(); // エラー時に空のJSONオブジェクトを返す
+                }
+        }
+
+        /**
+         * 地物の属性を初期化します
+         *
+         * @param selectedFeature 地物のIFeatureView
+         */
+        public List<ADEComponent> initializeAttributes(IFeatureView selectedFeature) {
+                AbstractBuilding selectedBuilding = (AbstractBuilding) selectedFeature.getGML();
+
+                selectedBuilding.unsetDescription();
+                selectedBuilding.unsetName();
+                selectedBuilding.unsetTerminationDate();
+                selectedBuilding.unsetCreationDate();
+                selectedBuilding.unsetClazz();
+                selectedBuilding.unsetUsage();
+                selectedBuilding.unsetYearOfConstruction();
+                selectedBuilding.unsetYearOfDemolition();
+                selectedBuilding.unsetRoofType();
+                selectedBuilding.unsetMeasuredHeight();
+                selectedBuilding.unsetStoreysAboveGround();
+                selectedBuilding.unsetStoreysBelowGround();
+                // selectedBuilding.unsetAddress();
+
+                selectedBuilding.unsetGenericApplicationPropertyOfAbstractBuilding();
+                return getADEComponents(selectedFeature);
+        }
+
+        public List<ADEComponent> getADEComponents(IFeatureView selectedFeature) {
+                AbstractBuilding selectedBuilding = (AbstractBuilding) selectedFeature.getGML();
+                return selectedBuilding.getGenericApplicationPropertyOfAbstractBuilding();
         }
 }

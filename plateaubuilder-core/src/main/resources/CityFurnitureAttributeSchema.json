@@ -1,0 +1,86 @@
+{
+    "description": {
+        "name": "gml:description",
+        "type": "gml:StringOrRefType",
+        "min": "0",
+        "max": "1"
+    },
+    "name": {
+        "name": "gml:name",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "creationDate": {
+        "name": "core:creationDate",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "terminationDate": {
+        "name": "core:terminationDate",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "stringAttribute": {
+        "name": "gen:stringAttribute",
+        "type": "gen:stringAttribute",
+        "min": "0",
+        "max": "unbounded"
+    },
+    "intAttribute": {
+        "name": "gen:intAttribute",
+        "type": "gen:intAttribute",
+        "min": "0",
+        "max": "unbounded"
+    },
+    "doubleAttribute": {
+        "name": "gen:doubleAttribute",
+        "type": "gen:doubleAttribute",
+        "min": "0",
+        "max": "unbounded"
+    },
+    "dateAttribute": {
+        "name": "gen:dateAttribute",
+        "type": "gen:dateAttribute",
+        "min": "0",
+        "max": "unbounded"
+    },
+    "uriAttribute": {
+        "name": "gen:uriAttribute",
+        "type": "gen:uriAttribute",
+        "min": "0",
+        "max": "unbounded"
+    },
+    "measureAttribute": {
+        "name": "gen:measureAttribute",
+        "type": "gen:measureAttribute",
+        "min": "0",
+        "max": "unbounded"
+    },
+    "genericAttributeSet": {
+        "name": "gen:genericAttributeSet",
+        "type": "gen:GenericAttributeSet",
+        "min": "0",
+        "max": "unbounded"
+    },
+    "class": {
+        "name": "frn:class",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "function": {
+        "name": "frn:function",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "unbounded"
+    },
+    "usage": {
+        "name": "frn:usage",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "unbounded"
+    }
+}

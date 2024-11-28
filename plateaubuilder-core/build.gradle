@@ -45,4 +45,6 @@ dependencies {
     implementation group: 'org.gdal', name: 'gdal', version: '3.8.0'
 
     implementation 'org.glassfish:javax.json:1.1.4'
+
+    implementation group: 'com.opencsv', name: 'opencsv', version: '5.5.2'
 }

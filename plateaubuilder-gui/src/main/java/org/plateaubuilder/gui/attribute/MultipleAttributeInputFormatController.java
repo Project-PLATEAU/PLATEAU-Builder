@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.xerces.impl.xpath.XPath.Step;
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.common.child.ChildList;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
+import org.plateaubuilder.gui.utils.StageController;
 
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,6 +24,8 @@ public class MultipleAttributeInputFormatController {
     private TabPane tabPane;
 
     private List<AttributeInputFormController> controllers = new ArrayList<>();
+    private String name = null;
+    private StageController stageController;
 
     public void initialize() {
         tabPane.getTabs().clear();
@@ -31,7 +36,7 @@ public class MultipleAttributeInputFormatController {
             while (change.next()) {
                 // 最後のタブが削除された場合、ウィンドウ（Stage）を閉じる
                 if (change.wasRemoved() && tabPane.getTabs().isEmpty()) {
-                    closeWindow();
+                    stageController.closeStage();
                 }
             }
         });
@@ -47,34 +52,38 @@ public class MultipleAttributeInputFormatController {
      */
     public void loadAttributeForms(AttributeItem baseAttribute, ArrayList<String> treeViewChildItemList,
             ArrayList<ArrayList<String>> requiredChildAttributeList,
-            ChildList<ADEComponent> bldgAttributeTree) {
+            ChildList<ADEComponent> bldgAttributeTree, StageController stageController) {
+        this.stageController = stageController;
         for (ArrayList<String> attribute : requiredChildAttributeList) {
+            name = attribute.get(0);
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("attribute-input-form.fxml"));
                 javafx.scene.Node form = loader.load();
                 AttributeInputFormController attributeInputFormController = loader.getController();
-                attributeInputFormController.initialize(baseAttribute, attribute.get(0),
-                        treeViewChildItemList,
-                        bldgAttributeTree, null);
-                attributeInputFormController.hideButtons();
-                controllers.add(attributeInputFormController);
+                attributeInputFormController.setMultipleAttributeController(this);
 
                 // タブに設定
                 Tab tab = new Tab(attribute.get(0), form);
                 tabPane.getTabs().add(tab);
 
-                attributeInputFormController.setOnAddButtonPressedCallback(() -> {
-                    removeTabByName(attribute.get(0));
-                });
-
+                attributeInputFormController.initialize(baseAttribute, attribute.get(0),
+                        treeViewChildItemList,
+                        bldgAttributeTree, null);
+                attributeInputFormController.hideButtons();
+                // スキップされている場合は、タブやコントローラーを追加せずに削除
+                if (attributeInputFormController.isSkipped()) {
+                    Platform.runLater(() -> removeTabByName(name)); // 遅延実行
+                    continue;
+                }
+                controllers.add(attributeInputFormController);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        stageController.showStage();
     }
 
     private void removeTabByName(String tabName) {
-        // タブ名で対象のタブを検索し、見つかった場合は削除
         Tab tabToRemove = null;
         for (Tab tab : tabPane.getTabs()) {
             if (tab.getText().equals(tabName)) {
@@ -85,11 +94,18 @@ public class MultipleAttributeInputFormatController {
         if (tabToRemove != null) {
             tabPane.getTabs().remove(tabToRemove);
         }
+        if (tabPane.getTabs().isEmpty()) {
+            closeWindow();
+        }
+    }
+
+    public void notifyFormCompleted(String name) {
+        removeTabByName(name);
     }
 
     private void closeWindow() {
-        Stage stage = (Stage) tabPane.getScene().getWindow();
-        stage.close();
+
+        stageController.closeStage();
     }
 
     @FXML

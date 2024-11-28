@@ -54,4 +54,11 @@ public class AlertController {
         // アラートを表示
         alert.showAndWait();
     }
+    
+    public static void showExportAlert() {
+        AlertType alertType = AlertType.WARNING;
+        String title = "エクスポートエラー";
+        String content = "エクスポートする機能はありません。";
+        showAlert(alertType, title, content, null);
+    }
 }

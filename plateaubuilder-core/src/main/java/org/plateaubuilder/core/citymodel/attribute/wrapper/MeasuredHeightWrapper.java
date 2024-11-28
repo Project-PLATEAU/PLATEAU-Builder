@@ -4,6 +4,7 @@ import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.gml.base.StringOrRef;
 import org.citygml4j.model.gml.measures.Length;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
+import org.plateaubuilder.core.citymodel.attribute.manager.ModelType;
 
 import javafx.scene.control.TreeItem;
 
@@ -11,8 +12,8 @@ import javafx.scene.control.TreeItem;
  * MeasuredHeight属性の追加・削除などの操作処理の実体を持つクラス
  */
 public class MeasuredHeightWrapper extends AbstractAttributeWrapper {
-    public MeasuredHeightWrapper() {
-        initialize("measuredHeight");
+    public MeasuredHeightWrapper(ModelType modelType) {
+        initialize(modelType, "measuredHeight");
     }
 
     @Override

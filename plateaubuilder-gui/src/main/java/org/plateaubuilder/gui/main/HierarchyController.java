@@ -14,11 +14,13 @@ import org.plateaubuilder.core.citymodel.geometry.GeometryView;
 import org.plateaubuilder.core.citymodel.geometry.ILODView;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.editor.transform.AutoGeometryAligner;
+import org.plateaubuilder.core.io.csv.exporters.CSVExporter;
 import org.plateaubuilder.core.io.mesh.FormatEnum;
 import org.plateaubuilder.core.io.mesh.ThreeDimensionsModelEnum;
 import org.plateaubuilder.core.io.mesh.converters.LODConverterBuilder;
 import org.plateaubuilder.core.io.mesh.exporters.LODExporterBuilder;
 import org.plateaubuilder.core.world.World;
+import org.plateaubuilder.gui.io.csv.CsvExportDialogController;
 import org.plateaubuilder.gui.io.mesh.ThreeDimensionsExportDialogController;
 import org.plateaubuilder.gui.io.mesh.ThreeDimensionsImportDialogController;
 import org.plateaubuilder.gui.search.SearchDialogController;
@@ -50,6 +52,7 @@ public class HierarchyController implements Initializable {
     public TreeTableColumn<Node, String> idColumn;
     public TreeTableColumn<Node, Boolean> visibilityColumn;
     public ContextMenu hierarchyContextMenu;
+    public MenuItem exportCsvMenu;
     public MenuItem exportGltfMenu;
     public MenuItem exportObjMenu;
     public MenuItem importGltfMenu;
@@ -142,6 +145,7 @@ public class HierarchyController implements Initializable {
                     exportObjMenu.setDisable(!(item instanceof IFeatureView));
                     importGltfMenu.setDisable(!(item instanceof IFeatureView));
                     importObjMenu.setDisable(!(item instanceof IFeatureView));
+                    exportCsvMenu.setDisable(!(item instanceof IFeatureView));
                 }
             }
             if (t.getButton() == MouseButton.PRIMARY && t.getClickCount() == 2) {
@@ -213,6 +217,32 @@ public class HierarchyController implements Initializable {
             var lodView = controller.getLodView();
             var option = controller.getExportOption();
             var exporter = new LODExporterBuilder().lodView(lodView).featureId(featureView.getId()).exportOption(option).format(FormatEnum.gLTF).build();
+            exporter.export(fileUrl);
+            java.awt.Desktop.getDesktop().open(new File(fileUrl).getParentFile());
+        } catch (Exception ex) {
+            Logger.getLogger(HierarchyController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * Export the selected solid to Csv
+     * @param actionEvent the event
+     */
+    public void exportCsv(ActionEvent actionEvent) {
+        TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
+        if (selectedItem == null)
+            return;
+
+        var item = selectedItem.valueProperty().get();
+        if (!(item instanceof IFeatureView))
+            return;
+
+        try {
+            CsvExportDialogController controller = CsvExportDialogController.create(false);
+            if (!controller.getDialogResult())
+                return;
+            String fileUrl = controller.getFileUrl();
+            CSVExporter exporter = new CSVExporter(false);
             exporter.export(fileUrl);
             java.awt.Desktop.getDesktop().open(new File(fileUrl).getParentFile());
         } catch (Exception ex) {
