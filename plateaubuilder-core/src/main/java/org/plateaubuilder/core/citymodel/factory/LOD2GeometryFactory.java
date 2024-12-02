@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.citygml4j.model.citygml.building.BuildingInstallation;
 import org.citygml4j.model.citygml.cityfurniture.CityFurniture;
 import org.citygml4j.model.citygml.vegetation.SolitaryVegetationObject;
 import org.citygml4j.model.gml.geometry.AbstractGeometry;
@@ -32,6 +33,11 @@ public class LOD2GeometryFactory extends GeometryFactory {
     }
 
     public LOD2GeometryView createLOD2Geometry(CityFurniture gmlObject) {
+        var geometry = gmlObject.getLod2Geometry();
+        return geometry != null ? createLOD2Geometry(geometry.getObject()) : null;
+    }
+
+    public LOD2GeometryView createLOD2Geometry(BuildingInstallation gmlObject) {
         var geometry = gmlObject.getLod2Geometry();
         return geometry != null ? createLOD2Geometry(geometry.getObject()) : null;
     }

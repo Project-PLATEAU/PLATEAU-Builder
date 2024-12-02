@@ -3,6 +3,7 @@ package org.plateaubuilder.core.io.mesh.exporters;
 import org.apache.commons.lang3.NotImplementedException;
 import org.plateaubuilder.core.citymodel.WaterBodyView;
 import org.plateaubuilder.core.citymodel.ADEGenericComponentView;
+import org.plateaubuilder.core.citymodel.BuildingInstallationView;
 import org.plateaubuilder.core.citymodel.CityFurnitureView;
 import org.plateaubuilder.core.citymodel.LandUseView;
 import org.plateaubuilder.core.citymodel.PlantCoverView;
@@ -64,8 +65,7 @@ public class LODExporterBuilder {
             return new GltfLODMultiSurfaceExporter((ILODMultiSurfaceView) lodView, featureId, exportOption);
         } else if (lodView instanceof ILODMultiSolidView && lodView.getParent() instanceof PlantCoverView) {
             return new GltfLODMultiSolidExporter((ILODMultiSolidView) lodView, featureId, exportOption);
-        } else if (lodView instanceof ILODGeometryView
-                && (lodView.getParent() instanceof CityFurnitureView || lodView.getParent() instanceof SolitaryVegetationObjectView)) {
+        } else if (lodView instanceof ILODGeometryView) {
             return new GltfLODGeometryExporter((ILODGeometryView) lodView, featureId, exportOption);
         } else {
             throw new NotImplementedException(lodView.getClass().getName() + " is not supported.");
@@ -82,8 +82,7 @@ public class LODExporterBuilder {
             return new ObjLODMultiSurfaceExporter((ILODMultiSurfaceView) lodView, featureId, exportOption);
         } else if (lodView instanceof ILODMultiSolidView && lodView.getParent() instanceof PlantCoverView) {
             return new ObjLODMultiSolidExporter((ILODMultiSolidView) lodView, featureId, exportOption);
-        } else if (lodView instanceof ILODGeometryView
-                && (lodView.getParent() instanceof CityFurnitureView || lodView.getParent() instanceof SolitaryVegetationObjectView)) {
+        } else if (lodView instanceof ILODGeometryView) {
             return new ObjLODGeometryExporter((ILODGeometryView) lodView, featureId, exportOption);
         } else {
             throw new NotImplementedException(lodView.getClass().getName() + " is not supported.");

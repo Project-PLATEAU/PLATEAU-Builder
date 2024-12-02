@@ -1,6 +1,7 @@
 package org.plateaubuilder.core.citymodel.factory;
 
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.plateaubuilder.core.citymodel.BuildingInstallationView;
 import org.plateaubuilder.core.citymodel.BuildingView;
 import org.plateaubuilder.core.citymodel.CityModelGroup;
 import org.plateaubuilder.core.citymodel.CityModelView;
@@ -40,11 +41,10 @@ public class BuildingViewFactory
 
         // </bldg:outerBuildingInstallation>
         for (var outerBuildingInstallation : gmlObject.getOuterBuildingInstallation()) {
-            var geometryFactory = new GeometryFactory(getTarget());
-            var buildingInstallationView = geometryFactory
-                    .cretateBuildingInstallationView(outerBuildingInstallation.getObject());
+            var buildingInstallationViewFactory = new BuildingInstallationViewFactory(getGroup(), getTarget());
+            var buildingInstallationView = buildingInstallationViewFactory.create(outerBuildingInstallation.getObject());
             if (buildingInstallationView != null) {
-                view.addBuildingInstallationView(buildingInstallationView);
+                view.addBuildingInstallationView((BuildingInstallationView) buildingInstallationView);
             }
         }
 

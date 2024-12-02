@@ -53,16 +53,6 @@ public class BuildingView extends ManagedGMLView<AbstractBuilding> implements IF
 
             meshView.setVisible(lod == i);
         }
-
-        // BuildingInstallation
-        for (var buildingInstallationView : buildingInstallationViews) {
-            for (int i = 2; i <= 3; i++) {
-                var geometryView = buildingInstallationView.getGeometryView(i);
-                if (geometryView != null) {
-                    geometryView.setVisible(i == lod);
-                }
-            }
-        }
     }
 
     public void setDefaultVisible() {
@@ -174,6 +164,16 @@ public class BuildingView extends ManagedGMLView<AbstractBuilding> implements IF
         this.getChildren().add(buildingInstallationView);
     }
 
+    public void removeBuildingInstallationView(String id) {
+        for (var buildingInstallationView : this.buildingInstallationViews) {
+            if (buildingInstallationView.getId().equals(id)) {
+                this.buildingInstallationViews.remove(buildingInstallationView);
+                this.getChildren().remove(buildingInstallationView);
+                return;
+            }
+        }
+    }
+
     public void addBuildingPart(BuildingView buildingPart) {
         if (buildingPart == null)
             return;
@@ -213,14 +213,6 @@ public class BuildingView extends ManagedGMLView<AbstractBuilding> implements IF
         }
         if (lod3Solid != null) {
             paths.addAll(lod3Solid.getTexturePaths());
-        }
-        for (var buildingInstallationView : buildingInstallationViews) {
-            for (int i = 2; i <= 3; i++) {
-                var geometryView = buildingInstallationView.getGeometryView(i);
-                if (geometryView != null) {
-                    paths.addAll(geometryView.getTexturePaths());
-                }
-            }
         }
         return new ArrayList<String>(paths);
     }

@@ -290,7 +290,7 @@ public class HierarchyController implements Initializable {
             return;
 
         IFeatureView featureView = (IFeatureView) item;
-        CityModelView cityModelView = (CityModelView) featureView.getParent();
+        CityModelView cityModelView = featureView.getCityModelView();
         try {
             ThreeDimensionsImportDialogController controller = ThreeDimensionsImportDialogController.create(featureView,
                     ThreeDimensionsModelEnum.GLTF);
@@ -325,7 +325,7 @@ public class HierarchyController implements Initializable {
             return;
 
         IFeatureView featureView = (IFeatureView) item;
-        CityModelView cityModelView = (CityModelView) featureView.getParent();
+        CityModelView cityModelView = (CityModelView) featureView.getCityModelView();
         try {
             ThreeDimensionsImportDialogController controller = ThreeDimensionsImportDialogController.create(featureView,
                     ThreeDimensionsModelEnum.OBJ);

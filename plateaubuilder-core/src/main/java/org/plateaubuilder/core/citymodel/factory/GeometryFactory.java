@@ -32,24 +32,6 @@ public class GeometryFactory extends CityGMLFactory {
         super(target);
     }
 
-    public BuildingInstallationView cretateBuildingInstallationView(BuildingInstallation gmlObject) {
-        var buildingInstallationView = new BuildingInstallationView(gmlObject);
-
-        var lod2Geometry = createGeometryView(gmlObject.getLod2Geometry());
-        if (lod2Geometry != null) {
-            buildingInstallationView.setGeometryView(2, lod2Geometry);
-            lod2Geometry.getTransformManipulator().updateOrigin();
-        }
-
-        var lod3Geometry = createGeometryView(gmlObject.getLod3Geometry());
-        if (lod3Geometry != null) {
-            buildingInstallationView.setGeometryView(3, lod3Geometry);
-            lod3Geometry.getTransformManipulator().updateOrigin();
-        }
-
-        return buildingInstallationView;
-    }
-
     public GeometryView createGeometryView(GeometryProperty<? extends AbstractGeometry> gmlGeometry) {
         if (gmlGeometry == null)
             return null;

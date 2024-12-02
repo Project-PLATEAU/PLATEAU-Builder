@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import org.citygml4j.model.citygml.building.AbstractBuilding;
+import org.citygml4j.model.citygml.building.BuildingInstallation;
 import org.citygml4j.model.citygml.cityfurniture.CityFurniture;
 import org.citygml4j.model.citygml.landuse.LandUse;
 import org.citygml4j.model.citygml.transportation.Road;
@@ -85,6 +86,8 @@ public class FeatureInfoController implements Initializable {
                     featureIDText.setText("地物ID：" + feature.getId());
                     if (feature instanceof AbstractBuilding) {
                         featureTypeText.setText("地物型：" + UIConstants.buildingTypeDescription(feature.getCityGMLClass()));
+                    } else if (feature instanceof BuildingInstallation) {
+                        featureTypeText.setText("地物型：" + UIConstants.buildingInstallationTypeDescription(feature.getCityGMLClass()));
                     } else if (feature instanceof Road) {
                         featureTypeText.setText("地物型：" + UIConstants.roadTypeDescription(feature.getCityGMLClass()));
                     } else if (feature instanceof LandUse) {

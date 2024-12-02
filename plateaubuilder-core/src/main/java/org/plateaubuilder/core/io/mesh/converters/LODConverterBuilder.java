@@ -4,6 +4,7 @@ import java.nio.file.Paths;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.plateaubuilder.core.citymodel.ADEGenericComponentView;
+import org.plateaubuilder.core.citymodel.BuildingInstallationView;
 import org.plateaubuilder.core.citymodel.BuildingView;
 import org.plateaubuilder.core.citymodel.CityFurnitureView;
 import org.plateaubuilder.core.citymodel.CityModelView;
@@ -112,6 +113,8 @@ public class LODConverterBuilder {
     private AbstractLODConverter buildLODConverter(Abstract3DFormatHandler formatHandler) {
         if (featureView instanceof BuildingView) {
             return new LODBuildingConverter(cityModelView, (BuildingView) featureView, lod, convertOption, formatHandler);
+        } else if (featureView instanceof BuildingInstallationView) {
+            return new LODBuildingInstallationConverter(cityModelView, (BuildingInstallationView) featureView, lod, convertOption, formatHandler);
         } else if (featureView instanceof RoadView) {
             return new LODRoadConverter(cityModelView, (RoadView) featureView, lod, convertOption, formatHandler);
         } else if (featureView instanceof LandUseView) {

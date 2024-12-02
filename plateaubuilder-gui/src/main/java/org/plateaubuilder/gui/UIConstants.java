@@ -42,6 +42,24 @@ public class UIConstants {
         throw new IllegalArgumentException();
     }
 
+    public static final String buildingInstallationTypeDescription(CityGMLClass clazz) {
+        switch (clazz) {
+        case BUILDING_INSTALLATION:
+            return "屋外付属物(bldg:BuildingInstallation)";
+        }
+
+        throw new IllegalArgumentException();
+    }
+
+    public static final String uildingInstallationTypeDescriptionShort(CityGMLClass clazz) {
+        switch (clazz) {
+        case BUILDING_INSTALLATION:
+            return "屋外付属物";
+        }
+
+        throw new IllegalArgumentException();
+    }
+
     public static final String roadTypeDescription(CityGMLClass clazz) {
         switch (clazz) {
             case TRANSPORTATION_COMPLEX: return "TRANSPORTATION_COMPLEX";

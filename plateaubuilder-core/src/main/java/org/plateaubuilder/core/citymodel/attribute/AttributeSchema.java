@@ -84,6 +84,9 @@ public class AttributeSchema {
         case "bldg:Building":
             clazz = org.citygml4j.model.citygml.building.AbstractBuilding.class;
             break;
+        case "bldg:outerBuildingInstallation":
+            clazz = org.citygml4j.model.citygml.building.BuildingInstallation.class;
+            break;
         case "frn:CityFurniture":
             clazz = org.citygml4j.model.citygml.cityfurniture.CityFurniture.class;
             break;
