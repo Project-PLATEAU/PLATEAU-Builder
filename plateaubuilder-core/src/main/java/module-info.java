@@ -61,6 +61,8 @@ open module plateaubuilder.core {
     requires com.fasterxml.jackson.databind;
     requires org.apache.commons.io;
     requires com.opencsv;
+    requires java.json;
+    requires jdk.crypto.ec;
 
     provides Importer with
             ObjOrPolyObjImporter;

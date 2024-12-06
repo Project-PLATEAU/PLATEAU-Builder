@@ -88,11 +88,13 @@ public class AdjustPerspectiveController implements Initializable {
         camera = World.getActiveInstance().getCamera();
 
         var resourceDirectory = "/org/plateaubuilder/gui/";
-        var path = getClass().getResource(resourceDirectory).toExternalForm();
+        var zoomIconPath = getClass().getResource(resourceDirectory + "images/icon_view_zoom_hover.png").toExternalForm();
+        var panIconPath = getClass().getResource(resourceDirectory + "images/icon_view_pan_hover.png").toExternalForm();
+        var rotateIconPath = getClass().getResource(resourceDirectory + "images/icon_view_rotate_hover.png").toExternalForm();
 
-        IconControlZoom = new IconControl(iconZoom, iconZoom.getImage(), new Image(path + "images/icon_view_zoom_hover.png"), SelectIcons.ZOOM);
-        IconControlPan = new IconControl(iconPan, iconPan.getImage(), new Image(path + "images/icon_view_pan_hover.png"), SelectIcons.PAN);
-        IconControlRotate = new IconControl(iconRotate, iconRotate.getImage(), new Image(path + "images/icon_view_rotate_hover.png"), SelectIcons.ROTATE);
+        IconControlZoom = new IconControl(iconZoom, iconZoom.getImage(), new Image(zoomIconPath), SelectIcons.ZOOM);
+        IconControlPan = new IconControl(iconPan, iconPan.getImage(), new Image(panIconPath), SelectIcons.PAN);
+        IconControlRotate = new IconControl(iconRotate, iconRotate.getImage(), new Image(rotateIconPath), SelectIcons.ROTATE);
     }
 
     /**

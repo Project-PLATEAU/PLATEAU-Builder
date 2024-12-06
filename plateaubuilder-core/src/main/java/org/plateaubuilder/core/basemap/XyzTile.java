@@ -3,6 +3,7 @@ package org.plateaubuilder.core.basemap;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.scene.DepthTest;
 import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.canvas.Canvas;
@@ -141,6 +142,7 @@ public class XyzTile {
      * @param envelope contains the coordinates of the two corners
      */
     public void loadAllBasemapImages(Envelope envelope) {
+        int cnt = 0;
         mapSizeBase = new HashMap<>();
         // get the coordinates of the two corners of the map.
         GeoCoordinate upper = new GeoCoordinate(envelope.getUpperCorner().getValue());
@@ -195,7 +197,7 @@ public class XyzTile {
             tasksForLoadAll.add(imageLoadingTask);
             thread.start();
         }
-        
+
         pairCanvasXyzTileModels.add(pairCanvasXyzTileModel);
     }
     
@@ -653,6 +655,7 @@ public class XyzTile {
      * @return
      */
     private int calZoomLevel(GeoCoordinate upper, GeoCoordinate lower, Canvas canvasBasemap) {
+        //System.setProperty("https.protocols", "TLSv1.2,TLSv1.3");
         int zoomLevel = MAX_ZOOM_LEVEL_DEFAULT;
         boolean isZoomLevelAvailable = false;
         try {
@@ -677,6 +680,7 @@ public class XyzTile {
             }
         } catch (Exception e) {
             // If an exception occurs, it will return ZOOM_LEVEL_UNAVAILABLE.
+            e.printStackTrace();
             return ZOOM_LEVEL_UNVAILABLE;
         }
         // If a reasonable zoom level cannot be found, it will return MIN_ZOOM_LEVEL
@@ -737,6 +741,7 @@ public class XyzTile {
                         // Exit gracefully if the task is cancelled
                         break;
                     }
+
                     // draw the images on the canvas
                     Platform.runLater(() -> {
                         gc.drawImage(image,
@@ -787,6 +792,8 @@ public class XyzTile {
         canvas.setLayoutX(minX);
         canvas.setLayoutY(minY);
         canvas.setScaleY(-1);
+        canvas.setDepthTest(DepthTest.ENABLE);
+        canvas.setViewOrder(10);
         Translate zTranslation = new Translate();
         zTranslation.setZ(baseMapPositionZ);
         canvas.getTransforms().addAll(zTranslation);

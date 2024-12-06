@@ -1,7 +1,7 @@
 plugins {
     id 'application'
     id 'org.beryx.jlink' version '2.25.0'
-    id 'edu.sc.seis.launch4j' version '2.4.9'
+    id 'edu.sc.seis.launch4j' version '2.5.4'
 }
 
 ext {
@@ -133,12 +133,15 @@ jlink {
         requires 'com.fasterxml.jackson.annotation';
         requires 'java.logging';
         requires 'com.sun.xml.xsom';
+        requires 'java.scripting';
+        requires 'java.sql';
         requires 'java.xml';
         requires 'com.sun.xml.txw2';
         requires 'java.desktop';
         requires 'java.datatransfer';
         requires 'java.compiler';
         requires 'com.sun.xml.fastinfoset';
+        uses 'javax.json.spi.JsonProvider';
     }
 }
 
@@ -152,6 +155,9 @@ launch4j() {
     headerType = 'console' // ログを確認したい場合は'console'に設定
     bundledJrePath = './image'
     bundledJre64Bit = true
+    jvmOptions = [
+            '-Djdk.tls.client.protocols=TLSv1,TLSv1.1,TLSv1.2',
+    ]
 }
 
 // JREをコピー
