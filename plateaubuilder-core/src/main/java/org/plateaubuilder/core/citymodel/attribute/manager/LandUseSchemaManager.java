@@ -11,6 +11,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
+import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.citygml.landuse.LandUse;
 import org.plateaubuilder.core.citymodel.IFeatureView;
@@ -212,27 +213,44 @@ public class LandUseSchemaManager implements AttributeSchemaManager {
          * @param addAttributeName 属性名
          * @param value            値
          */
-        public void addAttribute(AbstractCityObject model, String addAttributeName, String value) {
+        public AttributeItem addAttribute(AbstractCityObject model, String addAttributeName, String value) {
                 LandUse landUse = (LandUse) model;
+                AttributeItem attributeItem;
                 switch (addAttributeName) {
                         case "gml:description":
                                 new DescriptionWrapper(modelType).add(landUse, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<LandUse>(landUse,
+                                                                getAttributeName("description")));
                                 break;
                         case "gml:name":
                                 new NameWrapper(modelType).add(landUse, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<LandUse>(landUse,
+                                                                getAttributeName("name")));
                                 break;
                         case "core:creationDate":
                                 new CreationDateWrapper(modelType).add(landUse, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<LandUse>(landUse,
+                                                                getAttributeName("creationDate")));
                                 break;
                         case "core:terminationDate":
                                 new TerminationDateWrapper(modelType).add(landUse, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<LandUse>(landUse,
+                                                                getAttributeName("terminationDate")));
                                 break;
                         case "luse:class":
                                 new ClazzWrapper(modelType).add(landUse, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<LandUse>(landUse,
+                                                                getAttributeName("class")));
                                 break;
                         default:
-                                return;
+                                return null;
                 }
+                return attributeItem;
         }
 
         // スキーマをロードするメソッド

@@ -3,10 +3,12 @@ package org.plateaubuilder.gui.attribute;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.xerces.impl.xpath.XPath.Step;
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.common.child.ChildList;
+import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
 import org.plateaubuilder.gui.utils.StageController;
 
@@ -26,6 +28,7 @@ public class MultipleAttributeInputFormatController {
     private List<AttributeInputFormController> controllers = new ArrayList<>();
     private String name = null;
     private StageController stageController;
+    private Set<IFeatureView> selectedFeatures;
 
     public void initialize() {
         tabPane.getTabs().clear();

@@ -3,6 +3,7 @@ package org.plateaubuilder.gui.attribute;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.common.child.ChildList;
@@ -57,6 +58,7 @@ public class AttributeInputFormController {
     private AttributeSchemaManager attributeSchemaManager = AttributeSchemaManagerFactory
             .getSchemaManager(Editor.getFeatureSellection().getActiveFeatureProperty().get().getGML());
     private MultipleAttributeInputFormatController multipleAttributeInputFormatController;
+    private Set<IFeatureView> selectedFeatures;
 
     /**
      * 属性追加用フォームを表示するための初期設定を行います
@@ -405,7 +407,6 @@ public class AttributeInputFormController {
                 });
             }
         } else {
-
             Stage stage = (Stage) addButton.getScene().getWindow();
             AlertController.showValueAlert(addAttributeType, stage);
             return;

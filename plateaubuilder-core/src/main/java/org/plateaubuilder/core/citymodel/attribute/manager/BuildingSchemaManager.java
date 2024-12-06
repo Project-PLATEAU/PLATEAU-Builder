@@ -301,57 +301,103 @@ public class BuildingSchemaManager implements AttributeSchemaManager {
          * @param addAttributeName 属性名
          * @param value            値
          */
-        public void addAttribute(AbstractCityObject model, String addAttributeName, String value) {
+        public AttributeItem addAttribute(AbstractCityObject model, String addAttributeName, String value) {
                 AbstractBuilding building = (AbstractBuilding) model;
+                AttributeItem attributeItem;
                 switch (addAttributeName) {
                         case "gml:description":
                                 new DescriptionWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("description")));
                                 break;
                         case "gml:name":
                                 new NameWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("name")));
                                 break;
                         case "core:creationDate":
                                 new CreationDateWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("creationDate")));
                                 break;
                         case "core:terminationDate":
                                 new TerminationDateWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("terminationDate")));
                                 break;
                         case "bldg:class":
                                 new ClazzWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("class")));
                                 break;
                         case "bldg:usage":
                                 new UsageWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("usage")));
                                 break;
                         case "bldg:yearOfConstruction":
                                 new YearOfConstructionWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("yearOfConstruction")));
                                 break;
                         case "bldg:yearOfDemolition":
                                 new YearOfDemolitionWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("yearOfDemolition")));
                                 break;
                         case "bldg:roofType":
                                 new RoofTypeWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("roofType")));
                                 break;
                         case "bldg:measuredHeight":
                                 new MeasuredHeightWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("measuredHeight")));
                                 break;
                         case "bldg:storeysBelowGround":
                                 new StoreysBelowGroundWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("storeysBelowGround")));
                                 break;
                         case "bldg:storeysAboveGround":
                                 new StoreysAboveGroundWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("storeysAboveGround")));
                                 break;
                         case "bldg:address":
                                 new AddressWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("address")));
                                 break;
                         case "xAL:CountryName":
                                 new CountryNameWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("CountryName")));
                                 break;
                         case "xAL:LocalityName":
-                                new LocalityNameWrapper(modelType).add(building, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<AbstractBuilding>(building,
+                                                                getAttributeName("LocalityName")));
                                 break;
                         default:
-                                return;
+                                return null;
                 }
+                return attributeItem;
         }
 
         // スキーマをロードするメソッド

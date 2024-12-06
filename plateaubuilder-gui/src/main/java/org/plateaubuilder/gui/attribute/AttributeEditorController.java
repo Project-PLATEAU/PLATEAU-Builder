@@ -3,8 +3,11 @@ package org.plateaubuilder.gui.attribute;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
@@ -97,13 +100,18 @@ public class AttributeEditorController implements Initializable {
                         "uro")) {
                     AlertController.showDeleteAlert();
                 } else {
+                    // 選択された地物から取得
+                    Set<IFeatureView> selectedFeatures = Editor.getFeatureSellection().getSelectedFeatures();
+                    IFeatureView feature = selectedFeatures.iterator().next();
+                    ChildList<ADEComponent> adeComponents = AttributeTreeBuilder.getADEComponents(feature);
+
                     Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
                         private final javafx.scene.Node focusTarget = Editor.getFeatureSellection().getActive()
                                 .getNode();
                         private final String codeSpaceCache = deleteAttributeItem.getCodeSpace();
                         private final String uomCache = deleteAttributeItem.getUom();
                         private final String valueCache = deleteAttributeItem.getValue();
-                        private final ChildList<ADEComponent> bldgAttributeTreeCache = getADEComponents();
+                        private final ChildList<ADEComponent> bldgAttributeTreeCache = adeComponents;
                         private final AttributeItem parentAttributeItemCache = parentAttributeItem;
                         private final String deleteAttributeNameCache = deleteAttributeItem.getName();
                         private AttributeItem targetAttributeItem = deleteAttributeItem;
@@ -183,21 +191,28 @@ public class AttributeEditorController implements Initializable {
         attributeTreeTable.rootProperty().bind(new ObjectBinding<>() {
             {
                 bind(activeFeatureProperty);
+                // selectedFeaturesPropertyもバインド
+                bind(Editor.getFeatureSellection().selectedFeaturesProperty());
             }
 
             @Override
             protected TreeItem<AttributeItem> computeValue() {
-                selectedFeature = activeFeatureProperty.get();
+                Set<IFeatureView> selectedFeatures = Editor.getFeatureSellection().getSelectedFeatures();
 
-                if (selectedFeature != null) {
-                    attributeSchemaManager = AttributeSchemaManagerFactory.getSchemaManager(selectedFeature.getGML());
-                } else {
+                if (selectedFeatures.isEmpty()) {
                     return null;
                 }
+
                 var root = new TreeItem<>(
-                        new AttributeItem(new RootAttributeHandler(selectedFeature)));
-                AttributeTreeBuilder.attributeToTree(selectedFeature, root);
-                root.setExpanded(true);
+                        new AttributeItem(new RootAttributeHandler(selectedFeatures.iterator().next())));
+
+                if (selectedFeatures.size() > 1) {
+                    AttributeTreeBuilder.commonAttributesToTree(selectedFeatures, root);
+                } else {
+                    AttributeTreeBuilder.attributeToTree(selectedFeatures.iterator().next(), root);
+                }
+
+                // root.setExpanded(true);
                 return root;
             }
         });
@@ -292,6 +307,17 @@ public class AttributeEditorController implements Initializable {
      */
     private void showAddableAttributePanel(TreeItem<AttributeItem> selectedTreeItem,
             ChildList<ADEComponent> bldgAttributeTree) {
+
+        // 選択地物の取得を先頭に移動
+        Set<IFeatureView> selectedFeatures = Editor.getFeatureSellection().getSelectedFeatures();
+        if (selectedFeatures.isEmpty()) {
+            return;
+        }
+
+        // attributeSchemaManagerの初期化
+        attributeSchemaManager = AttributeSchemaManagerFactory
+                .getSchemaManager(selectedFeatures.iterator().next().getGML());
+
         AddableAttributeListPanelController addableAttributeMenuController = null;
         AttributeItem selectedAttributeItem = null;
         String keyAttributeName = null;
@@ -304,29 +330,38 @@ public class AttributeEditorController implements Initializable {
         // 追加済みの子要素の名前を取得
         final ArrayList<String> treeViewChildItemList = extractChildAttributeNames(selectedTreeItem);
 
-        /* Uro用 */
-        ArrayList<ArrayList<String>> addableUroAttributeList = uroSchemaDocument.getElementList(keyAttributeName, false,
-                treeViewChildItemList, "uro");
-        ArrayList<String> addableBldgAttributeList = attributeSchemaManager.getAttributeNameList(keyAttributeName,
-                treeViewChildItemList);
-        addableUroAttributeList.addAll(getBuildingElementList());
+        List<AttributeValue> addAttributeList = new ArrayList<>();
+
+        if (selectedFeatures.size() > 1) {
+            // 複数選択時の処理
+            addAttributeList = getCommonAddableAttributes(selectedFeatures, keyAttributeName, treeViewChildItemList);
+        } else {
+            // 単一選択時の既存の処理
+            /* Uro用 */
+            ArrayList<ArrayList<String>> addableUroAttributeList = uroSchemaDocument.getElementList(
+                    keyAttributeName, false, treeViewChildItemList, "uro");
+            ArrayList<String> addableBldgAttributeList = attributeSchemaManager.getAttributeNameList(
+                    keyAttributeName, treeViewChildItemList);
+            addableUroAttributeList.addAll(getBuildingElementList());
+
+            // 属性値リストの作成
+            for (ArrayList<String> attribute : addableUroAttributeList) {
+                addAttributeList.add(new AttributeValue(attribute.get(0), attribute.get(2)));
+            }
+
+            /* bldg用 */
+            for (String attribute : addableBldgAttributeList) {
+                addAttributeList.add(new AttributeValue(attribute, ""));
+            }
+        }
 
         // 追加可能な属性がない場合はエラー表示
-        if (addableUroAttributeList.size() == 0) {
+        if (addAttributeList.isEmpty()) {
             AlertController.showAddAlert();
             return;
         }
-        List<AttributeValue> addAttributeList = new ArrayList<>();
-        for (ArrayList<String> attribute : addableUroAttributeList) {
-            addAttributeList.add(new AttributeValue(attribute.get(0), attribute.get(2)));
-        }
 
-        /* bldg用 */
-        for (String attribute : addableBldgAttributeList) {
-            addAttributeList.add(new AttributeValue(attribute, ""));
-        }
-
-        // 追加する属性の選択画面を表示
+        // 以降は既存の処理を利用
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("addable-attribute-menu.fxml"));
             Parent root = loader.load();
@@ -338,28 +373,75 @@ public class AttributeEditorController implements Initializable {
 
         final AttributeItem finalSelectedAttributeItem = selectedAttributeItem;
 
-        // 追加用メニュー内の属性がダブルクリックされたときに呼び出されるコールバック
+        // 追加用メニュー内の属性がダブルクリックされたときのコールバック
         addableAttributeMenuController.setItemSelectedCallback(selectedItem -> {
             String addAttributeName = selectedItem.getSelectedItem().nameProperty().getValue();
             try {
-                // 追加する属性の情報を入力するフォームを表示
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("attribute-input-form.fxml"));
                 Parent formRoot = loader.load();
                 AttributeInputFormController attributeInputFormController = loader.getController();
 
-                // 追加ボタンが押されたことを検知するコールバックを設定
+                // 追加ボタンが押されたことを検知するコールバック
                 attributeInputFormController.setOnAddButtonPressedCallback(() -> {
                     refreshListView();
                 });
-                // 情報入力用フォームのコントローラーを初期化
+
+                // フォームの初期化時に選択地物の情報も渡す
                 attributeInputFormController.initialize(finalSelectedAttributeItem,
                         addAttributeName,
                         treeViewChildItemList,
-                        bldgAttributeTree, formRoot);
+                        bldgAttributeTree,
+                        formRoot);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
+    }
+
+    /**
+     * 複数の地物で共通して追加可能な属性リストを取得します
+     */
+    private List<AttributeValue> getCommonAddableAttributes(Set<IFeatureView> selectedFeatures,
+            String keyAttributeName, ArrayList<String> treeViewChildItemList) {
+
+        Map<String, Integer> attributeCount = new HashMap<>();
+        Map<String, String> attributeTypeMap = new HashMap<>(); // 属性名とその型の対応を保存
+        int featureCount = selectedFeatures.size();
+
+        // 各地物について追加可能な属性をカウント
+        for (IFeatureView feature : selectedFeatures) {
+            ArrayList<ArrayList<String>> addableList = uroSchemaDocument.getElementList(
+                    keyAttributeName, false, treeViewChildItemList, "uro");
+
+            // uro属性のカウントと型情報の保存
+            for (ArrayList<String> attr : addableList) {
+                String attrName = attr.get(0);
+                attributeCount.merge(attrName, 1, Integer::sum);
+                if (!attributeTypeMap.containsKey(attrName)) {
+                    attributeTypeMap.put(attrName, attr.get(2)); // 型情報を保存
+                }
+            }
+
+            // 地物属性のカウント
+            AttributeSchemaManager schemaManager = AttributeSchemaManagerFactory.getSchemaManager(feature.getGML());
+            ArrayList<String> attributeList = schemaManager.getAttributeNameList(keyAttributeName,
+                    treeViewChildItemList);
+            for (String attrName : attributeList) {
+                attributeCount.merge(attrName, 1, Integer::sum);
+            }
+        }
+
+        // 全ての地物で追加可能な属性のみを抽出
+        List<AttributeValue> commonAttributes = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : attributeCount.entrySet()) {
+            if (entry.getValue() == featureCount) {
+                String attrName = entry.getKey();
+                String type = attributeTypeMap.getOrDefault(attrName, "");
+                commonAttributes.add(new AttributeValue(attrName, type));
+            }
+        }
+
+        return commonAttributes;
     }
 
     private ArrayList<String> extractChildAttributeNames(TreeItem<AttributeItem> selectedTreeItem) {
@@ -396,10 +478,18 @@ public class AttributeEditorController implements Initializable {
     }
 
     private ChildList<ADEComponent> getADEComponents() {
-        return getADEComponents(selectedFeature);
+        Set<IFeatureView> selectedFeatures = Editor.getFeatureSellection().getSelectedFeatures();
+        if (selectedFeatures.isEmpty()) {
+            return null;
+        }
+        return AttributeTreeBuilder.getADEComponents(selectedFeatures.iterator().next());
     }
 
     private static ChildList<ADEComponent> getADEComponents(IFeatureView selectedFeature) {
+        // nullチェックを追加
+        if (selectedFeature == null) {
+            return null;
+        }
         return (ChildList<ADEComponent>) selectedFeature.getADEComponents();
     }
 

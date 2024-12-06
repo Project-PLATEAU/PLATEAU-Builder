@@ -11,6 +11,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
+import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.citygml.transportation.TransportationComplex;
 import org.plateaubuilder.core.citymodel.IFeatureView;
@@ -229,33 +230,56 @@ public class RoadSchemaManager implements AttributeSchemaManager {
          * @param addAttributeName 属性名
          * @param value            値
          */
-        public void addAttribute(AbstractCityObject model, String addAttributeName, String value) {
+        public AttributeItem addAttribute(AbstractCityObject model, String addAttributeName, String value) {
                 TransportationComplex road = (TransportationComplex) model;
+                AttributeItem attributeItem;
                 switch (addAttributeName) {
                         case "gml:description":
                                 new DescriptionWrapper(modelType).add(road, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<TransportationComplex>(road,
+                                                                getAttributeName("description")));
                                 break;
                         case "gml:name":
                                 new NameWrapper(modelType).add(road, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<TransportationComplex>(road,
+                                                                getAttributeName("name")));
                                 break;
                         case "core:creationDate":
                                 new CreationDateWrapper(modelType).add(road, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<TransportationComplex>(road,
+                                                                getAttributeName("creationDate")));
                                 break;
                         case "core:terminationDate":
                                 new TerminationDateWrapper(modelType).add(road, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<TransportationComplex>(road,
+                                                                getAttributeName("terminationDate")));
                                 break;
                         case "tran:class":
                                 new ClazzWrapper(modelType).add(road, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<TransportationComplex>(road,
+                                                                getAttributeName("class")));
                                 break;
                         case "tran:function":
                                 new FunctionWrapper(modelType).add(road, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<TransportationComplex>(road,
+                                                                getAttributeName("function")));
                                 break;
                         case "tran:usage":
                                 new UsageWrapper(modelType).add(road, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<TransportationComplex>(road,
+                                                                getAttributeName("usage")));
                                 break;
                         default:
-                                return;
+                                return null;
                 }
+                return attributeItem;
         }
 
         // スキーマをロードするメソッド

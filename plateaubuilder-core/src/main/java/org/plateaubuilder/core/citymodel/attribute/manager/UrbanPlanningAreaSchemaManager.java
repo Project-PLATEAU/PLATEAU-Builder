@@ -194,7 +194,7 @@ public class UrbanPlanningAreaSchemaManager implements AttributeSchemaManager {
          * @param addAttributeName 属性名
          * @param value            値
          */
-        public void addAttribute(AbstractCityObject model, String addAttributeName, String value) {
+        public AttributeItem addAttribute(AbstractCityObject model, String addAttributeName, String value) {
                 // switch (addAttributeName) {
                 // case "gml:description":
                 // new DescriptionWrapper(dataType).add(building, value);
@@ -241,6 +241,7 @@ public class UrbanPlanningAreaSchemaManager implements AttributeSchemaManager {
                 // default:
                 // return;
                 // }
+                return null;
         }
 
         // スキーマをロードするメソッド

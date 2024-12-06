@@ -11,6 +11,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
+import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.cityfurniture.CityFurniture;
 import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.citygml.generics.AbstractGenericAttribute;
@@ -311,33 +312,56 @@ public class CityFurnitureSchemaManager implements AttributeSchemaManager {
          * @param addAttributeName 属性名
          * @param value            値
          */
-        public void addAttribute(AbstractCityObject model, String addAttributeName, String value) {
+        public AttributeItem addAttribute(AbstractCityObject model, String addAttributeName, String value) {
                 CityFurniture cityFurniture = (CityFurniture) model;
+                AttributeItem attributeItem;
                 switch (addAttributeName) {
                         case "gml:description":
                                 new DescriptionWrapper(modelType).add(cityFurniture, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<CityFurniture>(cityFurniture,
+                                                                getAttributeName("description")));
                                 break;
                         case "gml:name":
                                 new NameWrapper(modelType).add(cityFurniture, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<CityFurniture>(cityFurniture,
+                                                                getAttributeName("name")));
                                 break;
                         case "core:creationDate":
                                 new CreationDateWrapper(modelType).add(cityFurniture, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<CityFurniture>(cityFurniture,
+                                                                getAttributeName("creationDate")));
                                 break;
                         case "core:terminationDate":
                                 new TerminationDateWrapper(modelType).add(cityFurniture, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<CityFurniture>(cityFurniture,
+                                                                getAttributeName("terminationDate")));
                                 break;
                         case "frn:class":
                                 new ClazzWrapper(modelType).add(cityFurniture, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<CityFurniture>(cityFurniture,
+                                                                getAttributeName("class")));
                                 break;
                         case "frn:usage":
                                 new UsageWrapper(modelType).add(cityFurniture, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<CityFurniture>(cityFurniture,
+                                                                getAttributeName("usage")));
                                 break;
                         case "frn:function":
                                 new FunctionWrapper(modelType).add(cityFurniture, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<CityFurniture>(cityFurniture,
+                                                                getAttributeName("function")));
                                 break;
                         default:
-                                return;
+                                return null;
                 }
+                return attributeItem;
         }
 
         // スキーマをロードするメソッド

@@ -69,4 +69,7 @@ public class AttributeItem {
     // public void add() {
     // attributeHandler.add();
     // }
+    protected AttributeHandler getAttributeHandler() {
+        return attributeHandler;
+    }
 }

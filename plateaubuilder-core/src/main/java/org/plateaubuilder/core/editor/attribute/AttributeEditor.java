@@ -3,17 +3,22 @@ package org.plateaubuilder.core.editor.attribute;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.Set;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.citygml.ade.generic.ADEGenericElement;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.common.child.ChildList;
+import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
+import org.plateaubuilder.core.citymodel.attribute.CommonAttributeItem;
 import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManager;
 import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManagerFactory;
 import org.plateaubuilder.core.citymodel.attribute.manager.BuildingSchemaManager;
 import org.plateaubuilder.core.citymodel.attribute.wrapper.NodeAttributeHandler;
+import org.plateaubuilder.core.citymodel.attribute.wrapper.RootAttributeHandler;
 import org.plateaubuilder.core.editor.Editor;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -29,21 +34,47 @@ public class AttributeEditor {
      * @param uom               uom入力フォーム上の値
      */
     public static AttributeItem addAttribute(AttributeItem baseAttributeItem, String addAttributeName, String value,
-            String codeSpace, String uom,
-            ChildList<ADEComponent> addedAttributeTree) {
+            String codeSpace, String uom, ChildList<ADEComponent> addedAttributeTree) {
+        // CommonAttributeItemの場合、全関連地物に対して属性を追加
+        if (baseAttributeItem instanceof CommonAttributeItem) {
+            AttributeItem firstAdded = null;
+            Set<IFeatureView> features = baseAttributeItem.getName().equals("root")
+                    ? Editor.getFeatureSellection().getSelectedFeatures()
+                    : ((CommonAttributeItem) baseAttributeItem).getRelatedFeatures();
+            CommonAttributeItem commonAttributeItem = null;
+            for (IFeatureView feature : features) {
+                System.out.println(feature.getId());
+                AttributeItem actualParent = baseAttributeItem.getName().equals("root")
+                        ? new AttributeItem(new RootAttributeHandler(feature))
+                        : ((CommonAttributeItem) baseAttributeItem).getAttributeForFeature(feature);
+
+                AttributeItem addedItem = addAttributeForFeature(actualParent, addAttributeName, value,
+                        codeSpace, uom, AttributeTreeBuilder.getADEComponents(feature));
+
+                if (firstAdded == null) {
+                    firstAdded = addedItem;
+                    commonAttributeItem = new CommonAttributeItem(addedItem, feature);
+                } else {
+                    commonAttributeItem.addRelatedAttribute(feature, addedItem);
+                }
+            }
+            return commonAttributeItem;
+        }
+        return addAttributeForFeature(baseAttributeItem, addAttributeName, value, codeSpace, uom, addedAttributeTree);
+    }
+
+    private static AttributeItem addAttributeForFeature(AttributeItem baseAttributeItem, String addAttributeName,
+            String value, String codeSpace, String uom, ChildList<ADEComponent> addedAttributeTree) {
         AttributeItem addedAttributeItem = null;
         AttributeSchemaManager attributeSchemaManager;
         if (addAttributeName.split(":")[0].matches("uro")) {
             ArrayList<ArrayList<String>> childAttributeList = Editor.getUroSchemaDocument().getElementList(
-                    baseAttributeItem.getName(),
-                    false,
-                    null, "uro");
+                    baseAttributeItem.getName(), false, null, "uro");
             String addAttributeType;
 
             addAttributeType = Editor.getUroSchemaDocument().getType(addAttributeName, baseAttributeItem.getName(),
                     "uro");
 
-            // 追加する属性に合わせて、追加処理を実施
             if (baseAttributeItem.getName().matches("root")) {
                 var adeComponent = addedAttributeTree.get(0);
                 Element newElement = createNewElement(
@@ -53,27 +84,11 @@ public class AttributeEditor {
                 ADEGenericElement newAdeElement = new ADEGenericElement(newElement);
 
                 addedAttributeTree.add(addedAttributeTree.size(), (ADEComponent) newAdeElement);
-
-                // // 型要素があるかどうかを確認し、あれば追加
-                // for (int i = 0; i < childAttributeList.size(); i++) {
-                // if (!childAttributeList.get(i).isEmpty() && childAttributeList.get(i).get(3)
-                // != null) {
-                // if (hasTypeElement("uro:" + childAttributeList.get(i).get(3),
-                // addAttributeName)) {
-                // Element newChildElement = createNewElement(
-                // ((ADEGenericElement) adeComponent).getContent().getOwnerDocument(), "", "",
-                // "",
-                // "uro:" + childAttributeList.get(i).get(3));
-                // newAdeElement.getContent().appendChild(newChildElement);
-                // }
-                // }
-                // }
                 addedAttributeItem = new AttributeItem(new NodeAttributeHandler((Node) newElement, addAttributeType));
+
             } else {
                 Element newElement = createNewElement(((Node) baseAttributeItem.getContent()).getOwnerDocument(), value,
-                        uom,
-                        codeSpace,
-                        addAttributeName);
+                        uom, codeSpace, addAttributeName);
                 ((Node) baseAttributeItem.getContent()).appendChild(newElement);
                 addedAttributeItem = new AttributeItem(new NodeAttributeHandler((Node) newElement, addAttributeType));
                 sortElement(baseAttributeItem, childAttributeList);
@@ -81,8 +96,15 @@ public class AttributeEditor {
         } else {
             attributeSchemaManager = AttributeSchemaManagerFactory
                     .getSchemaManager(Editor.getFeatureSellection().getActiveFeatureProperty().get().getGML());
-            attributeSchemaManager.addAttribute((AbstractCityObject) baseAttributeItem.getContent(), addAttributeName,
+            addedAttributeItem = attributeSchemaManager.addAttribute(
+                    (AbstractCityObject) baseAttributeItem.getContent(), addAttributeName,
                     value);
+        }
+        if (!(uom == null)) {
+            addedAttributeItem.setUom(uom);
+        }
+        if (!(codeSpace == null)) {
+            addedAttributeItem.setCodeSpace(codeSpace);
         }
         return addedAttributeItem;
     }
@@ -117,29 +139,61 @@ public class AttributeEditor {
     public static void removeAttribute(String removeAttributeName, AttributeItem parentAttributeItem,
             AttributeItem removeAttributeItem,
             ChildList<ADEComponent> addedAttributeTree) {
-        if (removeAttributeName.split(":")[0].matches("uro")) {
-            if (parentAttributeItem.getName() == "root") {
-                ADEComponent targetAttributeComponent = null;
-                Node removeAttributeNode = (Node) removeAttributeItem.getContent();
+        // CommonAttributeItemの場合、関連する全ての属性を削除
+        if (removeAttributeItem instanceof CommonAttributeItem) {
+            CommonAttributeItem commonAttr = (CommonAttributeItem) removeAttributeItem;
+            var baseAttributeItem = parentAttributeItem;
+            // 全ての関連地物の属性を削除
+            for (Map.Entry<IFeatureView, AttributeItem> entry : commonAttr.getFeatureAttributeEntries()) {
+                IFeatureView feature = entry.getKey();
+                AttributeItem attributeItem = entry.getValue();
 
-                for (var adeComponent : addedAttributeTree) {
-                    Node targetNode = ((ADEGenericElement) adeComponent).getContent();
-                    if (targetNode == removeAttributeNode)
-                        targetAttributeComponent = adeComponent;
-                }
-                if (targetAttributeComponent != null)
-                    addedAttributeTree.remove(targetAttributeComponent);
-            } else {
-                Node parentNode = (Node) parentAttributeItem.getContent();
-                Node targetNode = (Node) removeAttributeItem.getContent();
-                if (hasTypeElement(parentNode.getNodeName(), parentNode.getFirstChild().getNodeName())) {
-                    parentNode.getFirstChild().removeChild(targetNode);
+                // 各地物の属性ツリーから削除
+                if (removeAttributeName.split(":")[0].matches("uro")) {
+                    if (!parentAttributeItem.getName().matches("root")
+                            && parentAttributeItem instanceof CommonAttributeItem) {
+                        baseAttributeItem = ((CommonAttributeItem) parentAttributeItem)
+                                .getAttributeForFeature(feature);
+                    }
+                    removeUroAttribute(removeAttributeName, baseAttributeItem, attributeItem,
+                            AttributeTreeBuilder.getADEComponents(feature));
                 } else {
-                    parentNode.removeChild(targetNode);
+                    attributeItem.remove();
                 }
             }
         } else {
-            removeAttributeItem.remove();
+            // 単一属性の場合は既存の処理を使用
+            if (removeAttributeName.split(":")[0].matches("uro")) {
+                removeUroAttribute(removeAttributeName, parentAttributeItem, removeAttributeItem,
+                        addedAttributeTree);
+            } else {
+                removeAttributeItem.remove();
+            }
+        }
+    }
+
+    // URO属性の削除処理を分離
+    private static void removeUroAttribute(String removeAttributeName, AttributeItem parentAttributeItem,
+            AttributeItem removeAttributeItem, ChildList<ADEComponent> addedAttributeTree) {
+        if (parentAttributeItem.getName() == "root") {
+            ADEComponent targetAttributeComponent = null;
+            Node removeAttributeNode = (Node) removeAttributeItem.getContent();
+
+            for (var adeComponent : addedAttributeTree) {
+                Node targetNode = ((ADEGenericElement) adeComponent).getContent();
+                if (targetNode == removeAttributeNode)
+                    targetAttributeComponent = adeComponent;
+            }
+            if (targetAttributeComponent != null)
+                addedAttributeTree.remove(targetAttributeComponent);
+        } else {
+            Node parentNode = (Node) parentAttributeItem.getContent();
+            Node targetNode = (Node) removeAttributeItem.getContent();
+            if (hasTypeElement(parentNode.getNodeName(), parentNode.getFirstChild().getNodeName())) {
+                parentNode.getFirstChild().removeChild(targetNode);
+            } else {
+                parentNode.removeChild(targetNode);
+            }
         }
     }
 

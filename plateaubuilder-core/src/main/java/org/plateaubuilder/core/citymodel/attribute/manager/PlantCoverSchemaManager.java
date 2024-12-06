@@ -223,24 +223,38 @@ public class PlantCoverSchemaManager implements AttributeSchemaManager {
          * @param addAttributeName 属性名
          * @param value            値
          */
-        public void addAttribute(AbstractCityObject model, String addAttributeName, String value) {
+        public AttributeItem addAttribute(AbstractCityObject model, String addAttributeName, String value) {
                 PlantCover plantCover = (PlantCover) model;
+                AttributeItem attributeItem;
                 switch (addAttributeName) {
                         case "core:creationDate":
                                 new CreationDateWrapper(modelType).add(plantCover, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<PlantCover>(plantCover,
+                                                                getAttributeName("creationDate")));
                                 break;
                         case "core:terminationDate":
                                 new TerminationDateWrapper(modelType).add(plantCover, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<PlantCover>(plantCover,
+                                                                getAttributeName("terminationDate")));
                                 break;
                         case "veg:class":
                                 new ClazzWrapper(modelType).add(plantCover, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<PlantCover>(plantCover,
+                                                                getAttributeName("class")));
                                 break;
                         case "veg:averageHeight":
                                 new AverageHeightWrapper(modelType).add(plantCover, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<PlantCover>(plantCover,
+                                                                getAttributeName("averageHeight")));
                                 break;
                         default:
-                                return;
+                                return null;
                 }
+                return attributeItem;
         }
 
         // スキーマをロードするメソッド

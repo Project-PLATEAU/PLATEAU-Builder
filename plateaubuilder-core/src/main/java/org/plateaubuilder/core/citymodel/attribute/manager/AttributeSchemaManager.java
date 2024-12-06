@@ -6,6 +6,7 @@ import java.util.List;
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.plateaubuilder.core.citymodel.IFeatureView;
+import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
 
 public interface AttributeSchemaManager {
     String getAttributeName(String attributeName);
@@ -26,7 +27,7 @@ public interface AttributeSchemaManager {
 
     ArrayList<String> getAttributeNameList(String parentAttributeName, ArrayList<String> addedAttributeNames);
 
-    void addAttribute(AbstractCityObject model, String attributeName, String attributeValue);
+    AttributeItem addAttribute(AbstractCityObject model, String attributeName, String attributeValue);
 
     String getAttributeUom(String attributeKey);
 

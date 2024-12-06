@@ -11,6 +11,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
+import org.citygml4j.model.citygml.building.AbstractBuilding;
 import org.citygml4j.model.citygml.core.AbstractCityObject;
 import org.citygml4j.model.citygml.vegetation.SolitaryVegetationObject;
 import org.plateaubuilder.core.citymodel.IFeatureView;
@@ -232,36 +233,62 @@ public class SolitaryVegetationObjectSchemaManager implements AttributeSchemaMan
          * @param addAttributeName 属性名
          * @param value            値
          */
-        public void addAttribute(AbstractCityObject model, String addAttributeName, String value) {
+        public AttributeItem addAttribute(AbstractCityObject model, String addAttributeName, String value) {
                 SolitaryVegetationObject solitaryVegetationObject = (SolitaryVegetationObject) model;
+                AttributeItem attributeItem;
                 switch (addAttributeName) {
                         case "gml:name":
                                 new NameWrapper(modelType).add(solitaryVegetationObject, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<SolitaryVegetationObject>(solitaryVegetationObject,
+                                                                getAttributeName("name")));
                                 break;
                         case "core:creationDate":
                                 new CreationDateWrapper(modelType).add(solitaryVegetationObject, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<SolitaryVegetationObject>(solitaryVegetationObject,
+                                                                getAttributeName("creationDate")));
                                 break;
                         case "core:terminationDate":
                                 new TerminationDateWrapper(modelType).add(solitaryVegetationObject, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<SolitaryVegetationObject>(solitaryVegetationObject,
+                                                                getAttributeName("terminationDate")));
                                 break;
                         case "veg:class":
                                 new ClazzWrapper(modelType).add(solitaryVegetationObject, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<SolitaryVegetationObject>(solitaryVegetationObject,
+                                                                getAttributeName("class")));
                                 break;
                         case "veg:function":
                                 new FunctionWrapper(modelType).add(solitaryVegetationObject, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<SolitaryVegetationObject>(solitaryVegetationObject,
+                                                                getAttributeName("function")));
                                 break;
                         case "veg:height":
                                 new HeightWrapper(modelType).add(solitaryVegetationObject, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<SolitaryVegetationObject>(solitaryVegetationObject,
+                                                                getAttributeName("height")));
                                 break;
                         case "veg:trunkDiameter":
                                 new TrunkDiameterWrapper(modelType).add(solitaryVegetationObject, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<SolitaryVegetationObject>(solitaryVegetationObject,
+                                                                getAttributeName("trunkDiameter")));
                                 break;
                         case "veg:crownDiameter":
                                 new CrownDiameterWrapper(modelType).add(solitaryVegetationObject, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<SolitaryVegetationObject>(solitaryVegetationObject,
+                                                                getAttributeName("crownDiameter")));
                                 break;
                         default:
-                                return;
+                                return null;
                 }
+                return attributeItem;
         }
 
         // スキーマをロードするメソッド

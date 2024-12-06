@@ -1,5 +1,8 @@
 package org.plateaubuilder.core.editor.attribute;
 
+import java.util.List;
+import java.util.Set;
+
 import org.citygml4j.model.citygml.ade.ADEComponent;
 import org.citygml4j.model.citygml.ade.generic.ADEGenericElement;
 import org.citygml4j.model.citygml.building.AbstractBuilding;
@@ -13,6 +16,7 @@ import org.citygml4j.model.citygml.waterbody.WaterBody;
 import org.citygml4j.model.common.child.ChildList;
 import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
+import org.plateaubuilder.core.citymodel.attribute.CommonAttributeItem;
 import org.plateaubuilder.core.citymodel.attribute.manager.BuildingSchemaManager;
 import org.plateaubuilder.core.citymodel.attribute.manager.CityFurnitureSchemaManager;
 import org.plateaubuilder.core.citymodel.attribute.manager.LandUseSchemaManager;
@@ -23,6 +27,7 @@ import org.plateaubuilder.core.citymodel.attribute.manager.UrbanPlanningAreaSche
 import org.plateaubuilder.core.citymodel.attribute.manager.WaterBodySchemaManager;
 import org.plateaubuilder.core.citymodel.attribute.reader.XSDSchemaDocument;
 import org.plateaubuilder.core.citymodel.attribute.wrapper.NodeAttributeHandler;
+import org.plateaubuilder.core.citymodel.attribute.wrapper.RootAttributeHandler;
 import org.plateaubuilder.core.citymodel.citygml.ADEGenericComponent;
 import org.plateaubuilder.core.editor.Editor;
 import org.w3c.dom.CharacterData;
@@ -203,5 +208,101 @@ public class AttributeTreeBuilder {
                     .getAttributeType(node.getNodeName().split(COLON_SPLIT_REGEX)[1]);
         }
         return type;
+    }
+
+    /**
+     * 複数地物から共通の属性を抽出してTreeItemを構築します
+     */
+    public static void commonAttributesToTree(Set<IFeatureView> selectedFeatures, TreeItem<AttributeItem> root) {
+        if (selectedFeatures == null || selectedFeatures.isEmpty()) {
+            return;
+        }
+
+        // 基準となる最初の地物の属性ツリーを構築
+        IFeatureView firstFeature = selectedFeatures.iterator().next();
+        TreeItem<AttributeItem> firstRoot = new TreeItem<>(new AttributeItem(new RootAttributeHandler(firstFeature)));
+        attributeToTree(firstFeature, firstRoot);
+
+        // 共通属性を持つTreeItemを作成
+        buildCommonAttributeTree(firstRoot, root, firstFeature);
+
+        // 他の地物と比較して共通属性のTreeItemを構築
+        for (IFeatureView feature : selectedFeatures) {
+            if (feature == firstFeature)
+                continue;
+
+            TreeItem<AttributeItem> compareRoot = new TreeItem<>(new AttributeItem(new RootAttributeHandler(feature)));
+            attributeToTree(feature, compareRoot);
+
+            // 共通属性の検出と関連付け
+            pruneNonCommonAttributes(root, compareRoot, feature);
+        }
+    }
+
+    /**
+     * 共通属性のツリーを構築します
+     */
+    private static void buildCommonAttributeTree(TreeItem<AttributeItem> sourceItem,
+            TreeItem<AttributeItem> targetItem, IFeatureView feature) {
+
+        CommonAttributeItem commonAttr = new CommonAttributeItem(sourceItem.getValue(), feature);
+        targetItem.setValue(commonAttr);
+
+        for (TreeItem<AttributeItem> sourceChild : sourceItem.getChildren()) {
+            TreeItem<AttributeItem> newItem = new TreeItem<>();
+            targetItem.getChildren().add(newItem);
+            buildCommonAttributeTree(sourceChild, newItem, feature);
+        }
+    }
+
+    /**
+     * 共通ではない属性を削除し、共通属性を関連付けます
+     */
+    private static void pruneNonCommonAttributes(TreeItem<AttributeItem> baseItem,
+            TreeItem<AttributeItem> compareItem, IFeatureView feature) {
+
+        // 子ノードを後ろから処理
+        for (int i = baseItem.getChildren().size() - 1; i >= 0; i--) {
+            TreeItem<AttributeItem> baseChild = baseItem.getChildren().get(i);
+            TreeItem<AttributeItem> compareChild = findMatchingAttribute(baseChild, compareItem.getChildren());
+
+            if (compareChild == null) {
+                // 一致する属性がない場合は削除
+                baseItem.getChildren().remove(i);
+                continue;
+            }
+
+            String baseValue = baseChild.getValue().getValue();
+            String compareValue = compareChild.getValue().getValue();
+
+            if ((baseValue == null && compareValue != null) ||
+                    (baseValue != null && compareValue == null) ||
+                    (baseValue != null && !baseValue.equals(compareValue))) {
+                // 値が異なる場合は削除
+                baseItem.getChildren().remove(i);
+            } else {
+                // 共通属性として関連付け
+                CommonAttributeItem commonAttr = (CommonAttributeItem) baseChild.getValue();
+                commonAttr.addRelatedAttribute(feature, compareChild.getValue());
+
+                // 子階層の比較を続行
+                pruneNonCommonAttributes(baseChild, compareChild, feature);
+            }
+        }
+    }
+
+    /**
+     * 属性名が一致する属性を探します
+     */
+    private static TreeItem<AttributeItem> findMatchingAttribute(TreeItem<AttributeItem> targetItem,
+            List<TreeItem<AttributeItem>> compareItems) {
+        String targetName = targetItem.getValue().getName();
+
+        for (TreeItem<AttributeItem> item : compareItems) {
+            if (item.getValue().getName().equals(targetName)) {
+                return item;
+            }
+        }
+        return null;
     }
 }

@@ -306,30 +306,50 @@ public class WaterBodySchemaManager implements AttributeSchemaManager {
          * @param addAttributeName 属性名
          * @param value            値
          */
-        public void addAttribute(AbstractCityObject model, String addAttributeName, String value) {
+        public AttributeItem addAttribute(AbstractCityObject model, String addAttributeName, String value) {
                 WaterBody waterBody = (WaterBody) model;
+                AttributeItem attributeItem;
                 switch (addAttributeName) {
                         case "gml:description":
                                 new DescriptionWrapper(modelType).add(waterBody, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<WaterBody>(waterBody,
+                                                                getAttributeName("description")));
                                 break;
                         case "gml:name":
                                 new NameWrapper(modelType).add(waterBody, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<WaterBody>(waterBody,
+                                                                getAttributeName("name")));
                                 break;
                         case "core:creationDate":
                                 new CreationDateWrapper(modelType).add(waterBody, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<WaterBody>(waterBody,
+                                                                getAttributeName("creationDate")));
                                 break;
                         case "core:terminationDate":
                                 new TerminationDateWrapper(modelType).add(waterBody, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<WaterBody>(waterBody,
+                                                                getAttributeName("terminationDate")));
                                 break;
                         case "wtl:class":
                                 new ClazzWrapper(modelType).add(waterBody, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<WaterBody>(waterBody,
+                                                                getAttributeName("class")));
                                 break;
                         case "wtl:function":
                                 new FunctionWrapper(modelType).add(waterBody, value);
+                                attributeItem = new AttributeItem(
+                                                new AttributeHandler<WaterBody>(waterBody,
+                                                                getAttributeName("function")));
                                 break;
                         default:
-                                return;
+                                return null;
                 }
+                return attributeItem;
         }
 
         // スキーマをロードするメソッド
