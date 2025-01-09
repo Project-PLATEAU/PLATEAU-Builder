@@ -413,6 +413,7 @@ public class HierarchyController implements Initializable {
                         featureList.forEach(view -> {
                             var filtered = !filter.evaluate(view);
                             view.setFiltered(filtered);
+                            view.setVisible(true);
                             if (filtered) {
                                 view.setVisible(false);
                             }
