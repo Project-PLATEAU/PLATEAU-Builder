@@ -112,6 +112,10 @@ public class FeatureSelection {
             if (!enabled.get())
                 return;
 
+            if (!event.isPrimaryButtonDown()) {
+                return;
+            }
+
             if (event.getClickCount() == 2) {
                 if (active.get() != null) {
                     World.getActiveInstance().getCamera().focus(active.get().getLODView(1).getMeshView());
