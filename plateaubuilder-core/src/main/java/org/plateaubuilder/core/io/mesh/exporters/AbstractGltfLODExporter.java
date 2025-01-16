@@ -128,7 +128,7 @@ abstract public class AbstractGltfLODExporter<T extends ILODView> extends Abstra
         var positions = new float[vertexList.size() * 3];
         for (int i = 0; i < vertexList.size(); i++) {
             var vertex = vertexList.get(i);
-            var vec3f = axisTransformer.transform((float) (vertex.x + offset.x), (float) (vertex.y + offset.y), (float) (vertex.z + offset.z));
+            var vec3f = axisTransformer.transform(vertex.x + offset.x, vertex.y + offset.y, vertex.z + offset.z);
             positions[i * 3] = vec3f.x;
             positions[i * 3 + 1] = vec3f.y;
             positions[i * 3 + 2] = vec3f.z;

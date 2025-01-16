@@ -62,8 +62,7 @@ abstract public class AbstractObjLODExporter<T extends ILODView> extends Abstrac
                 var offset = exportOption.getOffset();
                 var vertices = objectModel.getVertices();
                 for (int i = 0; i < vertices.length; i += 3) {
-                    var vec3f = axisTransformer.transform((float) (vertices[i] + offset.x), (float) (vertices[i + 1] + offset.y),
-                            (float) (vertices[i + 2] + offset.z));
+                    var vec3f = axisTransformer.transform(vertices[i] + offset.x, vertices[i + 1] + offset.y, vertices[i + 2] + offset.z);
                     writer.write(String.format("v %f %f %f\r\n", vec3f.x, vec3f.y, vec3f.z));
                 }
 

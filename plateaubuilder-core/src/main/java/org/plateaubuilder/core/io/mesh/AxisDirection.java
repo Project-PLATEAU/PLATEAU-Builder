@@ -61,6 +61,15 @@ public class AxisDirection {
     }
 
     /**
+     * 上方向の軸を取得します。
+     * 
+     * @return 上方向の軸
+     */
+    public AxisEnum getTop() {
+        return up;
+    }
+
+    /**
      * 指定された方角に対応する軸を取得します。
      * 
      * @param direction 方角
