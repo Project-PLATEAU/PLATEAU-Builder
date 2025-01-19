@@ -205,6 +205,26 @@ public class ToolbarController implements Initializable {
         Editor.getXyzTile().toggleBaseMapMode(baseMapToggle.isSelected());
     }
 
+    public void onViewNorth() {
+        Editor.getCamera().focusNorth();
+    }
+
+    public void onViewSouth() {
+        Editor.getCamera().focusSouth();
+    }
+
+    public void onViewWest() {
+        Editor.getCamera().focusWest();
+    }
+
+    public void onViewEast() {
+        Editor.getCamera().focusEast();
+    }
+
+    public void onViewTop() {
+        Editor.getCamera().focusTop();
+    }
+
     /** LOD表示切り替え **/
     public ToggleGroup lodToggleGroup;
 

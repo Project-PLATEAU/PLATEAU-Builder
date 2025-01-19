@@ -31,6 +31,9 @@
  */
 package org.plateaubuilder.core.world;
 
+import org.locationtech.jts.math.Vector2D;
+import org.plateaubuilder.core.editor.Editor;
+
 import javafx.animation.PauseTransition;
 import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
@@ -42,8 +45,6 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.util.Duration;
-import org.locationtech.jts.math.Vector2D;
-import org.plateaubuilder.core.editor.Editor;
 
 /**
  * Cameraクラスは、シーンにおけるカメラの動きとインタラクションを処理します。
@@ -82,6 +83,7 @@ public class Camera {
 
         zoom.setX(-baseZoomDistance);
         pitch.setAngle(45);
+        yaw.setAngle(90);
     }
 
     private final EventHandler<MouseEvent> mouseEventHandler = event -> {
@@ -223,5 +225,129 @@ public class Camera {
         // 回転
         yaw.setAngle(yaw.getAngle() - deltaMousePosition.getX() * 0.6);
         pitch.setAngle(pitch.getAngle() + deltaMousePosition.getY() * 0.6);
+    }
+
+    /*
+     * ビューを北にフォーカスします
+     */
+    public void focusNorth() {
+        resetPivot();
+
+        var citymodelGroup = World.getActiveInstance().getCityModelGroup();
+        double distance = 1000;
+        if (citymodelGroup != null) {
+            var bounds = citymodelGroup.getBoundsInParent();
+            var distance1 = (Math.abs(bounds.getMaxX()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxY();
+            var distance2 = (Math.abs(bounds.getMinX()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxY();
+            distance = Math.max(distance1, distance2);
+        }
+        zoomFactor = calculateZoomFactorByOffsetDistance(distance);
+        zoom.setX(calculateZoomOffset());
+
+        yaw.setAngle(90);
+        pitch.setAngle(0);
+    }
+
+    /*
+     * ビューを南にフォーカスします
+     */
+    public void focusSouth() {
+        resetPivot();
+
+        var citymodelGroup = World.getActiveInstance().getCityModelGroup();
+        double distance = 1000;
+        if (citymodelGroup != null) {
+            var bounds = citymodelGroup.getBoundsInParent();
+            var distance1 = (Math.abs(bounds.getMaxX()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) - bounds.getMinY();
+            var distance2 = (Math.abs(bounds.getMinX()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) - bounds.getMinY();
+            distance = Math.max(distance1, distance2);
+        }
+        zoomFactor = calculateZoomFactorByOffsetDistance(distance);
+        zoom.setX(calculateZoomOffset());
+
+        yaw.setAngle(-90);
+        pitch.setAngle(0);
+    }
+
+    /*
+     * ビューを西にフォーカスします
+     */
+    public void focusWest() {
+        resetPivot();
+
+        var citymodelGroup = World.getActiveInstance().getCityModelGroup();
+        double distance = 1000;
+        if (citymodelGroup != null) {
+            var bounds = citymodelGroup.getBoundsInParent();
+            var distance1 = (Math.abs(bounds.getMaxY()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxX();
+            var distance2 = (Math.abs(bounds.getMinY()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxX();
+            distance = Math.max(distance1, distance2);
+        }
+        zoomFactor = calculateZoomFactorByOffsetDistance(distance);
+        zoom.setX(calculateZoomOffset());
+
+        yaw.setAngle(180);
+        pitch.setAngle(0);
+    }
+
+    /*
+     * ビューを東にフォーカスします
+     */
+    public void focusEast() {
+
+        resetPivot();
+
+        var citymodelGroup = World.getActiveInstance().getCityModelGroup();
+        double distance = 1000;
+        if (citymodelGroup != null) {
+            var bounds = citymodelGroup.getBoundsInParent();
+            var distance1 = (Math.abs(bounds.getMaxY()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) - bounds.getMinX();
+            var distance2 = (Math.abs(bounds.getMinY()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) - bounds.getMinX();
+            distance = Math.max(distance1, distance2);
+        }
+        zoomFactor = calculateZoomFactorByOffsetDistance(distance);
+        zoom.setX(calculateZoomOffset());
+
+        yaw.setAngle(0);
+        pitch.setAngle(0);
+    }
+
+    /*
+     * ビューを北 + 上にフォーカスします
+     */
+    public void focusTop() {
+        resetPivot();
+
+        var citymodelGroup = World.getActiveInstance().getCityModelGroup();
+        double distance = 1000;
+        if (citymodelGroup != null) {
+            var bounds = citymodelGroup.getBoundsInParent();
+            var distance1 = (Math.abs(bounds.getMaxX()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxZ();
+            var distance2 = (Math.abs(bounds.getMinX()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxZ();
+            var distance3 = (Math.abs(bounds.getMaxX()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxZ();
+            var distance4 = (Math.abs(bounds.getMinX()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxZ();
+            var distance5 = (Math.abs(bounds.getMaxY()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxZ();
+            var distance6 = (Math.abs(bounds.getMinY()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxZ();
+            var distance7 = (Math.abs(bounds.getMaxY()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxZ();
+            var distance8 = (Math.abs(bounds.getMinY()) / (Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))) + bounds.getMaxZ();
+            var maxDistanceX = Math.max(Math.max(distance1, distance2), Math.max(distance3, distance4));
+            var maxDistanceY = Math.max(Math.max(distance5, distance6), Math.max(distance7, distance8));
+            distance = Math.max(maxDistanceX, maxDistanceY);
+        }
+        zoomFactor = calculateZoomFactorByOffsetDistance(distance);
+        zoom.setX(calculateZoomOffset());
+
+        yaw.setAngle(90);
+        pitch.setAngle(90);
+    }
+
+    public Rotate getYaw() {
+        return yaw;
+    }
+
+    private void resetPivot() {
+        pivotTranslate.setX(0);
+        pivotTranslate.setY(0);
+        pivotTranslate.setZ(0);
     }
 }
