@@ -176,7 +176,8 @@ public class ThreeDimensionsImportDialogController implements Initializable {
     public void onSelectFile(ActionEvent actionEvent) {
         var extensions = modelType == ThreeDimensionsModelEnum.OBJ ? new String[] { "*.obj" }
                 : new String[] { "*.gltf", "*.glb" };
-        var file = FileChooserService.showOpenDialog(SessionManager.GLTF_FILE_PATH_PROPERTY, extensions);
+        var file = FileChooserService.showOpenDialog(
+                modelType == ThreeDimensionsModelEnum.OBJ ? SessionManager.OBJ_FILE_PATH_PROPERTY : SessionManager.GLTF_FILE_PATH_PROPERTY, extensions);
         if (file == null) {
             return;
         }

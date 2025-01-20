@@ -15,12 +15,14 @@ import javafx.util.Callback;
 import org.apache.commons.lang3.StringUtils;
 import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.geometry.ILODView;
+import org.plateaubuilder.core.editor.SessionManager;
 import org.plateaubuilder.core.io.mesh.AxisEnum;
 import org.plateaubuilder.core.io.mesh.ThreeDimensionsModelEnum;
 import org.plateaubuilder.core.io.mesh.exporters.ExportOption;
 import org.plateaubuilder.core.io.mesh.exporters.ExportOptionBuilder;
 import org.plateaubuilder.core.utils3d.geom.Vec3d;
 import org.plateaubuilder.core.world.World;
+import org.plateaubuilder.gui.FileChooserService;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +34,8 @@ public class ThreeDimensionsExportDialogController implements Initializable {
     private Stage root;
 
     private IFeatureView featureView;
+
+    private File file;
 
     private String fileUrl;
 
@@ -114,6 +118,14 @@ public class ThreeDimensionsExportDialogController implements Initializable {
     public void setFeatureView(IFeatureView featureView) {
         this.featureView = featureView;
 
+        var id = featureView.getId();
+        var extension = modelType == ThreeDimensionsModelEnum.OBJ ? ".obj" : ".gltf";
+        var fileName = String.format("%s%s", id, extension);
+        var initialDirectory = FileChooserService.getInitialDirectory(
+                modelType == ThreeDimensionsModelEnum.OBJ ? SessionManager.OBJ_FILE_PATH_PROPERTY : SessionManager.GLTF_FILE_PATH_PROPERTY);
+        this.file = new File(initialDirectory, fileName);
+        textFieldFile.setText(this.file.getAbsolutePath());
+
         var list = new ArrayList<String>();
         if (this.featureView.getLODView(1) != null) {
             list.add("LOD1");
@@ -173,17 +185,16 @@ public class ThreeDimensionsExportDialogController implements Initializable {
     public void onSelectFile(ActionEvent actionEvent) {
         var type = modelType == ThreeDimensionsModelEnum.OBJ ? "OBJ" : "gLTF";
         var extensions = modelType == ThreeDimensionsModelEnum.OBJ ? new String[] {"*.obj"} : new String[] {"*.gltf", "*.glb"};
-        FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter(type, extensions)
-        );
-        chooser.setTitle(String.format("Export %s", type));
-        File file = chooser.showSaveDialog(this.root.getOwner());
-        if (file == null) {
+
+        var selectedfile = FileChooserService.showSaveDialog(String.format("Export %s", type), this.file.getName(),
+                modelType == ThreeDimensionsModelEnum.OBJ ? SessionManager.OBJ_FILE_PATH_PROPERTY : SessionManager.GLTF_FILE_PATH_PROPERTY, extensions);
+
+        if (selectedfile == null) {
             return;
         }
+        this.file = selectedfile;
 
-        textFieldFile.setText(file.getAbsolutePath());
+        textFieldFile.setText(this.file.getAbsolutePath());
     }
 
     /**
@@ -236,8 +247,8 @@ public class ThreeDimensionsExportDialogController implements Initializable {
             stage.setScene(new Scene(loader.load()));
             var controller = (ThreeDimensionsExportDialogController) loader.getController();
             controller.setRoot(stage);
-            controller.setFeatureView(featureView);
             controller.setModelType(modelType);
+            controller.setFeatureView(featureView);
             stage.showAndWait();
 
             return controller;
