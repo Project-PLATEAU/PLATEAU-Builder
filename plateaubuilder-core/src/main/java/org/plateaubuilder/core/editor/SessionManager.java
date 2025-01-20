@@ -55,14 +55,19 @@ public class SessionManager {
     public static final String GML_FILE_PATH_PROPERTY = "gmlFilePath";
 
     /*
-     * インポートされたgLTFファイルのパス
+     * インポート/エクスポートされたgLTFファイルのパス
      */
     public static final String GLTF_FILE_PATH_PROPERTY = "gltfFilePath";
 
     /*
-     * インポートされたOBJファイルのパス
+     * インポート/エクスポートされたOBJファイルのパス
      */
     public static final String OBJ_FILE_PATH_PROPERTY = "objFilePath";
+
+    /*
+     * インポート/エクスポートされたフィルタ設定ファイルのパス
+     */
+    public static final String FILTER_FILE_PATH_PROPERTY = "filterFilePath";
 
     public final String SESSION_PROPERTIES_FILENAME;
     private static final boolean ENABLE_SAVE_SESSION = true;

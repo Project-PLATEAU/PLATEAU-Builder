@@ -1,5 +1,11 @@
 package org.plateaubuilder.gui.search;
 
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -9,9 +15,14 @@ import java.util.ResourceBundle;
 
 import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.editor.Editor;
+import org.plateaubuilder.core.editor.SessionManager;
 import org.plateaubuilder.core.editor.filters.AndFilter;
+import org.plateaubuilder.core.editor.filters.FeatureFilterBuilder;
 import org.plateaubuilder.core.editor.filters.IFeatureFilter;
 import org.plateaubuilder.core.editor.filters.OrFilter;
+import org.plateaubuilder.core.editor.filters.expressions.ExpressionBuilder;
+import org.plateaubuilder.core.editor.filters.expressions.FeatureFilterSetting;
+import org.plateaubuilder.gui.FileChooserService;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -72,6 +83,54 @@ public class SearchDialogController implements Initializable {
 
     public void close() {
         root.close();
+    }
+
+    public void onOpenSetting() {
+        try {
+            var file = FileChooserService.showOpenDialog(SessionManager.FILTER_FILE_PATH_PROPERTY, new String[] { "*.xml" });
+            if (file == null) {
+                return;
+            }
+
+            XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(file)));
+            try {
+                FeatureFilterSetting setting = (FeatureFilterSetting) decoder.readObject();
+                isAndLogic = setting.isAndLogic();
+                removeAllCondition();
+                for (var builder : setting.getBulders()) {
+                    addCondition(builder);
+                }
+            } finally {
+                decoder.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+    }
+
+    public void onSaveSetting() {
+        try {
+            var file = FileChooserService.showSaveDialog("", null, SessionManager.FILTER_FILE_PATH_PROPERTY, new String[] { "*.xml" });
+            if (file == null) {
+                return;
+            }
+
+            var setting = new FeatureFilterSetting(isAndLogic);
+            for (var condition : searchConditions) {
+                setting.addFilter(condition.createFeatureFilterBuilder());
+            }
+
+            XMLEncoder encoder = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(file)));
+            try {
+                encoder.writeObject(setting);
+            } finally {
+                encoder.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void onAddCondition() {
@@ -137,6 +196,26 @@ public class SearchDialogController implements Initializable {
             searchConditions.remove(controller);
             subSceneContainer.getChildren().remove(controller.getRoot());
         });
+    }
+
+    private void addCondition(FeatureFilterBuilder featureFilterBuilder) {
+        var controller = new SearchConditionController(typeListInstance, featureListInstance);
+        ExpressionBuilder expressionBuilder = featureFilterBuilder.getExpressionBuilder();
+        controller.setFeatureType(featureFilterBuilder.getFeatureType());
+        controller.setAttributeName(expressionBuilder.getAttributeName());
+        controller.setOperator(expressionBuilder.getOperator());
+        controller.setValue(expressionBuilder.getValue());
+        searchConditions.add(controller);
+        subSceneContainer.getChildren().add(controller.getRoot());
+        controller.buttonDelete.setOnAction(event -> {
+            searchConditions.remove(controller);
+            subSceneContainer.getChildren().remove(controller.getRoot());
+        });
+    }
+
+    private void removeAllCondition() {
+        searchConditions.clear();
+        subSceneContainer.getChildren().clear();
     }
 
     private IFeatureFilter createFilter() {

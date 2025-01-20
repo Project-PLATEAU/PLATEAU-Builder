@@ -101,8 +101,27 @@ public class SearchConditionController {
     }
 
     public IFeatureFilter createFilter() {
+        return createFeatureFilterBuilder().build();
+    }
+
+    public FeatureFilterBuilder createFeatureFilterBuilder() {
         return new FeatureFilterBuilder().featureType(comboBoxGMLType.getValue()).attributeName(comboBoxAttributeName.getValue())
-                .operator(comboBoxOperator.getValue())
-                .value(attributeValue.getText()).build();
+                .operator(comboBoxOperator.getValue()).value(attributeValue.getText());
+    }
+
+    public void setFeatureType(String featureType) {
+        comboBoxGMLType.setValue(featureType);
+    }
+
+    public void setAttributeName(String attributeName) {
+        comboBoxAttributeName.setValue(attributeName);
+    }
+
+    public void setOperator(Operator operator) {
+        comboBoxOperator.setValue(operator);
+    }
+
+    public void setValue(String value) {
+        attributeValue.setText(value);
     }
 }

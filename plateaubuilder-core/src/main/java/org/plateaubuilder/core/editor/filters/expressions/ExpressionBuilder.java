@@ -5,6 +5,9 @@ public class ExpressionBuilder {
     private Operator operator = Operator.NONE;
     private String value;
 
+    public ExpressionBuilder() {
+    }
+
     public ExpressionBuilder attributeName(String attributeName) {
         this.attributeName = attributeName;
         return this;
@@ -37,5 +40,30 @@ public class ExpressionBuilder {
         default:
             throw new IllegalArgumentException("Unknown operator: " + operator);
         }
+    }
+
+    // for serialization
+    public String getAttributeName() {
+        return attributeName;
+    }
+
+    public void setAttributeName(String attributeName) {
+        this.attributeName = attributeName;
+    }
+
+    public Operator getOperator() {
+        return operator;
+    }
+
+    public void setOperator(Operator operator) {
+        this.operator = operator;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }

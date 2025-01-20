@@ -23,11 +23,18 @@
                <children>
                   <HBox>
                      <children>
-                        <Label text="表示条件を設定">
+                        <Label prefWidth="650.0" text="表示条件を設定">
                            <font>
                               <Font size="18.0" />
                            </font>
                         </Label>
+                        <Label prefHeight="30.0" prefWidth="60.0" text="プリセット" />
+                        <Button mnemonicParsing="false" onAction="#onOpenSetting" prefHeight="30.0" text="読み込み">
+                           <HBox.margin>
+                              <Insets right="12.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#onSaveSetting" prefHeight="30.0" text="書き出し" />
                      </children>
                      <padding>
                         <Insets bottom="10.0" top="20.0" />
@@ -53,7 +60,7 @@
                   </ScrollPane>
                   <HBox alignment="TOP_RIGHT">
                      <children>
-                        <Button mnemonicParsing="false" text="条件の追加" onAction="#onAddCondition" />
+                        <Button mnemonicParsing="false" onAction="#onAddCondition" text="条件の追加" />
                      </children>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -64,12 +71,12 @@
                   </HBox>
                   <HBox alignment="CENTER_RIGHT" spacing="10.0">
                      <children>
-                        <ToggleButton prefHeight="30.0" selected="true" text="すべての条件に一致" onAction="#onAndCondition">
+                        <ToggleButton onAction="#onAndCondition" prefHeight="30.0" selected="true" text="すべての条件に一致">
                            <toggleGroup>
                               <ToggleGroup fx:id="toggleGroup" />
                            </toggleGroup>
                         </ToggleButton>
-                        <ToggleButton prefHeight="30.0" text="いずれかの条件に一致" toggleGroup="$toggleGroup" onAction="#onOrCondition" />
+                        <ToggleButton onAction="#onOrCondition" prefHeight="30.0" text="いずれかの条件に一致" toggleGroup="$toggleGroup" />
                      </children>
                      <padding>
                         <Insets bottom="10.0" top="10.0" />
@@ -77,8 +84,8 @@
                   </HBox>
                   <HBox alignment="BOTTOM_CENTER" maxWidth="1.7976931348623157E308" spacing="10.0" VBox.vgrow="ALWAYS">
                      <children>
-                        <Button mnemonicParsing="false" prefHeight="30.0" prefWidth="70.0" text="キャンセル" onAction="#onCancel" />
-                        <Button mnemonicParsing="false" prefHeight="30.0" prefWidth="120.0" text="検索する" onAction="#onOK">
+                        <Button mnemonicParsing="false" onAction="#onCancel" prefHeight="30.0" prefWidth="70.0" text="キャンセル" />
+                        <Button mnemonicParsing="false" onAction="#onOK" prefHeight="30.0" prefWidth="120.0" text="検索する">
                            <graphic>
                               <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
