@@ -138,14 +138,16 @@ public class HierarchyController implements Initializable {
 
         hierarchyTreeTable.setOnMouseClicked(t -> {
             if (t.getButton() == MouseButton.SECONDARY) {
+
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
                 if (selectedItem != null) {
                     var item = selectedItem.valueProperty().get();
-                    exportGltfMenu.setDisable(!(item instanceof IFeatureView));
-                    exportObjMenu.setDisable(!(item instanceof IFeatureView));
-                    importGltfMenu.setDisable(!(item instanceof IFeatureView));
-                    importObjMenu.setDisable(!(item instanceof IFeatureView));
+                    var isSingleSelection = hierarchyTreeTable.getSelectionModel().getSelectedItems().size() == 1;
                     exportCsvMenu.setDisable(!(item instanceof IFeatureView));
+                    exportGltfMenu.setDisable(!(item instanceof IFeatureView) || !isSingleSelection);
+                    exportObjMenu.setDisable(!(item instanceof IFeatureView) || !isSingleSelection);
+                    importGltfMenu.setDisable(!(item instanceof IFeatureView) || !isSingleSelection);
+                    importObjMenu.setDisable(!(item instanceof IFeatureView) || !isSingleSelection);
                 }
             }
             if (t.getButton() == MouseButton.PRIMARY && t.getClickCount() == 2) {
