@@ -12,6 +12,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -126,6 +127,7 @@ public class AdjustPerspectiveController implements Initializable {
      * マウスイベントを処理するハンドラ
      */
     private final EventHandler<MouseEvent> mouseEventHandler = event -> {
+        var scene = Editor.getScene();
         isDragging = false;
         if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
             if (reserveIcon == SelectIcons.NONE){
@@ -134,10 +136,12 @@ public class AdjustPerspectiveController implements Initializable {
                 IconControlRotate.resetIcon();
                 Editor.getXyzTile().loadImagesAfterCameraMove();
             }
+            scene.setCursor(Cursor.DEFAULT);
         }
 
-        if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+        if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isPrimaryButtonDown()) {
             lastMousePosition = new Vector2D(event.getSceneX(), event.getSceneY());
+            scene.setCursor(Cursor.HAND);
         }
 
         if (event.getEventType() != MouseEvent.MOUSE_DRAGGED && event.getEventType() != MouseEvent.DRAG_DETECTED && event.getEventType() != MouseEvent.MOUSE_PRESSED)
@@ -150,6 +154,7 @@ public class AdjustPerspectiveController implements Initializable {
         lastMousePosition = currentMousePosition;
 
         if (event.isPrimaryButtonDown()) {
+            scene.setCursor(Cursor.CLOSED_HAND);
             switch(selectIcon){
                 case ZOOM:
                     camera.dragZoom(deltaMousePosition);
