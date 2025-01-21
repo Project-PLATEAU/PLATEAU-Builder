@@ -1,19 +1,20 @@
 package org.plateaubuilder.core.io.gml;
 
-import javafx.scene.control.TextInputDialog;
-import javafx.stage.DirectoryChooser;
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
+
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
 import org.citygml4j.xml.io.writer.CityGMLWriteException;
 import org.plateaubuilder.core.citymodel.CityModelView;
 import org.plateaubuilder.core.utils.FileUtils;
 
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
+import javafx.scene.control.TextInputDialog;
+import javafx.stage.DirectoryChooser;
 
 public class CityGmlDatasetExporter {
     public void export(List<CityModelView> cityModelViews) {
@@ -22,7 +23,6 @@ public class CityGmlDatasetExporter {
 
         String rootDirName;// エクスポート先のルートフォルダの名前
         String udxDirName = "udx";
-        String bldgDirName = "bldg";
         String defaultDirName;
         Optional<String> textDialogResult;
         TextInputDialog textDialog;
@@ -59,7 +59,7 @@ public class CityGmlDatasetExporter {
                     String skipPath = sourceRootDirPath.toString().replace("\\", "\\\\") + "\\\\udx\\\\.*";
                     if (!FileUtils.copyDirectory(
                             sourceRootDirPath,
-                            Paths.get(selectedDirectory.getAbsolutePath() + "\\\\" + rootDirName),skipPath) )
+                            Paths.get(selectedDirectory.getAbsolutePath() + "\\\\" + rootDirName), skipPath))
                         return;
                 } catch (IOException e) {
                     System.out.println(e);
@@ -67,19 +67,21 @@ public class CityGmlDatasetExporter {
                 for (var cityModelView : cityModelViews) {
                     var path = cityModelView.getGmlPath().split("\\\\");
                     try {
+                        // ファイル名からフィーチャータイプを抽出
+                        String dirName = path[path.length - 1].split("_")[1];
                         // CityGMLのエクスポート
                         GmlExporter.export(
                                 Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" +
-                                                udxDirName + "/"
-                                                + bldgDirName
-                                                + "/" + path[path.length - 1])
+                                        udxDirName + "/"
+                                        + dirName
+                                        + "/" + path[path.length - 1])
                                         .toString(),
                                 cityModelView.getGML(),
                                 cityModelView.getSchemaHandler());
                         // Appearanceのエクスポート
                         TextureExporter.export(
                                 selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" + udxDirName + "/"
-                                        + bldgDirName,
+                                        + dirName,
                                 cityModelView);
                     } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
                         throw new RuntimeException(e);

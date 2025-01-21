@@ -67,6 +67,7 @@ public class LoadGMLDialogController {
                 }
 
                 group.addCityModel(cityModelView);
+                world.addCityModel(cityModelView);
                 // ツリー更新
                 group.fireChangeEvent();
             }
