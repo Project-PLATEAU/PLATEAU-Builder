@@ -135,6 +135,22 @@ public class Camera {
     };
 
     private final EventHandler<ScrollEvent> scrollEventHandler = event -> {
+        // 中心からのマウス位置を取得
+        var scene = Editor.getSceneContent().getSubScene();
+        var center = new Vector2D(scene.getWidth() / 2, scene.getHeight() / 2);
+        var currentMousePosition = new Vector2D(event.getX(), event.getY());
+        var deltaMousePosition = center.subtract(currentMousePosition);
+
+        // マウス位置にある座標がズーム後にも同じ位置になるように移動
+        var currentPosition = yaw.deltaTransform(applyZoomFactor(deltaMousePosition.getY() * 0.5), applyZoomFactor(deltaMousePosition.getX() * 0.5), 0);
+        var nextZoomFactor = zoomFactor + event.getDeltaY() * 0.01;
+        var nextZoomPosition = yaw.deltaTransform(applyZoomFactor(deltaMousePosition.getY() * 0.5, nextZoomFactor),
+                applyZoomFactor(deltaMousePosition.getX() * 0.5, nextZoomFactor), 0);
+        var deltaPosition = currentPosition.subtract(nextZoomPosition);
+        pivotTranslate.setX(pivotTranslate.getX() + deltaPosition.getX());
+        pivotTranslate.setY(pivotTranslate.getY() + deltaPosition.getY());
+        pivotTranslate.setZ(pivotTranslate.getZ() + deltaPosition.getZ());
+
         if (pause == null) {
             pause = new PauseTransition(Duration.millis(200));
             pause.setOnFinished(e -> {
@@ -143,11 +159,15 @@ public class Camera {
         }
         pause.playFromStart();
         // ズームイン・アウト
-        zoomFactor += event.getDeltaY() * 0.01;
+        zoomFactor = nextZoomFactor;
         zoom.setX(calculateZoomOffset());
     };
 
     private double applyZoomFactor(double value) {
+        return applyZoomFactor(value, zoomFactor);
+    }
+
+    private double applyZoomFactor(double value, double zoomFactor) {
         return value * Math.pow(2, -zoomFactor);
     }
 
