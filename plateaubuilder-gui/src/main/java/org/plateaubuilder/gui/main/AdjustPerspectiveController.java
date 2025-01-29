@@ -117,7 +117,7 @@ public class AdjustPerspectiveController implements Initializable {
         gc.clearRect(0, 0, arrowCanvas.getWidth(), arrowCanvas.getHeight());
         gc.save();
         var transform = gc.getTransform();
-        transform.appendRotation(angle - 90, arrowCanvas.getWidth() / 2, arrowCanvas.getHeight() / 2);
+        transform.appendRotation(90 - angle, arrowCanvas.getWidth() / 2, arrowCanvas.getHeight() / 2);
         gc.setTransform(transform);
         gc.drawImage(arrowIcon, 0, 0, arrowCanvas.getWidth(), arrowCanvas.getHeight());
         gc.restore();
