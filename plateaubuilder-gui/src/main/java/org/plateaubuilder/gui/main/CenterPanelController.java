@@ -29,9 +29,6 @@ public class CenterPanelController implements Initializable {
     private StackPane adjustPerspective;
 
     @FXML
-    private ContextMenu hierarchyContextMenu;
-
-    @FXML
     private MenuItem exportCsvMenu;
 
     @Override
@@ -57,7 +54,6 @@ public class CenterPanelController implements Initializable {
         Platform.runLater(() -> {
             setRightAdjustPerspective(subSceneContainer.getWidth());
         });
-        Editor.getSceneContent().getSubScene().addEventHandler(MouseEvent.MOUSE_PRESSED, mouseEventHandler);
     }
 
     private void setSubScene(SubScene subScene) {
@@ -83,11 +79,6 @@ public class CenterPanelController implements Initializable {
         adjustPerspective.layoutXProperty().unbind();
         adjustPerspective.setLayoutX(xOffset);
     }
-    private final EventHandler<MouseEvent> mouseEventHandler = event -> {
-        if (event.isSecondaryButtonDown() && !ObjectUtils.isEmpty(Editor.getFeatureSellection().getSelectedFeatures())) {
-            hierarchyContextMenu.show(Editor.getSceneContent().getSubScene(),event.getScreenX(), event.getScreenY());
-        }
-    };
 
     public void exportCsv(ActionEvent actionEvent) {
         try {

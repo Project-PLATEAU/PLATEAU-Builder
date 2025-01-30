@@ -87,9 +87,6 @@ public class Camera {
     }
 
     private final EventHandler<MouseEvent> mouseEventHandler = event -> {
-        if (event.isPrimaryButtonDown() && !event.isSecondaryButtonDown() && !event.isMiddleButtonDown()) {
-            return;
-        }
         if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
             lastMousePosition = new Vector2D(event.getSceneX(), event.getSceneY());
         }
