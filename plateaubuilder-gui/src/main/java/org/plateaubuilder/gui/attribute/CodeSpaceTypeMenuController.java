@@ -4,12 +4,14 @@ import java.io.File;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 
 public class CodeSpaceTypeMenuController {
 
@@ -20,6 +22,9 @@ public class CodeSpaceTypeMenuController {
 
     private Consumer<String> onSelectCallback;
     private ObservableList<String> originalListItems = FXCollections.observableArrayList();
+    final double listViewWidth = 300.0;
+    final double searchFieldWidth = listViewWidth;
+    final double padding = 40.0;
 
     public void initialize() {
         // ListViewのアイテムがダブルクリックされたときのイベントリスナーを設定
@@ -63,5 +68,18 @@ public class CodeSpaceTypeMenuController {
 
     public void setOnSelectCallback(Consumer<String> callback) {
         this.onSelectCallback = callback;
+    }
+
+    public void initializeTableWidth() {
+        // リストビューと検索フィールドの幅を設定
+        codeTypeListView.setPrefWidth(listViewWidth);
+        searchField.setPrefWidth(searchFieldWidth);
+        // ウィンドウサイズを設定
+        Platform.runLater(() -> {
+            Stage stage = (Stage) codeTypeListView.getScene().getWindow();
+            double totalWidth = listViewWidth + padding;
+            stage.setMinWidth(totalWidth);
+            stage.setWidth(totalWidth);
+        });
     }
 }

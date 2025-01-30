@@ -14,8 +14,7 @@
         <Label text="■ CodeSpaceの入力" />
         <HBox fx:id="codeSpaceHbox" spacing="10">
             <TextField fx:id="codeSpaceField" promptText="CodeSpace" />
-            <Button onAction="#handleSelectCodeSpace" text="CodeSpaceの選択" />
-            <Button onAction="#handleSelectCodeSpaceValue" text="値の変更" />
+            <Button onAction="#handleSelectCodeSpace" text="一覧から選択" />
         </HBox>
     </VBox>
     <VBox fx:id="uomVbox">
@@ -25,7 +24,10 @@
     </VBox>
     <VBox fx:id="valueVbox">
         <Label text="■ 値の入力" />
-       <TextField fx:id="valueField" promptText="属性値" />
+          <HBox fx:id="valueHbox" spacing="10">
+            <TextField fx:id="valueField" promptText="属性値" />
+            <Button fx:id="valueButton" onAction="#handleSelectCodeSpaceValue" text="値を選択" />
+        </HBox>
     </VBox>
     <HBox alignment="CENTER_RIGHT" spacing="10">
         <Button fx:id="cancelButton" onAction="#handleCancel" text="キャンセル" />

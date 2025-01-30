@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import org.plateaubuilder.core.citymodel.attribute.AttributeValue;
 import org.plateaubuilder.gui.utils.StageController;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -50,6 +51,12 @@ public class AddableAttributeListPanelController {
         attributeTableView.setItems(allAttributes); // TableViewにアイテムを設定
         filterList(""); // 初期表示時に全ての項目を表示
 
+        // カラムの自動リサイズを有効化
+        name.setResizable(true);
+        name.setMinWidth(300);
+        description.setResizable(true);
+        description.setMinWidth(100);
+
         showPanel(panel);
     }
 
@@ -62,6 +69,19 @@ public class AddableAttributeListPanelController {
 
     private void showPanel(Parent panel) {
         stageController = new StageController(panel, "追加属性の選択");
+        // TableViewの内容が変更された後に幅を自動調整
+        Platform.runLater(() -> {
+            // TableViewの全体の幅を計算
+            double totalWidth = attributeTableView.getColumns().stream()
+                    .mapToDouble(TableColumn::getWidth)
+                    .sum();
+
+            // パディングなどの余白を考慮して少し広めに設定
+            totalWidth += 30; // 左右のパディング分
+
+            // ステージの幅を設定
+            stageController.getStage().setWidth(totalWidth);
+        });
         stageController.showStage();
     }
 

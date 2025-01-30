@@ -10,13 +10,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
-import org.citygml4j.model.citygml.building.AbstractBuilding;
-import org.citygml4j.model.citygml.cityfurniture.CityFurniture;
-import org.citygml4j.model.citygml.landuse.LandUse;
-import org.citygml4j.model.citygml.transportation.Road;
-import org.citygml4j.model.citygml.vegetation.PlantCover;
-import org.citygml4j.model.citygml.vegetation.SolitaryVegetationObject;
-import org.citygml4j.model.citygml.waterbody.WaterBody;
 import org.citygml4j.model.common.child.ChildList;
 import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.attribute.AttributeItem;
@@ -25,7 +18,6 @@ import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManage
 import org.plateaubuilder.core.citymodel.attribute.manager.AttributeSchemaManagerFactory;
 import org.plateaubuilder.core.citymodel.attribute.reader.XSDSchemaDocument;
 import org.plateaubuilder.core.citymodel.attribute.wrapper.RootAttributeHandler;
-import org.plateaubuilder.core.citymodel.citygml.ADEGenericComponent;
 import org.plateaubuilder.core.editor.Editor;
 import org.plateaubuilder.core.editor.attribute.AttributeEditor;
 import org.plateaubuilder.core.editor.attribute.AttributeTreeBuilder;
@@ -42,6 +34,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
@@ -150,29 +143,7 @@ public class AttributeEditorController implements Initializable {
 
         // TreeViewの各行に対する処理
         attributeTreeTable.setRowFactory(treeView -> {
-            TreeTableRow<AttributeItem> row = new TreeTableRow<>() {
-                // 削除不可能アイテムの背景色をグレーにする処理
-                @Override
-                protected void updateItem(AttributeItem item, boolean empty) {
-                    super.updateItem(item, empty);
-
-                    // 項目が空、または存在しない場合、背景色なし。
-                    if (empty || item == null) {
-                        setStyle("");
-                    } else {
-                        // 項目が存在する場合のみ、チェックを行う。
-                        TreeItem<AttributeItem> parentItem = getTreeItem().getParent();
-                        String parentKey = parentItem != null ? parentItem.getValue().getName() : "";
-                        if (!uroSchemaDocument.isDeletable(item.getName(), parentKey, "uro")) {
-                            setStyle("-fx-background-color: grey;");
-                        } else {
-                            setStyle("");
-                        }
-                    }
-
-                    // ツールチップを設定
-                }
-            };
+            TreeTableRow<AttributeItem> row = new TreeTableRow<>();
             // 空白部分をクリックした際にアイテムの選択状態をクリアにする処理
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 1 && row.isEmpty()) {
@@ -342,25 +313,34 @@ public class AttributeEditorController implements Initializable {
             // 複数選択時の処理
             addAttributeList = getCommonAddableAttributes(selectedFeatures, keyAttributeName, treeViewChildItemList);
         } else {
-            // 単一選択時の既存の処理
-            /* Uro用 */
-            ArrayList<ArrayList<String>> addableUroAttributeList = uroSchemaDocument.getElementList(
-                    keyAttributeName, false, treeViewChildItemList, "uro");
-            ArrayList<String> addableBldgAttributeList = attributeSchemaManager.getAttributeNameList(
-                    keyAttributeName, treeViewChildItemList);
-            addableUroAttributeList.addAll(getBuildingElementList());
+
+            ArrayList<ArrayList<String>> addableUroAttributeList = new ArrayList<>();
+            ArrayList<String> addableBldgAttributeList = new ArrayList<>();
+            // 属性の種類に応じて追加可能な属性リストを取得
+            if (keyAttributeName != null && keyAttributeName.startsWith("uro:")) {
+                // uro属性の場合は、uro属性のみ取得
+                addableUroAttributeList = uroSchemaDocument.getElementList(
+                        keyAttributeName, false, treeViewChildItemList, "uro");
+            } else if (keyAttributeName.matches("root")) {
+                // ルート要素の場合は、uro属性と地物属性の両方を取得
+                addableUroAttributeList = uroSchemaDocument.getElementList(
+                        keyAttributeName, false, treeViewChildItemList, "uro");
+                addableBldgAttributeList = attributeSchemaManager.getAttributeNameList(
+                        keyAttributeName, treeViewChildItemList);
+            } else {
+                // その他の場合は、地物属性のみ取得
+                addableBldgAttributeList = attributeSchemaManager.getAttributeNameList(
+                        keyAttributeName, treeViewChildItemList);
+            }
 
             // 属性値リストの作成
             for (ArrayList<String> attribute : addableUroAttributeList) {
                 addAttributeList.add(new AttributeValue(attribute.get(0), attribute.get(2)));
             }
-
-            /* bldg用 */
             for (String attribute : addableBldgAttributeList) {
                 addAttributeList.add(new AttributeValue(attribute, ""));
             }
         }
-
         // 追加可能な属性がない場合はエラー表示
         if (addAttributeList.isEmpty()) {
             AlertController.showAddAlert();

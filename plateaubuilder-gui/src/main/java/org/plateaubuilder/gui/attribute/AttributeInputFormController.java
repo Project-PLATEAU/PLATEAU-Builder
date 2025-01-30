@@ -29,6 +29,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -42,6 +43,10 @@ public class AttributeInputFormController {
     private TextField codeSpaceField, uomField, valueField;
     @FXML
     private VBox codeSpaceVbox, uomVbox, valueVbox;
+    @FXML
+    private HBox codeSpaceHbox;
+    @FXML
+    private Button valueButton;
 
     private ChildList<ADEComponent> bldgAttributeTree;
     private String addAttributeName;
@@ -59,6 +64,8 @@ public class AttributeInputFormController {
             .getSchemaManager(Editor.getFeatureSellection().getActiveFeatureProperty().get().getGML());
     private MultipleAttributeInputFormatController multipleAttributeInputFormatController;
     private Set<IFeatureView> selectedFeatures;
+    final double maxWidth = 500.0;
+    final double preWidth = 300.0;
 
     /**
      * 属性追加用フォームを表示するための初期設定を行います
@@ -76,7 +83,7 @@ public class AttributeInputFormController {
         this.addAttributeName = addAttributeName;
         this.bldgAttributeTree = bldgAttributeTree;
         this.addFlag = true;
-
+        setWidth();
         configureForm(baseAttributeItem.getName(), addAttributeName, treeViewChildItemList, form, "属性の追加");
         nameLabel.setText(nameLabel.getText() + addAttributeName);
     }
@@ -90,7 +97,7 @@ public class AttributeInputFormController {
     public void initialize(AttributeItem targetAttributeItem, Parent form) {
         this.targetAttributeItem = targetAttributeItem;
         this.editFlag = true;
-
+        setWidth();
         configureForm(targetAttributeItem.getName(), null, null, form, "属性の編集");
         nameLabel.setText(nameLabel.getText() + targetAttributeItem.getName());
     }
@@ -151,6 +158,8 @@ public class AttributeInputFormController {
             }
         } else {
             setVisibility(codeSpaceVbox, false);
+            valueButton.setVisible(false);
+            valueButton.setManaged(false);
         }
 
         // uom入力BOXの表示設定
@@ -193,6 +202,7 @@ public class AttributeInputFormController {
             e.printStackTrace();
         }
         final StageController codeTypeStageController = new StageController(typeRoot, "CodeSpaceの選択");
+        codeSpaceTypeMenuController.initializeTableWidth(); // ウィンドウサイズを自動調整
         codeTypeStageController.showStage();
 
         try {
@@ -205,15 +215,19 @@ public class AttributeInputFormController {
         final CodeSpaceValueMenuController codeSpaceValueMenuController = valueLoader.getController();
         final Parent finalValueRoot = valueRoot;
         final StageController codeValueStageController = new StageController(finalValueRoot, "codeSpace値の入力");
+        // テーブルの列幅に基づいてウィンドウサイズを自動調整
+        codeSpaceValueMenuController.initializeTableWidth();
 
         CodeListReader CodeListReader = new CodeListReader();
         // codeTypeMenuControllerで表示されるメニューにおいて、選択行為がされたら呼び出される
         codeSpaceTypeMenuController.setOnSelectCallback(selectedCodeSpace -> {
             setCodeSpaceField(selectedCodeSpace);
+
             codeSpacePath = "../../codelists/" + selectedCodeSpace;
             CodeListReader.readCodeList(codeListDirPath + "\\" + selectedCodeSpace);
-            codeSpaceValueMenuController.setCodeType(CodeListReader.getCodeListDocument());
 
+            codeSpaceValueMenuController.setCodeType(CodeListReader.getCodeListDocument());
+            codeSpaceValueMenuController.initializeTableWidth(); // テーブルの列幅に基づいてウィンドウサイズを自動調整
             codeValueStageController.showStage();
             codeTypeStageController.closeStage();
         });
@@ -249,6 +263,8 @@ public class AttributeInputFormController {
         codeSpaceValueMenuController.setCodeType(codeListReader.getCodeListDocument());
 
         StageController stageController = new StageController(valueRoot, "codeSpace値の入力");
+        // テーブルの列幅に基づいてウィンドウサイズを自動調整
+        codeSpaceValueMenuController.initializeTableWidth();
         stageController.showStage();
 
         codeSpaceValueMenuController.setItemSelectedCallback(selectedItem -> {
@@ -407,6 +423,7 @@ public class AttributeInputFormController {
                 });
             }
         } else {
+
             Stage stage = (Stage) addButton.getScene().getWindow();
             AlertController.showValueAlert(addAttributeType, stage);
             return;
@@ -424,6 +441,34 @@ public class AttributeInputFormController {
         if (stageController != null) {
             stageController.closeStage();
         }
+    }
+
+    /**
+     * 必須フィールドが未入力かどうかをチェックします
+     */
+    public boolean isRequiredFieldEmpty() {
+        String value = valueField.getText();
+
+        // 値の入力チェック
+        if (value == null || value.trim().isEmpty()) {
+            return true;
+        }
+
+        // 型に応じた必須項目チェック
+        if (addAttributeType.matches("gml:CodeType")) {
+            if (codeSpaceField.getText() == null || codeSpaceField.getText().trim().isEmpty()) {
+                return true;
+            }
+        } else if (addAttributeType.matches("gml:MeasureType") ||
+                addAttributeType.matches("gml:LengthType") ||
+                addAttributeType.matches("gml::MeasureOrNullListType")) {
+            if (uomField.getText() == null || uomField.getText().trim().isEmpty()) {
+                return true;
+            }
+        } else if (!valueVbox.isVisible() || !valueVbox.isManaged()) {
+            return false;
+        }
+        return false;
     }
 
     /**
@@ -448,5 +493,41 @@ public class AttributeInputFormController {
 
     public boolean isSkipped() {
         return requiredChildAttributeList != null && !requiredChildAttributeList.isEmpty();
+    }
+
+    private void setWidth() {
+        codeSpaceVbox.setMaxWidth(maxWidth);
+        codeSpaceField.setPrefWidth(preWidth);
+        uomVbox.setMaxWidth(maxWidth);
+        uomField.setPrefWidth(preWidth);
+        valueVbox.setMaxWidth(maxWidth);
+        valueField.setPrefWidth(preWidth);
+    }
+
+    /**
+     * 属性の名前を取得します
+     * 
+     * @return 属性の名前
+     */
+    public String getAttributeName() {
+        return addAttributeName;
+    }
+
+    /**
+     * 属性の型を取得します
+     * 
+     * @return 属性の型
+     */
+    public String getAttributeType() {
+        return addAttributeType;
+    }
+
+    /**
+     * 属性値入力フィールドを取得します
+     * 
+     * @return 属性値入力フィールド
+     */
+    public TextField getValueField() {
+        return valueField;
     }
 }

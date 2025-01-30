@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
@@ -274,20 +273,20 @@ public class BuildingSchemaManager implements AttributeSchemaManager {
                 ArrayList<String> childNames = new ArrayList<>();
 
                 JsonObject parentObject = ATTRIBUTE_BUILDING_CONFIG.getJsonObject(parentAttributeName);
-
-                if (parentObject == null) {
+                JsonObject childrenObject = parentObject.getJsonObject("children");
+                if (parentObject == null || childrenObject == null) {
                         return childNames;
                 }
-                JsonObject childrenObject = parentObject.getJsonObject("children");
                 for (String childKey : childrenObject.keySet()) {
                         JsonObject childObject = childrenObject.getJsonObject(childKey);
                         String childAttributeName = childObject.getString("name");
-                        if (getChildAttributeMax(parentAttributeName, childAttributeName.split(":")[1])
-                                        .matches("unbounded")
-                                        || Integer.parseInt(getChildAttributeMax(parentAttributeName,
-                                                        childAttributeName.split(":")[1])) > Collections.frequency(
-                                                                        addedAttributeNames,
-                                                                        childAttributeName)) {
+                        String childName = childAttributeName.split(":")[1];
+                        String maxOccurs = getChildAttributeMax(parentAttributeName, childName);
+
+                        int currentCount = Collections.frequency(addedAttributeNames, childAttributeName);
+
+                        if (maxOccurs.matches("unbounded") ||
+                                        Integer.parseInt(maxOccurs) > currentCount) {
                                 childNames.add(childAttributeName);
                         }
                 }

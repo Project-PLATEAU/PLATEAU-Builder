@@ -187,10 +187,10 @@ public class LandUseSchemaManager implements AttributeSchemaManager {
                         ArrayList<String> addedAttributeNames) {
                 ArrayList<String> childNames = new ArrayList<>();
                 JsonObject parentObject = ATTRIBUTE_LANDUSE_CONFIG.getJsonObject(parentAttributeName);
-                if (parentObject == null) {
+                JsonObject childrenObject = parentObject.getJsonObject("children");
+                if (parentObject == null || childrenObject == null) {
                         return childNames;
                 }
-                JsonObject childrenObject = parentObject.getJsonObject("children");
                 for (String childKey : childrenObject.keySet()) {
                         JsonObject childObject = childrenObject.getJsonObject(childKey);
                         String childAttributeName = childObject.getString("name");

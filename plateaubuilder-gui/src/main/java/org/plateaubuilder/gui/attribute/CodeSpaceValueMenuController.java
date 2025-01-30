@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -15,6 +16,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 
 public class CodeSpaceValueMenuController {
     @FXML
@@ -83,5 +85,31 @@ public class CodeSpaceValueMenuController {
                 onItemSelected.accept(selectedItem);
             }
         }
+    }
+
+    public void initializeTableWidth() {
+        // テーブルの列幅を設定
+        double baseColumnWidth = 200.0; // 各列の最小幅
+
+        // 各列に最小幅を設定
+        id.setPrefWidth(baseColumnWidth + 50);
+        description.setPrefWidth(baseColumnWidth);
+        name.setPrefWidth(baseColumnWidth - 50);
+
+        // テーブル全体の幅を計算
+        final double finalTotalWidth = baseColumnWidth * 3 + 20;
+
+        // テーブルの幅を設定
+        codeSpaceValueTable.setPrefWidth(finalTotalWidth);
+
+        // ウィンドウサイズを設定
+        Platform.runLater(() -> {
+            Stage stage = (Stage) codeSpaceValueTable.getScene().getWindow();
+            stage.setMinWidth(finalTotalWidth);
+            stage.setWidth(finalTotalWidth);
+        });
+
+        // 列の自動リサイズを有効化
+        codeSpaceValueTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
     }
 }
