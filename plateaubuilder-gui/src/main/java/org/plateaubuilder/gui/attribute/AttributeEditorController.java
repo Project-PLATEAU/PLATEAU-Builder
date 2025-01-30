@@ -36,6 +36,7 @@ import org.plateaubuilder.validation.AttributeValidator;
 
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -47,6 +48,7 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.util.StringConverter;
 
 public class AttributeEditorController implements Initializable {
     public TreeTableView<AttributeItem> attributeTreeTable;
@@ -220,6 +222,10 @@ public class AttributeEditorController implements Initializable {
         attributeTreeTable.setShowRoot(false);
 
         keyColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
+        valueColumn.setCellValueFactory(param -> {
+            AttributeItem item = param.getValue().getValue();
+            return new SimpleStringProperty(item.getValue());
+        });
         valueColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("value"));
         valueColumn.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
         valueColumn.setOnEditCommit(event -> {

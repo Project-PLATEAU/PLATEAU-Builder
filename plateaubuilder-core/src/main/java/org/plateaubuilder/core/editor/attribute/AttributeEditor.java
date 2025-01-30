@@ -43,7 +43,6 @@ public class AttributeEditor {
                     : ((CommonAttributeItem) baseAttributeItem).getRelatedFeatures();
             CommonAttributeItem commonAttributeItem = null;
             for (IFeatureView feature : features) {
-                System.out.println(feature.getId());
                 AttributeItem actualParent = baseAttributeItem.getName().equals("root")
                         ? new AttributeItem(new RootAttributeHandler(feature))
                         : ((CommonAttributeItem) baseAttributeItem).getAttributeForFeature(feature);

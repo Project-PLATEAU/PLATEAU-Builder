@@ -1,6 +1,8 @@
 package org.plateaubuilder.core.editor.attribute;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
@@ -223,86 +225,62 @@ public class AttributeTreeBuilder {
         TreeItem<AttributeItem> firstRoot = new TreeItem<>(new AttributeItem(new RootAttributeHandler(firstFeature)));
         attributeToTree(firstFeature, firstRoot);
 
-        // 共通属性を持つTreeItemを作成
-        buildCommonAttributeTree(firstRoot, root, firstFeature);
-
-        // 他の地物と比較して共通属性のTreeItemを構築
+        // 全地物の属性をマッピング
+        Map<IFeatureView, Map<String, TreeItem<AttributeItem>>> featureAttributeMap = new HashMap<>();
         for (IFeatureView feature : selectedFeatures) {
-            if (feature == firstFeature)
-                continue;
-
-            TreeItem<AttributeItem> compareRoot = new TreeItem<>(new AttributeItem(new RootAttributeHandler(feature)));
-            attributeToTree(feature, compareRoot);
-
-            // 共通属性の検出と関連付け
-            pruneNonCommonAttributes(root, compareRoot, feature);
+            TreeItem<AttributeItem> featureRoot = new TreeItem<>(new AttributeItem(new RootAttributeHandler(feature)));
+            attributeToTree(feature, featureRoot);
+            featureAttributeMap.put(feature, mapAttributesByName(featureRoot));
         }
+
+        // 最初の地物の属性をベースに共通属性ツリーを構築
+        buildCommonAttributeTree(firstRoot.getChildren(), featureAttributeMap, root, firstFeature);
     }
 
-    /**
-     * 共通属性のツリーを構築します
-     */
-    private static void buildCommonAttributeTree(TreeItem<AttributeItem> sourceItem,
-            TreeItem<AttributeItem> targetItem, IFeatureView feature) {
-
-        CommonAttributeItem commonAttr = new CommonAttributeItem(sourceItem.getValue(), feature);
-        targetItem.setValue(commonAttr);
-
-        for (TreeItem<AttributeItem> sourceChild : sourceItem.getChildren()) {
-            TreeItem<AttributeItem> newItem = new TreeItem<>();
-            targetItem.getChildren().add(newItem);
-            buildCommonAttributeTree(sourceChild, newItem, feature);
+    // 属性を名前でマッピングする
+    private static Map<String, TreeItem<AttributeItem>> mapAttributesByName(TreeItem<AttributeItem> root) {
+        Map<String, TreeItem<AttributeItem>> attributeMap = new HashMap<>();
+        for (TreeItem<AttributeItem> item : root.getChildren()) {
+            attributeMap.put(item.getValue().getName(), item);
+            attributeMap.putAll(mapAttributesByName(item));
         }
+        return attributeMap;
     }
 
-    /**
-     * 共通ではない属性を削除し、共通属性を関連付けます
-     */
-    private static void pruneNonCommonAttributes(TreeItem<AttributeItem> baseItem,
-            TreeItem<AttributeItem> compareItem, IFeatureView feature) {
+    // 共通属性を抽出してTreeItemを構築
+    private static void buildCommonAttributeTree(List<TreeItem<AttributeItem>> sourceItems,
+            Map<IFeatureView, Map<String, TreeItem<AttributeItem>>> featureAttributeMap,
+            TreeItem<AttributeItem> targetParent, IFeatureView firstFeature) {
 
-        // 子ノードを後ろから処理
-        for (int i = baseItem.getChildren().size() - 1; i >= 0; i--) {
-            TreeItem<AttributeItem> baseChild = baseItem.getChildren().get(i);
-            TreeItem<AttributeItem> compareChild = findMatchingAttribute(baseChild, compareItem.getChildren());
+        for (TreeItem<AttributeItem> sourceItem : sourceItems) {
+            AttributeItem sourceAttr = sourceItem.getValue();
+            CommonAttributeItem commonAttr = new CommonAttributeItem(sourceAttr, firstFeature);
+            TreeItem<AttributeItem> commonItem = new TreeItem<>(commonAttr);
 
-            if (compareChild == null) {
-                // 一致する属性がない場合は削除
-                baseItem.getChildren().remove(i);
-                continue;
+            // 他の地物で同じ名前の属性を探して関連付け
+            boolean allFeaturesHaveAttribute = true;
+            for (Map.Entry<IFeatureView, Map<String, TreeItem<AttributeItem>>> entry : featureAttributeMap.entrySet()) {
+                IFeatureView feature = entry.getKey();
+                if (feature == firstFeature)
+                    continue;
+
+                TreeItem<AttributeItem> matchingItem = entry.getValue().get(sourceAttr.getName());
+                if (matchingItem == null) {
+                    allFeaturesHaveAttribute = false;
+                    break;
+                }
+                commonAttr.addRelatedAttribute(feature, matchingItem.getValue());
             }
 
-            String baseValue = baseChild.getValue().getValue();
-            String compareValue = compareChild.getValue().getValue();
+            // 全ての地物が属性を持っている場合のみ追加
+            if (allFeaturesHaveAttribute) {
+                targetParent.getChildren().add(commonItem);
 
-            if ((baseValue == null && compareValue != null) ||
-                    (baseValue != null && compareValue == null) ||
-                    (baseValue != null && !baseValue.equals(compareValue))) {
-                // 値が異なる場合は削除
-                baseItem.getChildren().remove(i);
-            } else {
-                // 共通属性として関連付け
-                CommonAttributeItem commonAttr = (CommonAttributeItem) baseChild.getValue();
-                commonAttr.addRelatedAttribute(feature, compareChild.getValue());
-
-                // 子階層の比較を続行
-                pruneNonCommonAttributes(baseChild, compareChild, feature);
-            }
-        }
-    }
-
-    /**
-     * 属性名が一致する属性を探します
-     */
-    private static TreeItem<AttributeItem> findMatchingAttribute(TreeItem<AttributeItem> targetItem,
-            List<TreeItem<AttributeItem>> compareItems) {
-        String targetName = targetItem.getValue().getName();
-
-        for (TreeItem<AttributeItem> item : compareItems) {
-            if (item.getValue().getName().equals(targetName)) {
-                return item;
+                if (!sourceItem.getChildren().isEmpty()) {
+                    buildCommonAttributeTree(sourceItem.getChildren(), featureAttributeMap, commonItem,
+                            firstFeature);
+                }
             }
         }
-        return null;
     }
 }

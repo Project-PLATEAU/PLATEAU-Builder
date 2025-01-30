@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.plateaubuilder.core.citymodel.IFeatureView;
-import org.plateaubuilder.core.citymodel.attribute.wrapper.RootAttributeHandler;
 
 /**
  * 複数地物間で共通の属性を管理するクラス
@@ -24,6 +23,19 @@ public class CommonAttributeItem extends AttributeItem {
     public void addRelatedAttribute(IFeatureView feature, AttributeItem attribute) {
         relatedAttributes.add(attribute);
         featureToAttributeMap.put(feature, attribute);
+    }
+
+    @Override
+    public String getValue() {
+        String baseValue = super.getValue();
+        // 関連する全ての属性の値を比較
+        for (AttributeItem attr : relatedAttributes) {
+            String attrValue = attr.getValue();
+            if (attrValue == null || !baseValue.equals(attrValue)) {
+                return "*";
+            }
+        }
+        return baseValue;
     }
 
     @Override

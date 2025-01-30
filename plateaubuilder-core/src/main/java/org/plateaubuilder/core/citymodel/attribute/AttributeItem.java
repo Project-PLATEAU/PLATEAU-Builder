@@ -31,7 +31,11 @@ public class AttributeItem {
     }
 
     public String getValue() {
-        return attributeHandler.getValue();
+        if (attributeHandler != null) {
+            String value = attributeHandler.getValue();
+            return value != null ? value : "";
+        }
+        return "";
     }
 
     public void setValue(String value) {
