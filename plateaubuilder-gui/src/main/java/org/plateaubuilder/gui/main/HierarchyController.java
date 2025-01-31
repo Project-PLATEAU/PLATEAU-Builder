@@ -8,6 +8,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javafx.scene.control.skin.TreeTableViewSkin;
+import javafx.scene.control.skin.VirtualFlow;
 import org.plateaubuilder.core.citymodel.CityModelView;
 import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.geometry.GeometryView;
@@ -47,101 +49,133 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.shape.MeshView;
 
 public class HierarchyController implements Initializable {
-    public TreeTableView<Node> hierarchyTreeTable;
-    public TreeTableColumn<Node, String> nodeColumn;
-    public TreeTableColumn<Node, String> idColumn;
-    public TreeTableColumn<Node, Boolean> visibilityColumn;
-    public ContextMenu hierarchyContextMenu;
-    public MenuItem exportCsvMenu;
-    public MenuItem exportGltfMenu;
-    public MenuItem exportObjMenu;
-    public MenuItem importGltfMenu;
-    public MenuItem importObjMenu;
-    public MenuItem hideSelectedViews;
-    public MenuItem hideUnselectedViews;
+    @FXML
+    private TreeTableView<Node> hierarchyTreeTable;
+    @FXML
+    private TreeTableColumn<Node, String> nodeColumn;
+    @FXML
+    private TreeTableColumn<Node, String> idColumn;
+    @FXML
+    private TreeTableColumn<Node, Boolean> visibilityColumn;
+    @FXML
+    private ContextMenu hierarchyContextMenu;
+    @FXML
+    private MenuItem exportCsvMenu;
+    @FXML
+    private MenuItem exportGltfMenu;
+    @FXML
+    private MenuItem exportObjMenu;
+    @FXML
+    private MenuItem importGltfMenu;
+    @FXML
+    private MenuItem importObjMenu;
+    @FXML
+    private MenuItem hideSelectedViews;
+    @FXML
+    private MenuItem hideUnselectedViews;
 
     @FXML
-    Button buttonShowSearchDialog;
-
+    private Button buttonShowSearchDialog;
     @FXML
-    Button buttonClearFilter;
+    private Button buttonClearFilter;
 
     private boolean syncingHierarchy = false;
-
     private SearchDialogController searchDialogController;
 
+    /**
+     * 現在のCityModelGroupをもとにツリーを再構築します。
+     * ルートの子要素はデフォルトで展開されます。
+     */
     private void constructTree() {
         var group = World.getActiveInstance().getCityModelGroup();
         if (group != null) {
-            hierarchyTreeTable.rootProperty().set(new HierarchyController.TreeItemImpl(group));
+            hierarchyTreeTable.setRoot(new TreeItemImpl(group));
+            // ルート直下の要素は全て展開
+            for (var item : hierarchyTreeTable.getRoot().getChildren()) {
+                item.setExpanded(true);
+            }
         }
-        for (var item : hierarchyTreeTable.getRoot().getChildren()) {
-            item.setExpanded(true);
-        }
+        // 検索ダイアログが開いている場合は閉じる
         closeSearchDialog();
     }
 
+    /**
+     * @brief 初期化処理。GUI要素の設定とイベントリスナを登録します。
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        hierarchyTreeTable.setFocusTraversable(true);
+
+        // CityModelGroupの変更を監視
         World.getActiveInstance().cityModelGroupProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null)
+            if (newValue == null) {
                 return;
-
+            }
             constructTree();
-
+            // CityModelの変更があったら再構築
             newValue.addChangeListener(this::constructTree);
         });
 
+        // 複数選択を許可
         hierarchyTreeTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        Editor.getFeatureSellection().selectedFeaturesProperty().addListener((SetChangeListener<? super IFeatureView>) change -> {
-            Platform.runLater(() -> {
-                if (syncingHierarchy)
-                    return;
+        // 3Dビューでの選択変更を監視し、ツリー上の選択状態に反映
+        Editor.getFeatureSellection().selectedFeaturesProperty().addListener(
+                (SetChangeListener<? super IFeatureView>) change -> {
+                    Platform.runLater(() -> {
+                        if (syncingHierarchy) {
+                            return;
+                        }
+                        syncingHierarchy = true;
 
-                syncingHierarchy = true;
-                try {
-                    var selectedFeatures = Editor.getFeatureSellection().selectedFeaturesProperty().get();
-                    var selectionModel = hierarchyTreeTable.getSelectionModel();
-                    selectionModel.clearSelection();
-                    selectedFeatures.forEach(feature -> {
-                        TreeItem<Node> item = findTreeItem(feature);
-                        if (item != null) {
-                            hierarchyTreeTable.requestFocus();
-                            expandTreeViewItem(item);
-                            selectionModel.select(item);
-                            hierarchyTreeTable.scrollTo(hierarchyTreeTable.getRow(item));
+                        try {
+                            var selectedFeatures = Editor.getFeatureSellection().selectedFeaturesProperty().get();
+                            var selectionModel = hierarchyTreeTable.getSelectionModel();
+                            selectionModel.clearSelection();
+                            // 選択中の地物に対応するツリーアイテムを探して選択
+                            selectedFeatures.forEach(feature -> {
+                                TreeItem<Node> item = findTreeItem(feature);
+                                if (item != null) {
+                                    hierarchyTreeTable.requestFocus();
+                                    expandTreeViewItem(item);
+                                    selectionModel.select(item);
+
+                                    // 画面外の場合はスクロール
+                                    if (!isRowVisible(item))
+                                        hierarchyTreeTable.scrollTo(hierarchyTreeTable.getRow(item));
+                                }
+                            });
+                        } finally {
+                            syncingHierarchy = false;
                         }
                     });
-                } finally {
-                    syncingHierarchy = false;
-                }
-            });
-        });
+                });
 
+        // ツリー上の選択アイテム変更を監視
         hierarchyTreeTable.getSelectionModel().getSelectedItems().addListener((ListChangeListener<TreeItem<Node>>) change -> {
-            if (syncingHierarchy)
+            if (syncingHierarchy) {
                 return;
-
+            }
             syncingHierarchy = true;
             try {
                 var selectedItems = hierarchyTreeTable.getSelectionModel().getSelectedItems();
                 var selectedFeatures = selectedItems.stream()
-                        .filter((item) -> item.valueProperty().get() instanceof IFeatureView).map((item) -> (IFeatureView) item.valueProperty().get())
+                        .filter(item -> item.getValue() instanceof IFeatureView)
+                        .map(item -> (IFeatureView) item.getValue())
                         .toArray(IFeatureView[]::new);
-                var selection = Editor.getFeatureSellection();
-                selection.select(selectedFeatures);
+                Editor.getFeatureSellection().select(selectedFeatures);
             } finally {
                 syncingHierarchy = false;
             }
         });
 
-        hierarchyTreeTable.setOnMouseClicked(t -> {
-            if (t.getButton() == MouseButton.SECONDARY) {
-
+        // マウスクリック時の処理
+        hierarchyTreeTable.setOnMouseClicked(event -> {
+            // 右クリック時、コンテキストメニューの有効/無効を切り替え
+            if (event.getButton() == MouseButton.SECONDARY) {
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
                 if (selectedItem != null) {
-                    var item = selectedItem.valueProperty().get();
+                    var item = selectedItem.getValue();
                     var isSingleSelection = hierarchyTreeTable.getSelectionModel().getSelectedItems().size() == 1;
                     exportCsvMenu.setDisable(!(item instanceof IFeatureView));
                     exportGltfMenu.setDisable(!(item instanceof IFeatureView) || !isSingleSelection);
@@ -150,40 +184,56 @@ public class HierarchyController implements Initializable {
                     importObjMenu.setDisable(!(item instanceof IFeatureView) || !isSingleSelection);
                 }
             }
-            if (t.getButton() == MouseButton.PRIMARY && t.getClickCount() == 2) {
+            // 左ダブルクリック時、カメラをその地物にフォーカス
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
-                if (selectedItem != null && selectedItem.valueProperty().get() instanceof IFeatureView) {
-                    var feature = (IFeatureView) selectedItem.valueProperty().get();
+                if (selectedItem != null && selectedItem.getValue() instanceof IFeatureView) {
+                    var feature = (IFeatureView) selectedItem.getValue();
+                    // カメラをLOD1のMeshViewに向ける
                     World.getActiveInstance().getCamera().focus(feature.getLODView(1).getMeshView());
                 }
-                t.consume();
+                event.consume();
             }
         });
 
-        hierarchyTreeTable.setOnKeyPressed(t -> {
-            if (t.getCode() == KeyCode.SPACE) {
+        // スペースキーで表示/非表示を切り替え
+        hierarchyTreeTable.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.SPACE) {
                 TreeItem<Node> selectedItem = hierarchyTreeTable.getSelectionModel().getSelectedItem();
                 if (selectedItem != null) {
                     Node node = selectedItem.getValue();
+                    // 表示状態を反転
                     node.setVisible(!node.isVisible());
                 }
-                t.consume();
+                event.consume();
             }
         });
 
-
+        // カラム設定
         nodeColumn.setCellValueFactory(p -> p.getValue().valueProperty().asString());
         idColumn.setCellValueFactory(p -> p.getValue().getValue().idProperty());
         visibilityColumn.setCellValueFactory(p -> p.getValue().getValue().visibleProperty());
         visibilityColumn.setCellFactory(CheckBoxTreeTableCell.forTreeTableColumn(visibilityColumn));
     }
 
+    /**
+     * 指定したIFeatureViewを保持するTreeItemを探します。
+     * @param activeFeature 検索対象のIFeatureView
+     * @return TreeItem<Node> 該当アイテム、未発見の場合null
+     */
     private TreeItem<Node> findTreeItem(IFeatureView activeFeature) {
         return findTreeItemRecursive(hierarchyTreeTable.getRoot(), activeFeature);
     }
 
+    /**
+     * findTreeItem用の再帰ヘルパー関数。
+     * @param currentItem 現在探索中のTreeItem
+     * @param activeFeature 検索対象のIFeatureView
+     * @return 見つかったTreeItem、またはnull
+     */
     private TreeItem<Node> findTreeItemRecursive(TreeItem<Node> currentItem, IFeatureView activeFeature) {
         Node currentFeature = currentItem.getValue();
+        // IFeatureView同士で比較
         if (currentFeature instanceof IFeatureView && currentFeature.equals(activeFeature)) {
             return currentItem;
         }
@@ -459,6 +509,38 @@ public class HierarchyController implements Initializable {
         if (searchDialogController != null) {
             searchDialogController.close();
         }
+    }
+
+    /**
+     * 指定した行番号が現在の可視領域に含まれているかを返す。
+     * 非公開API(VirtualFlow)を利用するため、将来のJavaFXで動作が変わる可能性がある点に注意。
+     */
+    private boolean isRowVisible(TreeItem<Node> item) {
+        int rowIndex = hierarchyTreeTable.getRow(item);
+        if (rowIndex < 0) return false; // アイテムが見つからない場合
+
+        if (!(hierarchyTreeTable.getSkin() instanceof TreeTableViewSkin)) {
+            return false;
+        }
+        TreeTableViewSkin<?> skin = (TreeTableViewSkin<?>) hierarchyTreeTable.getSkin();
+
+        // Skin内部の子要素(VirtualFlow)を取得
+        var flows = skin.getChildren().stream().filter(node -> node instanceof VirtualFlow).findFirst();
+        if (flows.isEmpty()) {
+            return false;
+        }
+        var flow = (VirtualFlow<?>)flows.get();
+
+        // 現在の先頭セルと末尾セルを取得
+        var firstCell = flow.getFirstVisibleCell();
+        var lastCell = flow.getLastVisibleCell();
+        if (firstCell == null || lastCell == null) {
+            return false;
+        }
+        int firstIndex = firstCell.getIndex();
+        int lastIndex = lastCell.getIndex();
+        // rowIndex が可視範囲に入っていれば true
+        return (rowIndex >= firstIndex && rowIndex <= lastIndex);
     }
 
     private class TreeItemImpl extends TreeItem<Node> {
