@@ -73,4 +73,28 @@ public class CommonAttributeItem extends AttributeItem {
     public Set<Map.Entry<IFeatureView, AttributeItem>> getFeatureAttributeEntries() {
         return featureToAttributeMap.entrySet();
     }
+
+    /**
+     * 指定された地物の属性値を取得します
+     */
+    public String getValueForFeature(IFeatureView feature) {
+        AttributeItem attr = featureToAttributeMap.get(feature);
+        return attr != null ? attr.getValue() : null;
+    }
+
+    /**
+     * 指定された地物のコードスペースを取得します
+     */
+    public String getCodeSpaceForFeature(IFeatureView feature) {
+        AttributeItem attr = featureToAttributeMap.get(feature);
+        return attr != null ? attr.getCodeSpace() : null;
+    }
+
+    /**
+     * 指定された地物のUOMを取得します
+     */
+    public String getUomForFeature(IFeatureView feature) {
+        AttributeItem attr = featureToAttributeMap.get(feature);
+        return attr != null ? attr.getUom() : null;
+    }
 }

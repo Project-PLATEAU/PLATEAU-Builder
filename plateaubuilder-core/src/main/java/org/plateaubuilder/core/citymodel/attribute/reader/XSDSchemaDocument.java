@@ -22,12 +22,16 @@ import org.w3c.dom.NodeList;
 import net.opengis.gml.StringOrRefType;
 
 public class XSDSchemaDocument {
-    private static final Map<String, Class> typeMap = Map.ofEntries(entry("xs:string", String.class), entry("xs:integer", Integer.class),
-            entry("xs:double", Double.class), entry("xs:gYear", LocalDate.class), entry("xs:date", ZonedDateTime.class), entry("xs:boolean", Boolean.class),
-            entry("xs:anyURI", String.class), entry("gml:CodeType", Code.class), entry("gml:LengthType", Length.class), entry("gml:MeasureType", Measure.class),
+    private static final Map<String, Class> typeMap = Map.ofEntries(entry("xs:string", String.class),
+            entry("xs:integer", Integer.class),
+            entry("xs:double", Double.class), entry("xs:gYear", LocalDate.class), entry("xs:date", ZonedDateTime.class),
+            entry("xs:boolean", Boolean.class),
+            entry("xs:anyURI", String.class), entry("gml:CodeType", Code.class), entry("gml:LengthType", Length.class),
+            entry("gml:MeasureType", Measure.class),
             entry("gml:StringOrRefType", StringOrRefType.class));
 
-    private static final Set<String> ignoreTypes = Set.of("urf:TargetPropertyType", "gml:MultiSurfacePropertyType", "gml:MultiCurvePropertyType",
+    private static final Set<String> ignoreTypes = Set.of("urf:TargetPropertyType", "gml:MultiSurfacePropertyType",
+            "gml:MultiCurvePropertyType",
             "gml:MultiPointPropertyType", "urf:BoundaryPropertyType");
 
     Document xsdDocument;
@@ -429,5 +433,45 @@ public class XSDSchemaDocument {
                 printNode(childNodes.item(i), depth + 1);
             }
         }
+    }
+
+    /**
+     * 指定した属性名のminOccursの値を取得します
+     * 
+     * @param name 属性名
+     * @return minOccursの値。属性が見つからない場合は0を返却
+     */
+    public int getMinOccurs(String name) {
+        // ルート要素を取得
+        Node rootNode = xsdDocument.getDocumentElement();
+        NodeList elementNodeList = ((Element) rootNode).getElementsByTagName("xs:element");
+
+        if (name == null)
+            return 0;
+        // nameから"uro:"プレフィックスを除去
+        String targetName = name.startsWith("uro:") ? name.substring(4) : name;
+
+        // 要素を検索
+        for (int i = 0; i < elementNodeList.getLength(); i++) {
+            Node node = elementNodeList.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+                if (targetName.equals(element.getAttribute("name"))) {
+                    // minOccurs属性を取得
+                    String minOccursStr = element.getAttribute("minOccurs");
+                    if (!minOccursStr.isEmpty()) {
+                        try {
+                            return Integer.parseInt(minOccursStr);
+                        } catch (NumberFormatException e) {
+                            return 0;
+                        }
+                    }
+                    // minOccurs属性が指定されていない場合はデフォルト値の1を返却
+                    return 1;
+                }
+            }
+        }
+        // 要素が見つからない場合は0を返却
+        return 0;
     }
 }

@@ -240,6 +240,7 @@ public class AttributeTreeBuilder {
     // 属性を名前でマッピングする
     private static Map<String, TreeItem<AttributeItem>> mapAttributesByName(TreeItem<AttributeItem> root) {
         Map<String, TreeItem<AttributeItem>> attributeMap = new HashMap<>();
+        attributeMap.put(root.getValue().getName(), root);
         for (TreeItem<AttributeItem> item : root.getChildren()) {
             attributeMap.put(item.getValue().getName(), item);
             attributeMap.putAll(mapAttributesByName(item));

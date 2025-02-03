@@ -83,15 +83,16 @@ public class MultipleAttributeInputFormatController {
                         bldgAttributeTree, null);
                 attributeInputFormController.hideButtons();
 
-                // タブに設定
-                Tab tab = new Tab(attribute.get(0), form);
-                tabPane.getTabs().add(tab);
-
                 // スキップされている場合は、タブやコントローラーを追加せずに削除
                 if (attributeInputFormController.isSkipped()) {
                     Platform.runLater(() -> removeTabByName(name));
                     continue;
                 }
+
+                // タブに設定
+                Tab tab = new Tab(attribute.get(0), form);
+                tabPane.getTabs().add(tab);
+
                 controllers.add(attributeInputFormController);
             } catch (IOException e) {
                 e.printStackTrace();

@@ -23,10 +23,10 @@ public class YearOfConstructionWrapper extends AbstractAttributeWrapper {
     @Override
     public void setValue(Object obj, String value) {
         AbstractBuilding building = (AbstractBuilding) obj;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy");
-        LocalDate localDate = LocalDate.parse(value, formatter);
+        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy");
+        // LocalDate localDate = LocalDate.parse(value, formatter);
 
-        building.setYearOfConstruction(localDate);
+        building.setYearOfConstruction(Integer.parseInt(value));
     }
 
     @Override

@@ -34,36 +34,40 @@ public class AttributeEditor {
      * @param uom               uom入力フォーム上の値
      */
     public static AttributeItem addAttribute(AttributeItem baseAttributeItem, String addAttributeName, String value,
-            String codeSpace, String uom, ChildList<ADEComponent> addedAttributeTree) {
+            String codeSpace, String uom, ChildList<ADEComponent> addedAttributeTree, IFeatureView feature) {
         // CommonAttributeItemの場合、全関連地物に対して属性を追加
+
         if (baseAttributeItem instanceof CommonAttributeItem) {
             AttributeItem firstAdded = null;
             Set<IFeatureView> features = baseAttributeItem.getName().equals("root")
                     ? Editor.getFeatureSellection().getSelectedFeatures()
                     : ((CommonAttributeItem) baseAttributeItem).getRelatedFeatures();
             CommonAttributeItem commonAttributeItem = null;
-            for (IFeatureView feature : features) {
+
+            for (IFeatureView currentFeature : features) {
+
                 AttributeItem actualParent = baseAttributeItem.getName().equals("root")
-                        ? new AttributeItem(new RootAttributeHandler(feature))
-                        : ((CommonAttributeItem) baseAttributeItem).getAttributeForFeature(feature);
+                        ? new AttributeItem(new RootAttributeHandler(currentFeature))
+                        : ((CommonAttributeItem) baseAttributeItem).getAttributeForFeature(currentFeature);
 
                 AttributeItem addedItem = addAttributeForFeature(actualParent, addAttributeName, value,
-                        codeSpace, uom, AttributeTreeBuilder.getADEComponents(feature));
-
+                        codeSpace, uom, AttributeTreeBuilder.getADEComponents(currentFeature), currentFeature);
                 if (firstAdded == null) {
                     firstAdded = addedItem;
-                    commonAttributeItem = new CommonAttributeItem(addedItem, feature);
+                    commonAttributeItem = new CommonAttributeItem(addedItem, currentFeature);
                 } else {
-                    commonAttributeItem.addRelatedAttribute(feature, addedItem);
+                    commonAttributeItem.addRelatedAttribute(currentFeature, addedItem);
                 }
             }
             return commonAttributeItem;
         }
-        return addAttributeForFeature(baseAttributeItem, addAttributeName, value, codeSpace, uom, addedAttributeTree);
+        return addAttributeForFeature(baseAttributeItem, addAttributeName, value, codeSpace, uom, addedAttributeTree,
+                feature);
     }
 
     private static AttributeItem addAttributeForFeature(AttributeItem baseAttributeItem, String addAttributeName,
-            String value, String codeSpace, String uom, ChildList<ADEComponent> addedAttributeTree) {
+            String value, String codeSpace, String uom, ChildList<ADEComponent> addedAttributeTree,
+            IFeatureView feature) {
         AttributeItem addedAttributeItem = null;
         AttributeSchemaManager attributeSchemaManager;
         if (addAttributeName.split(":")[0].matches("uro")) {
@@ -94,7 +98,7 @@ public class AttributeEditor {
             }
         } else {
             attributeSchemaManager = AttributeSchemaManagerFactory
-                    .getSchemaManager(Editor.getFeatureSellection().getActiveFeatureProperty().get().getGML());
+                    .getSchemaManager(feature.getGML());
             addedAttributeItem = attributeSchemaManager.addAttribute(
                     (AbstractCityObject) baseAttributeItem.getContent(), addAttributeName,
                     value);

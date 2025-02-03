@@ -3,6 +3,7 @@ package org.plateaubuilder.gui.attribute;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.citygml4j.model.citygml.ade.ADEComponent;
@@ -22,6 +23,7 @@ import org.plateaubuilder.gui.utils.StageController;
 import org.plateaubuilder.validation.AttributeValidator;
 import org.w3c.dom.Node;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -130,8 +132,9 @@ public class AttributeInputFormController {
 
         configureInputBoxVisibility(addAttributeType);
 
-        // 追加必須の子属性を持つ場合は親要素の処理をスキップ
-        if (requiredChildAttributeList != null && !requiredChildAttributeList.isEmpty()) {
+        // 追加必須の子属性を持つ場合や、追加必須属性の場合はスキップ
+        if ((requiredChildAttributeList != null && !requiredChildAttributeList.isEmpty())
+                || (uroSchemaDocument.getMinOccurs(addAttributeName) >= 1 && !childAttributeList.isEmpty())) {
             handleAdd();
             return;
         }
@@ -343,6 +346,7 @@ public class AttributeInputFormController {
     /**
      * 追加ボタンのイベントハンドラ
      */
+
     @FXML
     private void handleAdd() {
         String codeSpace = codeSpaceField.getText();
@@ -350,32 +354,44 @@ public class AttributeInputFormController {
         String value = valueField.getText();
         if (AttributeValidator.checkValue(value, addAttributeType)) {
             if (addFlag) {
+                // 現在の選択状態を保存
+                final Set<IFeatureView> originalSelectedFeatures = new HashSet<>(
+                        Editor.getFeatureSellection().getSelectedFeatures());
+
                 Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
                     private final IFeatureView focusTarget = Editor.getFeatureSellection().getActive();
                     private final ChildList<ADEComponent> bldgAttributeTreeCache = bldgAttributeTree;
                     private final String addAttributeNameCache = addAttributeName;
                     private final AttributeItem baseAttributeItemCache = baseAttributeItem;
-
                     private final String newCodeSpace = codeSpacePath;
                     private final String newUom = uom;
                     private final String newValue = value;
-
                     private Node addedNode;
                     private AttributeItem addedAttributeItem;
 
                     @Override
                     public void redo() {
                         baseAttributeItem = AttributeEditor.addAttribute(baseAttributeItemCache, addAttributeNameCache,
-                                newValue,
-                                newCodeSpace, newUom, bldgAttributeTreeCache);
+                                newValue, newCodeSpace, newUom, bldgAttributeTreeCache, focusTarget);
                         addedAttributeItem = baseAttributeItem;
+                        Platform.runLater(() -> {
+                            Editor.getFeatureSellection().clear();
+                            for (IFeatureView feature : originalSelectedFeatures) {
+                                Editor.getFeatureSellection().addSelection(feature);
+                            }
+                        });
                     }
 
                     @Override
                     public void undo() {
                         AttributeEditor.removeAttribute(addAttributeNameCache, baseAttributeItemCache,
-                                addedAttributeItem,
-                                bldgAttributeTreeCache);
+                                addedAttributeItem, bldgAttributeTreeCache);
+                        Platform.runLater(() -> {
+                            Editor.getFeatureSellection().clear();
+                            for (IFeatureView feature : originalSelectedFeatures) {
+                                Editor.getFeatureSellection().addSelection(feature);
+                            }
+                        });
                     }
 
                     @Override
@@ -389,10 +405,11 @@ public class AttributeInputFormController {
                     }
                 });
             } else if (editFlag) {
+                final Set<IFeatureView> originalSelectedFeatures = new HashSet<>(
+                        Editor.getFeatureSellection().getSelectedFeatures());
+
                 Editor.getUndoManager().addCommand(new AbstractCityGMLUndoableCommand() {
-
                     private final IFeatureView focusTarget = Editor.getFeatureSellection().getActive();
-
                     private final String oldCodeSpace = AttributeEditor.getCodeSpace(targetAttributeItem);
                     private final String oldUom = AttributeEditor.getUom(targetAttributeItem);
                     private final String oldValue = AttributeEditor.getValue(targetAttributeItem);
@@ -403,11 +420,23 @@ public class AttributeInputFormController {
                     @Override
                     public void redo() {
                         AttributeEditor.editAttribute(targetAttributeItem, newCodeSpace, newUom, newValue);
+                        Platform.runLater(() -> {
+                            Editor.getFeatureSellection().clear();
+                            for (IFeatureView feature : originalSelectedFeatures) {
+                                Editor.getFeatureSellection().addSelection(feature);
+                            }
+                        });
                     }
 
                     @Override
                     public void undo() {
                         AttributeEditor.editAttribute(targetAttributeItem, oldCodeSpace, oldUom, oldValue);
+                        Platform.runLater(() -> {
+                            Editor.getFeatureSellection().clear();
+                            for (IFeatureView feature : originalSelectedFeatures) {
+                                Editor.getFeatureSellection().addSelection(feature);
+                            }
+                        });
                     }
 
                     @Override
@@ -492,7 +521,11 @@ public class AttributeInputFormController {
     }
 
     public boolean isSkipped() {
-        return requiredChildAttributeList != null && !requiredChildAttributeList.isEmpty();
+        childAttributeList = uroSchemaDocument.getElementList(addAttributeName, false,
+                treeViewChildItemList,
+                "uro");
+        return ((requiredChildAttributeList != null && !requiredChildAttributeList.isEmpty())
+                || (uroSchemaDocument.getMinOccurs(addAttributeName) >= 1 && !childAttributeList.isEmpty()));
     }
 
     private void setWidth() {
