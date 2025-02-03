@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 
 import javafx.scene.control.skin.TreeTableViewSkin;
 import javafx.scene.control.skin.VirtualFlow;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 import org.plateaubuilder.core.citymodel.CityModelView;
 import org.plateaubuilder.core.citymodel.IFeatureView;
 import org.plateaubuilder.core.citymodel.geometry.GeometryView;
@@ -28,6 +31,7 @@ import org.plateaubuilder.gui.io.mesh.ThreeDimensionsImportDialogController;
 import org.plateaubuilder.gui.search.SearchDialogController;
 
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
@@ -41,11 +45,13 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.HBox;
 import javafx.scene.shape.MeshView;
 
 public class HierarchyController implements Initializable {
@@ -54,7 +60,7 @@ public class HierarchyController implements Initializable {
     @FXML
     private TreeTableColumn<Node, String> nodeColumn;
     @FXML
-    private TreeTableColumn<Node, String> idColumn;
+    private TreeTableColumn<Node, Node> idColumn;
     @FXML
     private TreeTableColumn<Node, Boolean> visibilityColumn;
     @FXML
@@ -211,9 +217,49 @@ public class HierarchyController implements Initializable {
 
         // カラム設定
         nodeColumn.setCellValueFactory(p -> p.getValue().valueProperty().asString());
-        idColumn.setCellValueFactory(p -> p.getValue().getValue().idProperty());
+        idColumn.setCellValueFactory(p -> new ReadOnlyObjectWrapper<>(p.getValue().getValue()));
+        idColumn.setCellFactory(col -> new TreeTableCell<Node, Node>() {
+            private final HBox container = new HBox(3); // 画像同士の間隔を3pxに
+
+            @Override
+            protected void updateItem(Node item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null || !(item instanceof IFeatureView)) {
+                    // セルが空の場合はグラフィックを表示しない
+                    setGraphic(null);
+                } else {
+                    // いったん前の子ノードをクリア
+                    container.getChildren().clear();
+
+                    var isGayout = false;
+                    var currentViewLod = Editor.getCityModelViewMode().lodProperty().get();
+                    var featureView = (IFeatureView) item;
+                    for (var i = 1; i <= 3; i++) {
+                        var hasLod = featureView.getLODView(i) != null;
+                        ImageView imageView = new ImageView(new Image(getClass()
+                                .getResource(String.format("/org/plateaubuilder/gui/images/img_lod0%d_%s.png", i, hasLod ? "on" : "off")).toExternalForm()));
+                        imageView.setFitWidth(24);
+                        imageView.setFitHeight(24);
+                        imageView.setPreserveRatio(true);
+                        container.getChildren().add(imageView);
+                        if (currentViewLod == i) {
+                            isGayout = !hasLod;
+                        }
+                    }
+
+                    setGraphic(container);
+                    setText(featureView.getId());
+                    setStyle(isGayout ? "-fx-text-fill: gray;" : "");
+                }
+            }
+        });
         visibilityColumn.setCellValueFactory(p -> p.getValue().getValue().visibleProperty());
         visibilityColumn.setCellFactory(CheckBoxTreeTableCell.forTreeTableColumn(visibilityColumn));
+
+        Editor.getCityModelViewMode().lodProperty().addListener((observable, oldValue, newValue) -> {
+            hierarchyTreeTable.refresh();
+        });
     }
 
     /**
