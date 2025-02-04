@@ -17,7 +17,7 @@ jobs:
         run: choco install -y docfx
       
       - name: Build Document
-        run: docfx Documentation~/docfx.json
+        run: docfx Documentation/docfx.json
 
       - name: Publish Documentation on GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
