@@ -152,7 +152,7 @@ launch4j() {
     outputDir = './product/PLATEAUBuilder'
     // TODO: jar名変数化
     jar = '../../libs/plateaubuilder-gui-1.0.0-no-deps-win.jar'
-    headerType = 'console' // ログを確認したい場合は'console'に設定
+//    headerType = 'console' // ログを確認したい場合は'console'に設定
     bundledJrePath = './image'
     bundledJre64Bit = true
     jvmOptions = [

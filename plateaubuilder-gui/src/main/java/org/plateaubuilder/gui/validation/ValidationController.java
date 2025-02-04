@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import javafx.stage.Modality;
 import org.citygml4j.builder.copy.DeepCopyBuilder;
 import org.citygml4j.model.gml.geometry.primitives.Polygon;
 import org.plateaubuilder.core.citymodel.CityModelView;
@@ -144,22 +145,24 @@ public class ValidationController implements Initializable {
     }
 
     public static void openWindow() {
-        Stage newWindow = new Stage();
-        newWindow.setTitle("品質検査");
+        Stage stage = new Stage();
+        stage.initModality(Modality.NONE);
+        stage.initOwner(Editor.getWindow());
+        stage.setTitle("品質検査");
         FXMLLoader loader = new FXMLLoader(ValidationController.class.getResource("validation.fxml"));
         try {
-            newWindow.setScene(new Scene(loader.load()));
+            stage.setScene(new Scene(loader.load()));
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
 
-        var controller = (ValidationController)loader.getController();
-        newWindow.setOnCloseRequest(event -> {
+        var controller = (ValidationController) loader.getController();
+        stage.setOnCloseRequest(event -> {
             controller.clearHighLight();
         });
 
-        newWindow.showAndWait();
+        stage.showAndWait();
     }
 
     private void showMessage(ValidationResultMessage message) {
