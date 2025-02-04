@@ -455,11 +455,26 @@ public class HierarchyController implements Initializable {
         }
     }
 
+    public void showSelectedViews(ActionEvent actionEvent) {
+        var selectedViews = Editor.getFeatureSellection().selectedFeaturesProperty().get();
+        selectedViews.forEach(view -> {
+            view.setVisible(true);
+        });
+    }
+
     public void hideSelectedViews(ActionEvent actionEvent) {
         var selectedViews = Editor.getFeatureSellection().selectedFeaturesProperty().get();
         selectedViews.forEach(view -> {
             view.setVisible(false);
         });
+    }
+
+    public void showUnselectedViews(ActionEvent actionEvent) {
+        var allViews = World.getActiveInstance().getCityModelGroup().getAllFeatures();
+        var selectedViews = Editor.getFeatureSellection().selectedFeaturesProperty().get();
+        allViews.stream()
+                .filter(view -> (view instanceof IFeatureView) && !selectedViews.contains(view))
+                .forEach(view -> view.setVisible(true));
     }
 
     public void hideUnselectedViews(ActionEvent actionEvent) {
@@ -473,7 +488,13 @@ public class HierarchyController implements Initializable {
     public void showAllViews() {
         var allViews = World.getActiveInstance().getCityModelGroup().getAllFeatures();
         allViews.forEach(view -> view.setVisible(true));
+    }
 
+    public void hideAllViews() {
+        var allViews = World.getActiveInstance().getCityModelGroup().getAllFeatures();
+        allViews.stream()
+                .filter(view -> (view instanceof IFeatureView))
+                .forEach(view -> view.setVisible(false));
     }
 
     public void showSearchDialog() {

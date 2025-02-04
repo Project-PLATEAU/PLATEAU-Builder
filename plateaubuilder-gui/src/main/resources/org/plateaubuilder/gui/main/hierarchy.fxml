@@ -53,9 +53,12 @@
                      <MenuItem fx:id="exportObjMenu" mnemonicParsing="false" onAction="#exportObj" text="OBJをエクスポート..." />
                      <MenuItem fx:id="importGltfMenu" mnemonicParsing="false" onAction="#importGltf" text="glTFをインポート..." />
                      <MenuItem fx:id="importObjMenu" mnemonicParsing="false" onAction="#importObj" text="OBJをインポート..." />
+                     <MenuItem mnemonicParsing="false" onAction="#showSelectedViews" text="選択地物を表示" />
                      <MenuItem mnemonicParsing="false" onAction="#hideSelectedViews" text="選択地物を非表示" />
+                     <MenuItem mnemonicParsing="false" onAction="#showUnselectedViews" text="選択地物以外を表示" />
                      <MenuItem mnemonicParsing="false" onAction="#hideUnselectedViews" text="選択地物以外を非表示" />
                      <MenuItem mnemonicParsing="false" onAction="#showAllViews" text="全ての地物を表示" />
+                     <MenuItem mnemonicParsing="false" onAction="#hideAllViews" text="全ての地物を非表示" />
                  </items>
              </ContextMenu>
          </contextMenu>
