@@ -48,6 +48,7 @@ public class PLATEAUBuilderApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         stage.setTitle("PLATEAU Builder");
+        stage.setMaximized(true);
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             System.err.println("Uncaught exception in thread: " + t.getName() + ": " + e.getMessage());
             e.printStackTrace();
