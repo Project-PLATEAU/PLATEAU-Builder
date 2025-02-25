@@ -35,6 +35,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.plateaubuilder.core.editor.Editor;
 
@@ -55,6 +56,7 @@ public class PLATEAUBuilderApp extends Application {
         });
 
         Editor.initialize(stage);
+        stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResource("/org/plateaubuilder/gui/images/icon_x256.png")).toExternalForm()));
 
         // UI, Controller初期化
         var scene = new Scene(

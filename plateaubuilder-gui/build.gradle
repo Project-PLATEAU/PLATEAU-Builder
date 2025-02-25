@@ -149,6 +149,7 @@ tasks.createExe.dependsOn('uberJar')
 
 launch4j() {
     mainClassName = project.mainClassName
+    icon = "${projectDir}/src/main/resources/org/plateaubuilder/gui/images/icon.ico"
     outputDir = './product/PLATEAUBuilder'
     // TODO: jar名変数化
     jar = '../../libs/plateaubuilder-gui-1.0.0-no-deps-win.jar'
