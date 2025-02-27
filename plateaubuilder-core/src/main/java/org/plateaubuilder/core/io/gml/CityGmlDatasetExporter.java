@@ -69,6 +69,8 @@ public class CityGmlDatasetExporter {
                     try {
                         // ファイル名からフィーチャータイプを抽出
                         String dirName = path[path.length - 1].split("_")[1];
+                        // Appearanceのエクスポート
+                        String appearanceDirName = TextureExporter.export(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" + udxDirName + "/" + dirName, cityModelView);
                         // CityGMLのエクスポート
                         GmlExporter.export(
                                 Paths.get(selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" +
@@ -77,12 +79,8 @@ public class CityGmlDatasetExporter {
                                         + "/" + path[path.length - 1])
                                         .toString(),
                                 cityModelView.getGML(),
-                                cityModelView.getSchemaHandler());
-                        // Appearanceのエクスポート
-                        TextureExporter.export(
-                                selectedDirectory.getAbsolutePath() + "/" + rootDirName + "/" + udxDirName + "/"
-                                        + dirName,
-                                cityModelView);
+                                cityModelView.getSchemaHandler(),
+                                appearanceDirName);
                     } catch (ADEException | CityGMLWriteException | CityGMLBuilderException e) {
                         throw new RuntimeException(e);
                     }

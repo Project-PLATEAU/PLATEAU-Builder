@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,14 +33,17 @@ public class ObjHandler extends Abstract3DFormatHandler {
 
     private String _gmlFileName;
 
+    private String _gmlFolder;
+
     /**
      * ObjHandlerのコンストラクタです。
      * 
      * @param axisTransformer AxisTransformerオブジェクト
      */
-    public ObjHandler(AxisTransformer axisTransformer, String gmlFileName) {
+    public ObjHandler(AxisTransformer axisTransformer, String gmlFileName, String gmlFolder) {
         super(axisTransformer);
         _gmlFileName = gmlFileName;
+        _gmlFolder = gmlFolder;
     }
 
     /**
@@ -132,6 +136,11 @@ public class ObjHandler extends Abstract3DFormatHandler {
             texturePath = String.format("%s_%s_%s_appearance/%s", codes[0], codes[1], codes[2], fileName);
         } else {
             texturePath = fileName;
+        }
+
+        // テクスチャがもとのGMLに存在しない場合は絶対パスを指定する
+        if (!Files.exists(Paths.get(_gmlFolder, texturePath))) {
+            texturePath = path.toAbsolutePath().toString().replace("\\", "/");
         }
 
         ParameterizedTexture parameterizedTexture = new ParameterizedTexture();

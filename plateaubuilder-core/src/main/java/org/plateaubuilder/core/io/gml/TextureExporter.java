@@ -17,13 +17,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class TextureExporter {
-    public static void export(String folderPath, CityModelView cityModel) {
+    public static String export(String folderPath, CityModelView cityModel) {
         AppearanceView tempAppearance = cityModel.getAppearance();
         if(tempAppearance == null)
-            return;
+            return null;
         ArrayList<SurfaceDataView> tempSurfaceDatas = tempAppearance.getSurfaceData();
         String appearanceDirName = "";
-        int count = 0;
 
         for (SurfaceDataView surfaceData : tempSurfaceDatas) {
             if (surfaceData.getGML().getCityGMLClass() != CityGMLClass.PARAMETERIZED_TEXTURE)
@@ -32,17 +31,34 @@ public class TextureExporter {
             var parameterizedTexture = (ParameterizedTexture) surfaceData.getGML();
             var imageURI = parameterizedTexture.getImageURI();
 
-            if (count == 0) {
-                var filePathComponents = imageURI.split("/");
-                appearanceDirName = filePathComponents[0];
-                try {
-                    if (new File(folderPath + "/" + appearanceDirName).exists()) {
-                        FileUtils.deleteDirectory(Paths.get(folderPath + "/" + appearanceDirName));
-                    }
-                    Files.createDirectory(Paths.get(folderPath + "/" + appearanceDirName));
-                } catch (IOException e) {
-                    System.out.println(e);
+            // 相対パスで指定されているものを利用してフォルダを特定する
+            if (Paths.get(imageURI).isAbsolute())
+                continue;
+
+            var filePathComponents = imageURI.split("/");
+            appearanceDirName = filePathComponents[0];
+            try {
+                if (new File(folderPath + "/" + appearanceDirName).exists()) {
+                    FileUtils.deleteDirectory(Paths.get(folderPath + "/" + appearanceDirName));
                 }
+                Files.createDirectories(Paths.get(folderPath + "/" + appearanceDirName));
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+            break;
+        }
+
+        for (SurfaceDataView surfaceData : tempSurfaceDatas) {
+            if (surfaceData.getGML().getCityGMLClass() != CityGMLClass.PARAMETERIZED_TEXTURE)
+                continue;
+
+            var parameterizedTexture = (ParameterizedTexture) surfaceData.getGML();
+            var imageURI = parameterizedTexture.getImageURI();
+
+            // 相対パスで指定されているものは他のものと同じフォルダになるようにパスを差し替える
+            if (Paths.get(imageURI).isAbsolute()) {
+                var filePathComponents = imageURI.split("/");
+                imageURI = appearanceDirName + "/" + filePathComponents[filePathComponents.length - 1];
             }
 
             PhongMaterial material = (PhongMaterial) surfaceData.getMaterial();
@@ -67,7 +83,8 @@ public class TextureExporter {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            count++;
         }
+
+        return appearanceDirName;
     }
 }

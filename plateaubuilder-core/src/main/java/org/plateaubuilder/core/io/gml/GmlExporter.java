@@ -6,6 +6,7 @@ import org.citygml4j.builder.copy.DeepCopyBuilder;
 import org.citygml4j.builder.jaxb.CityGMLBuilder;
 import org.citygml4j.builder.jaxb.CityGMLBuilderException;
 import org.citygml4j.model.citygml.ade.ADEException;
+import org.citygml4j.model.citygml.appearance.ParameterizedTexture;
 import org.citygml4j.model.citygml.core.CityModel;
 import org.citygml4j.model.module.ModuleContext;
 import org.citygml4j.model.module.citygml.CityGMLVersion;
@@ -16,15 +17,15 @@ import org.citygml4j.xml.io.writer.CityGMLWriter;
 import org.citygml4j.xml.io.writer.FeatureWriteMode;
 import org.citygml4j.xml.schema.SchemaHandler;
 import org.plateaubuilder.core.citymodel.helpers.SchemaHelper;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 
 public class GmlExporter {
 
-    public static void export(String fileUrl, CityModel cityModel, SchemaHandler schemaHandler)
+    public static void export(String fileUrl, CityModel cityModel, SchemaHandler schemaHandler, String appearanceDirName)
         throws ADEException, CityGMLBuilderException, CityGMLWriteException {
         OutputStream outputStream = null;
         try {
@@ -34,7 +35,7 @@ public class GmlExporter {
                 file.createNewFile();
             }
             outputStream = new FileOutputStream(file);
-            export(outputStream, cityModel, schemaHandler);
+            export(outputStream, cityModel, schemaHandler, appearanceDirName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -48,7 +49,13 @@ public class GmlExporter {
         }
     }
 
-    public static void export(OutputStream outputStream, CityModel cityModel, SchemaHandler schemaHandler) throws ADEException, CityGMLBuilderException, CityGMLWriteException {
+    public static void export(OutputStream outputStream, CityModel cityModel, SchemaHandler schemaHandler)
+            throws ADEException, CityGMLBuilderException, CityGMLWriteException {
+        export(outputStream, cityModel, schemaHandler, null);
+    }
+
+    public static void export(OutputStream outputStream, CityModel cityModel, SchemaHandler schemaHandler, String appearanceDirName)
+            throws ADEException, CityGMLBuilderException, CityGMLWriteException {
         CityGMLContext context = CityGMLContext.getInstance();
 
         if (!context.hasADEContexts())
@@ -101,7 +108,28 @@ public class GmlExporter {
         writer.setIndentString("\t");
 
         var tmpCityModel = (CityModel)cityModel.copy(new DeepCopyBuilder());
+        if (appearanceDirName != null) {
+            toRelativePath(tmpCityModel, appearanceDirName);
+        }
         writer.write(tmpCityModel);
         writer.close();
+    }
+
+    private static void toRelativePath(CityModel tmpCityModel, String appearanceDirName) {
+        // テクスチャが絶対パスで指定されているものを相対パスに差し替える
+        for (var appearanceMember : tmpCityModel.getAppearanceMember()) {
+            for (var surfaceDataMember : appearanceMember.getAppearance().getSurfaceDataMember()) {
+                var surfaceData = surfaceDataMember.getSurfaceData();
+                if (surfaceData instanceof ParameterizedTexture) {
+                    var parameterizedTexture = (ParameterizedTexture) surfaceData;
+                    var imageURI = parameterizedTexture.getImageURI();
+                    if (Paths.get(imageURI).isAbsolute()) {
+                        var filePathComponents = imageURI.split("/");
+                        var newImageURI = appearanceDirName + "/" + filePathComponents[filePathComponents.length - 1];
+                        parameterizedTexture.setImageURI(newImageURI);
+                    }
+                }
+            }
+        }
     }
 }

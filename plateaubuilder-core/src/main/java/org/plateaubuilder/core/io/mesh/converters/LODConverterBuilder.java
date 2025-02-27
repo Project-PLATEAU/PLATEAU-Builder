@@ -99,10 +99,12 @@ public class LODConverterBuilder {
             formatHandler = new GltfHandler(
                     new AxisTransformer(new AxisDirection(convertOption.getAxisEast(), convertOption.getAxisUp(), true), AxisDirection.TOOL_AXIS_DIRECTION));
         } else if (format == FormatEnum.OBJ) {
-            var gmlFileName = Paths.get(cityModelView.getGmlPath()).getFileName().toString();
+            var gmlPath = Paths.get(cityModelView.getGmlPath());
+            var gmlFileName = gmlPath.getFileName().toString();
+            var folder = gmlPath.getParent().toAbsolutePath().toString();
             formatHandler = new ObjHandler(
                     new AxisTransformer(new AxisDirection(convertOption.getAxisEast(), convertOption.getAxisUp(), false), AxisDirection.TOOL_AXIS_DIRECTION),
-                    gmlFileName);
+                    gmlFileName, folder);
         } else {
             throw new NotImplementedException(format + " is not supported.");
         }
