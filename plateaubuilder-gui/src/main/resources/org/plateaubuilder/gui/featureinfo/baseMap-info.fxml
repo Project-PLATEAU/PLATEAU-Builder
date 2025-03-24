@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.featureinfo.BaseMapController">
+    <VBox spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+        </padding>
+        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ベースマップ">
+            <font>
+                <Font size="16.0" />
+            </font>
+        </Text>
+        <Accordion>
+            <panes>
+                <TitledPane fx:id="titledPane" animated="false" text="設定">
+                    <VBox fx:id="tabContentsArea" layoutX="15.0" layoutY="36.0" prefWidth="280.0" spacing="5.0">
+                        <children>
+                            <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" prefWidth="200.0">
+                                <children>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="55.0">
+                                        <HBox.margin>
+                                            <Insets />
+                                        </HBox.margin>
+                                        <children>
+                                            <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="高さZ">
+                                                <font>
+                                                    <Font size="14.0" />
+                                                </font>
+                                            </Text>
+                                        </children>
+                                    </HBox>
+                                    <Spinner fx:id="positionZ" layoutX="152.0" layoutY="10.0" prefHeight="25.0" prefWidth="75.0">
+                                        <HBox.margin>
+                                            <Insets left="5.0" />
+                                        </HBox.margin>
+                                    </Spinner>
+                                </children>
+                                <VBox.margin>
+                                    <Insets />
+                                </VBox.margin>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" layoutX="15.0" layoutY="15.0" maxWidth="1.7976931348623157E308" prefWidth="200.0">
+                                <children>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="55.0">
+                                        <HBox.margin>
+                                            <Insets />
+                                        </HBox.margin>
+                                        <children>
+                                            <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="URL">
+                                                <font>
+                                                    <Font size="14.0" />
+                                                </font>
+                                            </Text>
+                                        </children>
+                                    </HBox>
+                                    <TextField fx:id="tileServerUrl" prefHeight="20.0" prefWidth="200.0">
+                                        <HBox.margin>
+                                            <Insets left="5.0" />
+                                        </HBox.margin>
+                                    </TextField>
+                                </children>
+                            </HBox>
+                            <HBox alignment="CENTER_RIGHT">
+                                <Button text="適用" fx:id="btnApply" onAction="#handleButtonApply" prefHeight="20.0" prefWidth="80.0"/>
+                            </HBox>
+                        </children>
+                        <padding>
+                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                        </padding>
+                        <VBox.margin>
+                            <Insets bottom="5.0" top="5.0" />
+                        </VBox.margin>
+                    </VBox>
+                </TitledPane>
+            </panes>
+        </Accordion>
+    </VBox>
+</AnchorPane>

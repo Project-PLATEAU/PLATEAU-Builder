@@ -5,7 +5,8 @@
         "globalMetadata": {
             "_appTitle": "PLATEAU Builder",
             "_appFooter": "PLATEAU",
-            "_enableSearch": true
+            "_enableSearch": true,
+            "_appLogoPath": "resources/logo.svg"
         },
         "content": [
             {

@@ -1,0 +1,27 @@
+{
+    "creationDate": {
+        "name": "core:creationDate",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "terminationDate": {
+        "name": "core:terminationDate",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "class": {
+        "name": "veg:class",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "averageHeight": {
+        "name": "veg:averageHeight",
+        "type": "gml:LengthType",
+        "min": "0",
+        "max": "1",
+        "uom": "m"
+    }
+}

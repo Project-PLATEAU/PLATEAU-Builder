@@ -1,0 +1,184 @@
+{
+    "description": {
+        "name": "gml:description",
+        "type": "gml:StringOrRefType",
+        "min": "0",
+        "max": "1"
+    },
+    "name": {
+        "name": "gml:name",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "creationDate": {
+        "name": "core:creationDate",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "terminationDate": {
+        "name": "core:terminationDate",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "function": {
+        "name": "urf:function",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "unbounded"
+    },
+    "validFrom": {
+        "name": "urf:validFrom",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "validFromType": {
+        "name": "urf:validFromType",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "enactmentFiscalYear": {
+        "name": "urf:enactmentFiscalYear",
+        "type": "xs:gYear",
+        "min": "0",
+        "max": "1"
+    },
+    "validTo": {
+        "name": "urf:validTo",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "validToType": {
+        "name": "urf:validToType",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "expirationFiscalYear": {
+        "name": "urf:expirationFiscalYear",
+        "type": "xs:gYear",
+        "min": "0",
+        "max": "1"
+    },
+    "legalGrounds": {
+        "name": "urf:legalGrounds",
+        "type": "xs:string",
+        "min": "0",
+        "max": "1"
+    },
+    "custodian": {
+        "name": "urf:custodian",
+        "type": "xs:string",
+        "min": "0",
+        "max": "1"
+    },
+    "notificationNumber": {
+        "name": "urf:notificationNumber",
+        "type": "xs:string",
+        "min": "0",
+        "max": "1"
+    },
+    "finalNotificationNumber": {
+        "name": "urf:finalNotificationNumber",
+        "type": "xs:string",
+        "min": "0",
+        "max": "1"
+    },
+    "finalNotificationDate": {
+        "name": "urf:finalNotificationDate",
+        "type": "xs:date",
+        "min": "0",
+        "max": "1"
+    },
+    "nominalArea": {
+        "name": "urf:nominalArea",
+        "type": "gml:MeasureType",
+        "min": "0",
+        "max": "1",
+        "uom": "ha"
+    },
+    "prefecture": {
+        "name": "urf:prefecture",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "city": {
+        "name": "urf:city",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "reference": {
+        "name": "urf:reference",
+        "type": "xs:anyURI",
+        "min": "0",
+        "max": "1"
+    },
+    "reason": {
+        "name": "urf:reason",
+        "type": "gml:StringOrRefType",
+        "min": "0",
+        "max": "1"
+    },
+    "note": {
+        "name": "urf:note",
+        "type": "gml:StringOrRefType",
+        "min": "0",
+        "max": "1"
+    },
+    "areaClassification": {
+        "name": "urf:areaClassification",
+        "type": "gml:CodeType",
+        "min": "0",
+        "max": "1"
+    },
+    "reasonForAreaClassification": {
+        "name": "urf:reasonForAreaClassification",
+        "type": "gml:StringOrRefType",
+        "min": "0",
+        "max": "1"
+    },
+    "policyForAreaClassification": {
+        "name": "urf:policyForAreaClassification",
+        "type": "gml:StringOrRefType",
+        "min": "0",
+        "max": "1"
+    },
+    "purposeForUrbanPlan": {
+        "name": "urf:purposeForUrbanPlan",
+        "type": "gml:StringOrRefType",
+        "min": "0",
+        "max": "1"
+    },
+    "policyForUrbanPlanDecision": {
+        "name": "urf:policyForUrbanPlanDecision",
+        "type": "gml:StringOrRefType",
+        "min": "0",
+        "max": "1"
+    },
+    "population": {
+        "name": "urf:population",
+        "type": "xs:integer",
+        "min": "0",
+        "max": "1"
+    },
+    "cityArea": {
+        "name": "urf:cityArea",
+        "type": "gml:MeasureType",
+        "min": "0",
+        "max": "1",
+        "uom": "ha"
+    },
+    "cityPopulation": {
+        "name": "urf:cityPopulation",
+        "type": "xs:integer",
+        "min": "0",
+        "max": "1"
+    }
+}

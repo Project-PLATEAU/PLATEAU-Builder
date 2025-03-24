@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
+<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.attribute.CodeSpaceValueMenuController">
+        <TableView fx:id="codeSpaceValueTable" editable="false" onMouseClicked="#handleMouseClick">
+            <columns>
+                <TableColumn fx:id="id" editable="false"  text="ID" />
+                <TableColumn fx:id="description" editable="false"  text="Description" />
+                <TableColumn fx:id="name" editable="false"   text="Name" />
+            </columns>
+        </TableView>
+    <stylesheets>
+        <URL value="@../viewer.css" />
+    </stylesheets>
+</VBox>

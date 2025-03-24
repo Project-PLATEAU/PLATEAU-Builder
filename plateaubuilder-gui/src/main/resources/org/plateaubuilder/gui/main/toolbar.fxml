@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
+<ToolBar maxWidth="1.7976931348623157E308" minWidth="660.0" prefHeight="40.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.main.ToolbarController">
+    <ToggleButton mnemonicParsing="false" onAction="#onSelect" prefHeight="32.0" prefWidth="32.0" selected="true">
+        <toggleGroup>
+            <!--suppress JavaFxUnresolvedFxIdReference -->
+            <ToggleGroup fx:id="toggleGroup" />
+        </toggleGroup>
+        <tooltip>
+            <Tooltip text="選択モード" />
+        </tooltip>
+        <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../images/icon_select.png" />
+            </ImageView>
+        </graphic>
+    </ToggleButton>
+    <ToggleButton mnemonicParsing="false" onAction="#onMove" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
+        <tooltip>
+            <Tooltip text="移動モード" />
+        </tooltip>
+        <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../images/icon_move.png" />
+            </ImageView>
+        </graphic>
+    </ToggleButton>
+    <ToggleButton mnemonicParsing="false" onAction="#onRotation" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
+        <tooltip>
+            <Tooltip text="回転モード" />
+        </tooltip>
+        <graphic>
+            
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../images/icon_rotate.png" />
+            </ImageView>
+        </graphic>
+    </ToggleButton>
+    <ToggleButton mnemonicParsing="false" onAction="#onScale" prefHeight="32.0" prefWidth="32.0" toggleGroup="$toggleGroup">
+        <tooltip>
+            <Tooltip text="拡大／縮小モード" />
+        </tooltip>
+        <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../images/icon_scale.png" />
+            </ImageView>
+        </graphic>
+    </ToggleButton>
+
+    <Separator />
+
+    <ToggleButton fx:id="surfaceViewToggle" mnemonicParsing="false" onAction="#onToggleSurfaceView" prefHeight="32.0" prefWidth="32.0">
+        <tooltip>
+            <Tooltip text="面表示モード" />
+        </tooltip>
+      <graphic>
+         <ImageView fitHeight="20.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_surface.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </ToggleButton>
+
+    <Separator />
+    <Button layoutX="231.0" layoutY="10.0" mnemonicParsing="false" onAction="#onViewNorth" prefHeight="32.0" prefWidth="32.0">
+      <tooltip>
+        <Tooltip text="ビュー: 北" />
+      </tooltip>
+      <graphic>
+         <ImageView fitHeight="22.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_cameraFront.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </Button>
+    <Button layoutX="358.0" layoutY="10.0" mnemonicParsing="false" onAction="#onViewSouth" prefHeight="32.0" prefWidth="32.0">
+      <tooltip>
+        <Tooltip text="ビュー: 南" />
+      </tooltip>
+      <graphic>
+         <ImageView fitHeight="22.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_cameraBack.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </Button>
+    <Button layoutX="271.0" layoutY="10.0" mnemonicParsing="false" onAction="#onViewWest" prefHeight="32.0" prefWidth="32.0">
+      <tooltip>
+        <Tooltip text="ビュー: 西" />
+      </tooltip>
+      <graphic>
+         <ImageView fitHeight="22.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_cameraLeft.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </Button>
+    <Button layoutX="316.0" layoutY="10.0" mnemonicParsing="false" onAction="#onViewEast" prefHeight="32.0" prefWidth="32.0">
+      <tooltip>
+        <Tooltip text="ビュー: 東" />
+      </tooltip>
+      <graphic>
+         <ImageView fitHeight="22.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_cameraRight.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </Button>
+    <Button layoutX="400.0" layoutY="10.0" mnemonicParsing="false" onAction="#onViewTop" prefHeight="32.0" prefWidth="32.0">
+      <tooltip>
+        <Tooltip text="ビュー: 上" />
+      </tooltip>
+      <graphic>
+         <ImageView fitHeight="22.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_cameraTop.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </Button>
+   <Separator layoutX="220.0" layoutY="10.0" />
+
+    <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" selected="true" userData="1">
+        <toggleGroup>
+            <ToggleGroup fx:id="lodToggleGroup" />
+        </toggleGroup>
+        <tooltip>
+            <Tooltip text="LOD表示切替(1)" />
+        </tooltip>
+      <graphic>
+         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_lod1.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </ToggleButton>
+    <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$lodToggleGroup" userData="2">
+        <tooltip>
+            <Tooltip text="LOD表示切替(2)" />
+        </tooltip>
+      <graphic>
+         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_lod2.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </ToggleButton>
+    <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" toggleGroup="$lodToggleGroup" userData="3">
+        <tooltip>
+            <Tooltip text="LOD表示切替(3)" />
+        </tooltip>
+      <graphic>
+         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+               <Image url="@../images/icon_lod3.png" />
+            </image>
+         </ImageView>
+      </graphic>
+    </ToggleButton>
+    <ToggleButton fx:id="baseMapToggle" mnemonicParsing="false" onAction="#onToggleShowBaseMap" prefHeight="32.0" prefWidth="32.0">
+        <tooltip>
+            <Tooltip text="ベースマップ表示モード" />
+        </tooltip>
+        <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                <image>
+                    <Image url="@../images/icon_basemap.png" />
+                </image>
+            </ImageView>
+        </graphic>
+    </ToggleButton>
+</ToolBar>

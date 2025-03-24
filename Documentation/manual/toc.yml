@@ -1,8 +1,20 @@
-- name: PLATEAU Builder
+- name: PLATEAU Builderについて
   href: ../index.md
-- name: 利用を開始する
-  items:
-  - name: 環境構築手順書
-    href: Setup.md
-  - name: 操作マニュアル
-    href: HowToUse.md
+- name: 動作環境と対応地物
+  href: SupportedEnvironment.md
+- name: クイックスタート
+  href: QuickStart.md
+- name: 属性情報の編集
+  href: EditAttribute.md
+- name: 形状情報の編集
+  href: EditGeometry.md
+- name: 地物のフィルタリング
+  href: FilterFeature.md
+- name: ベースマップの表示
+  href: VisualizeBasemap.md
+- name: 品質検査
+  href: Validate.md
+- name: データセットのエクスポート
+  href: ExportDataset.md
+- name: ソースコードのビルド（開発者向け）
+  href: Build.md

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.main.CenterPanelController">
+      <fx:include source="toolbar.fxml" />
+      <Pane fx:id="subSceneContainer" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+            <fx:include source="../surfacetype/surface-type-editor.fxml" />
+            <StackPane fx:id="adjustPerspective" alignment="TOP_RIGHT">
+                  <fx:include source="adjust-perspective.fxml" />
+            </StackPane>
+      </Pane>
+</VBox>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import java.net.URL?>
+<AnchorPane prefHeight="700.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.plateaubuilder.gui.validation.ValidationController">
+   <VBox fx:id="rootContainer" alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="700.0" prefWidth="600.0" spacing="10.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="10.0">
+      <children>
+         <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" spacing="10.0">
+            <children>
+               <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="品質検査パラメータ">
+                  <HBox.margin>
+                     <Insets left="50.0" />
+                  </HBox.margin>
+                  <font>
+                     <Font size="14.0" />
+                  </font>
+               </Text>
+               <TextField fx:id="parameterFilePathText" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+               <Button mnemonicParsing="false" onAction="#onClickParameterFileSelectButton" prefHeight="50.0" prefWidth="70.0" text="参照">
+                  <font>
+                     <Font size="14.0" />
+                  </font>
+                  <padding>
+                     <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
+                  </padding>
+               </Button>
+            </children>
+            <padding>
+               <Insets right="70.0" top="20.0" />
+            </padding>
+         </HBox>
+         <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" spacing="10.0">
+            <children>
+               <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="ログ出力先">
+                  <HBox.margin>
+                     <Insets left="50.0" right="44.0" />
+                  </HBox.margin>
+                  <font>
+                     <Font size="14.0" />
+                  </font>
+               </Text>
+               <TextField fx:id="logDestinationPathText" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+               <Button mnemonicParsing="false" onAction="#onClickLogDestinationSelectButton" prefHeight="50.0" prefWidth="70.0" text="参照">
+                  <font>
+                     <Font size="14.0" />
+                  </font>
+                  <padding>
+                     <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
+                  </padding>
+               </Button>
+            </children>
+            <padding>
+               <Insets bottom="20.0" right="70.0" />
+            </padding>
+         </HBox>
+          <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#execute" text="実行">
+            <padding>
+               <Insets bottom="10.0" left="50.0" right="50.0" top="10.0" />
+            </padding>
+         </Button>
+<!--         ログ表示パネル-->
+         <TitledPane animated="false" collapsible="false" prefHeight="600.0" text="ログ">
+            <VBox>
+            <ScrollPane prefHeight="400.0">
+               <VBox fx:id="resultTextContainer">
+               </VBox>
+                  <VBox.margin>
+                     <Insets left="-10.0" right="-10.0" top="-10.0" />
+                  </VBox.margin>
+            </ScrollPane>
+               <ScrollPane prefHeight="200.0">
+                  <TextArea fx:id="messageTextArea" editable="false" />
+                  <VBox.margin>
+                     <Insets bottom="-10.0" left="-10.0" right="-10.0" />
+                  </VBox.margin>
+               </ScrollPane>
+            </VBox>
+         </TitledPane>
+      </children>
+   </VBox>
+   <stylesheets>
+      <URL value="@../viewer.css" />
+   </stylesheets>
+</AnchorPane>

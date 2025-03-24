@@ -1,1 +1,3 @@
+include 'plateaubuilder-core', 'plateaubuilder-validation', 'plateaubuilder-gui'
+
 rootProject.name = 'PLATEAUBuilder'
