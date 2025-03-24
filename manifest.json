@@ -8,7 +8,8 @@
     "baseUrl": "https://project-plateau.github.io/PLATEAU-Builder/",
     "changefreq": "weekly"
   },
-  "source_base_path": "C:/Users/kazum/Synesthesias/Repos_PLATEAU/PLATEAU-Builder/Documentation",
+  "homepages": [],
+  "source_base_path": "D:/a/PLATEAU-Builder/PLATEAU-Builder/Documentation",
   "xrefmap": "xrefmap.yml",
   "files": [
     {
@@ -17,36 +18,154 @@
         "resource": {
           "relative_path": "index.json"
         }
-      }
+      },
+      "is_incremental": false
     },
     {
+      "log_codes": [
+        "InvalidYamlHeader"
+      ],
       "type": "Conceptual",
       "source_relative_path": "index.md",
       "output": {
         ".html": {
-          "relative_path": "index.html"
+          "relative_path": "index.html",
+          "hash": "pIiSWoMwynFTGbjs1SrW33KCTnLpFj9GRPX8Q8dt6iA="
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
       "type": "Conceptual",
-      "source_relative_path": "manual/HowToUse.md",
+      "source_relative_path": "manual/Build.md",
       "output": {
         ".html": {
-          "relative_path": "manual/HowToUse.html"
+          "relative_path": "manual/Build.html",
+          "hash": "S9/ObAECkD888nRWwbIcNWv1gPWLcTxxWRaR1fnPDrQ="
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
+      "log_codes": [
+        "InvalidYamlHeader"
+      ],
       "type": "Conceptual",
-      "source_relative_path": "manual/Setup.md",
+      "source_relative_path": "manual/EditAttribute.md",
       "output": {
         ".html": {
-          "relative_path": "manual/Setup.html"
+          "relative_path": "manual/EditAttribute.html",
+          "hash": "KSH9uzh/ng4KTsJzernIRJBWzToYIPiRQ9CttwMqE1U="
         }
       },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "log_codes": [
+        "InvalidYamlHeader"
+      ],
+      "type": "Conceptual",
+      "source_relative_path": "manual/EditGeometry.md",
+      "output": {
+        ".html": {
+          "relative_path": "manual/EditGeometry.html",
+          "hash": "4UtqgZLzmMUC9YYMIeaFVRV+2mGN7Cth3JgvmKMFLGE="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "log_codes": [
+        "InvalidYamlHeader"
+      ],
+      "type": "Conceptual",
+      "source_relative_path": "manual/ExportDataset.md",
+      "output": {
+        ".html": {
+          "relative_path": "manual/ExportDataset.html",
+          "hash": "b4dV456NSfhf8oKplGplVv0CVHQqfhJEfwHa8z91x2o="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "log_codes": [
+        "InvalidYamlHeader"
+      ],
+      "type": "Conceptual",
+      "source_relative_path": "manual/FilterFeature.md",
+      "output": {
+        ".html": {
+          "relative_path": "manual/FilterFeature.html",
+          "hash": "p3kQPmBsVp1EWu/s6prXv1wHeClo3IpxgM4MAOJBfDc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "log_codes": [
+        "InvalidYamlHeader"
+      ],
+      "type": "Conceptual",
+      "source_relative_path": "manual/QuickStart.md",
+      "output": {
+        ".html": {
+          "relative_path": "manual/QuickStart.html",
+          "hash": "LanzLNPA4Kj1zjHMsXPJfWMK8B4MZrNhDZ3hE8uA07k="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "log_codes": [
+        "InvalidYamlHeader"
+      ],
+      "type": "Conceptual",
+      "source_relative_path": "manual/SupportedEnvironment.md",
+      "output": {
+        ".html": {
+          "relative_path": "manual/SupportedEnvironment.html",
+          "hash": "CHChFxL/R4CRBV34vJgDvPh6MOpo9dcHVBrlRcHsew0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "log_codes": [
+        "InvalidYamlHeader"
+      ],
+      "type": "Conceptual",
+      "source_relative_path": "manual/Validate.md",
+      "output": {
+        ".html": {
+          "relative_path": "manual/Validate.html",
+          "hash": "ta20f/iKlFQ/T72VygwDZZawe/3THEOJiOPF2TDRN1w="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "log_codes": [
+        "InvalidYamlHeader"
+      ],
+      "type": "Conceptual",
+      "source_relative_path": "manual/VisualizeBasemap.md",
+      "output": {
+        ".html": {
+          "relative_path": "manual/VisualizeBasemap.html",
+          "hash": "8Rl6z6OSsIPDX8Cjp408HQHfWHIF/uRLxHdgis5T3Q8="
+        }
+      },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -54,12 +173,11 @@
       "source_relative_path": "manual/toc.yml",
       "output": {
         ".html": {
-          "relative_path": "manual/toc.html"
-        },
-        ".json": {
-          "relative_path": "manual/toc.json"
+          "relative_path": "manual/toc.html",
+          "hash": "RHtCy8rbs2h3NEBZ849+7kSO8wxipeMauSm+8CYdz/4="
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -70,6 +188,7 @@
           "relative_path": "resources/HowToUse/3d_export.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -80,6 +199,7 @@
           "relative_path": "resources/HowToUse/3d_import.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -90,6 +210,7 @@
           "relative_path": "resources/HowToUse/attribute_add.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -100,6 +221,7 @@
           "relative_path": "resources/HowToUse/attribute_add2.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -110,6 +232,7 @@
           "relative_path": "resources/HowToUse/attribute_context_menu.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -120,6 +243,7 @@
           "relative_path": "resources/HowToUse/attribute_edit_code.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -130,6 +254,7 @@
           "relative_path": "resources/HowToUse/attribute_edit_code2.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -140,6 +265,7 @@
           "relative_path": "resources/HowToUse/attribute_edit_code3.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -150,6 +276,29 @@
           "relative_path": "resources/HowToUse/attribute_edit_uom.png"
         }
       },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/basemap.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/basemap.png"
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/basemap_settings.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/basemap_settings.png"
+        }
+      },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -160,6 +309,7 @@
           "relative_path": "resources/HowToUse/citygml_export.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -170,6 +320,7 @@
           "relative_path": "resources/HowToUse/citygml_export①.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -180,6 +331,7 @@
           "relative_path": "resources/HowToUse/citygml_export②.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -190,6 +342,7 @@
           "relative_path": "resources/HowToUse/citygml_import.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -200,6 +353,51 @@
           "relative_path": "resources/HowToUse/citygml_import②.png"
         }
       },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/csv_export1.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/csv_export1.png"
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/csv_export2.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/csv_export2.png"
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/csv_import1.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/csv_import1.png"
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/csv_import2.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/csv_import2.png"
+        }
+      },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -210,6 +408,7 @@
           "relative_path": "resources/HowToUse/feature_info.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -220,6 +419,7 @@
           "relative_path": "resources/HowToUse/feature_opening_edit.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -230,6 +430,7 @@
           "relative_path": "resources/HowToUse/feature_opening_select.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -240,6 +441,7 @@
           "relative_path": "resources/HowToUse/feature_polygon_edit.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -250,6 +452,7 @@
           "relative_path": "resources/HowToUse/feature_polygon_edit_select.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -260,6 +463,18 @@
           "relative_path": "resources/HowToUse/feature_type_edit.png"
         }
       },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/HowToUse/filter.png",
+      "output": {
+        "resource": {
+          "relative_path": "resources/HowToUse/filter.png"
+        }
+      },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -270,6 +485,7 @@
           "relative_path": "resources/HowToUse/hierarchy_context.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -280,6 +496,7 @@
           "relative_path": "resources/HowToUse/panel.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -290,6 +507,7 @@
           "relative_path": "resources/HowToUse/panel①.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -300,6 +518,7 @@
           "relative_path": "resources/HowToUse/panel②.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -310,6 +529,7 @@
           "relative_path": "resources/HowToUse/panel③.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -320,6 +540,7 @@
           "relative_path": "resources/HowToUse/panel④.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -330,6 +551,7 @@
           "relative_path": "resources/HowToUse/panel⑤.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -340,6 +562,7 @@
           "relative_path": "resources/HowToUse/surface_type_edit.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -350,6 +573,7 @@
           "relative_path": "resources/HowToUse/surface_view_mode.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -360,6 +584,7 @@
           "relative_path": "resources/HowToUse/top.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -370,6 +595,7 @@
           "relative_path": "resources/HowToUse/top_normal.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -380,6 +606,7 @@
           "relative_path": "resources/HowToUse/validation_1.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -390,6 +617,7 @@
           "relative_path": "resources/HowToUse/validation_2.png"
         }
       },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -400,6 +628,18 @@
           "relative_path": "resources/Index/index.png"
         }
       },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "resources/logo.svg",
+      "output": {
+        "resource": {
+          "relative_path": "resources/logo.svg"
+        }
+      },
+      "is_incremental": false,
       "version": ""
     },
     {
@@ -407,15 +647,59 @@
       "source_relative_path": "toc.yml",
       "output": {
         ".html": {
-          "relative_path": "toc.html"
-        },
-        ".json": {
-          "relative_path": "toc.json"
+          "relative_path": "toc.html",
+          "hash": "06uiBuftZaXpQ8azBe5iXhY37/sextPwNZwV63tkIxk="
         }
       },
+      "is_incremental": false,
       "version": ""
     }
   ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot build incrementally because last build info is missing.",
+        "incrementalPhase": "build",
+        "total_file_count": 0,
+        "skipped_file_count": 0,
+        "full_build_reason_code": "NoAvailableBuildCache"
+      },
+      "processors": {
+        "ConceptualDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 10,
+          "skipped_file_count": 0
+        },
+        "ResourceDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor ResourceDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        },
+        "TocDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor TocDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot support incremental post processing, the reason is: should not trace intermediate info.",
+        "incrementalPhase": "postProcessing",
+        "total_file_count": 0,
+        "skipped_file_count": 0
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
   "groups": [
     {
       "xrefmap": "xrefmap.yml"

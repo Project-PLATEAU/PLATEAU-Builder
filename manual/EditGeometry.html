@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>&#24418;&#29366;&#24773;&#22577;&#12398;&#32232;&#38598; | PLATEAU Builder </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="&#24418;&#29366;&#24773;&#22577;&#12398;&#32232;&#38598; | PLATEAU Builder ">
+    <meta name="generator" content="docfx 2.59.4.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../resources/logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="形状情報の編集">形状情報の編集</h1>
+
+<p>このページでは、地物の形状を編集するための手順と、それぞれの機能について解説します。地物の形状を外部ツールで修正したい場合や、面ごとの地物型（屋根・壁・開口部など）を微調整したい場合に参照してください。</p>
+<h2 id="1-3dファイルのエクスポート">1. 3Dファイルのエクスポート</h2>
+<p>本ツール内の地物データを元に3Dファイルを作成したい場合、まずは以下の手順でエクスポートします。既存の地物形状を参照せずに一から作成する場合は、このステップは不要です。</p>
+<ol>
+<li><p><strong>エクスポートしたい地物を右クリック</strong></p>
+<ul>
+<li>ヒエラルキー(一覧)で対象を選択し、右クリック → OBJ または glTF を選んで「3Dエクスポート画面」を開きます。<br><img src="../resources/HowToUse/hierarchy_context.png" alt="image"></li>
+</ul>
+</li>
+<li><p><strong>エクスポート設定を行い「エクスポート」</strong></p>
+<ul>
+<li>以下の画面で、出力先・LOD・参照座標系・基準点位置などを設定し、「エクスポート」ボタンを押します。<br><img src="../resources/HowToUse/3d_export.png" alt="image"></li>
+</ul>
+</li>
+</ol>
+<h3 id="エクスポート画面の主な項目">エクスポート画面の主な項目</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>出力先</strong></td>
+<td>エクスポートする3Dファイルの保存先を指定します。</td>
+</tr>
+<tr>
+<td><strong>LOD</strong></td>
+<td>出力対象のLODを指定します。</td>
+</tr>
+<tr>
+<td><strong>参照座標系</strong></td>
+<td>CityGMLインポート時に設定された座標系が表示されます。</td>
+</tr>
+<tr>
+<td><strong>基準点位置</strong></td>
+<td>3Dファイルの座標原点をどの地点に合わせるか設定します。大きな値による桁落ちを防ぐため、原点に近い座標へ補正する仕組みです。</td>
+</tr>
+<tr>
+<td><strong>東向きの軸</strong></td>
+<td>3Dファイルで&quot;東&quot;にあたる軸を X, Y, Z, -X, -Y, -Z の中から選択します。</td>
+</tr>
+<tr>
+<td><strong>上向きの軸</strong></td>
+<td>3Dファイルで&quot;上&quot;にあたる軸を X, Y, Z, -X, -Y, -Z の中から選択します。</td>
+</tr>
+</tbody>
+</table>
+<div class="NOTE"><h5>Note</h5><p><strong>基準点位置について</strong><br>OBJやglTFなど一部形式では、座標を小数点以下数桁までに制限して記録するため、非常に大きな数値の場合は桁落ち（精度低下）が起こる恐れがあります。<br>そこで、3Dファイルのエクスポート時は「基準点位置」を基準にオフセットをかけることで、原点付近の値になるよう調整しています。デフォルトでは最初にインポートしたCityGMLのEnvelope中心が使用されます。</p>
+</div>
+<hr>
+<h2 id="2-外部ツールでの形状編集">2. 外部ツールでの形状編集</h2>
+<p>エクスポートした3Dファイル（OBJ, glTFなど）は、Maya・Blender・3dsMaxなどの外部DCCツールで編集できます。</p>
+<ul>
+<li><strong>ポリゴンの頂点移動・面の追加削除・UV編集</strong>など自由に行えます。</li>
+<li>編集を終えたら、<strong>同じフォーマット(OBJまたはglTF)</strong> で再度エクスポートしてください。</li>
+</ul>
+<div class="NOTE"><h5>Note</h5><p>建築物の場合は各面の地物型（壁・屋根など）はインポート時に自動で推定され、ツール内で修正可能です。</p>
+</div>
+<hr>
+<h2 id="3-3dファイルのインポート">3. 3Dファイルのインポート</h2>
+<p>外部ツールで形状を変更したら、本ツールに再び取り込みます。</p>
+<ol>
+<li><p><strong>ヒエラルキーで右クリック → OBJまたはglTF を選択</strong></p>
+<ul>
+<li>「3Dインポート画面」を開きます。<br><img src="../resources/HowToUse/hierarchy_context.png" alt="image"></li>
+</ul>
+</li>
+<li><p><strong>インポート設定を行い「インポート」</strong></p>
+<ul>
+<li>以下の画面でファイルパスやLOD、座標系などを指定し、「インポート」ボタンで適用します。<br><img src="../resources/HowToUse/3d_import.png" alt="image"></li>
+</ul>
+</li>
+</ol>
+<h3 id="インポート画面の主な項目">インポート画面の主な項目</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>入力ファイル</strong></td>
+<td>取り込む3Dファイル(OBJ/glTF)を指定します。</td>
+</tr>
+<tr>
+<td><strong>LOD</strong></td>
+<td>インポート対象のLOD(詳細度)を指定します。</td>
+</tr>
+<tr>
+<td><strong>面検出角度の閾値</strong></td>
+<td>建築物として認識する際、地面以外の面の法線方向が垂直上方向とどの程度ズレていれば&quot;壁&quot;とみなすかを設定します。</td>
+</tr>
+<tr>
+<td><strong>モデル配置</strong></td>
+<td>「参照座標系を利用」を選択するとマニュアルで位置指定可能。&quot;自動&quot;の場合は底面位置を自動推定して配置します。</td>
+</tr>
+<tr>
+<td><strong>参照座標系</strong></td>
+<td>CityGMLインポート時に設定された座標系が表示されます。</td>
+</tr>
+<tr>
+<td><strong>基準点位置</strong></td>
+<td>エクスポートと同様に、3Dファイルの原点をどこに合わせるか設定します。</td>
+</tr>
+<tr>
+<td><strong>東向きの軸</strong></td>
+<td>ファイルでの&quot;東&quot;にあたる軸を X, Y, Z, -X, -Y, -Z から選択。</td>
+</tr>
+<tr>
+<td><strong>上向きの軸</strong></td>
+<td>ファイルでの&quot;上&quot;にあたる軸を X, Y, Z, -X, -Y, -Z から選択。</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="4-地物型の修正">4. 地物型の修正</h2>
+<p>3Dファイルのインポート後、壁や屋根などの面が自動的に判別されますが、誤認識があれば手動で修正します。<br>「<strong>面表示モード</strong>」をONにし、3Dビューでポリゴンをクリックすると面の地物型を変更できます。</p>
+<p><img src="../resources/HowToUse/surface_view_mode.png" alt="image"></p>
+<h3 id="ポリゴン編集">ポリゴン編集</h3>
+<p><img src="../resources/HowToUse/surface_type_edit.png" alt="image"></p>
+<ol>
+<li>3Dビューで編集したいポリゴンを選択</li>
+<li>変更後の地物型を選択</li>
+</ol>
+<div class="NOTE"><h5>Note</h5><p>複数面からなる地物(壁面、屋根面等)に属する1つの面(ポリゴン)を別の地物型にすると、既存の地物から分離して&quot;新規地物&quot;として登録されます。</p>
+</div>
+<h3 id="地物編集">地物編集</h3>
+<p><img src="../resources/HowToUse/feature_type_edit.png" alt="image"></p>
+<ul>
+<li><p><strong>タイプ編集</strong><br>地物の全ポリゴンをまとめて異なる地物型に変更します。</p>
+</li>
+<li><p><strong>面編集</strong><br>既存地物からポリゴンを追加・削除し、新しい地物として再構成します。</p>
+<ol>
+<li>編集したい地物を選択</li>
+<li>[編集] ボタンを押して3Dビュー上でポリゴンを指定</li>
+<li>[決定] ボタンで確定</li>
+</ol>
+</li>
+</ul>
+<div class="NOTE"><h5>Note</h5><p>地物から削除したポリゴンは、新規地物として登録されます。</p>
+</div>
+<ul>
+<li><strong>開口部編集</strong><br>窓やドア(=開口部)の追加・削除を行います。<ol>
+<li>編集したい地物を選択</li>
+<li>[編集] ボタンを押して3Dビュー上で追加/削除したい開口部を指定</li>
+<li>[決定] ボタンで確定</li>
+</ol>
+</li>
+</ul>
+<div class="NOTE"><h5>Note</h5><p>変更後の地物型は自動で切り替わります。<br>(例) Window/ Door以外を開口部として選択した場合、Window型に変換されます。</p>
+</div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/Project-PLATEAU/PLATEAU-Builder/blob/main/Documentation/manual/EditGeometry.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            PLATEAU
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

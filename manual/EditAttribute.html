@@ -1,0 +1,242 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>&#23646;&#24615;&#24773;&#22577;&#12398;&#32232;&#38598; | PLATEAU Builder </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="&#23646;&#24615;&#24773;&#22577;&#12398;&#32232;&#38598; | PLATEAU Builder ">
+    <meta name="generator" content="docfx 2.59.4.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../resources/logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="属性情報の編集">属性情報の編集</h1>
+
+<p>このページでは、<strong>地物の属性情報を編集</strong>する際の手順や方法を解説します。操作手順は、大きく以下の 2 つに分かれます。</p>
+<ol>
+<li><strong>ツール上で直接編集</strong></li>
+<li><strong>CSV ファイルを出力・編集してインポート</strong></li>
+</ol>
+<p>いずれの方法でも、最終的に CityGML の属性情報へ反映されます。作業規模やワークフローに合わせて使いやすい方をお選びください。</p>
+<hr>
+<h2 id="1-ツール上で直接編集する方法">1. ツール上で直接編集する方法</h2>
+<p>ヒエラルキー一覧または 3D ビュー上で対象の地物を選択すると、画面右（地物情報パネル）にその地物の情報が表示されます。<br>※複数の地物を一括選択している場合は、<strong>共通する属性のみ</strong>が表示され、追加・編集・削除は選択中の全地物に同時適用されます。</p>
+<p><img src="../resources/HowToUse/feature_info.png" alt="image"></p>
+<p>上図の「属性情報パネル」から、属性の追加・削除・編集が可能です。</p>
+<h3 id="1-1-個別編集">1-1. 個別編集</h3>
+<p>既存の属性を修正する際は、<strong>値欄をダブルクリック</strong>し、表示されたテキストフィールドで編集します。<br><code>uom</code> や <code>codeSpace</code> など、CityGML 特有の属性をまとめて編集したいときは、属性を<strong>右クリック → [編集]</strong> で専用の編集画面を開けます。</p>
+<h4 id="codetype-の編集">CodeType の編集</h4>
+<p>CodeType 型の属性を編集するときは、以下の画面が表示されます。<br><img src="../resources/HowToUse/attribute_edit_code.png" alt="image"></p>
+<ol>
+<li><strong>「一覧から選択」</strong> を押して、一覧から CodeList の XML ファイルを指定する。<br><img src="../resources/HowToUse/attribute_edit_code2.png" alt="image"></li>
+<li><strong>「値を選択」</strong> を押して、候補から適切なコード値を選択。<br><img src="../resources/HowToUse/attribute_edit_code3.png" alt="image"></li>
+<li><strong>「追加」</strong> ボタンで編集内容を確定。</li>
+</ol>
+<h4 id="measuretype-の編集">MeasureType の編集</h4>
+<p>MeasureType 型の属性編集画面では、<code>uom</code> と数値の入力欄があります。<br><img src="../resources/HowToUse/attribute_edit_uom.png" alt="image"></p>
+<ol>
+<li><code>uom</code> と値を入力</li>
+<li><strong>「追加」</strong> ボタンを押して適用</li>
+</ol>
+<p>これにより、<code>bldg:measuredHeight</code> などの情報を単位付きで管理できます。</p>
+<hr>
+<h3 id="1-2-属性情報の追加">1-2. 属性情報の追加</h3>
+<p>新規属性を追加する場合は、属性情報パネルの <strong>「＋」ボタン</strong> を押し、以下のような画面を開きます。既存の親要素に追加する場合は、その親属性を右クリックして「追加」を選びます。</p>
+<p><img src="../resources/HowToUse/attribute_add.png" alt="image"></p>
+<p>追加画面では、<strong>タグ名一覧</strong>が表示され、上部の検索パネルでフィルタリングが可能です。</p>
+<p>属性をダブルクリックすると、<strong>必須入力項目や型別の編集画面</strong>が表示されます（<a href="#1-1-個別編集">個別編集</a>の画面と同様）。親要素を追加する場合は、全ての必須属性について編集をおこないます。</p>
+<p><img src="../resources/HowToUse/attribute_add2.png" alt="image"></p>
+<p>入力を終えたら<strong>「追加」</strong>ボタンで確定し、属性が生成されます。</p>
+<hr>
+<h3 id="1-3-属性情報の削除">1-3. 属性情報の削除</h3>
+<p>削除したい属性を右クリックし、 <strong>「削除」</strong> を選ぶと、その属性情報が地物から外れます。</p>
+<hr>
+<h2 id="2-csv-を用いて編集する方法">2. CSV を用いて編集する方法</h2>
+<p><strong>多数の地物の属性を一括編集・一括削除</strong>する場合や、Excel などで一括管理したい場合には、CSV エクスポート/インポートを活用します。</p>
+<h3 id="2-1-csv-のエクスポート">2-1. CSV のエクスポート</h3>
+<p>画面上部の <strong>「CSV」ボタン → [エクスポート]</strong> を選択し、エクスポート画面を開きます。<br><img src="../resources/HowToUse/csv_export1.png" alt="image"></p>
+<ol>
+<li><strong>出力先</strong> を指定（デフォルトは CityGML ファイル直下の CSV フォルダ）</li>
+<li><strong>「エクスポート」</strong> ボタンを押すと、地物全体の属性情報が CSV に出力されます。</li>
+</ol>
+<p><img src="../resources/HowToUse/csv_export2.png" alt="image"></p>
+<hr>
+<h3 id="2-2-エクスポートされた-csv-の編集">2-2. エクスポートされた CSV の編集</h3>
+<p>エクスポート結果の CSV は、任意のテキストエディタや Excel で開いて編集できます。<strong>1 行が 1 地物</strong>、<strong>列が属性</strong>に対応します。</p>
+<ul>
+<li>全ての地物に対して特定属性を削除したい場合は、該当する列を削除 or 2 行目以降を空白化</li>
+<li>新たな属性を追加するには、列を新設したうえでヘッダを属性名に合わせる</li>
+</ul>
+<h4 id="csv-フォーマットのポイント">CSV フォーマットのポイント</h4>
+<ol>
+<li><strong>gml:id</strong> をキーとした 1 地物 1 レコード</li>
+<li><strong>1 行目はヘッダ行</strong>、2 行目以降がデータ行</li>
+<li>属性名が重複する場合は <code>_[連番]</code> が付く（※連番は 1 から開始）</li>
+<li>階層構造や <code>uom</code> / <code>codeSpace</code> は 親名 + <code>_</code> + 子名 で表現</li>
+</ol>
+<h4 id="例">例</h4>
+<table>
+<thead>
+<tr>
+<th>gml:id</th>
+<th>bldg:measuredHeight</th>
+<th>uro:buildingIDAttribute_uro:buildingID</th>
+<th>uro:buildingDetailAttribute_1_uro:surveyYear</th>
+<th>uro:buildingDetailAttribute_2_uro:districtsAndZonesType</th>
+<th>bldg:measuredHeight_uom</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bldg_18c5e09c-9118-4e63-b85e-389814</td>
+<td>92.3</td>
+<td>13104-bldg</td>
+<td>2016</td>
+<td>10</td>
+<td>m</td>
+</tr>
+<tr>
+<td>bldg_58a6e11b-7492-ac98-89b7-837487</td>
+<td>45.7</td>
+<td>（空白）</td>
+<td>2020</td>
+<td>10</td>
+<td>（空白）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>uro:buildingDetailAttribute が 2 つあるため、 uro:buildingDetailAttribute_1,uro:buildingDetailAttribute_2 が存在</li>
+<li>uro:buildingIDAttribute_uro:buildingID は、uro:buildingIDAttribute を親とする uro:buildingID を表す属性カラム</li>
+<li>bldg:measuredHeight_uom は、measuredHeight の uom を設定するカラム</li>
+</ul>
+<div class="WARNING"><h5>Warning</h5><p>CSV 形式が破損すると、インポートエラーが発生する場合があります。ヘッダ行を大きく書き換える際は注意してください。</p>
+</div>
+<hr>
+<h3 id="2-3-csv-のインポート">2-3. CSV のインポート</h3>
+<p>編集を終えたら、画面上部の <strong>「CSV」ボタン → [インポート]</strong> を選択し、インポート画面を開きます。</p>
+<p><img src="../resources/HowToUse/csv_import1.png" alt="image"></p>
+<ol>
+<li><strong>編集後の CSV ファイル</strong> を指定</li>
+<li><strong>「インポート」</strong> ボタンを押す<ul>
+<li>成功すると 「対象の CSV の読み込みが完了しました。」 と表示</li>
+<li>不正な行や属性があればエラー文で通知</li>
+</ul>
+</li>
+</ol>
+<p><img src="../resources/HowToUse/csv_import2.png" alt="image"></p>
+<p>これにより、CSV 内で修正した内容が各地物に反映されます。大量の属性変更や削除がある場合に便利です。</p>
+<hr>
+<h2 id="3-まとめ">3. まとめ</h2>
+<ul>
+<li><strong>少量の属性編集や確認</strong> → <a href="#1-ツール上で直接編集する方法">ツール上で直接編集</a>が簡単</li>
+<li><strong>一括更新や外部ツール(Excel)での管理</strong> → <a href="#2-csvを用いて編集する方法">CSV を用いた編集</a>が効率的</li>
+</ul>
+<p>どちらの方法でも同じ CityGML 属性に反映されるため、使い分けて効率良く管理してください。</p>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/Project-PLATEAU/PLATEAU-Builder/blob/main/Documentation/manual/EditAttribute.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            PLATEAU
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

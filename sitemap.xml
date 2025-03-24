@@ -2,19 +2,61 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://project-plateau.github.io/PLATEAU-Builder/index.html</loc>
-    <lastmod>2024-04-01T11:10:39+09:00</lastmod>
+    <lastmod>2025-03-24T02:26:26+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/HowToUse.html</loc>
-    <lastmod>2024-04-01T11:10:39+09:00</lastmod>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/Build.html</loc>
+    <lastmod>2025-03-24T02:26:26+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/Setup.html</loc>
-    <lastmod>2024-04-01T11:10:39+09:00</lastmod>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/EditAttribute.html</loc>
+    <lastmod>2025-03-24T02:26:26+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/EditGeometry.html</loc>
+    <lastmod>2025-03-24T02:26:26+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/ExportDataset.html</loc>
+    <lastmod>2025-03-24T02:26:26+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/FilterFeature.html</loc>
+    <lastmod>2025-03-24T02:26:26+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/QuickStart.html</loc>
+    <lastmod>2025-03-24T02:26:26+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/SupportedEnvironment.html</loc>
+    <lastmod>2025-03-24T02:26:26+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/Validate.html</loc>
+    <lastmod>2025-03-24T02:26:26+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://project-plateau.github.io/PLATEAU-Builder/manual/VisualizeBasemap.html</loc>
+    <lastmod>2025-03-24T02:26:26+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

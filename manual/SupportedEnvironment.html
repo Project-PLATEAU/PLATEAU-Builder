@@ -1,0 +1,357 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>&#21205;&#20316;&#29872;&#22659;&#12392;&#23550;&#24540;&#22320;&#29289; | PLATEAU Builder </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="&#21205;&#20316;&#29872;&#22659;&#12392;&#23550;&#24540;&#22320;&#29289; | PLATEAU Builder ">
+    <meta name="generator" content="docfx 2.59.4.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../resources/logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="動作環境と対応地物">動作環境と対応地物</h1>
+
+<p>このページでは、<strong>PLATEAU Builder</strong> を快適にご利用いただくための動作環境や、CityGMLインポート時にサポートされる地物・LOD、さらに対応する3Dファイルやデータセット構成について説明します。</p>
+<hr>
+<h2 id="1-動作環境">1. 動作環境</h2>
+<p>本ツールを正常に動作させるには、以下の要件を満たすマシンが必要です。特に大規模データを扱う場合や複数の3Dファイルを同時に表示する場合は、推奨環境以上をお使いください。</p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>最小動作環境</th>
+<th>推奨動作環境</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OS</strong></td>
+<td>Windows 11 (64bit)</td>
+<td>同左</td>
+</tr>
+<tr>
+<td><strong>CPU</strong></td>
+<td>Intel Core i3 以上</td>
+<td>Intel Core i5 以上</td>
+</tr>
+<tr>
+<td><strong>メモリ</strong></td>
+<td>4GB</td>
+<td>16GB</td>
+</tr>
+<tr>
+<td><strong>ディスプレイ解像度</strong></td>
+<td>1024 × 768 以上</td>
+<td>フルHD (1920×1080) 以上</td>
+</tr>
+<tr>
+<td><strong>ネットワーク</strong></td>
+<td>ベースマップ表示などでインターネット接続が必要</td>
+<td>同左</td>
+</tr>
+</tbody>
+</table>
+<div class="NOTE"><h5>Note</h5><p>Mac や Linux 等の環境は将来的な対応を検討中です。現状では Windows での利用を推奨します。</p>
+</div>
+<hr>
+<h2 id="2-citygmlでサポートされる地物">2. CityGMLでサポートされる地物</h2>
+<p>CityGMLインポート機能では、下表に示す地物やLODを取り扱えます。</p>
+<table>
+<thead>
+<tr>
+<th>地物</th>
+<th>LOD0</th>
+<th>LOD1</th>
+<th>LOD2</th>
+<th>LOD3</th>
+<th>LOD4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>建築物</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: green;">✓</span></td>
+<td><span style="color: green;">✓</span></td>
+<td><span style="color: green;">✓</span></td>
+<td><span style="color: red;">✗</span></td>
+</tr>
+<tr>
+<td><strong>交通（道路）</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: green;">✓</span></td>
+<td><span style="color: green;">✓</span></td>
+<td><span style="color: green;">✓</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>交通（徒歩道）</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>交通（広場）</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>交通（鉄道）</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>交通（航路）</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>都市計画決定情報</strong></td>
+<td>-</td>
+<td><span style="color: green;">✓</span></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>土地利用</strong></td>
+<td>-</td>
+<td><span style="color: green;">✓</span></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>災害リスク</strong></td>
+<td>-</td>
+<td><span style="color: green;">✓</span></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>都市設備</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: green;">✓</span></td>
+<td><span style="color: green;">✓</span></td>
+<td><span style="color: green;">✓</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>植生</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: green;">✓</span></td>
+<td><span style="color: green;">✓</span></td>
+<td><span style="color: green;">✓</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>水部</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>地形</strong></td>
+<td>-</td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>橋梁</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+</tr>
+<tr>
+<td><strong>トンネル</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+</tr>
+<tr>
+<td><strong>その他の構造物</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>地下街</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+</tr>
+<tr>
+<td><strong>地下埋設物</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+</tr>
+<tr>
+<td><strong>区域</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>汎用都市オブジェクト</strong></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+<td><span style="color: red;">✗</span></td>
+</tr>
+</tbody>
+</table>
+<div class="NOTE"><h5>Note</h5><p>上記の対応状況は一例であり、将来的にアップデートされる可能性があります。</p>
+</div>
+<hr>
+<h2 id="3-3dファイル対応">3. 3Dファイル対応</h2>
+<h3 id="3dファイルインポート">3Dファイルインポート</h3>
+<ul>
+<li><strong>OBJ形式</strong></li>
+<li><strong>glTF形式</strong></li>
+</ul>
+<p>外部のDCCツール（Blender, Maya, 3ds Max など）で編集した3Dファイルをインポートし、地物の形状を更新可能です。詳細な手順は「<a href="EditGeometry.html">形状情報の編集</a>」を参照してください。</p>
+<h3 id="3dファイルエクスポート">3Dファイルエクスポート</h3>
+<ul>
+<li><strong>OBJ形式</strong></li>
+<li><strong>glTF形式</strong></li>
+</ul>
+<p>編集したCityGMLの各地物をOBJやglTFとして書き出し、再度外部ツールで加工することもできます。</p>
+<hr>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/Project-PLATEAU/PLATEAU-Builder/blob/main/Documentation/manual/SupportedEnvironment.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            PLATEAU
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

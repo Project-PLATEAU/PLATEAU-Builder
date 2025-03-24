@@ -1,21 +1,21 @@
 ﻿<!DOCTYPE html>
 <!--[if IE]><![endif]-->
 <html>
-
+  
   <head>
     <meta charset="utf-8">
-      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-      <title>PLATEAU Builder | PLATEAU Builder </title>
-      <meta name="viewport" content="width=device-width">
-      <meta name="title" content="PLATEAU Builder | PLATEAU Builder ">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>PLATEAU Builder&#12395;&#12388;&#12356;&#12390; | PLATEAU Builder </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="PLATEAU Builder&#12395;&#12388;&#12356;&#12390; | PLATEAU Builder ">
+    <meta name="generator" content="docfx 2.59.4.0">
     
-    
-      <link rel="shortcut icon" href="favicon.ico">
-      <link rel="stylesheet" href="styles/docfx.vendor.min.css">
-      <link rel="stylesheet" href="styles/docfx.css">
-      <link rel="stylesheet" href="styles/main.css">
-      <meta property="docfx:navrel" content="toc.html">
-      <meta property="docfx:tocrel" content="manual/toc.html">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles/docfx.vendor.css">
+    <link rel="stylesheet" href="styles/docfx.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <meta property="docfx:navrel" content="toc.html">
+    <meta property="docfx:tocrel" content="manual/toc.html">
     
     <meta property="docfx:rel" content="">
     
@@ -23,7 +23,7 @@
   <body data-spy="scroll" data-target="#affix" data-offset="120">
     <div id="wrapper">
       <header>
-
+        
         <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
           <div class="container">
             <div class="navbar-header">
@@ -33,9 +33,9 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-
+              
               <a class="navbar-brand" href="index.html">
-                <img id="logo" class="svg" src="logo.svg" alt="">
+                <img id="logo" class="svg" src="resources/logo.svg" alt="">
               </a>
             </div>
             <div class="collapse navbar-collapse" id="navbar">
@@ -47,7 +47,7 @@
             </div>
           </div>
         </nav>
-
+        
         <div class="subnav navbar navbar-default">
           <div class="container hide-when-search" id="breadcrumb">
             <ul class="breadcrumb">
@@ -57,7 +57,7 @@
         </div>
       </header>
       <div class="container body-content">
-
+        
         <div id="search-results">
           <div class="search-list">Search Results for <span></span></div>
           <div class="sr-items">
@@ -67,7 +67,7 @@
         </div>
       </div>
       <div role="main" class="container body-content hide-when-search">
-
+        
         <div class="sidenav hide-when-search">
           <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
           <div class="sidetoggle collapse" id="sidetoggle">
@@ -77,34 +77,53 @@
         <div class="article row grid-right">
           <div class="col-md-10">
             <article class="content wrap" id="_content" data-uid="">
-<h1 id="plateau-builder">PLATEAU Builder</h1>
+<h1 id="plateau-builderについて">PLATEAU Builderについて</h1>
 
-<p>PLATEAUの標準製品仕様書（第3.2版）に準拠したCityGMLデータの編集・品質検査を行うためのシステムです。</p>
-<p>本ツールのソースコードについては<a href="https://github.com/Project-PLATEAU/PLATEAU-Builder">GitHub</a>を参照してください。</p>
-<p>また、本ツールは現状は初期開発フェーズであり、来年度以降によりターゲット業務の明確化・機能追加していく計画をしております。</p>
 <p><img src="resources/Index/index.png" alt="index"></p>
-
+<p><strong>PLATEAU Builder</strong> は、国土交通省の「PLATEAU」プロジェクトにおける <strong>3D都市モデルの標準仕様(PLATEAU標準製品仕様書 第4.0版)</strong> に準拠した CityGML データを、簡易かつ効率的に <strong>編集・品質検査・出力</strong> するためのソフトウェアです。</p>
+<p>本ツールは、測量会社や GIS 専門家のみならず、多様な分野のユーザが、直感的に 3D都市モデルを扱えるよう設計されています。オープンソースで公開されているため、個人や専門ベンダーも<strong>無料かつ自由に改良や活用</strong>が可能です。</p>
+<hr>
+<h2 id="主な特徴">主な特徴</h2>
+<ol>
+<li><p><strong>形状編集</strong><br>CityGML の建築物や道路などの地物に対して、DCCツールを併用した形状編集が行えます。</p>
+</li>
+<li><p><strong>属性編集</strong><br>主題属性や空間属性などを直感的なGUIで追加・修正可能です。大量の編集が必要な場合は、<strong>CSV を用いた一括編集</strong>にも対応しています。</p>
+</li>
+<li><p><strong>品質検査</strong><br>PLATEAU の標準仕様に基づいた品質検査を行い、問題箇所をハイライト表示して修正を促します。</p>
+</li>
+<li><p><strong>データセット出力 (CityGML)</strong><br>編集・検査を終えたモデルを、標準仕様に準拠したデータセット構成でエクスポート可能です。</p>
+</li>
+<li><p><strong>オープンソースかつ簡易な GUI</strong><br>GitHub上でソースコードが公開されており、誰でも改変・再配布が可能です。GUIが用意されているため、測量 / GIS の専門でない方でも扱いやすい設計です。</p>
+</li>
+</ol>
+<hr>
+<h2 id="ソースコード--ダウンロード">ソースコード / ダウンロード</h2>
+<ul>
+<li>ソースコード: <a href="https://github.com/Project-PLATEAU/PLATEAU-Builder">GitHub (Project-PLATEAU/PLATEAU-Builder)</a></li>
+<li>ダウンロード: GitHub リポジトリの <a href="https://github.com/Project-PLATEAU/PLATEAU-Builder/releases">Releases</a> ページから最新版を入手</li>
+</ul>
+<p>本ドキュメントでは、PLATEAU Builder の <strong>使い方や詳細な機能解説</strong> をページごとにまとめています。初めてお使いになる方は、まず「<a href="manual/QuickStart.html">クイックスタート</a>」をご覧ください。</p>
 </article>
           </div>
-
+          
           <div class="hidden-sm col-md-2" role="complementary">
             <div class="sideaffix">
               <div class="contribution">
                 <ul class="nav">
                   <li>
-                    <a href="https://github.com/project-plateau/PLATEAU-Builder/blob/main/Documentation/index.md/#L1" class="contribution-link">Edit this page</a>
+                    <a href="https://github.com/Project-PLATEAU/PLATEAU-Builder/blob/main/Documentation/index.md/#L1" class="contribution-link">Improve this Doc</a>
                   </li>
                 </ul>
               </div>
               <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
-                <h5>In this article</h5>
+                <h5>In This Article</h5>
                 <div></div>
               </nav>
             </div>
           </div>
         </div>
       </div>
-
+      
       <footer>
         <div class="grad-bottom"></div>
         <div class="footer">
@@ -112,14 +131,14 @@
             <span class="pull-right">
               <a href="#top">Back to top</a>
             </span>
-      PLATEAU
-      
+            PLATEAU
+            
           </div>
         </div>
       </footer>
     </div>
-
-    <script type="text/javascript" src="styles/docfx.vendor.min.js"></script>
+    
+    <script type="text/javascript" src="styles/docfx.vendor.js"></script>
     <script type="text/javascript" src="styles/docfx.js"></script>
     <script type="text/javascript" src="styles/main.js"></script>
   </body>

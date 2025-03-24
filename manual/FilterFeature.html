@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>&#22320;&#29289;&#12398;&#12501;&#12451;&#12523;&#12479;&#12522;&#12531;&#12464; | PLATEAU Builder </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="&#22320;&#29289;&#12398;&#12501;&#12451;&#12523;&#12479;&#12522;&#12531;&#12464; | PLATEAU Builder ">
+    <meta name="generator" content="docfx 2.59.4.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../resources/logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="地物のフィルタリング">地物のフィルタリング</h1>
+
+<p>このページでは、<strong>地物を属性情報でフィルタリング</strong>し、必要なものだけをヒエラルキーや3Dビューに表示する方法を解説します。大規模なデータを扱う際に目的の地物を素早く見つけたい場合や異常な属性を持った地物を絞り込みたい場合などに便利です。</p>
+<hr>
+<h2 id="1-フィルター画面を開く">1. フィルター画面を開く</h2>
+<p>画面左上の<strong>フィルターボタン</strong>をクリックすると、下図のような<strong>フィルター画面</strong>が表示されます。</p>
+<p><img src="../resources/HowToUse/filter.png" alt="image"></p>
+<ol>
+<li><strong>地物型の選択</strong><ul>
+<li>建物（Building）や道路（Transportation）など、カテゴリを指定します。</li>
+</ul>
+</li>
+<li><strong>主題属性の指定</strong><ul>
+<li>特定の属性（用途、名称、標高など）を指定します。</li>
+</ul>
+</li>
+<li><strong>条件 / 値の入力</strong><ul>
+<li>「一致する」「次より小さい」などの演算条件と検索値を組み合わせて絞り込みます。</li>
+</ul>
+</li>
+<li><strong>検索する</strong><ul>
+<li>ボタンを押すと、条件に合致する地物だけがヒエラルキーと3Dビューに表示されます。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="2-フィルター結果の表示と操作">2. フィルター結果の表示と操作</h2>
+<p>条件を指定して <strong>「検索する」</strong> をクリックすると、</p>
+<ul>
+<li><strong>ヒエラルキー</strong>: 条件に合致しない地物は非表示化される</li>
+<li><strong>3Dビュー</strong>: 条件外の地物は表示されず、対象だけがマップ上に残る</li>
+</ul>
+<hr>
+<h2 id="3-フィルター条件の保存読み込み">3. フィルター条件の保存・読み込み</h2>
+<h3 id="3-1-書き出しボタン">3-1. 「書き出し」ボタン</h3>
+<p>現在設定しているフィルター条件を外部ファイルに保存できます。よく使うフィルターを<strong>プリセット</strong>として登録しておきたい際に利用してください。</p>
+<h3 id="3-2-読み込みボタン">3-2. 「読み込み」ボタン</h3>
+<p>以前に保存したフィルター設定を<strong>一括で読み込み</strong>、すぐに同じ条件で検索できます。複雑な条件を再入力する手間が省けます。</p>
+<hr>
+<h2 id="4-フィルターの解除">4. フィルターの解除</h2>
+<p>フィルターを無効化するには、 画面左上の「クリア」ボタンを押下します。</p>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/Project-PLATEAU/PLATEAU-Builder/blob/main/Documentation/manual/FilterFeature.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            PLATEAU
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>&#12463;&#12452;&#12483;&#12463;&#12473;&#12479;&#12540;&#12488; | PLATEAU Builder </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="&#12463;&#12452;&#12483;&#12463;&#12473;&#12479;&#12540;&#12488; | PLATEAU Builder ">
+    <meta name="generator" content="docfx 2.59.4.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../resources/logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="クイックスタート">クイックスタート</h1>
+
+<p>本ページでは、<strong>PLATEAU Builder</strong> を初めて使用する方向けに、<strong>インストールからCityGMLをインポートして簡単に3D表示を行うまで</strong>の流れを紹介します。少ないステップでツールの概要を把握できるよう、最低限必要な操作に絞って解説しています。</p>
+<hr>
+<h2 id="1-plateau-builderの起動">1. PLATEAU Builderの起動</h2>
+<ol>
+<li><p><strong>リリースファイルのダウンロード</strong><br><a href="https://github.com/Project-PLATEAU/PLATEAU-Builder/releases">GitHubリポジトリのリリースページ</a>から最新版のリリースファイルを取得します。</p>
+</li>
+<li><p><strong>ファイルの展開と実行</strong><br>ダウンロードしたzipを解凍し、フォルダ内にある <code>.exe</code> ファイルをダブルクリックで起動します。</p>
+</li>
+<li><p><strong>トップ画面を確認</strong><br>起動に成功すると、下図のようなトップ画面が表示されます。<br><img src="../resources/HowToUse/top_normal.png" alt="image"></p>
+</li>
+</ol>
+<hr>
+<h2 id="2-citygmlのインポート">2. CityGMLのインポート</h2>
+<ol>
+<li><strong>「インポート」ボタン</strong>をクリック</li>
+<li><strong>CityGMLファイル</strong>を選択<br><img src="../resources/HowToUse/citygml_import.png" alt="image"></li>
+<li><strong>座標系</strong>を指定してインポート</li>
+</ol>
+<p>インポートが完了すると、下図のようにヒエラルキー（地物一覧）と3Dビューに地物が表示されます。</p>
+<p><img src="../resources/HowToUse/top.png" alt="image"></p>
+<hr>
+<h3 id="2-1-3d都市モデルを視覚的に確認">2-1. 3D都市モデルを視覚的に確認</h3>
+<p>3Dビュー上では以下の操作で視点を動かせます。</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>右クリック + ドラッグ</strong></td>
+<td>視点回転</td>
+</tr>
+<tr>
+<td><strong>ホイールボタン + ドラッグ</strong></td>
+<td>視点移動</td>
+</tr>
+<tr>
+<td><strong>マウスホイール回転</strong></td>
+<td>ズームイン・アウト</td>
+</tr>
+<tr>
+<td><strong>地物をダブルクリック</strong></td>
+<td>その地物へフォーカス（カメラ移動）</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="2-2-地物の属性情報を確認">2-2. 地物の属性情報を確認</h3>
+<p>地物一覧または3Dビュー上でオブジェクトを選択すると、画面右側に<strong>地物情報パネル</strong>が表示されます。</p>
+<ul>
+<li><strong>地物ID / 地物型</strong>など、CityGMLで定義されるメタ情報</li>
+<li><strong>属性情報</strong>（用途、階数、高さなど）</li>
+<li><strong>LOD</strong>やテクスチャ情報</li>
+</ul>
+<p>ここでは、属性を読み取るだけでなく、後述の機能で<strong>編集・追記・削除</strong>なども可能です。詳細は「<a href="EditAttribute.html">属性情報の編集</a>」を参照してください。</p>
+<p><img src="../resources/HowToUse/feature_info.png" alt="image"></p>
+<hr>
+<h2 id="3-次のステップ">3. 次のステップ</h2>
+<p>このクイックスタートでは、インポートして3Dビューで確認する最短ルートを紹介しました。続いて、以下の機能を使いこなすと、より高度な作業が可能になります。</p>
+<ul>
+<li><a href="FilterFeature.html"><strong>地物のフィルタリング</strong></a>: 属性情報で検索して、必要なオブジェクトだけを表示</li>
+<li><a href="EditGeometry.html"><strong>形状の編集</strong></a>: 地物の形状を外部ツールで編集して再インポート</li>
+<li><a href="EditAttribute.html"><strong>属性情報の編集</strong></a>: 各種属性の追加・削除や CSVでの一括編集</li>
+<li><a href="Validate.html"><strong>品質検査</strong></a>: 面の閉合やLOD整合など、モデルの整合性をチェック</li>
+<li><a href="ExportDataset.html"><strong>データセットエクスポート</strong></a>: 編集後のデータをCityGML形式で書き出し</li>
+</ul>
+<blockquote><p><strong>以上でクイックスタートは終了です。</strong><br>引き続き他の機能を参照し、PLATEAU Builderを活用してください。</p>
+</blockquote>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/Project-PLATEAU/PLATEAU-Builder/blob/main/Documentation/manual/QuickStart.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            PLATEAU
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
